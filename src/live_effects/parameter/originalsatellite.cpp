@@ -35,7 +35,7 @@ OriginalSatelliteParam::OriginalSatelliteParam(const Glib::ustring &label, const
 
 Gtk::Widget *OriginalSatelliteParam::param_newWidget()
 {
-    auto const _widget = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);
+    auto const _widget = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
 
     { // Label
         auto const pLabel = Gtk::make_managed<Gtk::Label>(param_label);
@@ -44,31 +44,25 @@ Gtk::Widget *OriginalSatelliteParam::param_newWidget()
     }
 
     { // Paste item to link button
-        Gtk::Image *pIcon = Gtk::manage(sp_get_icon_image("edit-paste", Gtk::ICON_SIZE_BUTTON));
+        Gtk::Image *pIcon = Gtk::manage(sp_get_icon_image("edit-paste", Gtk::IconSize::NORMAL));
         auto const pButton = Gtk::make_managed<Gtk::Button>();
-        pButton->set_relief(Gtk::RELIEF_NONE);
-        pIcon->set_visible(true);
-        pButton->add(*pIcon);
-        pButton->set_visible(true);
+        pButton->set_has_frame(false);
+        pButton->set_child(*pIcon);
         pButton->signal_clicked().connect(sigc::mem_fun(*this, &OriginalSatelliteParam::on_link_button_click));
         UI::pack_start(*_widget, *pButton, true, true);
         pButton->set_tooltip_text(_("Link to item"));
     }
 
     { // Select original button
-        Gtk::Image *pIcon = Gtk::manage(sp_get_icon_image("edit-select-original", Gtk::ICON_SIZE_BUTTON));
+        Gtk::Image *pIcon = Gtk::manage(sp_get_icon_image("edit-select-original", Gtk::IconSize::NORMAL));
         auto const pButton = Gtk::make_managed<Gtk::Button>();
-        pButton->set_relief(Gtk::RELIEF_NONE);
-        pIcon->set_visible(true);
-        pButton->add(*pIcon);
-        pButton->set_visible(true);
+        pButton->set_has_frame(false);
+        pButton->set_child(*pIcon);
         pButton->signal_clicked().connect(
             sigc::mem_fun(*this, &OriginalSatelliteParam::on_select_original_button_click));
         UI::pack_start(*_widget, *pButton, true, true);
         pButton->set_tooltip_text(_("Select original"));
     }
-
-    _widget->show_all_children();
 
     return _widget;
 }

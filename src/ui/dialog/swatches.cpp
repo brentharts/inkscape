@@ -33,9 +33,9 @@
 #include <gtkmm/cellrenderertext.h>
 #include <gtkmm/label.h>
 #include <gtkmm/menubutton.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/searchentry.h>
+#include <gtkmm/searchentry2.h>
 #include <gtkmm/sizegroup.h>
+#include <gtkmm/togglebutton.h>
 #include <gtkmm/window.h>
 #include <pangomm/layout.h>
 
@@ -70,12 +70,12 @@ static constexpr auto auto_id = "Auto";
 SwatchesPanel::SwatchesPanel(bool compact, char const *prefsPath)
     : DialogBase(prefsPath, "Swatches"),
     _builder(create_builder("dialog-swatches.glade")),
-    _list_btn(get_widget<Gtk::RadioButton>(_builder, "list")),
-    _grid_btn(get_widget<Gtk::RadioButton>(_builder, "grid")),
+    _list_btn(get_widget<Gtk::ToggleButton>(_builder, "list")),
+    _grid_btn(get_widget<Gtk::ToggleButton>(_builder, "grid")),
     _selector(get_widget<Gtk::MenuButton>(_builder, "selector")),
     _selector_label(get_widget<Gtk::Label>(_builder, "selector-label")),
     _selector_menu{compact ? nullptr
-                   : std::make_unique<UI::Widget::PopoverMenu>(_selector, Gtk::POS_BOTTOM)},
+                   : std::make_unique<UI::Widget::PopoverMenu>(_selector, Gtk::PositionType::BOTTOM)},
     _new_btn(get_widget<Gtk::Button>(_builder, "new")),
     _edit_btn(get_widget<Gtk::Button>(_builder, "edit")),
     _delete_btn(get_widget<Gtk::Button>(_builder, "delete"))
@@ -88,9 +88,9 @@ SwatchesPanel::SwatchesPanel(bool compact, char const *prefsPath)
     _palette = Gtk::make_managed<Inkscape::UI::Widget::ColorPalette>();
     _palette->set_visible();
     if (compact) {
-        add(*_palette);
+        append(*_palette);
     } else {
-        get_widget<Gtk::Box>(_builder, "content").add(*_palette);
+        get_widget<Gtk::Box>(_builder, "content").append(*_palette);
 
         _palette->set_settings_visibility(false);
 
@@ -99,9 +99,9 @@ SwatchesPanel::SwatchesPanel(bool compact, char const *prefsPath)
         _palette->set_filter([this](Dialog::ColorItem const &color){
             return filter_callback(color);
         });
-        auto& search = get_widget<Gtk::SearchEntry>(_builder, "search");
+        auto& search = get_widget<Gtk::SearchEntry2>(_builder, "search");
         search.signal_search_changed().connect([this, &search]{
-            if (search.get_text_length() == 0) {
+            if (search.get_text().length() == 0) {
                 clear_filter();
             } else {
                 filter_colors(search.get_text());
@@ -155,10 +155,10 @@ SwatchesPanel::SwatchesPanel(bool compact, char const *prefsPath)
         prefs->setBool(_prefs_path + "/show_labels", !embedded && _palette->are_labels_enabled());
     });
 
-    _list_btn.signal_clicked().connect([this]{
+    _list_btn.signal_toggled().connect([this]{
         _palette->enable_labels(true);
     });
-    _grid_btn.signal_clicked().connect([this]{
+    _grid_btn.signal_toggled().connect([this]{
         _palette->enable_labels(false);
     });
     (_palette->are_labels_enabled() ? _list_btn : _grid_btn).set_active();
@@ -176,7 +176,7 @@ SwatchesPanel::SwatchesPanel(bool compact, char const *prefsPath)
             set_palette(name);
         });
     } else {
-        add(get_widget<Gtk::Box>(_builder, "main"));
+        append(get_widget<Gtk::Box>(_builder, "main"));
 
         get_widget<Gtk::Button>(_builder, "open").signal_clicked().connect([this]{
             // load a color palette file selected by the user
@@ -315,7 +315,7 @@ void SwatchesPanel::selectionModified(Selection*, guint flags)
 // Document updates are handled asynchronously by setting a flag and queuing a resize. This results in
 // the following function being run at the last possible moment before the widget will be repainted.
 // This ensures that multiple document updates only result in a single UI update.
-void SwatchesPanel::on_size_allocate(Gtk::Allocation &alloc)
+void SwatchesPanel::size_allocate_vfunc(int const width, int const height, int const baseline)
 {
     if (gradients_changed) {
         assert(_current_palette_id == auto_id);
@@ -342,7 +342,7 @@ void SwatchesPanel::on_size_allocate(Gtk::Allocation &alloc)
     defs_changed = false;
 
     // Necessary to perform *after* the above widget modifications, so GTK can process the new layout.
-    DialogBase::on_size_allocate(alloc);
+    DialogBase::size_allocate_vfunc(width, height, baseline);
 }
 
 void SwatchesPanel::rebuild_isswatch()
@@ -562,7 +562,7 @@ void SwatchesPanel::rebuild()
 }
 
 bool SwatchesPanel::load_swatches() {
-    auto window = dynamic_cast<Gtk::Window*>(get_toplevel());
+    auto window = dynamic_cast<Gtk::Window *>(get_root());
     auto file = choose_palette_file(window);
     auto loaded = false;
     if (load_swatches(file)) {
@@ -644,14 +644,14 @@ bool SwatchesPanel::on_selector_key_pressed(GtkEventControllerKey const * contro
 
     auto const label = Gtk::make_managed<Gtk::Label>(palette.name, true);
     label->set_xalign(0.0);
-    UI::ellipsize(*label, max_chars, Pango::ELLIPSIZE_MIDDLE);
+    UI::ellipsize(*label, max_chars, Pango::EllipsizeMode::MIDDLE);
 
-    auto const box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 1);
-    box->add(*label);
-    box->add(*Gtk::make_managed<UI::Widget::ColorPalettePreview>(palette.colors));
+    auto const box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 1);
+    box->append(*label);
+    box->append(*Gtk::make_managed<UI::Widget::ColorPalettePreview>(palette.colors));
 
     auto const item = Gtk::make_managed<UI::Widget::PopoverMenuItem>();
-    item->add(*box);
+    item->set_child(*box);
 
     return std::pair{item, label};
 }
@@ -669,7 +669,7 @@ void SwatchesPanel::update_selector_menu()
     // TODO: GTK4: probably nicer to use GtkGridView.
     Inkscape::UI::ColumnMenuBuilder builder{*_selector_menu, 2};
     // Items are put in a SizeGroup to keep the two columnsʼ widths homogeneous
-    auto const size_group = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
+    auto const size_group = Gtk::SizeGroup::create(Gtk::SizeGroup::Mode::HORIZONTAL);
     auto const add_item = [&](UI::Widget::palette_t const &palette){
         auto const [item, label] = make_selector_item(palette);
         item->signal_activate().connect([id = palette.id, this]{ set_palette(id); });
@@ -687,7 +687,6 @@ void SwatchesPanel::update_selector_menu()
 
     _selector.set_sensitive(true);
     size_group->add_widget(_selector_label);
-    _selector_menu->show_all_children();
 }
 
 void SwatchesPanel::update_selector_label(Glib::ustring const &active_id)

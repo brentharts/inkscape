@@ -19,6 +19,7 @@
 #include "ui/pack.h"
 #include "ui/util.h"
 #include "ui/widget/scalar.h"
+#include "ui/widget/spinbutton.h"
 
 namespace Inkscape::LivePathEffect {
 
@@ -89,8 +90,8 @@ Gtk::Widget *LPEBSpline::newWidget()
 {
     // use manage here, because after deletion of Effect object, others might
     // still be pointing to this widget.
-    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
-    vbox->property_margin().set_value(5);
+    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
+    vbox->set_margin(5);
 
     for (auto const param: param_vector) {
         if (!param->widget_is_visible) continue;
@@ -99,7 +100,7 @@ Gtk::Widget *LPEBSpline::newWidget()
         if (!widg) continue;
 
         if (param->param_key == "weight") {
-            auto const buttons = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
+            auto const buttons = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
 
             auto const default_weight = Gtk::make_managed<Gtk::Button>(_("Default weight"));
             default_weight->signal_clicked()
@@ -116,10 +117,7 @@ Gtk::Widget *LPEBSpline::newWidget()
         if (param->param_key == "weight" || param->param_key == "steps") {
             auto &scalar = dynamic_cast<UI::Widget::Scalar &>(*widg);
             scalar.signal_value_changed().connect(sigc::mem_fun(*this, &LPEBSpline::toWeight));
-
-            auto const childList = UI::get_children(scalar);
-            auto &entry = dynamic_cast<Gtk::Entry &>(*childList.at(1));
-            entry.set_width_chars(9);
+            scalar.getSpinButton().set_width_chars(9);
         }
 
         UI::pack_start(*vbox, *widg, true, true, 2);

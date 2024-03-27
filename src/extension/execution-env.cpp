@@ -118,8 +118,8 @@ ExecutionEnv::createWorkingDialog () {
         _visibleDialog = nullptr;
     }
 
-    Gtk::Widget *toplevel = _desktop->getCanvas()->get_toplevel();
-    Gtk::Window *window = dynamic_cast<Gtk::Window *>(toplevel);
+    auto const root = _desktop->getCanvas()->get_root();
+    auto const window = dynamic_cast<Gtk::Window *>(root);
     if (!window) {
         return;
     }
@@ -128,8 +128,8 @@ ExecutionEnv::createWorkingDialog () {
     _visibleDialog = new Gtk::MessageDialog(*window,
                                dlgmessage,
                                false, // use markup
-                               Gtk::MESSAGE_INFO,
-                               Gtk::BUTTONS_CANCEL,
+                               Gtk::MessageType::INFO,
+                               Gtk::ButtonsType::CANCEL,
                                true); // modal
     _visibleDialog->signal_response().connect(sigc::mem_fun(*this, &ExecutionEnv::workingCanceled));
     g_free(dlgmessage);
@@ -142,9 +142,6 @@ ExecutionEnv::createWorkingDialog () {
         //       Currently imossible to test because of GUI freezing during save,
         //       see https://bugs.launchpad.net/inkscape/+bug/967416
     }
-    _visibleDialog->show_now();
-
-    return;
 }
 
 void

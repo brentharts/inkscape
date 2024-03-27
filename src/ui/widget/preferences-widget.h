@@ -25,7 +25,6 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/grid.h>
-#include <gtkmm/radiobutton.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/textview.h>
 
@@ -59,7 +58,7 @@ private:
     void on_toggled() override;
 };
 
-class PrefRadioButton : public Gtk::RadioButton
+class PrefRadioButton : public Gtk::CheckButton
 {
 public:
     void init(Glib::ustring const &label, Glib::ustring const &prefs_path,
@@ -100,7 +99,8 @@ private:
     Glib::ustring _prefs_path;
     bool _is_int;
     bool _is_percent;
-    void on_value_changed() override;
+
+    void on_value_changed();
 };
 
 class PrefSpinUnit : public ScalarUnit
@@ -131,9 +131,8 @@ public:
     static const double textpadding;
 
 private:
-    bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
-
-    void draw_marks(Cairo::RefPtr<Cairo::Context> cr, double dist, int major_interval);
+    void on_draw(Cairo::RefPtr<Cairo::Context> const &cr, int width, int height);
+    void draw_marks(Cairo::RefPtr<Cairo::Context> const &cr, double dist, int major_interval);
 
     double _unitconv;
     int _min_width;
@@ -145,7 +144,7 @@ private:
 class ZoomCorrRulerSlider : public Gtk::Box
 {
 public:
-    ZoomCorrRulerSlider() : Gtk::Box(Gtk::ORIENTATION_VERTICAL) {}
+    ZoomCorrRulerSlider() : Gtk::Box(Gtk::Orientation::VERTICAL) {}
 
     void init(int ruler_width, int ruler_height, double lower, double upper,
               double step_increment, double page_increment, double default_value);
@@ -166,7 +165,7 @@ private:
 class PrefSlider : public Gtk::Box
 {
 public:
-    PrefSlider(bool spin = true) : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL) { _spin = spin; }
+    PrefSlider(bool spin = true) : Gtk::Box(Gtk::Orientation::HORIZONTAL) { _spin = spin; }
 
     void init(Glib::ustring const &prefs_path,
     		  double lower, double upper, double step_increment, double page_increment, double default_value, int digits);
@@ -238,7 +237,7 @@ private:
 class PrefEntryButtonHBox : public Gtk::Box
 {
 public:
-    PrefEntryButtonHBox() : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL) {}
+    PrefEntryButtonHBox() : Gtk::Box(Gtk::Orientation::HORIZONTAL) {}
 
     void init(Glib::ustring const &prefs_path,
             bool mask, Glib::ustring const &default_string);
@@ -256,7 +255,7 @@ private:
 class PrefEntryFileButtonHBox : public Gtk::Box
 {
 public:
-    PrefEntryFileButtonHBox() : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL) {}
+    PrefEntryFileButtonHBox() : Gtk::Box(Gtk::Orientation::HORIZONTAL) {}
 
     void init(Glib::ustring const &prefs_path,
               bool mask);
@@ -272,7 +271,7 @@ private:
 
 class PrefOpenFolder : public Gtk::Box {
   public:
-    PrefOpenFolder() : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL) {}
+    PrefOpenFolder() : Gtk::Box(Gtk::Orientation::HORIZONTAL) {}
 
     void init(Glib::ustring const &entry_string, Glib::ustring const &tooltip);
 

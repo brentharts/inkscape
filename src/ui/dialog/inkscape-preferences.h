@@ -21,14 +21,16 @@
 
 #include <glibmm/refptr.h>
 #include <gtk/gtk.h> // GtkEventControllerKey
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/colorbutton.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/scrolledwindow.h>
-#include <gtkmm/searchentry.h>
+#include <gtkmm/searchentry2.h>
 #include <gtkmm/sizegroup.h>
 #include <gtkmm/textview.h>
+#include <gtkmm/togglebutton.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treemodelfilter.h>
 #include <gtkmm/treemodelsort.h>
@@ -125,7 +127,7 @@ protected:
     Gtk::Frame _page_frame;
     Gtk::Label _page_title;
     Gtk::TreeView _page_list;
-    Gtk::SearchEntry _search;
+    Gtk::SearchEntry2 _search;
     Glib::RefPtr<Gtk::TreeStore> _page_list_model;
     Gtk::Widget *_highlighted_widget = nullptr;
     Glib::RefPtr<Gtk::TreeModelFilter> _page_list_model_filter;
@@ -213,6 +215,7 @@ protected:
     UI::Widget::PrefSlider      _mouse_grabsize;
     UI::Widget::PrefCheckButton _mouse_use_ext_input;
     UI::Widget::PrefCheckButton _mouse_switch_on_ext_input;
+    std::unique_ptr<Preferences::PreferencesObserver> _handle_size;
 
     UI::Widget::PrefSpinButton _scroll_wheel;
     UI::Widget::PrefSpinButton _scroll_arrow_px;
@@ -609,31 +612,26 @@ protected:
     Gtk::ToggleButton _kb_mod_alt;
     Gtk::ToggleButton _kb_mod_meta;
     Gtk::CheckButton _kb_mod_enabled;
-    bool _kb_is_updated;
 
-    int _minimum_width;
-    int _minimum_height;
-    int _natural_width;
-    int _natural_height;
+    bool _kb_is_updated = false;
+
+    int _minimum_width  = 0;
+    int _minimum_height = 0;
+    int _natural_width  = 0;
+    int _natural_height = 0;
+
     bool GetSizeRequest(const Gtk::TreeModel::iterator& iter);
-    void get_preferred_width_vfunc (int& minimum_width, int& natural_width) const final {
-        minimum_width = _minimum_width;
-        natural_width = _natural_width;
+
+    void measure_vfunc(Gtk::Orientation const orientation, int const for_size,
+                       int &minimum, int &natural,
+                       int &minimum_baseline, int &natural_baseline) const final
+    {
+        minimum = (orientation == Gtk::Orientation::HORIZONTAL ? _minimum_width : _minimum_height);
+        natural = (orientation == Gtk::Orientation::HORIZONTAL ? _natural_width : _natural_height);
     }
-    void get_preferred_width_for_height_vfunc (int height, int& minimum_width, int& natural_width) const final {
-        minimum_width = _minimum_width;
-        natural_width = _natural_width;
-    }
-    void get_preferred_height_vfunc (int& minimum_height, int& natural_height) const final {
-        minimum_height = _minimum_height;
-        natural_height = _natural_height;
-    }
-    void get_preferred_height_for_width_vfunc (int width, int& minimum_height, int& natural_height) const final {
-        minimum_height = _minimum_height;
-        natural_height = _natural_height;
-    }
-    int _sb_width;
-    UI::Widget::DialogPage* _current_page;
+
+    int _sb_width = 0;
+    UI::Widget::DialogPage *_current_page = nullptr;
 
     Gtk::TreeModel::iterator AddPage(UI::Widget::DialogPage& p, Glib::ustring title, int id);
     Gtk::TreeModel::iterator AddPage(UI::Widget::DialogPage& p, Glib::ustring title, Gtk::TreeModel::iterator parent, int id);

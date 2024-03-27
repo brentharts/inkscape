@@ -25,39 +25,43 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/comboboxtext.h>
-#include <gtkmm/drawingarea.h>
+#include <gtkmm/dropdown.h>
+#include <gtkmm/eventcontrollerfocus.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/grid.h>
+#include <gtkmm/picture.h>
 #include <gtkmm/notebook.h>
-#include <gtkmm/radiobutton.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/progressbar.h>
 #include <gtkmm/stack.h>
 
 #include "desktop.h"
-#include "io/resource.h"
 #include "selection.h"
 #include "trace/autotrace/inkscape-autotrace.h"
 #include "trace/depixelize/inkscape-depixelize.h"
 #include "trace/potrace/inkscape-potrace.h"
 #include "ui/builder-utils.h"
 #include "ui/util.h"
-
-// This maps the column ids in the glade file to useful enums
-static const std::map<std::string, Inkscape::Trace::Potrace::TraceType> trace_types = {
-    {"SS_BC", Inkscape::Trace::Potrace::TraceType::BRIGHTNESS},
-    {"SS_ED", Inkscape::Trace::Potrace::TraceType::CANNY},
-    {"SS_CQ", Inkscape::Trace::Potrace::TraceType::QUANT},
-    {"SS_AT", Inkscape::Trace::Potrace::TraceType::AUTOTRACE_SINGLE},
-    {"SS_CT", Inkscape::Trace::Potrace::TraceType::AUTOTRACE_CENTERLINE},
-
-    {"MS_BS", Inkscape::Trace::Potrace::TraceType::BRIGHTNESS_MULTI},
-    {"MS_C",  Inkscape::Trace::Potrace::TraceType::QUANT_COLOR},
-    {"MS_BW", Inkscape::Trace::Potrace::TraceType::QUANT_MONO},
-    {"MS_AT", Inkscape::Trace::Potrace::TraceType::AUTOTRACE_MULTI},
-};
+#include "ui/widget/bin.h"
 
 namespace Inkscape::UI::Dialog {
+namespace {
+
+constexpr auto cbt_ss_map = std::to_array({
+    Trace::Potrace::TraceType::BRIGHTNESS,
+    Trace::Potrace::TraceType::CANNY,
+    Trace::Potrace::TraceType::QUANT,
+    Trace::Potrace::TraceType::AUTOTRACE_SINGLE,
+    Trace::Potrace::TraceType::AUTOTRACE_CENTERLINE
+});
+
+constexpr auto cbt_ms_map = std::to_array({
+    Trace::Potrace::TraceType::BRIGHTNESS_MULTI,
+    Trace::Potrace::TraceType::QUANT_COLOR,
+    Trace::Potrace::TraceType::QUANT_MONO,
+    Trace::Potrace::TraceType::AUTOTRACE_MULTI
+});
 
 enum class EngineType
 {
@@ -72,20 +76,18 @@ struct TraceData
     bool sioxEnabled;
 };
 
-class TraceDialogImpl final
-    : public TraceDialog
+class TraceDialogImpl : public TraceDialog
 {
 public:
     TraceDialogImpl();
-    ~TraceDialogImpl() final;
+    ~TraceDialogImpl() override;
 
 protected:
-    void selectionModified(Selection *selection, unsigned flags) final;
-    void selectionChanged(Selection *selection) final;
+    void selectionModified(Selection *selection, unsigned flags) override;
+    void selectionChanged(Selection *selection) override;
 
 private:
     TraceData getTraceData() const;
-    bool paintPreview(Cairo::RefPtr<Cairo::Context> const &cr);
     void setDefaults();
     void adjustParamsVisible();
     void onTraceClicked();
@@ -102,21 +104,21 @@ private:
     // Delayed preview generation.
     sigc::connection preview_timeout_conn;
     bool preview_pending_recompute = false;
-    Glib::RefPtr<Gdk::Pixbuf> preview_image;
 
     Glib::RefPtr<Gtk::Builder> builder;
+    UI::Widget::Bin bin;
     Glib::RefPtr<Gtk::Adjustment> MS_scans, PA_curves, PA_islands, PA_sparse1, PA_sparse2;
     Glib::RefPtr<Gtk::Adjustment> SS_AT_ET_T, SS_AT_FI_T, SS_BC_T, SS_CQ_T, SS_ED_T;
     Glib::RefPtr<Gtk::Adjustment> optimize, smooth, speckles;
-    Gtk::ComboBoxText &CBT_SS, &CBT_MS;
+    Gtk::DropDown &CBT_SS, &CBT_MS;
     Gtk::CheckButton &CB_invert, &CB_MS_smooth, &CB_MS_stack, &CB_MS_rb;
     Gtk::CheckButton &CB_speckles,  &CB_smooth,  &CB_optimize,  &CB_SIOX;
     Gtk::CheckButton &CB_speckles1, &CB_smooth1, &CB_optimize1, &CB_SIOX1, &CB_PA_optimize;
-    Gtk::RadioButton &RB_PA_voronoi;
+    Gtk::CheckButton &RB_PA_voronoi;
     Gtk::Button &B_RESET, &B_STOP, &B_OK, &B_Update;
     Gtk::Box &mainBox;
     Gtk::Notebook &choice_tab;
-    Gtk::DrawingArea &previewArea;
+    Gtk::Picture &previewArea;
     Gtk::Box &orient_box;
     Gtk::Frame &_preview_frame;
     Gtk::Grid &_param_grid;
@@ -140,10 +142,9 @@ TraceData TraceDialogImpl::getTraceData() const
     auto &cb_siox = current_page == Page::SingleScan ? CB_SIOX : CB_SIOX1;
     bool enable_siox = cb_siox.get_active();
 
-    auto trace_type_str = current_page == Page::SingleScan ? CBT_SS.get_active_id() : CBT_MS.get_active_id();
-    auto it = trace_types.find(trace_type_str);
-    assert(it != trace_types.end());
-    auto trace_type = it->second;
+    auto trace_type = current_page == Page::SingleScan
+                    ? cbt_ss_map.at(CBT_SS.get_selected())
+                    : cbt_ms_map.at(CBT_MS.get_selected());
 
     EngineType engine_type;
     if (current_page == Page::PixelArt) {
@@ -225,30 +226,6 @@ TraceData TraceDialogImpl::getTraceData() const
     data.sioxEnabled = enable_siox;
 
     return data;
-}
-
-bool TraceDialogImpl::paintPreview(Cairo::RefPtr<Cairo::Context> const &cr)
-{
-    if (preview_image) {
-        int width = preview_image->get_width();
-        int height = preview_image->get_height();
-        Gtk::Allocation const &allocation = previewArea.get_allocation();
-        double scaleFX = (double)allocation.get_width() / width;
-        double scaleFY = (double)allocation.get_height() / height;
-        double scaleFactor = std::min(scaleFX, scaleFY);
-        int newWidth = (double)width * scaleFactor;
-        int newHeight = (double)height * scaleFactor;
-        int offsetX = (allocation.get_width() - newWidth) / 2;
-        int offsetY = (allocation.get_height() - newHeight) / 2;
-        cr->scale(scaleFactor, scaleFactor);
-        Gdk::Cairo::set_source_pixbuf(cr, preview_image, offsetX / scaleFactor, offsetY / scaleFactor);
-        cr->paint();
-    } else {
-        cr->set_source_rgba(0, 0, 0, 0);
-        cr->paint();
-    }
-
-    return false;
 }
 
 void TraceDialogImpl::selectionChanged(Inkscape::Selection *selection)
@@ -361,8 +338,8 @@ TraceDialogImpl::TraceDialogImpl()
   , smooth         (get_object<Gtk::Adjustment>(builder,                "smooth"))
   , speckles       (get_object<Gtk::Adjustment>(builder,              "speckles"))
     // ComboBoxText
-  , CBT_SS         (get_widget<Gtk::ComboBoxText>(builder,              "CBT_SS"))
-  , CBT_MS         (get_widget<Gtk::ComboBoxText>(builder,              "CBT_MS"))
+  , CBT_SS         (get_widget<Gtk::DropDown>    (builder,              "CBT_SS"))
+  , CBT_MS         (get_widget<Gtk::DropDown>    (builder,              "CBT_MS"))
     // CheckButton
   , CB_invert      (get_widget<Gtk::CheckButton> (builder,           "CB_invert"))
   , CB_MS_smooth   (get_widget<Gtk::CheckButton> (builder,        "CB_MS_smooth"))
@@ -378,7 +355,7 @@ TraceDialogImpl::TraceDialogImpl()
   , CB_SIOX1       (get_widget<Gtk::CheckButton> (builder,            "CB_SIOX1"))
   , CB_PA_optimize (get_widget<Gtk::CheckButton> (builder,      "CB_PA_optimize"))
     // RadioButton
-  , RB_PA_voronoi  (get_widget<Gtk::RadioButton> (builder,       "RB_PA_voronoi"))
+  , RB_PA_voronoi  (get_widget<Gtk::CheckButton> (builder,       "RB_PA_voronoi"))
     // Button
   , B_RESET        (get_widget<Gtk::Button>      (builder,             "B_RESET"))
   , B_STOP         (get_widget<Gtk::Button>      (builder,              "B_STOP"))
@@ -387,7 +364,7 @@ TraceDialogImpl::TraceDialogImpl()
     // Box
   , mainBox        (get_widget<Gtk::Box>         (builder,             "mainBox"))
   , choice_tab     (get_widget<Gtk::Notebook>    (builder,          "choice_tab"))
-  , previewArea    (get_widget<Gtk::DrawingArea> (builder,         "previewArea"))
+  , previewArea    (get_widget<Gtk::Picture>     (builder,         "previewArea"))
   , orient_box     (get_widget<Gtk::Box>         (builder,          "orient_box"))
   , _preview_frame (get_widget<Gtk::Frame>       (builder,      "_preview_frame"))
   , _param_grid    (get_widget<Gtk::Grid>        (builder,         "_param_grid"))
@@ -397,56 +374,58 @@ TraceDialogImpl::TraceDialogImpl()
   , boxchild1      (get_widget<Gtk::Box>         (builder,           "boxchild1"))
   , boxchild2      (get_widget<Gtk::Box>         (builder,           "boxchild2"))
 {
-    add(mainBox);
+    append(bin);
+    bin.set_child(mainBox);
+    bin.set_expand(true);
 
-    Inkscape::Preferences* prefs = Inkscape::Preferences::get();
+    auto prefs = Preferences::get();
 
     _live_preview.set_active(prefs->getBool(getPrefsPath() + "liveUpdate", true));
 
-    B_Update.signal_clicked().connect([=] { updatePreview(true); });
+    B_Update.signal_clicked().connect([this] { updatePreview(true); });
     B_OK.signal_clicked().connect(sigc::mem_fun(*this, &TraceDialogImpl::onTraceClicked));
     B_STOP.signal_clicked().connect(sigc::mem_fun(*this, &TraceDialogImpl::onAbortClicked));
     B_RESET.signal_clicked().connect(sigc::mem_fun(*this, &TraceDialogImpl::setDefaults));
-    previewArea.signal_draw().connect(sigc::mem_fun(*this, &TraceDialogImpl::paintPreview));
 
     // attempt at making UI responsive: relocate preview to the right or bottom of dialog depending on dialog size
-    signal_size_allocate().connect([=] (Gtk::Allocation const &alloc) {
+    bin.connectBeforeResize([this] (int width, int height, int baseline) {
         // skip bogus sizes
-        if (alloc.get_width() < 10 || alloc.get_height() < 10) return;
-        // ratio: is dialog wide or is it tall?
-        double const ratio = alloc.get_width() / static_cast<double>(alloc.get_height());
-        // g_warning("size alloc: %d x %d - %f", alloc.get_width(), alloc.get_height(), ratio);
-        double constexpr hysteresis = 0.01;
-        if (ratio < 1 - hysteresis) {
-            // narrow/tall
-            choice_tab.set_valign(Gtk::ALIGN_START);
-            orient_box.set_orientation(Gtk::ORIENTATION_VERTICAL);
-        }
-        else if (ratio > 1 + hysteresis) {
-            // wide/short
-            orient_box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
-            choice_tab.set_valign(Gtk::ALIGN_FILL);
+        if (width >= 10 && height >= 10) {
+            // ratio: is dialog wide or is it tall?
+            double const ratio = width / static_cast<double>(height);
+            // g_warning("size alloc: %d x %d - %f", alloc.get_width(), alloc.get_height(), ratio);
+            constexpr double hysteresis = 0.01;
+            if (ratio < 1 - hysteresis) {
+                // narrow/tall
+                choice_tab.set_valign(Gtk::Align::START);
+                orient_box.set_orientation(Gtk::Orientation::VERTICAL);
+            } else if (ratio > 1 + hysteresis) {
+                // wide/short
+                orient_box.set_orientation(Gtk::Orientation::HORIZONTAL);
+                choice_tab.set_valign(Gtk::Align::FILL);
+            }
         }
     });
 
-    CBT_SS.signal_changed().connect([=] { adjustParamsVisible(); });
+    CBT_SS.property_selected().signal_changed().connect([this] { adjustParamsVisible(); });
     adjustParamsVisible();
 
     // watch for changes, but only in params that can impact preview bitmap
     for (auto adj : {SS_BC_T, SS_ED_T, SS_CQ_T, SS_AT_FI_T, SS_AT_ET_T, /* optimize, smooth, speckles,*/ MS_scans, PA_curves, PA_islands, PA_sparse1, PA_sparse2 }) {
-        adj->signal_value_changed().connect([=] { updatePreview(); });
+        adj->signal_value_changed().connect([this] { updatePreview(); });
     }
     for (auto checkbtn : {&CB_invert, &CB_MS_rb, /* CB_MS_smooth, CB_MS_stack, CB_optimize1, CB_optimize, */ &CB_PA_optimize, &CB_SIOX1, &CB_SIOX, /* CB_smooth1, CB_smooth, CB_speckles1, CB_speckles, */ &_live_preview}) {
-        checkbtn->signal_toggled().connect([=] { updatePreview(); });
+        checkbtn->signal_toggled().connect([this] { updatePreview(); });
     }
     for (auto combo : {&CBT_SS, &CBT_MS}) {
-        combo->signal_changed().connect([=] { updatePreview(); });
+        combo->property_selected().signal_changed().connect([this] { updatePreview(); });
     }
-    choice_tab.signal_switch_page().connect([=] (Gtk::Widget*, unsigned) { updatePreview(); });
+    choice_tab.signal_switch_page().connect([this] (Gtk::Widget *, unsigned) { updatePreview(); });
 
-    signal_set_focus_child().connect([=] (Gtk::Widget *w) {
-        if (w) updatePreview();
-    });
+    auto focus = Gtk::EventControllerFocus::create();
+    focus->set_propagation_phase(Gtk::PropagationPhase::BUBBLE);
+    add_controller(focus);
+    focus->signal_enter().connect([this] { updatePreview(); });
 }
 
 TraceDialogImpl::~TraceDialogImpl()
@@ -495,8 +474,7 @@ void TraceDialogImpl::updatePreview(bool force)
     preview_future = Trace::preview(std::move(data.engine), data.sioxEnabled,
         // On completion:
         [this] (Glib::RefPtr<Gdk::Pixbuf> result) {
-            preview_image = std::move(result);
-            previewArea.queue_draw();
+            previewArea.set_paintable(Gdk::Texture::create_for_pixbuf(result));
             preview_future.cancel();
 
             // Recompute if invalidated during computation.
@@ -508,15 +486,14 @@ void TraceDialogImpl::updatePreview(bool force)
 
     if (!preview_future) {
         // On instant failure:
-        preview_image.reset();
-        previewArea.queue_draw();
+        previewArea.set_paintable({});
     }
 }
 
 void TraceDialogImpl::adjustParamsVisible()
 {
     int constexpr start_row = 2;
-    int option = CBT_SS.get_active_row_number();
+    int option = CBT_SS.get_selected();
     if (option >= 3) option = 3;
     int show1 = start_row + option;
     int show2 = show1;
@@ -534,6 +511,8 @@ void TraceDialogImpl::adjustParamsVisible()
         }
     }
 }
+
+} // namespace
 
 std::unique_ptr<TraceDialog> TraceDialog::create()
 {

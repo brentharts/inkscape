@@ -45,6 +45,7 @@
 #include "object/sp-page.h"
 #include "object/sp-shape.h"
 #include "object/sp-text.h"
+#include "object/sp-use.h"
 #include "ui/desktop/menu-set-tooltips-shift-icons.h"
 #include "ui/menuize.h"
 #include "ui/util.h"
@@ -93,12 +94,21 @@ void show_all_images(Gtk::Widget &parent)
     Inkscape::UI::for_each_descendant(parent, [=](Gtk::Widget &child)
     {
         if (auto const image = dynamic_cast<Gtk::Image *>(&child);
-            image && image->get_storage_type() != Gtk::IMAGE_EMPTY)
+            image && image->get_storage_type() != Gtk::Image::Type::EMPTY)
         {
             image->set_visible(true);
         }
         return Inkscape::UI::ForEachResult::_continue;
     });
+}
+
+/// Check if the item is a clone of an image.
+bool is_clone_of_image(SPItem const *item)
+{
+    if (auto const *clone = cast<SPUse>(item)) {
+        return is<SPImage>(clone->trueOriginal());
+    }
+    return false;
 }
 
 ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_and_objects_menu_item)
@@ -217,6 +227,11 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
                 }
             }
 
+            // A clone of an image supports "Edit Externally" as well
+            if (is_clone_of_image(item)) {
+                AppendItemFromAction(gmenu_dialogs, "app.element-image-edit", _("Edit Externally..."), "");
+            }
+
             // Text dialogs.
             if (is<SPText>(item)) {
                 AppendItemFromAction(     gmenu_dialogs, "win.dialog-open('Text')",                      _("_Text and Font..."),     "dialog-text-and-font"  );
@@ -329,15 +344,15 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
         AppendItemFromAction(gmenu_section,     "win.layer-lock-all",           _("_Lock All Layers"),           "");
         AppendItemFromAction(gmenu_section,     "win.layer-unlock-all",         _("_Unlock All Layers"),         "");
         gmenu->append_section(gmenu_section);
-
     }
     // clang-format on
 
     auto const widget = desktop->getDesktopWidget();
     g_assert(widget);
-    set_relative_to(*widget);
-    bind_model(gmenu);
-    set_position(Gtk::POS_BOTTOM);
+    set_parent(*widget);
+    set_menu_model(gmenu);
+    set_position(Gtk::PositionType::BOTTOM);
+    set_has_arrow(false);
     show_all_images(*this);
     Inkscape::UI::menuize_popover(*this);
 
@@ -349,15 +364,15 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
     set_tooltips_and_shift_icons(*this, shift_icons);
     // Set the style and icon theme of the new menu based on the desktop
     if (Gtk::Window *window = desktop->getToplevel()) {
-        if (window->get_style_context()->has_class("dark")) {
-            get_style_context()->add_class("dark");
+        if (window->has_css_class("dark")) {
+            add_css_class("dark");
         } else {
-            get_style_context()->add_class("bright");
+            add_css_class("bright");
         }
         if (prefs->getBool("/theme/symbolicIcons", false)) {
-            get_style_context()->add_class("symbolic");
+            add_css_class("symbolic");
         } else {
-            get_style_context()->add_class("regular");
+            add_css_class("regular");
         }
     }
 }

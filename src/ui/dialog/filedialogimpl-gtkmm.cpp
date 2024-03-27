@@ -34,7 +34,6 @@
 #include "preferences.h"
 #include "ui/dialog-events.h"
 #include "ui/dialog-run.h"
-#include "ui/util.h"
 
 namespace Inkscape::UI::Dialog {
 
@@ -43,16 +42,20 @@ namespace Inkscape::UI::Dialog {
 #########################################################################*/
 
 FileDialogBaseGtk::FileDialogBaseGtk(Gtk::Window &parentWindow, Glib::ustring const &title,
-                                     Gtk::FileChooserAction const dialogType,
+                                     Gtk::FileChooser::Action const dialogType,
                                      FileDialogType const type,
                                      char const * const preferenceBase)
     : Gtk::FileChooserDialog{parentWindow, title, dialogType}
     , _preferenceBase{preferenceBase ? preferenceBase : "unknown"}
     , _dialogType(type)
 {
+    reference();
 }
 
-FileDialogBaseGtk::~FileDialogBaseGtk() = default;
+FileDialogBaseGtk::~FileDialogBaseGtk()
+{
+    unreference();
+}
 
 Glib::RefPtr<Gtk::FileFilter> FileDialogBaseGtk::addFilter(const Glib::ustring &name, Glib::ustring ext,
                                                            Inkscape::Extension::Extension *extension)
@@ -97,7 +100,7 @@ Glib::ustring FileDialogBaseGtk::extToPattern(const Glib::ustring &extension) co
  */
 FileOpenDialogImplGtk::FileOpenDialogImplGtk(Gtk::Window &parentWindow, const std::string &dir,
                                              FileDialogType fileTypes, const Glib::ustring &title)
-    : FileDialogBaseGtk(parentWindow, title, Gtk::FILE_CHOOSER_ACTION_OPEN, fileTypes, "/dialogs/open")
+    : FileDialogBaseGtk(parentWindow, title, Gtk::FileChooser::Action::OPEN, fileTypes, "/dialogs/open")
 {
     if (_dialogType == EXE_TYPES) {
         /* One file at a time */
@@ -107,7 +110,7 @@ FileOpenDialogImplGtk::FileOpenDialogImplGtk(Gtk::Window &parentWindow, const st
         set_select_multiple(true);
     }
 
-    set_local_only(false);
+    // set_local_only(false); // Gone?
 
     /* Set our dialog type (open, import, etc...)*/
     _dialogType = fileTypes;
@@ -123,28 +126,26 @@ FileOpenDialogImplGtk::FileOpenDialogImplGtk(Gtk::Window &parentWindow, const st
             udir.erase(len - 1);
         }
 
+        auto file = Gio::File::create_for_path(udir);
         if (_dialogType == EXE_TYPES) {
-            auto file = Gio::File::create_for_path(udir);
             set_file(file);
         } else {
-            set_current_folder(udir);
-            // set_current_folder(file); // Gtk4
+            set_current_folder(file);
         }
     }
 
     // Add the file types menu.
     createFilterMenu();
 
-    add_button(_("_Cancel"), Gtk::RESPONSE_CANCEL);
-    add_button(_("_Open"),   Gtk::RESPONSE_OK);
-    set_default_response(Gtk::RESPONSE_OK);
+    add_button(_("_Cancel"), Gtk::ResponseType::CANCEL);
+    add_button(_("_Open"),   Gtk::ResponseType::OK);
+    set_default_response(Gtk::ResponseType::OK);
 
     // Allow easy access to our examples folder.
     using namespace Inkscape::IO::Resource;
     auto examplesdir = get_path_string(SYSTEM, EXAMPLES);
-    if (Glib::file_test(examplesdir, Glib::FILE_TEST_IS_DIR) && Glib::path_is_absolute(examplesdir)) {
-        add_shortcut_folder(examplesdir);
-        // add_shortcut_folder(Gio::File::create_for_path(examplesdir)); // Gtk4
+    if (Glib::file_test(examplesdir, Glib::FileTest::IS_DIR) && Glib::path_is_absolute(examplesdir)) {
+        add_shortcut_folder(Gio::File::create_for_path(examplesdir));
     }
 }
 
@@ -205,10 +206,10 @@ void FileOpenDialogImplGtk::createFilterMenu()
 bool FileOpenDialogImplGtk::show()
 {
     set_modal(true); // Window
-    sp_transientize(GTK_WIDGET(gobj())); // Make transient
+    sp_transientize(*this); // Make transient
     int response = dialog_run(*this); // Dialog
 
-    if (response == Gtk::RESPONSE_OK) {
+    if (response == Gtk::ResponseType::OK) {
         setExtension(filterExtensionMap[get_filter()]);
         return true;
     }
@@ -228,7 +229,7 @@ FileSaveDialogImplGtk::FileSaveDialogImplGtk(Gtk::Window &parentWindow, const st
                                              FileDialogType fileTypes, const Glib::ustring &title,
                                              const Glib::ustring & /*default_key*/, const gchar *docTitle,
                                              const Inkscape::Extension::FileSaveMethod save_method)
-    : FileDialogBaseGtk(parentWindow, title, Gtk::FILE_CHOOSER_ACTION_SAVE, fileTypes,
+    : FileDialogBaseGtk(parentWindow, title, Gtk::FileChooser::Action::SAVE, fileTypes,
                         (save_method == Inkscape::Extension::FILE_SAVE_METHOD_SAVE_COPY) ? "/dialogs/save_copy"
                                                                                          : "/dialogs/save_as")
     , save_method(save_method)
@@ -240,7 +241,7 @@ FileSaveDialogImplGtk::FileSaveDialogImplGtk(Gtk::Window &parentWindow, const st
     // One file at a time.
     set_select_multiple(false);
 
-    set_local_only(false);
+    // set_local_only(false); // Gone?
 
     // ===== Choices =====
 
@@ -276,14 +277,14 @@ FileSaveDialogImplGtk::FileSaveDialogImplGtk(Gtk::Window &parentWindow, const st
     char const *templates = Inkscape::IO::Resource::get_path(USER, TEMPLATES);
     if (Inkscape::IO::file_test(templates, G_FILE_TEST_EXISTS) &&
         Inkscape::IO::file_test(templates, G_FILE_TEST_IS_DIR) && g_path_is_absolute(templates)) {
-        add_shortcut_folder(templates);
+        add_shortcut_folder(Gio::File::create_for_path(templates));
     }
 
     // ===== Buttons =====
 
-    add_button(_("_Cancel"), Gtk::RESPONSE_CANCEL);
-    add_button(_("_Save"),   Gtk::RESPONSE_OK);
-    set_default_response(Gtk::RESPONSE_OK);
+    add_button(_("_Cancel"), Gtk::ResponseType::CANCEL);
+    add_button(_("_Save"),   Gtk::ResponseType::OK);
+    set_default_response(Gtk::ResponseType::OK);
 
     // ===== Initial Value =====
 
@@ -301,26 +302,25 @@ FileSaveDialogImplGtk::FileSaveDialogImplGtk(Gtk::Window &parentWindow, const st
         auto display_name = Glib::filename_to_utf8(file->get_basename());
         Gio::FileType type = file->query_file_type();
         switch (type) {
-            case Gio::FILE_TYPE_UNKNOWN:
+            case Gio::FileType::UNKNOWN:
                 set_file(file); // Set directory.
                 set_current_name(display_name); // Set entry (Glib::ustring).
                 break;
-            case Gio::FILE_TYPE_REGULAR:
+            case Gio::FileType::REGULAR:
                 // The extension set here is over-written when called by sp_file_save_dialog().
                 set_file(file); // Set directory (but not entry).
                 set_current_name(display_name); // Set entry.
                 break;
-            case Gio::FILE_TYPE_DIRECTORY:
-                set_current_folder_file(file); // Set directory.
+            case Gio::FileType::DIRECTORY:
+                set_current_folder(file); // Set directory.
                 break;
             default:
                 std::cerr << "FileDialogImplGtk: Unknown file type: " << (int)type << std::endl;
         }
     }
-    show_all_children();
 
     property_filter().signal_changed().connect([this]() { filefilterChanged(); });
-    signal_selection_changed().connect([this]() { filenameChanged(); });
+    // signal_selection_changed().connect([this]() { filenameChanged(); }); // Gone?
 }
 
 /**
@@ -329,11 +329,11 @@ FileSaveDialogImplGtk::FileSaveDialogImplGtk(Gtk::Window &parentWindow, const st
 bool FileSaveDialogImplGtk::show()
 {
     set_modal(true); // Window
-    sp_transientize(GTK_WIDGET(gobj())); // Make transient
+    sp_transientize(*this);
 
     int response = dialog_run(*this); // Dialog
 
-    if (response == Gtk::RESPONSE_OK) {
+    if (response == Gtk::ResponseType::OK) {
 
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 

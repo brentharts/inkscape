@@ -21,11 +21,11 @@
 #include <gdkmm/display.h>
 #include <gdkmm/general.h>
 #include <gtkmm/drawingarea.h>
-#include <gtkmm/stylecontext.h>
 
 #include "ui/controller.h"
 #include "ui/dialog/color-item.h"
 #include "ui/util.h"
+#include "ui/widget/bin.h"
 #include "ui/widget/ink-color-wheel.h"
 
 namespace Inkscape::UI::Widget {
@@ -42,7 +42,7 @@ constexpr static double MIN_LIGHTNESS = 0.0;
 constexpr static double OUTER_CIRCLE_DASH_SIZE = 10.0;
 constexpr static double VERTEX_EPSILON = 0.01;
 constexpr static double marker_radius = 4.0;
-constexpr static double focus_line_width = 0.5;
+constexpr static double focus_line_width = 1.0;
 constexpr static double focus_padding = 3.0;
 static auto const focus_dash = std::vector{1.5};
 
@@ -85,19 +85,20 @@ static void draw_vertical_padding(ColorPoint p0, ColorPoint p1, int padding, boo
 /* Base Color Wheel */
 
 ColorWheel::ColorWheel()
-    : _drawing_area{Gtk::make_managed<Gtk::DrawingArea>()}
+    : Gtk::AspectFrame(0.5, 0.5, 1.0, false)
+    , _bin{Gtk::make_managed<UI::Widget::Bin>()}
+    , _drawing_area{Gtk::make_managed<Gtk::DrawingArea>()}
 {
     set_name("ColorWheel");
-    set(0.5, 0.5, 1.0, false);
-    get_style_context()->add_class("flat");
+    add_css_class("flat");
 
-    _drawing_area->set_visible(true);
-    _drawing_area->set_can_focus(true);
-    _drawing_area->property_expand() = true;
-    _drawing_area->signal_size_allocate().connect(sigc::mem_fun(*this, &ColorWheel::on_drawing_area_size ));
-    _drawing_area->signal_draw         ().connect(sigc::mem_fun(*this, &ColorWheel::on_drawing_area_draw ));
-    _drawing_area->signal_focus        ().connect(sigc::mem_fun(*this, &ColorWheel::on_drawing_area_focus));
-    add(*_drawing_area);
+    _drawing_area->set_focusable(true);
+    _drawing_area->set_expand(true);
+    _bin->connectAfterResize(sigc::mem_fun(*this, &ColorWheel::on_drawing_area_size));
+    _drawing_area->set_draw_func(sigc::mem_fun(*this, &ColorWheel::on_drawing_area_draw ));
+    _drawing_area->property_has_focus().signal_changed().connect([this]{ _drawing_area->queue_draw(); });
+    _bin->set_child(_drawing_area);
+    set_child(*_bin);
 
     Controller::add_click(*_drawing_area, sigc::mem_fun(*this, &ColorWheel::on_click_pressed ),
                                           sigc::mem_fun(*this, &ColorWheel::on_click_released));
@@ -149,6 +150,11 @@ void ColorWheel::color_changed()
     _drawing_area->queue_draw();
 }
 
+void ColorWheel::queue_drawing_area_draw()
+{
+    _drawing_area->queue_draw();
+}
+
 Gtk::Allocation ColorWheel::get_drawing_area_allocation() const
 {
     return _drawing_area->get_allocation();
@@ -169,9 +175,14 @@ bool ColorWheel::on_key_released(GtkEventControllerKey const * /*controller*/,
                                  GdkModifierType const state)
 {
     unsigned int key = 0;
-    gdk_keymap_translate_keyboard_state(Gdk::Display::get_default()->get_keymap(),
-                                        keycode, state,
-                                        0, &key, nullptr, nullptr, nullptr);
+    gdk_display_translate_key(gdk_display_get_default(),
+                              keycode,
+                              state,
+                              0,
+                              &key,
+                              nullptr,
+                              nullptr,
+                              nullptr);
 
     switch (key) {
         case GDK_KEY_Up:
@@ -290,11 +301,11 @@ void ColorWheelHSL::update_ring_source()
 {
     if (_radii && _source_ring) return;
 
-    auto const &width = _cache_width.value(), &height = _cache_height.value();
+    auto const [width, height] = *_cache_size;
     auto const cx = width  / 2.0;
     auto const cy = height / 2.0;
 
-    auto const stride = Cairo::ImageSurface::format_stride_for_width(Cairo::FORMAT_RGB24, width);
+    auto const stride = Cairo::ImageSurface::format_stride_for_width(Cairo::Surface::Format::RGB24, width);
     _buffer_ring.resize(height * stride / 4);
 
     auto const &[r_min, r_max] = get_radii();
@@ -323,7 +334,7 @@ void ColorWheelHSL::update_ring_source()
 
     auto const data = reinterpret_cast<unsigned char *>(_buffer_ring.data());
     _source_ring = Cairo::ImageSurface::create(data,
-                                               Cairo::FORMAT_RGB24,
+                                               Cairo::Surface::Format::RGB24,
                                                width, height, stride);
 }
 
@@ -352,8 +363,8 @@ ColorWheelHSL::update_triangle_source()
      */
     constexpr int padding = 3; // Avoid edge artifacts.
 
-    auto const &width = _cache_width.value(), &height = _cache_height.value();
-    auto const stride = Cairo::ImageSurface::format_stride_for_width(Cairo::FORMAT_RGB24, width);
+    auto const [width, height] = *_cache_size;
+    auto const stride = Cairo::ImageSurface::format_stride_for_width(Cairo::Surface::Format::RGB24, width);
     _buffer_triangle.resize(height * stride / 4);
 
     for (int y = 0; y < height; ++y) {
@@ -407,25 +418,23 @@ ColorWheelHSL::update_triangle_source()
 
     auto const data = reinterpret_cast<unsigned char *>(_buffer_triangle.data());
     _source_triangle = Cairo::ImageSurface::create(data,
-                                                   Cairo::FORMAT_RGB24,
+                                                   Cairo::Surface::Format::RGB24,
                                                    width, height, stride);
 
     return {p0, p1, p2};
 }
 
-void ColorWheelHSL::on_drawing_area_size(Gtk::Allocation const &allocation)
+void ColorWheelHSL::on_drawing_area_size(int width, int height, int baseline)
 {
-    auto const width = allocation.get_width(), height = allocation.get_height();
-    if (width == _cache_width && height == _cache_height) return;
-
-    _cache_width  = width ;
-    _cache_height = height;
+    auto const size = Geom::IntPoint{width, height};
+    if (size == _cache_size) return;
+    _cache_size = size;
     _radii.reset();
 }
 
-bool ColorWheelHSL::on_drawing_area_draw(::Cairo::RefPtr<::Cairo::Context> const &cr)
+void ColorWheelHSL::on_drawing_area_draw(Cairo::RefPtr<Cairo::Context> const &cr, int, int)
 {
-    auto const &width = _cache_width.value(), &height = _cache_height.value();
+    auto const [width, height] = *_cache_size;
     auto const cx = width  / 2.0;
     auto const cy = height / 2.0;
 
@@ -481,10 +490,10 @@ bool ColorWheelHSL::on_drawing_area_draw(::Cairo::RefPtr<::Cairo::Context> const
     if (drawing_area_has_focus()) {
         // The focus_dash width & alpha(foreground_color) are from GTK3 Adwaita.
         cr->set_dash(focus_dash, 0);
-        cr->set_line_width(0.5);
+        cr->set_line_width(1.0);
 
         if (_focus_on_ring) {
-            auto const rgba = change_alpha(get_foreground_color(get_style_context()), 0.7);
+            auto const rgba = change_alpha(get_color(), 0.7);
             Gdk::Cairo::set_source_rgba(cr, rgba);
             cr->begin_new_path();
             cr->rectangle(0, 0, width, height);
@@ -496,18 +505,18 @@ bool ColorWheelHSL::on_drawing_area_draw(::Cairo::RefPtr<::Cairo::Context> const
 
         cr->stroke();
     }
-
-    return true;
 }
 
-bool ColorWheelHSL::on_drawing_area_focus(Gtk::DirectionType const direction)
+std::optional<bool> ColorWheelHSL::focus(Gtk::DirectionType const direction)
 {
+    // Any focus change must update focus indicators (add or remove).
+    queue_drawing_area_draw();
+
     // In forward direction, focus passes from no focus to ring focus to triangle
     // focus to no focus.
     if (!drawing_area_has_focus()) {
-        _focus_on_ring = (direction == Gtk::DIR_TAB_FORWARD);
+        _focus_on_ring = (direction == Gtk::DirectionType::TAB_FORWARD);
         focus_drawing_area();
-        queue_draw();
         return true;
     }
 
@@ -515,7 +524,7 @@ bool ColorWheelHSL::on_drawing_area_focus(Gtk::DirectionType const direction)
     bool keep_focus = true;
 
     switch (direction) {
-        case Gtk::DIR_TAB_BACKWARD:
+        case Gtk::DirectionType::TAB_BACKWARD:
             if (!_focus_on_ring) {
                 _focus_on_ring = true;
             } else {
@@ -523,7 +532,7 @@ bool ColorWheelHSL::on_drawing_area_focus(Gtk::DirectionType const direction)
             }
             break;
 
-        case Gtk::DIR_TAB_FORWARD:
+        case Gtk::DirectionType::TAB_FORWARD:
             if (_focus_on_ring) {
                 _focus_on_ring = false;
             } else {
@@ -531,16 +540,12 @@ bool ColorWheelHSL::on_drawing_area_focus(Gtk::DirectionType const direction)
             }
     }
 
-    if (!keep_focus) {
-        queue_draw();  // Update focus indicators.
-    }
-
     return keep_focus;
 }
 
 bool ColorWheelHSL::_set_from_xy(double const x, double const y)
 {
-    auto const &width = _cache_width.value(), &height = _cache_height.value();
+    auto const [width, height] = *_cache_size;
     double const cx = width/2.0;
     double const cy = height/2.0;
 
@@ -578,7 +583,7 @@ bool ColorWheelHSL::set_from_xy_delta(double const dx, double const dy)
 
 bool ColorWheelHSL::_is_in_ring(double x, double y)
 {
-    auto const &width = _cache_width.value(), &height = _cache_height.value();
+    auto const [width, height] = *_cache_size;
     auto const cx = width  / 2.0;
     auto const cy = height / 2.0;
 
@@ -610,7 +615,7 @@ bool ColorWheelHSL::_is_in_triangle(double x, double y)
 
 void ColorWheelHSL::_update_ring_color(double x, double y)
 {
-    auto const &width = _cache_width.value(), &height = _cache_height.value();
+    auto const [width, height] = *_cache_size;
     double cx = width / 2.0;
     double cy = height / 2.0;
 
@@ -627,7 +632,7 @@ void ColorWheelHSL::_update_ring_color(double x, double y)
     }
 }
 
-Gtk::EventSequenceState ColorWheelHSL::on_click_pressed(Gtk::GestureMultiPress const & /*click*/,
+Gtk::EventSequenceState ColorWheelHSL::on_click_pressed(Gtk::GestureClick const & /*click*/,
                                                         int /*n_press*/, double const x, double const y)
 {
     if (_is_in_ring(x, y) ) {
@@ -636,25 +641,25 @@ Gtk::EventSequenceState ColorWheelHSL::on_click_pressed(Gtk::GestureMultiPress c
         focus_drawing_area();
         _focus_on_ring = true;
         _update_ring_color(x, y);
-        return Gtk::EVENT_SEQUENCE_CLAIMED;
+        return Gtk::EventSequenceState::CLAIMED;
     } else if (_is_in_triangle(x, y)) {
         _adjusting = true;
         _mode = DragMode::SATURATION_VALUE;
         focus_drawing_area();
         _focus_on_ring = false;
         _set_from_xy(x, y);
-        return Gtk::EVENT_SEQUENCE_CLAIMED;
+        return Gtk::EventSequenceState::CLAIMED;
     }
 
-    return Gtk::EVENT_SEQUENCE_NONE;
+    return Gtk::EventSequenceState::NONE;
 }
 
-Gtk::EventSequenceState ColorWheelHSL::on_click_released(Gtk::GestureMultiPress const & /*click*/,
+Gtk::EventSequenceState ColorWheelHSL::on_click_released(Gtk::GestureClick const & /*click*/,
                                                          int /*n_press*/, double /*x*/, double /*y*/)
 {
     _mode = DragMode::NONE;
     _adjusting = false;
-    return Gtk::EVENT_SEQUENCE_CLAIMED;
+    return Gtk::EventSequenceState::CLAIMED;
 }
 
 void ColorWheelHSL::on_motion(GtkEventControllerMotion const * /*motion*/,
@@ -674,9 +679,14 @@ bool ColorWheelHSL::on_key_pressed(GtkEventControllerKey const * /*controller*/,
                                    GdkModifierType const state)
 {
     unsigned int key = 0;
-    gdk_keymap_translate_keyboard_state(Gdk::Display::get_default()->get_keymap(),
-                                        keycode, state,
-                                        0, &key, nullptr, nullptr, nullptr);
+    gdk_display_translate_key(gdk_display_get_default(),
+                              keycode,
+                              state,
+                              0,
+                              &key,
+                              nullptr,
+                              nullptr,
+                              nullptr);
 
     static constexpr double delta_hue = 2.0 / MAX_HUE;
     auto const old_hue = _values[0];
@@ -705,10 +715,11 @@ bool ColorWheelHSL::on_key_pressed(GtkEventControllerKey const * /*controller*/,
 
     if (dx == 0.0 && dy == 0.0) return false;
 
+    bool changed = false;
     if (_focus_on_ring) {
         _values[0] += -(dx != 0 ? dx : dy) * delta_hue;
     } else {
-        set_from_xy_delta(dx, dy);
+        changed = set_from_xy_delta(dx, dy);
     }
 
     if (_values[0] >= 1.0) {
@@ -717,11 +728,15 @@ bool ColorWheelHSL::on_key_pressed(GtkEventControllerKey const * /*controller*/,
         _values[0] += 1.0;
     }
 
-    bool const changed = _values[0] != old_hue;
-    if (changed) {
+    if (_values[0] != old_hue) {
         _triangle_corners.reset();
+        changed = true;
+    }
+
+    if (changed) {
         color_changed();
     }
+
     return changed;
 }
 
@@ -734,7 +749,7 @@ ColorWheelHSL::MinMax const &ColorWheelHSL::get_radii()
 
     _radii.emplace();
     auto &[r_min, r_max] = *_radii;
-    auto const &width = _cache_width.value(), &height = _cache_height.value();
+    auto const [width, height] = *_cache_size;
     r_max = std::min(width, height) / 2.0 - 2 * (focus_line_width + focus_padding);
     r_min = r_max * (1.0 - _ring_width);
     return *_radii;
@@ -744,7 +759,7 @@ std::array<ColorPoint, 3> const &ColorWheelHSL::get_triangle_corners()
 {
     if (_triangle_corners) return *_triangle_corners;
 
-    auto const &width = _cache_width.value(), &height = _cache_height.value();
+    auto const [width, height] = *_cache_size;
     double const cx = width  / 2.0;
     double const cy = height / 2.0;
 
@@ -955,7 +970,7 @@ bool ColorWheelHSLuv::_vertex() const
     return _values[2] < VERTEX_EPSILON || _values[2] > MAX_LIGHTNESS - VERTEX_EPSILON;
 }
 
-bool ColorWheelHSLuv::on_drawing_area_draw(::Cairo::RefPtr<::Cairo::Context> const &cr)
+void ColorWheelHSLuv::on_drawing_area_draw(::Cairo::RefPtr<::Cairo::Context> const &cr, int, int)
 {
     auto const &allocation = get_drawing_area_allocation();
     auto dimensions = _getAllocationDimensions(allocation);
@@ -974,7 +989,7 @@ bool ColorWheelHSLuv::on_drawing_area_draw(::Cairo::RefPtr<::Cairo::Context> con
     cr->set_antialias(Cairo::ANTIALIAS_SUBPIXEL);
 
     if (size > _square_size) {
-        if (_cache_width != dimensions[Geom::X] || _cache_height != dimensions[Geom::Y]) {
+        if (_cache_size != dimensions) {
             _updatePolygon();
         }
         if (!is_vertex) {
@@ -1046,8 +1061,6 @@ bool ColorWheelHSLuv::on_drawing_area_draw(::Cairo::RefPtr<::Cairo::Context> con
         cr->arc(mp[Geom::X], mp[Geom::Y], marker_radius + focus_padding, 0, 2 * M_PI);
         cr->stroke();
     }
-
-    return true;
 }
 
 bool ColorWheelHSLuv::_set_from_xy(double const x, double const y)
@@ -1079,8 +1092,7 @@ void ColorWheelHSLuv::_updatePolygon()
         return;
     }
 
-    _cache_width = allocation_size[Geom::X];
-    _cache_height = allocation_size[Geom::Y];
+    _cache_size = allocation_size;
 
     double const resize = size / static_cast<double>(SIZE);
 
@@ -1098,9 +1110,9 @@ void ColorWheelHSLuv::_updatePolygon()
     auto const bounding_max = bounding_rect.max().ceil();
     auto const bounding_min = bounding_rect.min().floor();
 
-    int const stride = Cairo::ImageSurface::format_stride_for_width(Cairo::FORMAT_RGB24, _cache_width);
+    int const stride = Cairo::ImageSurface::format_stride_for_width(Cairo::Surface::Format::RGB24, _cache_size.x());
 
-    _buffer_polygon.resize(_cache_height * stride / 4);
+    _buffer_polygon.resize(_cache_size.y() * stride / 4);
     std::vector<guint32> buffer_line(stride / 4);
 
     ColorPoint clr;
@@ -1130,10 +1142,10 @@ void ColorWheelHSLuv::_updatePolygon()
     }
 
     _surface_polygon = ::Cairo::ImageSurface::create(reinterpret_cast<unsigned char *>(_buffer_polygon.data()),
-                                                     Cairo::FORMAT_RGB24, _cache_width, _cache_height, stride);
+                                                     Cairo::Surface::Format::RGB24, _cache_size.x(), _cache_size.y(), stride);
 }
 
-Gtk::EventSequenceState ColorWheelHSLuv::on_click_pressed(Gtk::GestureMultiPress const & /*click*/,
+Gtk::EventSequenceState ColorWheelHSLuv::on_click_pressed(Gtk::GestureClick const & /*click*/,
                                                           int /*n_press*/, double const x, double const y)
 {
     auto const event_pt = Geom::Point(x, y);
@@ -1145,17 +1157,17 @@ Gtk::EventSequenceState ColorWheelHSLuv::on_click_pressed(Gtk::GestureMultiPress
         _adjusting = true;
         focus_drawing_area();
         _setFromPoint(event_pt);
-        return Gtk::EVENT_SEQUENCE_CLAIMED;
+        return Gtk::EventSequenceState::CLAIMED;
     }
 
-    return Gtk::EVENT_SEQUENCE_NONE;
+    return Gtk::EventSequenceState::NONE;
 }
 
-Gtk::EventSequenceState ColorWheelHSLuv::on_click_released(Gtk::GestureMultiPress const & /*click*/,
+Gtk::EventSequenceState ColorWheelHSLuv::on_click_released(Gtk::GestureClick const & /*click*/,
                                                            int /*n_press*/, double /*x*/, double /*y*/)
 {
     _adjusting = false;
-    return Gtk::EVENT_SEQUENCE_CLAIMED;
+    return Gtk::EventSequenceState::CLAIMED;
 }
 
 void ColorWheelHSLuv::on_motion(GtkEventControllerMotion const * /*motion*/,
@@ -1173,9 +1185,14 @@ bool ColorWheelHSLuv::on_key_pressed(GtkEventControllerKey const * /*controller*
     bool consumed = false;
 
     unsigned int key = 0;
-    gdk_keymap_translate_keyboard_state(Gdk::Display::get_default()->get_keymap(),
-                                        keycode, state,
-                                        0, &key, nullptr, nullptr, nullptr);
+    gdk_display_translate_key(gdk_display_get_default(),
+                              keycode,
+                              state,
+                              0,
+                              &key,
+                              nullptr,
+                              nullptr,
+                              nullptr);
 
     // Get current point
     auto luv = Hsluv::hsluv_to_luv(_values.data());

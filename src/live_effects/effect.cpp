@@ -89,6 +89,7 @@
 #include "ui/tools/node-tool.h"
 #include "ui/tools/pen-tool.h"
 #include "xml/sp-css-attr.h"
+#include "helper/geom.h"
 
 namespace Inkscape {
 namespace LivePathEffect {
@@ -1472,12 +1473,19 @@ void Effect::doOnRemove (SPLPEItem const* /*lpeitem*/)
 void Effect::doOnVisibilityToggled(SPLPEItem const* /*lpeitem*/)
 {
 }
+
+void Effect::adjustForNewPath()
+{
+    _adjust_path = true;
+}
+
 //secret impl methods (shhhh!)
 void Effect::doAfterEffect_impl(SPLPEItem const *lpeitem, SPCurve *curve)
 {
     doAfterEffect(lpeitem, curve);
     is_load = false;
     is_applied = false;
+    _adjust_path = false;
 }
 
 void Effect::doOnRemove_impl(SPLPEItem const* lpeitem)
@@ -1542,6 +1550,19 @@ void Effect::doOnApply_impl(SPLPEItem const* lpeitem)
 void Effect::doBeforeEffect_impl(SPLPEItem const* lpeitem)
 {
     sp_lpe_item = const_cast<SPLPEItem *>(lpeitem);
+    if (_provides_path_adjustment) {
+        LPEItemShapesNumbers lpenumbers;
+        // By the moment we not handle LPEItem groups. see here how to add to
+        // https://pastebin.com/e5AesES9
+        lpenumbers.nchildshapes = 0;
+        lpenumbers.nsubpaths    = pathvector_before_effect.size();
+        lpenumbers.ncurves      = count_pathvector_curves(pathvector_before_effect);
+        if (!is_load && lpenumbers != _lpenumbers) {
+            adjustForNewPath();
+        }
+        //std::cout << _lpenumbers << std::endl;
+        _lpenumbers = lpenumbers;
+    }
     doBeforeEffect(lpeitem);
     if (is_load) {
         update_satellites();
@@ -1769,9 +1790,8 @@ Gtk::Widget *
 Effect::newWidget()
 {
     // use manage here, because after deletion of Effect object, others might still be pointing to this widget.
-    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
-
-    vbox->property_margin().set_value(5);
+    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
+    vbox->set_margin(5);
 
     std::vector<Parameter *>::iterator it = param_vector.begin();
     while (it != param_vector.end()) {

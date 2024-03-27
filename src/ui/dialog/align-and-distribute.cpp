@@ -43,7 +43,7 @@ using Inkscape::IO::Resource::get_filename;
 using Inkscape::IO::Resource::UIS;
 
 AlignAndDistribute::AlignAndDistribute(Inkscape::UI::Dialog::DialogBase* dlg)
-    : Gtk::Box(Gtk::ORIENTATION_VERTICAL)
+    : Gtk::Box(Gtk::Orientation::VERTICAL)
     , builder(create_builder("align-and-distribute.ui"))
     , align_and_distribute_box   (get_widget<Gtk::Box>         (builder, "align-and-distribute-box"))
     , align_and_distribute_object(get_widget<Gtk::Box>         (builder, "align-and-distribute-object"))
@@ -64,7 +64,7 @@ AlignAndDistribute::AlignAndDistribute(Inkscape::UI::Dialog::DialogBase* dlg)
 {
     set_name("AlignAndDistribute");
 
-    add(align_and_distribute_box);
+    append(align_and_distribute_box);
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
@@ -235,9 +235,9 @@ AlignAndDistribute::on_align_node_clicked(std::string const &direction)
     }
 
     if (direction == "horizontal") {
-        win->activate_action("node-align-horizontal", variant);
+        win->activate_action("win.node-align-horizontal", variant);
     } else {
-        win->activate_action("node-align-vertical", variant);
+        win->activate_action("win.node-align-vertical", variant);
     }
 }
 

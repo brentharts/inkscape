@@ -30,8 +30,9 @@
 #include <gtkmm/image.h>
 #include <gtkmm/label.h>
 #include <gtkmm/menubutton.h>
-#include <gtkmm/radiobutton.h>
+#include <gtkmm/picture.h>
 #include <gtkmm/spinbutton.h>
+#include <gtkmm/togglebutton.h>
 #include <gtkmm/window.h>
 
 #include "helper/stock-items.h"
@@ -42,6 +43,7 @@
 #include "ui/builder-utils.h"
 #include "ui/svg-renderer.h"
 #include "ui/util.h"
+#include "ui/widget/bin.h"
 #include "util/object-renderer.h"
 
 #define noTIMING_INFO 1;
@@ -87,11 +89,15 @@ double get_attrib_num(SPMarker* marker, const char* attrib) {
 }
 
 MarkerComboBox::MarkerComboBox(Glib::ustring id, int l) :
+    Glib::ObjectBase{"MarkerComboBox"},
+    WidgetVfuncsClassInit{},
+    Gtk::Box{},
     _combo_id(std::move(id)),
     _loc(l),
     _builder(create_builder("marker-popup.glade")),
     _marker_list(get_widget<Gtk::FlowBox>(_builder, "flowbox")),
-    _preview(get_widget<Gtk::Image>(_builder, "preview")),
+    _preview_bin(get_derived_widget<UI::Widget::Bin>(_builder, "preview-bin")),
+    _preview(get_widget<Gtk::Picture>(_builder, "preview")),
     _marker_name(get_widget<Gtk::Label>(_builder, "marker-id")),
     _link_scale(get_widget<Gtk::Button>(_builder, "link-scale")),
     _scale_x(get_widget<Gtk::SpinButton>(_builder, "scale-x")),
@@ -102,9 +108,9 @@ MarkerComboBox::MarkerComboBox(Glib::ustring id, int l) :
     _offset_x(get_widget<Gtk::SpinButton>(_builder, "offset-x")),
     _offset_y(get_widget<Gtk::SpinButton>(_builder, "offset-y")),
     _input_grid(get_widget<Gtk::Grid>(_builder, "input-grid")),
-    _orient_auto_rev(get_widget<Gtk::RadioButton>(_builder, "orient-auto-rev")),
-    _orient_auto(get_widget<Gtk::RadioButton>(_builder, "orient-auto")),
-    _orient_angle(get_widget<Gtk::RadioButton>(_builder, "orient-angle")),
+    _orient_auto_rev(get_widget<Gtk::ToggleButton>(_builder, "orient-auto-rev")),
+    _orient_auto(get_widget<Gtk::ToggleButton>(_builder, "orient-auto")),
+    _orient_angle(get_widget<Gtk::ToggleButton>(_builder, "orient-angle")),
     _orient_flip_horz(get_widget<Gtk::Button>(_builder, "btn-horz-flip")),
     _current_img(get_widget<Gtk::Image>(_builder, "current-img")),
     _edit_marker(get_widget<Gtk::Button>(_builder, "edit-marker"))
@@ -123,35 +129,35 @@ MarkerComboBox::MarkerComboBox(Glib::ustring id, int l) :
         g_bad_marker = renderer.render_surface(1.0);
     }
 
-    add(_menu_btn);
+    prepend(_menu_btn);
 
-    _preview.signal_size_allocate().connect([=](Gtk::Allocation& a){
+    _preview_bin.connectAfterResize([this] (int, int, int) {
         // refresh after preview widget has been finally resized/expanded
         if (_preview_no_alloc) update_preview(find_marker_item(get_current()));
     });
 
     _marker_store = Gio::ListStore<MarkerItem>::create();
     _marker_list.bind_list_store(_marker_store, [=](const Glib::RefPtr<MarkerItem>& item){
-        auto const image = Gtk::make_managed<Gtk::Image>(item->pix);
+        auto const image = Gtk::make_managed<Gtk::Image>(to_texture(item->pix));
         image->set_visible(true);
         auto const box = Gtk::make_managed<Gtk::FlowBoxChild>();
-        box->add(*image);
+        box->set_child(*image);
         if (item->separator) {
             image->set_sensitive(false);
-            image->set_can_focus(false);
+            image->set_focusable(false);
             image->set_size_request(-1, 10);
             box->set_sensitive(false);
-            box->set_can_focus(false);
-            box->get_style_context()->add_class("marker-separator");
+            box->set_focusable(false);
+            box->add_css_class("marker-separator");
         }
         else {
-            box->get_style_context()->add_class("marker-item-box");
+            box->add_css_class("marker-item-box");
         }
         _widgets_to_markers[image] = item;
         box->set_size_request(item->width, item->height);
         // removing ability to focus from all items to prevent crash when user edits "Offset Y" and presses tab key
         // to move to the next widget; not ideal, as it limits navigation, but lesser evil
-        box->set_can_focus(false);
+        box->set_focusable(false);
         return box;
     });
 
@@ -256,7 +262,7 @@ MarkerComboBox::MarkerComboBox(Glib::ustring id, int l) :
     _menu_btn.get_popover()->signal_show().connect([=](){ update_ui(get_current(), false); }, false);
 
     update_scale_link();
-    _current_img.set(g_image_none);
+    _current_img.set(to_texture(g_image_none));
     set_visible(true);
 }
 
@@ -294,13 +300,12 @@ void MarkerComboBox::update_widgets_from_marker(SPMarker* marker) {
 }
 
 void MarkerComboBox::update_scale_link() {
-    _link_scale.remove();
-    _link_scale.add(get_widget<Gtk::Image>(_builder, _scale_linked ? "image-linked" : "image-unlinked"));
+    _link_scale.set_child(get_widget<Gtk::Image>(_builder, _scale_linked ? "image-linked" : "image-unlinked"));
 }
 
 // update marker image inside the menu button
 void MarkerComboBox::update_menu_btn(Glib::RefPtr<MarkerItem> marker) {
-    _current_img.set(marker ? marker->pix : g_image_none);
+    _current_img.set(to_texture(marker ? marker->pix : g_image_none));
 }
 
 // update marker preview image in the popover panel
@@ -331,7 +336,7 @@ void MarkerComboBox::update_preview(Glib::RefPtr<MarkerItem> item) {
         label = _(item->label.c_str());
     }
 
-    _preview.set(surface);
+    _preview.set_paintable(to_texture(surface));
     std::ostringstream ost;
     ost << "<small>" << label.raw() << "</small>";
     _marker_name.set_markup(ost.str().c_str());
@@ -379,15 +384,16 @@ SPMarker* MarkerComboBox::get_current() const {
 void MarkerComboBox::set_active(Glib::RefPtr<MarkerItem> item) {
     bool selected = false;
     if (item) {
-        _marker_list.foreach([=,&selected](Gtk::Widget& widget){
+        UI::for_each_child(_marker_list, [=, &selected] (Gtk::Widget &widget) {
             if (auto box = dynamic_cast<Gtk::FlowBoxChild*>(&widget)) {
                 if (auto marker = _widgets_to_markers[box->get_child()]) {
-                    if (*marker.get() == *item.get()) {
+                    if (*marker == *item) {
                         _marker_list.select_child(*box);
                         selected = true;
                     }
                 }
             }
+            return UI::ForEachResult::_continue;
         });
     }
 
@@ -481,7 +487,7 @@ void MarkerComboBox::refresh_after_markers_modified() {
 }
 
 Glib::RefPtr<MarkerComboBox::MarkerItem> MarkerComboBox::add_separator(bool filler) {
-    auto item = Glib::RefPtr<MarkerItem>(new MarkerItem);
+    auto item = MarkerItem::create();
     item->history = false;
     item->separator = true;
     item->id = "None";
@@ -511,7 +517,7 @@ MarkerComboBox::init_combo()
     if (markers_doc == nullptr) {
         using namespace Inkscape::IO::Resource;
         auto markers_source = get_path_string(SYSTEM, MARKERS, "markers.svg");
-        if (Glib::file_test(markers_source, Glib::FILE_TEST_IS_REGULAR)) {
+        if (Glib::file_test(markers_source, Glib::FileTest::IS_REGULAR)) {
             markers_doc = SPDocument::createNewDoc(markers_source.c_str(), false);
         }
     }
@@ -692,7 +698,7 @@ void MarkerComboBox::add_markers (std::vector<SPMarker *> const& marker_list, SP
 
     if (history) {
         // add "None"
-        auto item = Glib::RefPtr<MarkerItem>(new MarkerItem);
+        auto item = MarkerItem::create();
         item->pix = g_image_none;
         item->history = true;
         item->separator = false;
@@ -716,7 +722,7 @@ auto old_time =  std::chrono::high_resolution_clock::now();
         // generate preview
         auto pixbuf = create_marker_image(Geom::IntPoint(ITEM_WIDTH, ITEM_HEIGHT), repr->attribute("id"), source, drawing, visionkey, false, true, 1.50);
 
-        auto item = Glib::RefPtr<MarkerItem>(new MarkerItem);
+        auto item = MarkerItem::create();
         item->source = source;
         item->pix = pixbuf;
         if (auto id = repr->attribute("id")) {
@@ -760,18 +766,16 @@ MarkerComboBox::create_marker_image(Geom::IntPoint pixel_size, gchar const *mnam
     }
 
     int device_scale = get_scale_factor();
-    auto const fg = get_foreground_color(get_style_context());
-
+    auto const fg = get_color();
     return Inkscape::create_marker_image(_combo_id, _sandbox.get(), fg, pixel_size, mname, source,
         drawing, checkerboard_color, no_clip, scale, device_scale);
 }
 
 // capture background color when styles change
-void MarkerComboBox::on_style_updated() {
+void MarkerComboBox::css_changed(GtkCssStyleChange *) {
     auto background = _background_color;
-    if (auto wnd = dynamic_cast<Gtk::Window*>(this->get_toplevel())) {
-        auto sc = wnd->get_style_context();
-        auto const color = get_color_with_class(sc, "theme_bg_color");
+    if (auto wnd = dynamic_cast<Gtk::Window*>(this->get_root())) {
+        auto const color = get_color_with_class(*wnd, "theme_bg_color");
         background =
             gint32(0xff * color.get_red()) << 24 |
             gint32(0xff * color.get_green()) << 16 |
@@ -779,7 +783,7 @@ void MarkerComboBox::on_style_updated() {
             0xff;
     }
 
-    auto const color = get_foreground_color(get_style_context());
+    auto const color = get_color();
     auto foreground =
         gint32(0xff * color.get_red()) << 24 |
         gint32(0xff * color.get_green()) << 16 |

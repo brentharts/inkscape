@@ -100,8 +100,6 @@ inkscape:linux:
 
 
 appimage:linux:
-  image: registry.gitlab.com/inkscape/inkscape-ci-docker/ubuntu-2004
-  # appimage creator script does not support recent OS (yet)
   stage: build
   rules:
     - *do_not_run_for_schedules
@@ -123,7 +121,7 @@ inkscape:macos:
   stage: build
   parallel:
     matrix:
-      - RUNNER: [ "macosintel", "macosarm" ]
+      - RUNNER: [ "macosarm" ]
   rules:
     - *do_not_run_for_schedules
     # Mac runner is restricted to "inkscape" and "dehesselle" namespaces; only generate pipelines for those
@@ -175,7 +173,7 @@ inkscape:macos:
     - 7z x -oC:/ $IDW_ARCHIVE
 
 
-inkscape:windows:build:
+.inkscape:windows:build:
   extends: .windows
   retry: 2
   script:
@@ -195,7 +193,7 @@ inkscape:windows:build:
       - build.7z
 
 
-inkscape:windows:dist:
+.inkscape:windows:dist:
   extends: .windows
   parallel:
     matrix:
@@ -206,10 +204,6 @@ inkscape:windows:dist:
       when: manual
       allow_failure: true
     - *run_otherwise
-  dependencies:
-    - inkscape:windows:build
-  needs:
-    - inkscape:windows:build
   script:
     - 7z x build.7z
     - C:/msys64/msys2_shell.cmd -defterm -no-start -ucrt64 -here -c "ninja -C build dist-win-${DIST}"
@@ -237,17 +231,12 @@ test:linux:
       - build/Testing
     when: on_failure
 
-test:macos:
+.test:macos:
   extends: inkscape:macos
   stage: test
   parallel:
     matrix:
       - RUNNER: [ "macosintel" ]
-  needs:
-    - job: inkscape:macos
-      parallel:
-        matrix:
-          - RUNNER: macosintel
   script:
     - packaging/macos/test.sh
   artifacts:
@@ -285,6 +274,7 @@ codequality:
 
 
 ### We embed script from third party libraries, that we sometimes update from their source. Hence we should NEVER modify them here before submitting the patch upstream!
+# Submodules do not need this treatment, so are exempted from the check.
 # Ideally, we should remove all this code and use them as packaged libraries. Unfortunately this check only works for merge requests.
 codeprotect:
   stage: test
@@ -294,7 +284,9 @@ codeprotect:
     - *run_for_MR
   script:
     - git fetch $CI_MERGE_REQUEST_PROJECT_URL.git $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
-    - git diff $CI_MERGE_REQUEST_DIFF_BASE_SHA -U0 --no-color src/3rdparty/*/ | tee forbidden
+    - git diff --name-only $CI_MERGE_REQUEST_DIFF_BASE_SHA src/3rdparty/*/ > changed
+    - git submodule foreach --quiet 'echo $name' > submodules
+    - comm -23 changed submodules | tee forbidden
     - if [[ -s forbidden ]]; then echo "This commit modifies files that are in an dependency library. Make sure you update upstream first, *then* force the merge in Inkscape."; false; fi
 
 #### All files should have a licence

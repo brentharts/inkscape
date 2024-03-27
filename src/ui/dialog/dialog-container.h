@@ -18,6 +18,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <glibmm/refptr.h>
 #include <glibmm/ustring.h>
 #include <glibmm/keyfile.h>
 #include <gtkmm/accelkey.h>
@@ -27,9 +28,9 @@
 #include "desktop.h"
 #include "helper/auto-connection.h"
 
-namespace Gtk {
-class SelectionData;
-} // namespace Gtk
+namespace Glib {
+class ValueBase;
+} // namespace Glib
 
 namespace Inkscape::UI::Dialog {
 
@@ -52,7 +53,7 @@ public:
 
     // Columns-related functions
     DialogMultipaned *get_columns() { return columns.get(); }
-    DialogMultipaned *create_column();
+    std::unique_ptr<DialogMultipaned> create_column();
 
     // Dialog-related functions
     void new_dialog(const Glib::ustring& dialog_type);
@@ -69,7 +70,7 @@ public:
     InkscapeWindow *get_inkscape_window() { return _inkscape_window; }
 
     // State saving functionality
-    std::unique_ptr<Glib::KeyFile> save_container_state();
+    Glib::RefPtr<Glib::KeyFile> save_container_state();
     void load_container_state(Glib::KeyFile* keyfile, bool include_floating);
 
     void restore_window_position(DialogWindow* window);
@@ -80,8 +81,9 @@ public:
     void load_container_state(Glib::KeyFile& state, const std::string& window_id);
 
 private:
-    InkscapeWindow *_inkscape_window = nullptr;   // Every container is attached to an InkscapeWindow.
-    std::unique_ptr<DialogMultipaned> columns ;   // The main widget inside which other children are kept.
+    InkscapeWindow *_inkscape_window = nullptr; // Every container is attached to an InkscapeWindow.
+    std::unique_ptr<DialogMultipaned> columns ; // The main widget inside which other children are kept.
+    std::vector<GType> const _drop_gtypes     ; // What kind of object can be dropped.
 
     /**
      * Due to the way Gtk handles dragging between notebooks, one can
@@ -106,12 +108,12 @@ private:
 
     // Handlers
     void on_unrealize() override;
-    DialogNotebook *prepare_drop(Gtk::SelectionData const &selection_data);
-    using PrependOrAppend = void (DialogMultipaned::*)(Gtk::Widget &child);
-    void take_drop   (PrependOrAppend prepend_or_append,
-                      Gtk::SelectionData const &selection_data, DialogMultipaned *column);
-    void prepend_drop(Gtk::SelectionData const &selection_data, DialogMultipaned *column);
-    void append_drop (Gtk::SelectionData const &selection_data, DialogMultipaned *column);
+    std::unique_ptr<DialogNotebook> prepare_drop(Glib::ValueBase const &value);
+    using PrependOrAppend = void (DialogMultipaned::*)(std::unique_ptr<Gtk::Widget> child);
+    bool take_drop              (PrependOrAppend prepend_or_append,
+                                 Glib::ValueBase const &value, DialogMultipaned *column);
+    bool prepend_drop           (Glib::ValueBase const &value, DialogMultipaned *column);
+    bool append_drop            (Glib::ValueBase const &value, DialogMultipaned *column);
     void column_empty(DialogMultipaned *column);
     DialogBase* find_existing_dialog(const Glib::ustring& dialog_type);
     static bool recreate_dialogs_from_state(InkscapeWindow* inkscape_window, const Glib::KeyFile* keyfile);

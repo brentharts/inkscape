@@ -9,7 +9,7 @@
  */
 
 #include <sigc++/functors/mem_fun.h>
-#include <gtkmm/gesturemultipress.h>
+#include <gtkmm/gestureclick.h>
 #include <2geom/point.h>
 
 #include "rotateable.h"
@@ -35,17 +35,17 @@ Rotateable::Rotateable():
                                                                      GTK_EVENT_CONTROLLER_SCROLL_VERTICAL);
 }
 
-Gtk::EventSequenceState Rotateable::on_click(Gtk::GestureMultiPress const &click,
+Gtk::EventSequenceState Rotateable::on_click(Gtk::GestureClick const &click,
                                              int /*n_press*/, double const x, double const y)
 {
     drag_started_x = x;
     drag_started_y = y;
-    auto const state = Controller::get_current_event_state(click);
-    modifier = get_single_modifier(modifier, state);
+    auto const state = click.get_current_event_state();
+    modifier = get_single_modifier(modifier, unsigned(state));
     dragging = true;
     working = false;
     current_axis = axis;
-    return Gtk::EVENT_SEQUENCE_NONE; // no claim, would stop release being fired
+    return Gtk::EventSequenceState::NONE; // no claim, would stop release being fired
 }
 
 unsigned Rotateable::get_single_modifier(unsigned const old, unsigned const state)
@@ -55,13 +55,13 @@ unsigned Rotateable::get_single_modifier(unsigned const old, unsigned const stat
             return 1; // ctrl
         if (state & GDK_SHIFT_MASK)
             return 2; // shift
-        if (state & GDK_MOD1_MASK)
+        if (state & GDK_ALT_MASK)
             return 3; // alt
         return 0;
     }
 
     if (!(state & GDK_CONTROL_MASK) && !(state & GDK_SHIFT_MASK)) {
-        if (state & GDK_MOD1_MASK)
+        if (state & GDK_ALT_MASK)
             return 3; // alt
         else
             return 0; // none
@@ -70,7 +70,7 @@ unsigned Rotateable::get_single_modifier(unsigned const old, unsigned const stat
     if (old == 1) {
         if (state & GDK_SHIFT_MASK && !(state & GDK_CONTROL_MASK))
             return 2; // shift
-        if (state & GDK_MOD1_MASK && !(state & GDK_CONTROL_MASK))
+        if (state & GDK_ALT_MASK && !(state & GDK_CONTROL_MASK))
            return 3; // alt
         return 1;
     }
@@ -78,7 +78,7 @@ unsigned Rotateable::get_single_modifier(unsigned const old, unsigned const stat
     if (old == 2) {
         if (state & GDK_CONTROL_MASK && !(state & GDK_SHIFT_MASK))
             return 1; // ctrl
-        if (state & GDK_MOD1_MASK && !(state & GDK_SHIFT_MASK))
+        if (state & GDK_ALT_MASK && !(state & GDK_SHIFT_MASK))
            return 3; // alt
         return 2;
     }
@@ -102,7 +102,7 @@ void Rotateable::on_motion(GtkEventControllerMotion const * const motion,
         if (fabs(force) < 0.002)
             force = 0; // snap to zero
 
-        auto const state = Controller::get_device_state(GTK_EVENT_CONTROLLER(motion));
+        auto const state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(motion));
         auto const new_modifier = get_single_modifier(modifier, state);
         if (modifier != new_modifier) {
             // user has switched modifiers in mid drag, close past drag and start a new
@@ -119,7 +119,7 @@ void Rotateable::on_motion(GtkEventControllerMotion const * const motion,
 }
 
 
-Gtk::EventSequenceState Rotateable::on_release(Gtk::GestureMultiPress const & /*click*/,
+Gtk::EventSequenceState Rotateable::on_release(Gtk::GestureClick const & /*click*/,
                                                int /*n_press*/, double const x, double const y)
 {
     if (dragging && working) {
@@ -132,12 +132,12 @@ Gtk::EventSequenceState Rotateable::on_release(Gtk::GestureMultiPress const & /*
         current_axis = axis;
         dragging = false;
         working = false;
-        return Gtk::EVENT_SEQUENCE_CLAIMED;
+        return Gtk::EventSequenceState::CLAIMED;
     }
 
     dragging = false;
     working = false;
-    return Gtk::EVENT_SEQUENCE_NONE;
+    return Gtk::EventSequenceState::NONE;
 }
 
 bool Rotateable::on_scroll(GtkEventControllerScroll const * const scroll,
@@ -152,7 +152,7 @@ bool Rotateable::on_scroll(GtkEventControllerScroll const * const scroll,
     drag_started_y = event->y;
 #endif
 
-    auto const state = Controller::get_device_state(GTK_EVENT_CONTROLLER(scroll));
+    auto const state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(scroll));
     modifier = get_single_modifier(modifier, state);
     dragging = false;
     working = false;

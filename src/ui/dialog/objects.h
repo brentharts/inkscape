@@ -21,11 +21,13 @@
 #include <string>
 #include <vector>
 #include <glibmm/refptr.h>
+#include <gdkmm/enums.h> // Gdk::DragAction
 #include <gtk/gtk.h> // GtkEventControllerKey
 #include <gtkmm/box.h>
 #include <gtkmm/gesture.h> // Gtk::EventSequenceState
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treerowreference.h>
+#include <gtkmm/treeview.h>
 
 #include "color-rgba.h"
 #include "helper/auto-connection.h"
@@ -37,13 +39,23 @@
 #include "ui/widget/preferences-widget.h"
 #include "xml/node-observer.h"
 
+namespace Glib {
+class ValueBase;
+} // namespace Glib
+
+namespace Gdk {
+class Drag;
+} // namespace Gdk
+
 namespace Gtk {
 class Builder;
-class GestureMultiPress;
+class CheckButton;
+class DragSource;
+class DropTarget;
+class GestureClick;
 class Popover;
-class RadioButton;
 class Scale;
-class SearchEntry;
+class SearchEntry2;
 class TreeStore;
 } // namespace Gtk
 
@@ -74,13 +86,17 @@ enum SelectionStates : SelectionState {
  */
 class ObjectsPanel final : public DialogBase
 {
+    using parent_type = DialogBase;
+
 public:
     ObjectsPanel();
     ~ObjectsPanel() final;
 
     class ModelColumns;
 
-protected:
+private:
+    void size_allocate_vfunc(int width, int height, int baseline) final;
+
     void desktopReplaced() final;
     void documentReplaced() final;
     void layerChanged(SPObject *obj);
@@ -93,21 +109,20 @@ protected:
     ObjectWatcher *getRootWatcher() const { return root_watcher.get(); };
     bool showChildInTree(SPItem *item);
 
-    Inkscape::XML::Node *getRepr(Gtk::TreeModel::Row const &row) const;
-    SPItem *getItem(Gtk::TreeModel::Row const &row) const;
+    Inkscape::XML::Node *getRepr(Gtk::TreeModel::ConstRow const &row) const;
+    SPItem *getItem(Gtk::TreeModel::ConstRow const &row) const;
     std::optional<Gtk::TreeRow> getRow(SPItem *item) const;
 
-    bool isDummy(Gtk::TreeModel::Row const &row) const { return getRepr(row) == nullptr; }
-    bool hasDummyChildren(Gtk::TreeModel::Row const &row) const;
-    bool removeDummyChildren(Gtk::TreeModel::Row const &row);
-    bool cleanDummyChildren(Gtk::TreeModel::Row const &row);
+    bool isDummy(Gtk::TreeModel::ConstRow const &row) const { return !getRepr(row); }
+    bool hasDummyChildren(Gtk::TreeModel::ConstRow const &row) const;
+    bool removeDummyChildren(Gtk::TreeModel::Row row);
+    bool cleanDummyChildren (Gtk::TreeModel::Row row);
 
     Glib::RefPtr<Gtk::TreeStore> _store;
     std::unique_ptr<ModelColumns> _model;
 
     void setRootWatcher();
 
-private:
     Glib::RefPtr<Gtk::Builder> _builder;
     Inkscape::PrefObserver _watch_object_mode;
     std::unique_ptr<ObjectWatcher> root_watcher;
@@ -127,9 +142,10 @@ private:
     std::vector<Gtk::Widget*> _watchingNonTop;
     std::vector<Gtk::Widget*> _watchingNonBottom;
 
-    Gtk::TreeView _tree;
-    Gtk::CellRendererText *_text_renderer;
-    Gtk::TreeView::Column *_name_column;
+    class TreeViewWithCssChanged;
+    TreeViewWithCssChanged &_tree;
+    Gtk::CellRendererText *_text_renderer = nullptr;
+    Gtk::TreeView::Column *_name_column = nullptr;
     Gtk::TreeView::Column *_blend_mode_column = nullptr;
     Gtk::TreeView::Column *_eye_column = nullptr;
     Gtk::TreeView::Column *_lock_column = nullptr;
@@ -137,7 +153,7 @@ private:
     Gtk::Box _buttonsRow;
     Gtk::Box _buttonsPrimary;
     Gtk::Box _buttonsSecondary;
-    Gtk::SearchEntry& _searchBox;
+    Gtk::SearchEntry2& _searchBox;
     Gtk::ScrolledWindow _scroller;
     Gtk::Box _page;
     Inkscape::auto_connection _tree_style;
@@ -149,11 +165,11 @@ private:
     void _activateAction(const std::string& layerAction, const std::string& selectionAction);
 
     bool blendModePopup(int x, int y, Gtk::TreeModel::Row row);
-    bool toggleVisible(unsigned int state, Gtk::TreeModel::Row row);
-    bool toggleLocked(unsigned int state, Gtk::TreeModel::Row row);
+    bool toggleVisible(Gdk::ModifierType state, Gtk::TreeModel::Row row);
+    bool toggleLocked (Gdk::ModifierType state, Gtk::TreeModel::Row row);
 
     enum class EventType {pressed, released};
-    Gtk::EventSequenceState on_click(Gtk::GestureMultiPress const &gesture,
+    Gtk::EventSequenceState on_click(Gtk::GestureClick const &gesture,
                                      int n_press, double x, double y,
                                      EventType);
     bool on_tree_key_pressed   (GtkEventControllerKey const *controller,
@@ -170,7 +186,6 @@ private:
     void on_motion_leave (GtkEventControllerMotion const *controller);
 
     void _searchActivated();
-    void _searchChanged();
     
     void _handleEdited(const Glib::ustring& path, const Glib::ustring& new_text);
     void _handleTransparentHover(bool enabled);
@@ -178,12 +193,18 @@ private:
 
     bool select_row( Glib::RefPtr<Gtk::TreeModel> const & model, Gtk::TreeModel::Path const & path, bool b );
 
-    bool on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &, int, int, guint) final;
-    bool on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &, int, int, guint) final;
-    void on_drag_start(const Glib::RefPtr<Gdk::DragContext> &);
-    void on_drag_end(const Glib::RefPtr<Gdk::DragContext> &) final;
+    void drag_end_impl();
+    Glib::RefPtr<Gdk::ContentProvider> on_prepare(Gtk::DragSource const &controller, double x, double y);
+    void on_drag_begin(Gtk::DragSource const &controller, Glib::RefPtr<Gdk::Drag> const &drag);
+    void on_drag_end  (Gtk::DragSource const &controller, Glib::RefPtr<Gdk::Drag> const &drag,
+                       bool delete_data);
+    Gdk::DragAction on_drag_motion(Gtk::DropTarget const &controller,
+                                   double x, double y);
+    bool            on_drag_drop  (Gtk::DropTarget const &controller,
+                                   Glib::ValueBase const &value,
+                                   double x, double y);
 
-    bool selectCursorItem(unsigned int state);
+    bool selectCursorItem(Gdk::ModifierType state);
     SPItem *_getCursorItem(Gtk::TreeViewColumn *column);
 
     friend class ObjectWatcher;
@@ -195,9 +216,12 @@ private:
     Gtk::Popover& _settings_menu;
     Gtk::Popover& _object_menu;
     Gtk::Scale& _opacity_slider;
-    std::map<SPBlendMode, Gtk::RadioButton *> _blend_items;
+    std::map<SPBlendMode, Gtk::CheckButton *> _blend_items;
     std::map<SPBlendMode, Glib::ustring> _blend_mode_names;
     Inkscape::UI::Widget::ImageToggler* _item_state_toggler;
+
+    // Need to save as controllers are 'const' in callbacks.
+    Gtk::DragSource* drag_source = nullptr;
 
     // Special column dragging mode
     Gtk::TreeViewColumn* _drag_column = nullptr;

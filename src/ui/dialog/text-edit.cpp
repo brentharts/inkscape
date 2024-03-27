@@ -38,7 +38,7 @@
 #include <gtkmm/listboxrow.h>
 #include <gtkmm/menubutton.h>
 #include <gtkmm/notebook.h>
-#include <gtkmm/searchentry.h>
+#include <gtkmm/searchentry2.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/textview.h>
@@ -90,7 +90,7 @@ TextEdit::TextEdit()
     , settings_and_filters_box (get_widget<Gtk::Box>        (builder, "settings_and_filters_box"))
     , filter_menu_button       (get_widget<Gtk::MenuButton> (builder, "filter_menu_button"))
     , reset_button             (get_widget<Gtk::Button>     (builder, "reset_button"))
-    , search_entry             (get_widget<Gtk::SearchEntry>(builder, "search_entry"))
+    , search_entry             (get_widget<Gtk::SearchEntry2>(builder, "search_entry"))
     , font_count_label         (get_widget<Gtk::Label>      (builder, "font_count_label"))
     , filter_popover           (get_widget<Gtk::Popover>    (builder, "filter_popover"))
     , popover_box              (get_widget<Gtk::Box>        (builder, "popover_box"))
@@ -118,12 +118,14 @@ TextEdit::TextEdit()
     auto notebook = &get_widget<Gtk::Notebook>(builder, "notebook");
     auto font_box = &get_widget<Gtk::Box>     (builder, "font_box");
     auto feat_box = &get_widget<Gtk::Box>     (builder, "feat_box");
-    text_buffer = Glib::RefPtr<Gtk::TextBuffer>::cast_static(builder->get_object("text_buffer"));
+
+    text_buffer = std::dynamic_pointer_cast<Gtk::TextBuffer>(builder->get_object("text_buffer"));
+    g_assert(text_buffer);
 
     UI::pack_start(*font_box, font_selector, true, true);
-    font_box->reorder_child(font_selector, 2);
+    font_box->reorder_child_after(font_selector, *font_box->get_first_child()->get_next_sibling());
     UI::pack_start(*feat_box, font_features, true, true);
-    feat_box->reorder_child(font_features, 1);
+    feat_box->reorder_child_after(font_features, *feat_box->get_first_child());
 
     // filter_popover->set_modal(false); // Stay open until button clicked again.
     filter_popover.signal_show().connect([=](){
@@ -131,8 +133,7 @@ TextEdit::TextEdit()
         display_font_collections();
     }, false);
 
-    filter_menu_button.set_image_from_icon_name(INKSCAPE_ICON("font_collections"));
-    filter_menu_button.set_always_show_image(true);
+    filter_menu_button.set_icon_name(INKSCAPE_ICON("font_collections"));
     filter_menu_button.set_label(_("Collections"));
 
 #ifdef WITH_GSPELL
@@ -146,7 +147,7 @@ TextEdit::TextEdit()
     gspell_text_view_basic_setup(gspell_view);
 #endif
 
-    add(*contents);
+    append(*contents);
 
     /* Signal handlers */
     Controller::add_key<&TextEdit::captureUndo, nullptr>(text_view, *this);
@@ -165,8 +166,6 @@ TextEdit::TextEdit()
 
     font_selector.set_name("TextEdit");
     change_font_count_label();
-
-    show_all_children();
 }
 
 TextEdit::~TextEdit() = default;
@@ -495,7 +494,7 @@ void TextEdit::onApply()
 
 void TextEdit::display_font_collections()
 {
-    UI::delete_all_children(collections_list);
+    UI::remove_all_children(collections_list);
 
     FontCollections *font_collections = Inkscape::FontCollections::get();
 
@@ -508,11 +507,9 @@ void TextEdit::display_font_collections()
             // toggle font system collection
             font_collections->update_selected_collections(col);
         });
-// g_message("tag: %s", tag.display_name.c_str());
         auto const row = Gtk::make_managed<Gtk::ListBoxRow>();
-        row->set_can_focus(false);
-        row->add(*btn);
-        row->show_all();
+        row->set_focusable(false);
+        row->set_child(*btn);
         collections_list.append(*row);
     }
 
@@ -520,9 +517,8 @@ void TextEdit::display_font_collections()
     auto const sep = Gtk::make_managed<Gtk::Separator>();
     sep->set_margin_bottom(2);
     auto const sep_row = Gtk::make_managed<Gtk::ListBoxRow>();
-    sep_row->set_can_focus(false);
-    sep_row->add(*sep);
-    sep_row->show_all();
+    sep_row->set_focusable(false);
+    sep_row->set_child(*sep);
     collections_list.append(*sep_row);
 
     // Insert user collections.
@@ -534,11 +530,9 @@ void TextEdit::display_font_collections()
             // toggle font collection
             font_collections->update_selected_collections(col);
         });
-// g_message("tag: %s", tag.display_name.c_str());
         auto const row = Gtk::make_managed<Gtk::ListBoxRow>();
-        row->set_can_focus(false);
-        row->add(*btn);
-        row->show_all();
+        row->set_focusable(false);
+        row->set_child(*btn);
         collections_list.append(*row);
     }
 }

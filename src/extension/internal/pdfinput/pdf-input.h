@@ -53,7 +53,6 @@ class ComboBoxText;
 class DrawingArea;
 class Frame;
 class Scale;
-class RadioButton;
 class Box;
 class Label;
 class Entry;
@@ -98,7 +97,7 @@ private:
     void _setFonts(const FontList &fonts);
 
     // Signal handlers
-    bool _onDraw(const Cairo::RefPtr<Cairo::Context>& cr);
+    void _drawFunc(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height);
     void _onPageNumberChanged();
     void _onPrecisionChanged();
 

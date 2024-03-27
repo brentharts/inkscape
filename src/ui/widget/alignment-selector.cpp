@@ -18,18 +18,15 @@
 namespace Inkscape::UI::Widget {
 
 void AlignmentSelector::setupButton(const Glib::ustring& icon, Gtk::Button& button) {
-    auto const buttonIcon = Gtk::manage(sp_get_icon_image(icon, Gtk::ICON_SIZE_SMALL_TOOLBAR));
-    buttonIcon->set_visible(true);
-
-    button.set_relief(Gtk::RELIEF_NONE);
-    button.set_visible(true);
-    button.add(*buttonIcon);
-    button.set_can_focus(false);
+    auto const buttonIcon = Gtk::manage(sp_get_icon_image(icon, Gtk::IconSize::NORMAL));
+    button.set_has_frame(false);
+    button.set_child(*buttonIcon);
+    button.set_focusable(false);
 }
 
 AlignmentSelector::AlignmentSelector()
 {
-    set_halign(Gtk::ALIGN_CENTER);
+    set_halign(Gtk::Align::CENTER);
     // clang-format off
     setupButton(INKSCAPE_ICON("boundingbox_top_left"),     _buttons[0]);
     setupButton(INKSCAPE_ICON("boundingbox_top"),          _buttons[1]);
@@ -52,7 +49,7 @@ AlignmentSelector::AlignmentSelector()
         _container.attach(_buttons[i], i % 3, i / 3, 1, 1);
     }
 
-    add(_container);
+    append(_container);
 }
 
 sigc::connection AlignmentSelector::connectAlignmentClicked(sigc::slot<void (int)> slot)

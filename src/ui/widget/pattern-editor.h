@@ -34,11 +34,11 @@ class ComboBoxText;
 class Entry;
 class FlowBox;
 class Grid;
-class Image;
 class Label;
 class Paned;
+class Picture;
 class Scale;
-class SearchEntry;
+class SearchEntry2;
 class SpinButton;
 class TreeModel;
 class Viewport;
@@ -73,9 +73,9 @@ public:
     Glib::ustring get_label();
 
 private:
-    sigc::signal<void> _signal_changed;
-    sigc::signal<void, unsigned int> _signal_color_changed;
-    sigc::signal<void> _signal_edit;
+    sigc::signal<void ()> _signal_changed;
+    sigc::signal<void (unsigned)> _signal_color_changed;
+    sigc::signal<void ()> _signal_edit;
 
 public:
     decltype(_signal_changed) signal_changed() const { return _signal_changed; }
@@ -116,13 +116,13 @@ private:
     Gtk::Label& _color_label;
     Gtk::Button& _color_btn;
     Gtk::Button& _link_scale;
-    Gtk::Image& _preview_img;
+    Gtk::Picture& _preview_img;
     Gtk::Viewport& _preview;
     Gtk::FlowBox& _doc_gallery;
     Gtk::FlowBox& _stock_gallery;
     Gtk::Entry& _name_box;
     Gtk::ComboBoxText& _combo_set;
-    Gtk::SearchEntry& _search_box;
+    Gtk::SearchEntry2& _search_box;
     Gtk::Scale& _tile_slider;
     Gtk::CheckButton& _show_names;
     Glib::RefPtr<Gtk::TreeModel> _categories;

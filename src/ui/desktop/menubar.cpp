@@ -29,6 +29,7 @@
 #include <glibmm/i18n.h>
 #include <glibmm/quark.h>
 #include <glibmm/ustring.h>
+#include <glibmm/ustring_hash.h>
 #include <giomm/menu.h>
 #include <giomm/menuattributeiter.h>
 #include <giomm/menuitem.h>
@@ -55,12 +56,12 @@ build_menu()
     } catch (Glib::Error const &err) {
         std::cerr << "build_menu: failed to load Main menu from: "
                     << filename <<": "
-                    << err.what().raw() << std::endl;
+                    << err.what() << std::endl;
         return;
     }
 
     const auto object = refBuilder->get_object("menus");
-    const auto gmenu = Glib::RefPtr<Gio::Menu>::cast_dynamic(object);
+    const auto gmenu = std::dynamic_pointer_cast<Gio::Menu>(object);
 
     if (!gmenu) {
         std::cerr << "build_menu: failed to build Main menu!" << std::endl;
@@ -75,8 +76,8 @@ build_menu()
     { // Filters and Extensions
         auto effects_object = refBuilder->get_object("effect-menu-effects");
         auto filters_object = refBuilder->get_object("filter-menu-filters");
-        auto effects_menu   = Glib::RefPtr<Gio::Menu>::cast_dynamic(effects_object);
-        auto filters_menu   = Glib::RefPtr<Gio::Menu>::cast_dynamic(filters_object);
+        auto effects_menu   = std::dynamic_pointer_cast<Gio::Menu>(effects_object);
+        auto filters_menu   = std::dynamic_pointer_cast<Gio::Menu>(filters_object);
 
         if (!filters_menu) {
             std::cerr << "build_menu(): Couldn't find Filters menu entry!" << std::endl;
@@ -129,7 +130,7 @@ build_menu()
     // Recent file
     auto recent_manager = Gtk::RecentManager::get_default();
     auto sub_object = refBuilder->get_object("recent-files");
-    auto sub_gmenu = Glib::RefPtr<Gio::Menu>::cast_dynamic(sub_object);
+    auto sub_gmenu = std::dynamic_pointer_cast<Gio::Menu>(sub_object);
     auto recent_menu_quark = Glib::Quark("recent-manager");
     sub_gmenu->set_data(recent_menu_quark, recent_manager.get()); // mark submenu, so we can find it
 
@@ -145,7 +146,7 @@ build_menu()
         // sort by "last modified" time, which puts the most recently opened files first
         std::sort(begin(recent_files), end(recent_files),
             [](auto const &a, auto const &b) -> bool {
-                return a->get_modified() > b->get_modified();
+                return a->get_modified().compare(b->get_modified()) < 0;
             }
         );
 
@@ -237,8 +238,7 @@ void rebuild_menu(Glib::RefPtr<Gio::MenuModel> const &menu, Glib::RefPtr<Gio::Me
         Glib::VariantBase icon;
         Glib::ustring use_icon;
 
-        // TODO: Once we require new enough glibmm, #include <glibmm/ustring_hash.h> & make key ustring
-        std::unordered_map<std::string, Glib::VariantBase> attributes;
+        std::unordered_map<Glib::ustring, Glib::VariantBase> attributes;
 
         auto attribute_iter = menu->iterate_item_attributes(i);
         while (attribute_iter->next()) {
@@ -258,7 +258,7 @@ void rebuild_menu(Glib::RefPtr<Gio::MenuModel> const &menu, Glib::RefPtr<Gio::Me
                 use_icon =  attribute_iter->get_value().print();
             } else {
                 // All the remaining attributes.
-                attributes[attribute_iter->get_name().raw()] = attribute_iter->get_value();
+                attributes[attribute_iter->get_name()] = attribute_iter->get_value();
             }
         }
         Glib::ustring detailed_action = action;

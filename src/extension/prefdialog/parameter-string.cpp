@@ -9,9 +9,11 @@
 
 #include "parameter-string.h"
 
+#include <utility>
 #include <glibmm/regex.h>
 #include <gtkmm/box.h>
 #include <gtkmm/entry.h>
+#include <gtkmm/label.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/textview.h>
 
@@ -20,8 +22,7 @@
 #include "ui/pack.h"
 #include "xml/node.h"
 
-namespace Inkscape {
-namespace Extension {
+namespace Inkscape::Extension {
 
 ParamString::ParamString(Inkscape::XML::Node *xml, Inkscape::Extension::Extension *ext)
     : InxParameter(xml, ext)
@@ -68,23 +69,16 @@ ParamString::ParamString(Inkscape::XML::Node *xml, Inkscape::Extension::Extensio
 
 /**
  * A function to set the \c _value.
- *
  * This function sets the internal value, but it also sets the value
  * in the preferences structure.  To put it in the right place \c pref_name() is used.
- *
- * To copy the data into _value the old memory must be free'd first.
- * It is important to note that \c g_free handles \c NULL just fine.  Then
- * the passed in value is duplicated using \c g_strdup().
- *
  * @param  in   The value to set to.
+ * @returns The same value, moved to our _value member.
  */
-const Glib::ustring& ParamString::set(const Glib::ustring in)
+const Glib::ustring& ParamString::set(Glib::ustring in)
 {
-    _value = in;
-
+    _value = std::move(in);
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     prefs->setString(pref_name(), _value);
-
     return _value;
 }
 
@@ -156,7 +150,7 @@ public:
         , _changeSignal(changeSignal)
     {
         // replace literal '\n' with actual newlines for multiline strings
-        Glib::ustring value = Glib::Regex::create("\\\\n")->replace_literal(_pref->get(), 0, "\n", (Glib::RegexMatchFlags)0);
+        Glib::ustring value = Glib::Regex::create("\\\\n")->replace_literal(_pref->get(), 0, "\n", (Glib::Regex::MatchFlags)0);
 
         this->get_buffer()->set_text(value);
         this->get_buffer()->signal_changed().connect(sigc::mem_fun(*this, &ParamMultilineStringEntry::changed_text));
@@ -175,7 +169,7 @@ void ParamMultilineStringEntry::changed_text()
     Glib::ustring data = this->get_buffer()->get_text();
 
     // always store newlines as literal '\n'
-    data = Glib::Regex::create("\n")->replace_literal(data, 0, "\\n", (Glib::RegexMatchFlags)0);
+    data = Glib::Regex::create("\n")->replace_literal(data, 0, "\\n", (Glib::Regex::MatchFlags)0);
 
     _pref->set(data.c_str());
     if (_changeSignal != nullptr) {
@@ -196,36 +190,28 @@ Gtk::Widget *ParamString::get_widget(sigc::signal<void ()> *changeSignal)
         return nullptr;
     }
 
-    auto const box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, GUI_PARAM_WIDGETS_SPACING);
+    auto const box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, GUI_PARAM_WIDGETS_SPACING);
 
-    auto const label = Gtk::make_managed<Gtk::Label>(_text, Gtk::ALIGN_START);
-    label->set_visible(true);
+    auto const label = Gtk::make_managed<Gtk::Label>(_text, Gtk::Align::START);
     UI::pack_start(*box, *label, false, false);
 
     if (_mode == MULTILINE) {
-        box->set_orientation(Gtk::ORIENTATION_VERTICAL);
+        box->set_orientation(Gtk::Orientation::VERTICAL);
 
         auto const textarea = Gtk::make_managed<Gtk::ScrolledWindow>();
         textarea->set_vexpand();
-        textarea->set_shadow_type(Gtk::SHADOW_IN);
+        textarea->set_has_frame(true);
 
         auto const entry = Gtk::make_managed<ParamMultilineStringEntry>(this, changeSignal);
-        entry->set_visible(true);
-
-        textarea->add(*entry);
-        textarea->set_visible(true);
+        textarea->set_child(*entry);
 
         UI::pack_start(*box, *textarea, true, true);
     } else {
         Gtk::Widget *entry = Gtk::make_managed<ParamStringEntry>(this, changeSignal);
-        entry->set_visible(true);
-
         UI::pack_start(*box, *entry, true, true);
     }
 
-    box->set_visible(true);
     return box;
 }
 
-}  /* namespace Extension */
-}  /* namespace Inkscape */
+} // namespace Inkscape::Extension

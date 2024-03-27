@@ -16,10 +16,11 @@
 
 #include "select-toolbar.h"
 
+#include <iostream>
+
 #include <2geom/rect.h>
 #include <glibmm/i18n.h>
 #include <glibmm/main.h>
-
 #include <gtkmm/adjustment.h>
 #include <gtkmm/box.h>
 #include <gtkmm/enums.h>
@@ -36,6 +37,7 @@
 #include "selection.h"
 #include "ui/builder-utils.h"
 #include "ui/icon-names.h"
+#include "ui/util.h"
 #include "ui/widget/canvas.h" // Focus widget
 #include "ui/widget/combo-tool-item.h"
 #include "ui/widget/spinbutton.h"
@@ -77,7 +79,7 @@ SelectToolbar::SelectToolbar(SPDesktop *desktop)
     setup_derived_spin_button(_h_item, "height");
 
     auto unit_menu = _tracker->create_tool_item(_("Units"), (""));
-    get_widget<Gtk::Box>(_builder, "unit_menu_box").add(*unit_menu);
+    get_widget<Gtk::Box>(_builder, "unit_menu_box").append(*unit_menu);
 
     // Fetch all the ToolbarMenuButtons at once from the UI file
     // Menu Button #1
@@ -92,14 +94,14 @@ SelectToolbar::SelectToolbar(SPDesktop *desktop)
     // toolbar have been fetched. Otherwise, the children to be moved in the
     // popover will get mapped to a different position and it will probably
     // cause segfault.
-    auto children = _toolbar->get_children();
+    auto children = UI::get_children(*_toolbar);
 
     menu_btn1->init(1, "tag1", popover_box1, children);
     addCollapsibleButton(menu_btn1);
     menu_btn2->init(2, "tag2", popover_box2, children);
     addCollapsibleButton(menu_btn2);
 
-    add(*_toolbar);
+    set_child(*_toolbar);
 
     _select_touch_btn.set_active(prefs->getBool("/tools/select/touch_box", false));
     _select_touch_btn.signal_toggled().connect(sigc::mem_fun(*this, &SelectToolbar::toggle_touch));
@@ -107,11 +109,10 @@ SelectToolbar::SelectToolbar(SPDesktop *desktop)
     _tracker->addUnit(Util::UnitTable::get().getUnit("%"));
     _tracker->setActiveUnit(desktop->getNamedView()->display_units);
 
-    // Use StyleContext to check if the child is a context item.
-    for (auto child : _toolbar->get_children()) {
-        auto style_context = child->get_style_context();
-        bool is_context_item = style_context->has_class("context_item");
-
+    // Use StyleContext to check if the child is a context item (an item that is disabled if there is no selection).
+    children = UI::get_children(*_toolbar);
+    for (auto const child : children) {
+        bool const is_context_item = child->has_css_class("context_item");
         if (is_context_item) {
             _context_items.push_back(child);
         }
@@ -130,9 +131,15 @@ SelectToolbar::SelectToolbar(SPDesktop *desktop)
     _transform_pattern_btn.signal_toggled().connect(sigc::mem_fun(*this, &SelectToolbar::toggle_pattern));
 
     _lock_btn.signal_toggled().connect(sigc::mem_fun(*this, &SelectToolbar::toggle_lock));
+    toggle_lock();
+}
 
-    assert(desktop);
-    auto *selection = desktop->getSelection();
+SelectToolbar::~SelectToolbar() = default;
+
+void SelectToolbar::on_realize()
+{
+    assert(_desktop);
+    auto *selection = _desktop->getSelection();
 
     // Force update when selection changes.
     _connections.emplace_back( //
@@ -144,22 +151,14 @@ SelectToolbar::SelectToolbar(SPDesktop *desktop)
     layout_widget_update(selection);
 
     // Set context items insensitive.
-    _connections.emplace_back(Glib::signal_idle().connect(
-        [this] {
-            for (auto item : _context_items) {
-                if (item->is_sensitive()) {
-                    item->set_sensitive(false);
-                }
-            }
+    for (auto item : _context_items) {
+        if (item->is_sensitive()) {
+            item->set_sensitive(false);
+        }
+    }
 
-            return false;
-        },
-        Glib::PRIORITY_HIGH));
-
-    show_all();
+    parent_type::on_realize();
 }
-
-SelectToolbar::~SelectToolbar() = default;
 
 void SelectToolbar::on_unrealize()
 {
@@ -179,6 +178,8 @@ void SelectToolbar::setup_derived_spin_button(Inkscape::UI::Widget::SpinButton &
 
     btn.addUnitTracker(_tracker.get());
     btn.set_defocus_widget(_desktop->getCanvas());
+    // select toolbar spin buttons increment by 1.0 with key up/down, and 0.1 with spinner buttons
+    btn.set_increment(1.0);
 }
 
 void SelectToolbar::any_value_changed(Glib::RefPtr<Gtk::Adjustment> &adj)
@@ -369,8 +370,8 @@ void SelectToolbar::on_inkscape_selection_modified(Inkscape::Selection *selectio
 {
     assert(_desktop->getSelection() == selection);
     if ((flags & (SP_OBJECT_MODIFIED_FLAG        |
-                     SP_OBJECT_PARENT_MODIFIED_FLAG |
-                     SP_OBJECT_CHILD_MODIFIED_FLAG   )))
+                  SP_OBJECT_PARENT_MODIFIED_FLAG |
+                  SP_OBJECT_CHILD_MODIFIED_FLAG   )))
     {
         layout_widget_update(selection);
     }
@@ -413,21 +414,7 @@ char const *SelectToolbar::get_action_key(double mh, double sh, double mv, doubl
 
 void SelectToolbar::toggle_lock()
 {
-    // use this roundabout way of changing image to make sure its size is preserved
-    auto btn = static_cast<Gtk::ToggleButton *>(_lock_btn.get_child());
-    auto image = static_cast<Gtk::Image *>(btn->get_child());
-    if (!image) {
-        g_warning("No GTK image in toolbar button 'lock'");
-        return;
-    }
-    auto size = image->get_pixel_size();
-
-    if (_lock_btn.get_active()) {
-        image->set_from_icon_name("object-locked", Gtk::ICON_SIZE_BUTTON);
-    } else {
-        image->set_from_icon_name("object-unlocked", Gtk::ICON_SIZE_BUTTON);
-    }
-    image->set_pixel_size(size);
+    _lock_btn.set_image_from_icon_name(_lock_btn.get_active() ? "object-locked" : "object-unlocked");
 }
 
 void SelectToolbar::toggle_touch()

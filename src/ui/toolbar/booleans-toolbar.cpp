@@ -41,7 +41,7 @@ BooleansToolbar::BooleansToolbar(SPDesktop *desktop)
         tool->shape_cancel();
     });
 
-    add(*_toolbar);
+    set_child(*_toolbar);
 
     auto prefs = Inkscape::Preferences::get();
 

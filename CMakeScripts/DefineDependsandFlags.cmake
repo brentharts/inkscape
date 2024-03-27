@@ -31,11 +31,11 @@ else()
 endif()
 
 # Disable deprecated Gtk and friends
-list(APPEND INKSCAPE_CXX_FLAGS "-DGLIBMM_DISABLE_DEPRECATED")
-list(APPEND INKSCAPE_CXX_FLAGS "-DGTKMM_DISABLE_DEPRECATED")
-list(APPEND INKSCAPE_CXX_FLAGS "-DGDKMM_DISABLE_DEPRECATED")
-list(APPEND INKSCAPE_CXX_FLAGS "-DGTK_DISABLE_DEPRECATED")
-list(APPEND INKSCAPE_CXX_FLAGS "-DGDK_DISABLE_DEPRECATED")
+#list(APPEND INKSCAPE_CXX_FLAGS "-DGLIBMM_DISABLE_DEPRECATED")
+#list(APPEND INKSCAPE_CXX_FLAGS "-DGTKMM_DISABLE_DEPRECATED")
+#list(APPEND INKSCAPE_CXX_FLAGS "-DGDKMM_DISABLE_DEPRECATED")
+#list(APPEND INKSCAPE_CXX_FLAGS "-DGTK_DISABLE_DEPRECATED")
+#list(APPEND INKSCAPE_CXX_FLAGS "-DGDK_DISABLE_DEPRECATED")
 
 # Errors for common mistakes
 list(APPEND INKSCAPE_CXX_FLAGS "-fstack-protector-strong")
@@ -102,6 +102,7 @@ if(WIN32)
     get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 
     list(APPEND INKSCAPE_LIBS "-lmscms")
+    list(APPEND INKSCAPE_LIBS "-ldwmapi")
 
     list(APPEND INKSCAPE_CXX_FLAGS "-mms-bitfields")
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
@@ -116,6 +117,10 @@ if(WIN32)
     else()
         list(APPEND INKSCAPE_CXX_FLAGS "-m32")
     endif()
+
+    # Fixes for windows.h and GTK4
+    add_definitions(-DNOGDI)
+    add_definitions(-D_NO_W32_PSEUDO_MODIFIERS)
 endif()
 
 find_package(PkgConfig REQUIRED)
@@ -258,35 +263,63 @@ endif()
 # Include dependencies:
 
 pkg_check_modules(
-    GTK3
-    REQUIRED
-    glibmm-2.4>=2.58
-    gtkmm-3.0>=3.24
-    gdkmm-3.0>=3.24
-    gtk+-3.0>=3.24
-    gdk-3.0>=3.24
+    MM REQUIRED
+    cairomm-1.16
+    pangomm-2.48
+    gdk-pixbuf-2.0
+    graphene-1.0
     )
-list(APPEND INKSCAPE_CXX_FLAGS ${GTK3_CFLAGS_OTHER})
-list(APPEND INKSCAPE_INCS_SYS ${GTK3_INCLUDE_DIRS})
-list(APPEND INKSCAPE_LIBS ${GTK3_LIBRARIES})
-link_directories(${GTK3_LIBRARY_DIRS})
+list(APPEND INKSCAPE_CXX_FLAGS ${MM_CFLAGS_OTHER})
+list(APPEND INKSCAPE_INCS_SYS ${MM_INCLUDE_DIRS})
+list(APPEND INKSCAPE_LIBS ${MM_LIBRARIES})
+link_directories(${MM_LIBRARY_DIRS})
 
-if(WITH_GSPELL)
-    pkg_check_modules(GSPELL gspell-1)
-    if("${GSPELL_FOUND}")
-        message(STATUS "Using gspell")
-        list(APPEND INKSCAPE_INCS_SYS ${GSPELL_INCLUDE_DIRS})
-        sanitize_ldflags_for_libs(GSPELL_LDFLAGS)
-        list(APPEND INKSCAPE_LIBS ${GSPELL_LDFLAGS})
-    else()
-        set(WITH_GSPELL OFF)
-    endif()
+pkg_check_modules(
+    GTKMM4
+    glibmm-2.68>=2.78.1
+    gtk4
+    gtkmm-4.0>=4.13.3
+    )
+    list(APPEND INKSCAPE_CXX_FLAGS ${GTKMM4_CFLAGS_OTHER})
+    list(APPEND INKSCAPE_INCS_SYS ${GTKMM4_INCLUDE_DIRS})
+    list(APPEND INKSCAPE_LIBS ${GTKMM4_LIBRARIES})
+    link_directories(${GTKMM4_LIBRARY_DIRS})
+
+if(NOT GTKMM4_FOUND)
+    message("GTKMM too old, gtkmm 4.14.0 and glibmm 2.78.1 will be compiled from source")
+    include(ExternalProject)
+    ExternalProject_Add(gtkmm
+        URL https://download.gnome.org/sources/gtkmm/4.14/gtkmm-4.14.0.tar.xz
+        URL_HASH SHA256=9350a0444b744ca3dc69586ebd1b6707520922b6d9f4f232103ce603a271ecda
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+        CONFIGURE_COMMAND meson setup --libdir lib . ../gtkmm --prefix=${CMAKE_CURRENT_BINARY_DIR}/deps
+        BUILD_COMMAND meson compile
+        INSTALL_COMMAND meson install
+        )
+    ExternalProject_Add(glibmm
+        URL https://download.gnome.org/sources/glibmm/2.78/glibmm-2.78.1.tar.xz
+        URL_HASH SHA256=f473f2975d26c3409e112ed11ed36406fb3843fa975df575c22d4cb843085f61
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+        CONFIGURE_COMMAND meson setup --libdir lib . ../glibmm --prefix=${CMAKE_CURRENT_BINARY_DIR}/deps
+        BUILD_COMMAND meson compile
+        INSTALL_COMMAND meson install
+        )
+    include_directories(${CMAKE_CURRENT_BINARY_DIR}/deps/include/gtkmm-4.0 ${CMAKE_CURRENT_BINARY_DIR}/deps/include/glibmm-2.68/ ${CMAKE_CURRENT_BINARY_DIR}/deps/lib/gtkmm-4.0/include ${CMAKE_CURRENT_BINARY_DIR}/deps/lib/glibmm-2.68/include ${CMAKE_CURRENT_BINARY_DIR}/deps/include/gtk-4.0/ ${CMAKE_CURRENT_BINARY_DIR}/deps/include/giomm-2.68/ ${CMAKE_CURRENT_BINARY_DIR}/deps/lib/giomm-2.68/include)
+    link_directories(${CMAKE_CURRENT_BINARY_DIR}/deps/lib)
+    list(APPEND INKSCAPE_LIBS -lgtkmm-4.0 -lglibmm-2.68)
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH}:${CMAKE_BINARY_DIR}/deps/lib")
+
+    # check we can actually build it
+    message("To build gtkmm4, you need the packages glslc, mm-common, and libgstreamer-plugins-bad1.0-dev")
+    find_program(glslc glslc REQUIRED)
+    find_program(mmcp mm-common-prepare REQUIRED)
+    pkg_check_modules(TMP-gtkmm-gstreamer gstreamer-player-1.0 REQUIRED)
 endif()
 
 if(WITH_GSOURCEVIEW)
-    pkg_check_modules(GSOURCEVIEW gtksourceview-4)
+    pkg_check_modules(GSOURCEVIEW gtksourceview-5)
     if("${GSOURCEVIEW_FOUND}")
-        message(STATUS "Using gtksourceview-4")
+        message(STATUS "Using gtksourceview-5")
         list(APPEND INKSCAPE_INCS_SYS ${GSOURCEVIEW_INCLUDE_DIRS})
         sanitize_ldflags_for_libs(GSOURCEVIEW_LDFLAGS)
         list(APPEND INKSCAPE_LIBS ${GSOURCEVIEW_LDFLAGS})
@@ -420,7 +453,7 @@ if(WITH_NLS)
     endif()
 endif(WITH_NLS)
 
-pkg_check_modules(SIGC++ REQUIRED sigc++-2.0 )
+pkg_check_modules(SIGC++ REQUIRED sigc++-3.0)
 sanitize_ldflags_for_libs(SIGC++_LDFLAGS)
 list(APPEND INKSCAPE_LIBS ${SIGC++_LDFLAGS})
 list(APPEND INKSCAPE_CXX_FLAGS ${SIGC++_CFLAGS_OTHER} "-DSIGCXX_DISABLE_DEPRECATED")
@@ -430,17 +463,6 @@ sanitize_ldflags_for_libs(EPOXY_LDFLAGS)
 list(APPEND INKSCAPE_LIBS ${EPOXY_LDFLAGS})
 list(APPEND INKSCAPE_CXX_FLAGS ${EPOXY_CFLAGS_OTHER})
 
-if(WITH_X11)
-    find_package(X11 REQUIRED)
-    list(APPEND INKSCAPE_INCS_SYS ${X11_INCLUDE_DIRS})
-    list(APPEND INKSCAPE_LIBS ${X11_LIBRARIES})
-    add_definitions(-DHAVE_X11)
-
-    pkg_get_variable(GTK3_TARGETS gtk+-3.0 targets)
-    if(NOT("${GTK3_TARGETS}" MATCHES "x11"))
-        message(FATAL_ERROR "GTK+3 doesn't targets X11, this is required for WITH_X11")
-    endif()
-endif(WITH_X11)
 
 # end Dependencies
 

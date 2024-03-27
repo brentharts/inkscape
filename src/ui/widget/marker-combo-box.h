@@ -32,6 +32,7 @@
 #include "document.h"
 #include "helper/auto-connection.h"
 #include "ui/operation-blocker.h"
+#include "ui/widget/widget-vfuncs-class-init.h"
 
 namespace Gtk {
 class Builder;
@@ -41,8 +42,9 @@ class FlowBox;
 class Image;
 class Label;
 class MenuButton;
-class RadioButton;
+class Picture;
 class SpinButton;
+class ToggleButton;
 } // namespace Gtk
 
 class SPDocument;
@@ -51,10 +53,15 @@ class SPObject;
 
 namespace Inkscape::UI::Widget {
 
+class Bin;
+
 /**
  * ComboBox-like class for selecting stroke markers.
  */
-class MarkerComboBox final : public Gtk::Box {
+class MarkerComboBox final
+    : public WidgetVfuncsClassInit
+    , public Gtk::Box
+{
     using parent_type = Gtk::Box;
 
 public:
@@ -72,7 +79,9 @@ public:
     sigc::connection connect_edit   (sigc::slot<void ()> slot);
 
 private:
-    struct MarkerItem : Glib::Object {
+    class MarkerItem : public Glib::Object
+    {
+    public:
         Cairo::RefPtr<Cairo::Surface> pix;
         SPDocument* source = nullptr;
         std::string id;
@@ -84,13 +93,20 @@ private:
         int height = 0;
 
         bool operator == (const MarkerItem& item) const;
+
+        static Glib::RefPtr<MarkerItem> create() {
+            return Glib::make_refptr_for_instance(new MarkerItem());
+        }
+
+    protected:
+        MarkerItem() = default;
     };
 
     SPMarker* get_current() const;
     Glib::ustring _current_marker_id;
 
     sigc::signal<void ()> _signal_changed;
-    sigc::signal<void ()> _signal_edit   ;
+    sigc::signal<void ()> _signal_edit;
 
     Glib::RefPtr<Gtk::Builder> _builder;
     Gtk::FlowBox& _marker_list;
@@ -99,7 +115,8 @@ private:
     std::vector<Glib::RefPtr<MarkerItem>> _stock_items;
     std::vector<Glib::RefPtr<MarkerItem>> _history_items;
     std::map<Gtk::Widget*, Glib::RefPtr<MarkerItem>> _widgets_to_markers;
-    Gtk::Image& _preview;
+    UI::Widget::Bin &_preview_bin;
+    Gtk::Picture& _preview;
     bool _preview_no_alloc = true;
     Gtk::Button& _link_scale;
     Gtk::SpinButton& _angle_btn;
@@ -110,9 +127,9 @@ private:
     Gtk::SpinButton& _offset_x;
     Gtk::SpinButton& _offset_y;
     Gtk::Widget& _input_grid;
-    Gtk::RadioButton& _orient_auto_rev;
-    Gtk::RadioButton& _orient_auto;
-    Gtk::RadioButton& _orient_angle;
+    Gtk::ToggleButton& _orient_auto_rev;
+    Gtk::ToggleButton& _orient_auto;
+    Gtk::ToggleButton& _orient_angle;
     Gtk::Button& _orient_flip_horz;
     Gtk::Image& _current_img;
     Gtk::Button& _edit_marker;
@@ -148,7 +165,7 @@ private:
     void update_scale_link();
     Glib::RefPtr<MarkerItem> get_active();
     Glib::RefPtr<MarkerItem> find_marker_item(SPMarker* marker);
-    void on_style_updated() override;
+    void css_changed(GtkCssStyleChange *change) override;
     void update_preview(Glib::RefPtr<MarkerItem> marker_item);
     void update_menu_btn(Glib::RefPtr<MarkerItem> marker_item);
     void set_active(Glib::RefPtr<MarkerItem> item);

@@ -33,7 +33,7 @@ namespace UI {
 namespace Widget {
 
 ObjectCompositeSettings::ObjectCompositeSettings(Glib::ustring icon_name, char const *history_prefix, int flags)
-: Gtk::Box(Gtk::ORIENTATION_VERTICAL),
+: Gtk::Box(Gtk::Orientation::VERTICAL),
   _icon_name(std::move(icon_name)),
   _blend_tag(Glib::ustring(history_prefix) + ":blend"),
   _blur_tag(Glib::ustring(history_prefix) + ":blur"),
@@ -52,8 +52,6 @@ ObjectCompositeSettings::ObjectCompositeSettings(Glib::ustring icon_name, char c
     _filter_modifier.signal_opacity_changed().connect(sigc::mem_fun(*this, &ObjectCompositeSettings::_opacityValueChanged));
     _filter_modifier.signal_isolation_changed().connect(
         sigc::mem_fun(*this, &ObjectCompositeSettings::_isolationValueChanged));
-
-    show_all_children();
 }
 
 ObjectCompositeSettings::~ObjectCompositeSettings() {

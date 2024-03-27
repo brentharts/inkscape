@@ -14,7 +14,7 @@
 #include <gtkmm/enums.h>
 #include <gtkmm/object.h>
 #include <gtkmm/popovermenu.h>
-#include <gtkmm/radiobutton.h>
+#include <gtkmm/checkbutton.h>
 #include <memory>
 #include <sigc++/functors/mem_fun.h>
 
@@ -27,21 +27,22 @@
 #include "unit-menu.h"
 #include "unit-tracker.h"
 #include "util/expression-evaluator.h"
+#include "util-string/ustring-format.h"
 
 namespace Inkscape::UI::Widget {
 
 MathSpinButton::MathSpinButton(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade)
     : Gtk::SpinButton(cobject)
 {
-    drag_dest_unset();
+    signal_input().connect(sigc::mem_fun(*this, &MathSpinButton::on_input), true);
 }
 
-int MathSpinButton::on_input(double *newvalue)
+int MathSpinButton::on_input(double &newvalue)
 {
     try {
         auto eval = Inkscape::Util::ExpressionEvaluator(get_text().c_str(), nullptr);
         auto result = eval.evaluate();
-        *newvalue = result.value;
+        newvalue = result.value;
     } catch (Inkscape::Util::EvaluatorException const &e) {
         g_message ("%s", e.what());
         return false;
@@ -49,16 +50,18 @@ int MathSpinButton::on_input(double *newvalue)
     return true;
 }
 
-void SpinButton::construct()
+void SpinButton::_construct()
 {
     Controller::add_key<&SpinButton::on_key_pressed>(*this, *this);
 
     property_has_focus().signal_changed().connect(
         sigc::mem_fun(*this, &SpinButton::on_has_focus_changed));
     UI::on_popup_menu(*this, sigc::mem_fun(*this, &SpinButton::on_popup_menu));
+
+    signal_input().connect(sigc::mem_fun(*this, &SpinButton::on_input), true);
 }
 
-int SpinButton::on_input(double* newvalue)
+int SpinButton::on_input(double &newvalue)
 {
     if (_dont_evaluate) return false;
 
@@ -81,7 +84,7 @@ int SpinButton::on_input(double* newvalue)
             Inkscape::Util::ExpressionEvaluator eval = Inkscape::Util::ExpressionEvaluator(get_text().c_str(), nullptr);
             result = eval.evaluate();
         }
-        *newvalue = result.value;
+        newvalue = result.value;
     } catch (Inkscape::Util::EvaluatorException const &e) {
         g_message ("%s", e.what());
         return false;
@@ -101,6 +104,18 @@ bool SpinButton::on_key_pressed(GtkEventControllerKey const * const controller,
                                 unsigned const keyval, unsigned const keycode,
                                 GdkModifierType const state)
 {
+    bool inc = false;
+    double val = 0;
+
+    if (_increment > 0) {
+        constexpr auto modifiers = GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK | GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK;
+        // no modifiers pressed?
+        if ((state & modifiers) == 0) {
+            inc = true;
+            val = get_value();
+        }
+    }
+
     switch (Inkscape::UI::Tools::get_latin_keyval(controller, keyval, keycode, state)) {
         case GDK_KEY_Escape: // defocus
             undo();
@@ -124,6 +139,22 @@ bool SpinButton::on_key_pressed(GtkEventControllerKey const * const controller,
                 _stay = true;
                 undo();
                 return true; // I consumed the event
+            }
+            break;
+
+        case GDK_KEY_Up:
+        case GDK_KEY_KP_Up:
+            if (inc) {
+                set_value(val + _increment);
+                return true;
+            }
+            break;
+
+        case GDK_KEY_Down:
+        case GDK_KEY_KP_Down:
+            if (inc) {
+                set_value(val - _increment);
+                return true;
             }
             break;
 
@@ -170,19 +201,24 @@ std::shared_ptr<UI::Widget::PopoverMenu> SpinButton::get_popover_menu()
     values.emplace(std::fmin(adj_value + page, upper), "");
     values.emplace(std::fmax(adj_value - page, lower), "");
 
-    static auto popover_menu = std::make_shared<UI::Widget::PopoverMenu>(*this, Gtk::POS_BOTTOM);
+    static auto popover_menu = std::make_shared<UI::Widget::PopoverMenu>(*this, Gtk::PositionType::BOTTOM);
     popover_menu->delete_all();
-    Gtk::RadioButton::Group group;
+    Gtk::CheckButton *group = nullptr;
 
     for (auto const &value : values) {
         bool const enable = adj_value == value.first;
         auto const item_label = !value.second.empty() ? Glib::ustring::compose("%1: %2", value.first, value.second)
-                                                      : Glib::ustring::format(value.first);
-        auto const radio_button = Gtk::make_managed<Gtk::RadioButton>(group, item_label);
+                                                      : Inkscape::ustring::format_classic(value.first);
+        auto const radio_button = Gtk::make_managed<Gtk::CheckButton>(item_label);
+        if (!group) {
+            group = radio_button;
+        } else {
+            radio_button->set_group(*group);
+        }
         radio_button->set_active(enable);
 
         auto const item = Gtk::make_managed<UI::Widget::PopoverMenuItem>();
-        item->add(*radio_button);
+        item->set_child(*radio_button);
         item->signal_activate().connect(
             sigc::bind(sigc::mem_fun(*this, &SpinButton::on_numeric_menu_item_activate), value.first));
         popover_menu->append(*item);
@@ -213,6 +249,10 @@ void SpinButton::set_custom_numeric_menu_data(NumericMenuData &&custom_menu_data
 {
     _custom_popup = true;
     _custom_menu_data = std::move(custom_menu_data);
+}
+
+void SpinButton::set_increment(double delta) {
+    _increment = delta;
 }
 
 } // namespace Inkscape::UI::Widget

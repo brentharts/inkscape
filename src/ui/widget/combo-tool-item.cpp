@@ -58,11 +58,11 @@ ComboToolItem::ComboToolItem(Glib::ustring group_label,
     _use_label (true),
     _use_icon  (false),
     _use_pixbuf (true),
-    _icon_size ( Gtk::ICON_SIZE_LARGE_TOOLBAR ),
+    _icon_size ( Gtk::IconSize::LARGE ),
     _combobox (nullptr),
     _container(Gtk::make_managed<Gtk::Box>())
 {
-    add(*_container);
+    append(*_container);
     _container->set_spacing(3);
 
     // ": " is added to the group label later
@@ -78,8 +78,6 @@ ComboToolItem::ComboToolItem(Glib::ustring group_label,
     _combobox->signal_changed().connect(
             sigc::mem_fun(*this, &ComboToolItem::on_changed_combobox));
     UI::pack_start(*_container, *_combobox);
-
-    show_all();
 }
 
 ComboToolItem::~ComboToolItem() = default;
@@ -120,10 +118,12 @@ ComboToolItem::use_group_label(bool use_group_label)
     }
 
     if (use_group_label) {
+        _combobox->reference();
         _container->remove(*_combobox);
         _group_label_widget = std::make_unique<Gtk::Label>(_group_label + ": ");
         UI::pack_start(*_container, *_group_label_widget);
         UI::pack_start(*_container, *_combobox);
+        _combobox->unreference();
     } else {
         _container->remove(*_group_label_widget);
         _group_label_widget.reset();
@@ -151,7 +151,7 @@ ComboToolItem::populate_combobox()
         }
 
         auto const renderer = Gtk::make_managed<Gtk::CellRendererPixbuf>();
-        renderer->set_property ("stock_size", Gtk::ICON_SIZE_LARGE_TOOLBAR);
+        renderer->set_property ("stock_size", Gtk::IconSize::LARGE);
         _combobox->pack_start (*renderer, false);
         _combobox->add_attribute (*renderer, "icon_name", columns.col_icon );
     } else if (_use_pixbuf) {

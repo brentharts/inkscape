@@ -23,7 +23,8 @@
 #include <gtkmm/builder.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/enums.h>
-#include <gtkmm/gesturemultipress.h>
+#include <gtkmm/eventcontrollermotion.h>
+#include <gtkmm/gestureclick.h>
 #include <gtkmm/image.h>
 #include <gtkmm/label.h>
 #include <gtkmm/popover.h>
@@ -45,6 +46,7 @@
 #include "ui/controller.h"
 #include "ui/dialog/command-palette.h"
 #include "ui/tools/tool-base.h"
+#include "ui/util.h"
 #include "ui/widget/canvas.h"
 #include "ui/widget/desktop-widget.h"  // Hopefully temp.
 #include "ui/widget/events/canvas-event.h"
@@ -64,7 +66,7 @@ CanvasGrid::CanvasGrid(SPDesktopWidget *dtw)
     _canvas = std::make_unique<Inkscape::UI::Widget::Canvas>();
     _canvas->set_hexpand(true);
     _canvas->set_vexpand(true);
-    _canvas->set_can_focus(true);
+    _canvas->set_focusable(true);
 
     // Command palette
     _command_palette = std::make_unique<Inkscape::UI::Dialog::CommandPalette>();
@@ -73,19 +75,19 @@ CanvasGrid::CanvasGrid(SPDesktopWidget *dtw)
     _notice = CanvasNotice::create();
 
     // Canvas overlay
-    _canvas_overlay.add(*_canvas);
+    _canvas_overlay.set_child(*_canvas);
     _canvas_overlay.add_overlay(_command_palette->get_base_widget());
     _canvas_overlay.add_overlay(*_notice);
 
     // Horizontal Ruler
-    _hruler = std::make_unique<Inkscape::UI::Widget::Ruler>(Gtk::ORIENTATION_HORIZONTAL);
+    _hruler = std::make_unique<Inkscape::UI::Widget::Ruler>(Gtk::Orientation::HORIZONTAL);
     _hruler->add_track_widget(*_canvas);
     _hruler->set_hexpand(true);
     _hruler->set_visible(true);
     // Tooltip/Unit set elsewhere
 
     // Vertical Ruler
-    _vruler = std::make_unique<Inkscape::UI::Widget::Ruler>(Gtk::ORIENTATION_VERTICAL);
+    _vruler = std::make_unique<Inkscape::UI::Widget::Ruler>(Gtk::Orientation::VERTICAL);
     _vruler->add_track_widget(*_canvas);
     _vruler->set_vexpand(true);
     _vruler->set_visible(true);
@@ -93,10 +95,15 @@ CanvasGrid::CanvasGrid(SPDesktopWidget *dtw)
 
     // Guide Lock
     _guide_lock.set_name("LockGuides");
-    _guide_lock.add(*Gtk::make_managed<Gtk::Image>("object-locked", Gtk::ICON_SIZE_MENU));
-    _guide_lock.show_all_children();
+    auto set_lock_icon = [this](){
+        _guide_lock.set_image_from_icon_name(_guide_lock.get_active() ? "object-locked" : "object-unlocked");
+    };
     // To be replaced by Gio::Action:
-    _guide_lock.signal_toggled().connect(sigc::mem_fun(*_dtw, &SPDesktopWidget::update_guides_lock));
+    _guide_lock.signal_toggled().connect([=,this](){
+        set_lock_icon();
+        _dtw->update_guides_lock();
+    });
+    set_lock_icon();
     _guide_lock.set_tooltip_text(_("Toggle lock of all guides in the document"));
 
     // Subgrid
@@ -108,23 +115,26 @@ CanvasGrid::CanvasGrid(SPDesktopWidget *dtw)
     // Horizontal Scrollbar
     _hadj = Gtk::Adjustment::create(0.0, -4000.0, 4000.0, 10.0, 100.0, 4.0);
     _hadj->signal_value_changed().connect(sigc::mem_fun(*this, &CanvasGrid::_adjustmentChanged));
-    _hscrollbar = Gtk::Scrollbar(_hadj, Gtk::ORIENTATION_HORIZONTAL);
+    _hscrollbar = Gtk::Scrollbar(_hadj, Gtk::Orientation::HORIZONTAL);
     _hscrollbar.set_name("CanvasScrollbar");
     _hscrollbar.set_hexpand(true);
 
     // Vertical Scrollbar
     _vadj = Gtk::Adjustment::create(0.0, -4000.0, 4000.0, 10.0, 100.0, 4.0);
     _vadj->signal_value_changed().connect(sigc::mem_fun(*this, &CanvasGrid::_adjustmentChanged));
-    _vscrollbar = Gtk::Scrollbar(_vadj, Gtk::ORIENTATION_VERTICAL);
+    _vscrollbar = Gtk::Scrollbar(_vadj, Gtk::Orientation::VERTICAL);
     _vscrollbar.set_name("CanvasScrollbar");
     _vscrollbar.set_vexpand(true);
 
     // CMS Adjust (To be replaced by Gio::Action)
     _cms_adjust.set_name("CMS_Adjust");
-    _cms_adjust.add(*Gtk::make_managed<Gtk::Image>("color-management", Gtk::ICON_SIZE_MENU));
-    // Can't access via C++ API, fixed in Gtk4.
-    gtk_actionable_set_action_name( GTK_ACTIONABLE(_cms_adjust.gobj()), "win.canvas-color-manage");
+    _cms_adjust.set_action_name("win.canvas-color-manage");
     _cms_adjust.set_tooltip_text(_("Toggle color-managed display for this document window"));
+    auto set_cms_icon = [this](){
+        _cms_adjust.set_image_from_icon_name(_cms_adjust.get_active() ? "color-management" : "color-management-off");
+    };
+    set_cms_icon();
+    _cms_adjust.signal_toggled().connect([=,this](){ set_cms_icon(); });
 
     // popover with some common display mode related options
     _builder_display_popup = create_builder("display-popup.glade");
@@ -133,10 +143,11 @@ CanvasGrid::CanvasGrid(SPDesktopWidget *dtw)
 
     // To be replaced by Gio::Action:
     sticky_zoom->signal_toggled().connect([this](){ _dtw->sticky_zoom_toggled(); });
+
     _quick_actions.set_name("QuickActions");
     _quick_actions.set_popover(*popover);
-    _quick_actions.set_image_from_icon_name("display-symbolic");
-    _quick_actions.set_direction(Gtk::ARROW_LEFT);
+    _quick_actions.set_icon_name("display-symbolic");
+    _quick_actions.set_direction(Gtk::ArrowType::LEFT);
     _quick_actions.set_tooltip_text(_("Display options"));
 
     // Main grid
@@ -155,8 +166,6 @@ CanvasGrid::CanvasGrid(SPDesktopWidget *dtw)
                                     sigc::bind(sigc::mem_fun(*this, &CanvasGrid::_rulerButtonRelease), false),
                           Controller::Button::left);
     Controller::add_motion<nullptr, &CanvasGrid::_rulerMotion<false>, nullptr>(*_vruler, *this);
-
-    show_all();
 }
 
 CanvasGrid::~CanvasGrid() = default;
@@ -189,15 +198,15 @@ void CanvasGrid::on_realize() {
                 if (_canvas->get_cms_active()) {
                     id += "-alt";
                 }
-                _quick_actions.set_image_from_icon_name(id + "-symbolic");
+                _quick_actions.set_icon_name(id + "-symbolic");
             }
         };
 
         set_display_icon();
 
         // when display mode state changes, update icon
-        auto cms_action = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(map->lookup_action("canvas-color-manage"));
-        auto disp_action = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(map->lookup_action("canvas-display-mode"));
+        auto cms_action = std::dynamic_pointer_cast<Gio::SimpleAction>(map->lookup_action("canvas-color-manage"));
+        auto disp_action = std::dynamic_pointer_cast<Gio::SimpleAction>(map->lookup_action("canvas-display-mode"));
 
         if (cms_action && disp_action) {
             disp_action->signal_activate().connect([=](const Glib::VariantBase& state){ set_display_icon(); });
@@ -215,8 +224,8 @@ void CanvasGrid::on_realize() {
 }
 
 // TODO: remove when sticky zoom gets replaced by Gio::Action:
-Gtk::ToggleButton* CanvasGrid::GetStickyZoom() {
-    return &get_widget<Gtk::ToggleButton>(_builder_display_popup, "zoom-resize");
+Gtk::CheckButton *CanvasGrid::GetStickyZoom() {
+    return &get_widget<Gtk::CheckButton>(_builder_display_popup, "zoom-resize");
 }
 
 // _dt2r should be a member of _canvas.
@@ -287,22 +296,12 @@ void
 CanvasGrid::ShowScrollbars(bool state)
 {
     if (_show_scrollbars == state) return;
-    _show_scrollbars = state;
 
-    if (_show_scrollbars) {
-        // Show scrollbars
-        _hscrollbar.set_visible(true);
-        _vscrollbar.set_visible(true);
-        _cms_adjust.set_visible(true);
-        _cms_adjust.show_all_children();
-        _quick_actions.set_visible(true);
-    } else {
-        // Hide scrollbars
-        _hscrollbar.set_visible(false);
-        _vscrollbar.set_visible(false);
-        _cms_adjust.set_visible(false);
-        _quick_actions.set_visible(false);
-    }
+    _show_scrollbars = state;
+    _hscrollbar   .set_visible(_show_scrollbars);
+    _vscrollbar   .set_visible(_show_scrollbars);
+    _cms_adjust   .set_visible(_show_scrollbars);
+    _quick_actions.set_visible(_show_scrollbars);
 }
 
 void
@@ -365,38 +364,40 @@ CanvasGrid::ShowCommandPalette(bool state)
 
 // Update rulers on change of widget size, but only if allocation really changed.
 void
-CanvasGrid::on_size_allocate(Gtk::Allocation& allocation)
+CanvasGrid::size_allocate_vfunc(int const width, int const height, int const baseline)
 {
-    Gtk::Grid::on_size_allocate(allocation);
-    if (!(_allocation == allocation)) { // No != function defined!
-        _allocation = allocation;
+    Gtk::Grid::size_allocate_vfunc(width, height, baseline);
+
+    if (std::exchange(_width , width ) != width  ||
+        std::exchange(_height, height) != height)
+    {
         updateRulers();
     }
 }
 
 Geom::IntPoint CanvasGrid::_rulerToCanvas(bool horiz) const
 {
-    Geom::IntPoint result;
+    Geom::Point result;
     (horiz ? _hruler : _vruler)->translate_coordinates(*_canvas, 0, 0, result.x(), result.y());
-    return result;
+    return result.round();
 }
 
 // Start guide creation by dragging from ruler.
-Gtk::EventSequenceState CanvasGrid::_rulerButtonPress(Gtk::GestureMultiPress const &gesture,
+Gtk::EventSequenceState CanvasGrid::_rulerButtonPress(Gtk::GestureClick const &gesture,
                                                       int /*n_press*/, double x, double y)
 {
     if (_ruler_clicked) {
-        return Gtk::EVENT_SEQUENCE_NONE;
+        return Gtk::EventSequenceState::NONE;
     }
 
-    auto const state = Controller::get_current_event_state(gesture);
+    auto const state = gesture.get_current_event_state();
 
     _ruler_clicked = true;
     _ruler_dragged = false;
-    _ruler_ctrl_clicked = Controller::has_flag(state, Gdk::CONTROL_MASK);
+    _ruler_ctrl_clicked = Controller::has_flag(state, Gdk::ModifierType::CONTROL_MASK);
     _ruler_drag_origin = Geom::Point(x, y).floor();
 
-    return Gtk::EVENT_SEQUENCE_CLAIMED;
+    return Gtk::EventSequenceState::CLAIMED;
 }
 
 void CanvasGrid::_createGuideItem(Geom::Point const &pos, bool horiz)
@@ -448,7 +449,7 @@ void CanvasGrid::_createGuideItem(Geom::Point const &pos, bool horiz)
     _active_guide->set_stroke(desktop->getNamedView()->guidehicolor);
 }
 
-void CanvasGrid::_rulerMotion(GtkEventControllerMotion const *controller, double x, double y, bool horiz)
+void CanvasGrid::_rulerMotion(GtkEventControllerMotion const *controller_c, double x, double y, bool horiz)
 {
     if (!_ruler_clicked) {
         return;
@@ -471,15 +472,14 @@ void CanvasGrid::_rulerMotion(GtkEventControllerMotion const *controller, double
     }
 
     // Synthesize the CanvasEvent.
-    auto gdkevent = GdkEventUniqPtr(gtk_get_current_event());
-    assert(gdkevent->type == GDK_MOTION_NOTIFY);
+    auto controller = const_wrap(controller_c, true);
 
     auto event = MotionEvent();
-    event.modifiers = gdkevent->motion.state;
-    event.source_device = Util::GObjectPtr(gdk_event_get_source_device(gdkevent.get()), true);
+    event.modifiers = (unsigned)controller->get_current_event_state();
+    event.device = controller->get_current_event_device();
     event.pos = pos;
-    event.time = gdkevent->motion.time;
-    event.extinput = extinput_from_gdkevent(gdkevent.get());
+    event.time = controller->get_current_event_time();
+    event.extinput = extinput_from_gdkevent(*controller->get_current_event());
 
     rulerMotion(event, horiz);
 }
@@ -583,11 +583,11 @@ void CanvasGrid::_createGuide(Geom::Point origin, Geom::Point normal)
 }
 
 // End guide creation or toggle guides on/off.
-Gtk::EventSequenceState CanvasGrid::_rulerButtonRelease(Gtk::GestureMultiPress const &gesture,
+Gtk::EventSequenceState CanvasGrid::_rulerButtonRelease(Gtk::GestureClick const &gesture,
                                                         int /*n_press*/, double x, double y, bool horiz)
 {
     if (!_ruler_clicked) {
-        return Gtk::EVENT_SEQUENCE_NONE;
+        return Gtk::EventSequenceState::NONE;
     }
 
     auto const desktop = _dtw->get_desktop();
@@ -596,13 +596,13 @@ Gtk::EventSequenceState CanvasGrid::_rulerButtonRelease(Gtk::GestureMultiPress c
         desktop->getTool()->discard_delayed_snap_event();
 
         auto const pos = Geom::Point(x, y) + _rulerToCanvas(horiz);
-        auto const state = Controller::get_current_event_state(gesture);
+        auto const state = gesture.get_current_event_state();
 
         // Get the snapped position and normal.
         auto const event_w = _canvas->canvas_to_world(pos);
         auto event_dt = desktop->w2d(event_w);
         auto normal = _normal;
-        if (!(state & GDK_SHIFT_MASK)) {
+        if (!(bool)(state & Gdk::ModifierType::SHIFT_MASK)) {
             ruler_snap_new_guide(desktop, event_dt, normal);
         }
 
@@ -626,7 +626,7 @@ Gtk::EventSequenceState CanvasGrid::_rulerButtonRelease(Gtk::GestureMultiPress c
     _ruler_clicked = false;
     _ruler_dragged = false;
 
-    return Gtk::EVENT_SEQUENCE_CLAIMED;
+    return Gtk::EventSequenceState::CLAIMED;
 }
 
 void CanvasGrid::_blinkLockButton()

@@ -96,7 +96,7 @@ std::unique_ptr<Syntax::TextEditView> AttrDialog::init_text_view(AttrDialog* own
 {
     auto edit = Syntax::TextEditView::create(coloring);
     auto& textview = edit->getTextView();
-    textview.set_wrap_mode(Gtk::WrapMode::WRAP_WORD);
+    textview.set_wrap_mode(Gtk::WrapMode::WORD);
 
     // this actually sets padding rather than margin and extends textview's background color to the sides
     textview.set_top_margin(TEXT_MARGIN);
@@ -166,7 +166,7 @@ AttrDialog::AttrDialog()
     _treeView.append_column("", *delete_renderer);
 
     if (auto const col = _treeView.get_column(0)) {
-        auto add_icon = Gtk::manage(sp_get_icon_image("list-add", Gtk::ICON_SIZE_SMALL_TOOLBAR));
+        auto add_icon = Gtk::manage(sp_get_icon_image("list-add", Gtk::IconSize::NORMAL));
         col->set_clickable(true);
         col->set_widget(*add_icon);
         add_icon->set_tooltip_text(_("Add a new attribute"));
@@ -198,7 +198,7 @@ AttrDialog::AttrDialog()
     _valueRenderer = Gtk::make_managed<Gtk::CellRendererText>();
     _valueRenderer->property_editable() = true;
     _valueRenderer->property_placeholder_text().set_value(_("Attribute Value"));
-    _valueRenderer->property_ellipsize().set_value(Pango::ELLIPSIZE_END);
+    _valueRenderer->property_ellipsize().set_value(Pango::EllipsizeMode::END);
     _valueRenderer->signal_edited().connect(sigc::mem_fun(*this, &AttrDialog::valueEdited));
     _valueRenderer->signal_editing_started().connect(sigc::mem_fun(*this, &AttrDialog::startValueEdit), true);
     _treeView.append_column(_("Value"), *_valueRenderer);
@@ -221,9 +221,9 @@ AttrDialog::AttrDialog()
         _popover->popdown();
     });
 
-    _popover->set_relative_to(*this);
+    _popover->set_parent(*this);
     _popover->signal_closed().connect([this]{ popClosed(); });
-    Controller::add_key<&AttrDialog::onPopoverKeyPressed>(*_popover, *this, Gtk::PHASE_CAPTURE);
+    Controller::add_key<&AttrDialog::onPopoverKeyPressed>(*_popover, *this, Gtk::PropagationPhase::CAPTURE);
 
     get_widget<Gtk::Button>(_builder, "btn-truncate").signal_clicked().connect([this]{ truncateDigits(); });
 
@@ -265,9 +265,8 @@ void AttrDialog::truncateDigits() const
 void AttrDialog::set_current_textedit(Syntax::TextEditView* edit)
 {
     _current_text_edit = edit ? edit : _attr_edit.get();
-    _scrolled_text_view.remove();
-    _scrolled_text_view.add(_current_text_edit->getTextView());
-    _scrolled_text_view.show_all();
+    _scrolled_text_view.unset_child();
+    _scrolled_text_view.set_child(_current_text_edit->getTextView());
 }
 
 void AttrDialog::adjust_popup_edit_size()
@@ -280,6 +279,13 @@ void AttrDialog::adjust_popup_edit_size()
     } else {
         _scrolled_text_view.set_min_content_height(MAX_POPOVER_HEIGHT);
     }
+}
+
+void AttrDialog::size_allocate_vfunc(int const width, int const height, int const baseline)
+{
+    DialogBase::size_allocate_vfunc(width, height, baseline);
+
+    _popover->present();
 }
 
 bool AttrDialog::onPopoverKeyPressed(GtkEventControllerKey const * /*controller*/,
@@ -339,14 +345,14 @@ void set_mono_class(Gtk::Widget* widget, bool mono)
     if (!widget) {
         return;
     }
-    Glib::ustring class_name = "mono-font";
-    auto style = widget->get_style_context();
-    auto has_class = style->has_class(class_name);
+
+    static Glib::ustring const class_name = "mono-font";
+    auto const has_class = widget->has_css_class(class_name);
 
     if (mono && !has_class) {
-        style->add_class(class_name);
+        widget->add_css_class(class_name);
     } else if (!mono && has_class) {
-        style->remove_class(class_name);
+        widget->remove_css_class(class_name);
     }
 }
 
@@ -415,18 +421,21 @@ void AttrDialog::startValueEdit(Gtk::CellEditable *cell, const Glib::ustring &pa
     auto theme = get_syntax_theme();
 
     auto entry = dynamic_cast<Gtk::Entry*>(cell);
+    /* TODO: GTK4: We probably need a better replacement here:
     int width, height;
     entry->get_layout()->get_pixel_size(width, height);
+    */
+    int const width = entry->get_width();
     int colwidth = _valueCol->get_width();
 
-    if (row[_attrColumns._attributeValue] != row[_attrColumns._attributeValueRender] ||
+    if (row.get_value(_attrColumns._attributeValue) != row.get_value(_attrColumns._attributeValueRender) ||
         edit_in_popup || colwidth - 10 < width)
     {
         _value_editing = entry->get_text();
 
         Gdk::Rectangle rect;
         _treeView.get_cell_area((Gtk::TreeModel::Path)iter, *_valueCol, rect);
-        if (_popover->get_position() == Gtk::PositionType::POS_BOTTOM) {
+        if (_popover->get_position() == Gtk::PositionType::BOTTOM) {
             rect.set_y(rect.get_y() + 20);
         }
         if (rect.get_x() >= dlg_width) {
@@ -489,15 +498,15 @@ void AttrDialog::setRepr(Inkscape::XML::Node * repr)
         // show either attributes or content
         bool show_content = is_text_or_comment_node(*_repr);
         if (show_content) {
-            _content_sw.remove();
+            _content_sw.unset_child();
             auto type = repr->name();
             auto elem = repr->parent();
             if (type && strcmp(type, "string") == 0 && elem && elem->name() && strcmp(elem->name(), "svg:style") == 0) {
                 // editing embedded CSS style
                 _style_edit->setStyle(get_syntax_theme());
-                _content_sw.add(_style_edit->getTextView());
+                _content_sw.set_child(_style_edit->getTextView());
             } else {
-                _content_sw.add(_text_edit->getTextView());
+                _content_sw.set_child(_text_edit->getTextView());
             }
         }
 
@@ -523,7 +532,7 @@ void AttrDialog::createAttribute()
 void AttrDialog::deleteAttribute(Gtk::TreeRow &row)
 {
     auto const name = row.get_value(_attrColumns._attributeName);
-    _store->erase(row);
+    _store->erase(row.get_iter());
     _repr->removeAttribute(name);
     setUndo(_("Delete attribute"));
 }
@@ -572,8 +581,8 @@ void AttrDialog::notifyAttributeChanged(XML::Node & /*node*/, GQuark name_,
     if (new_value) {
         renderval = prepare_rendervalue(new_value.pointer());
     }
-    for (auto&& iter : _store->children()) {
-        Gtk::TreeModel::Row row = *iter;
+
+    for (auto &row : _store->children()) {
         Glib::ustring col_name = row[_attrColumns._attributeName];
         if (name == col_name) {
             if (new_value) {
@@ -581,11 +590,12 @@ void AttrDialog::notifyAttributeChanged(XML::Node & /*node*/, GQuark name_,
                 row[_attrColumns._attributeValueRender] = renderval;
                 new_value = Util::ptr_shared(); // Don't make a new one
             } else {
-                _store->erase(iter);
+                _store->erase(row.get_iter());
             }
             break;
         }
     }
+
     if (new_value) {
         Gtk::TreeModel::Row row = *_store->prepend();
         row[_attrColumns._attributeName] = name;
@@ -693,8 +703,8 @@ bool AttrDialog::onTreeViewKeyReleased(GtkEventControllerKey const * /*controlle
 void AttrDialog::storeMoveToNext(Gtk::TreeModel::Path modelpath)
 {
     auto selection = _treeView.get_selection();
-    auto iter = *(selection->get_selected());
-    auto path = static_cast<Gtk::TreeModel::Path>(iter);
+    auto const iter = selection->get_selected();
+    Gtk::TreeModel::Path path;
     Gtk::TreeViewColumn *focus_column;
     _treeView.get_cursor(path, focus_column);
     if (path == modelpath && focus_column == _treeView.get_column(1)) {
@@ -707,9 +717,9 @@ void AttrDialog::storeMoveToNext(Gtk::TreeModel::Path modelpath)
  */
 void AttrDialog::nameEdited (const Glib::ustring& path, const Glib::ustring& name)
 {
-    Gtk::TreeModel::iterator iter = *_store->get_iter(path);
+    auto iter = _store->get_iter(path);
     auto modelpath = static_cast<Gtk::TreeModel::Path>(iter);
-    Gtk::TreeModel::Row row = *iter;
+    auto &row = *iter;
     if(row && this->_repr) {
         Glib::ustring old_name = row[_attrColumns._attributeName];
         if (old_name == name) {
@@ -724,7 +734,7 @@ void AttrDialog::nameEdited (const Glib::ustring& path, const Glib::ustring& nam
         // Do not allow duplicate names
         const auto children = _store->children();
         for (const auto &child : children) {
-            if (name == child[_attrColumns._attributeName]) {
+            if (name == child.get_value(_attrColumns._attributeName)) {
                 return;
             }
         }
@@ -794,9 +804,9 @@ void AttrDialog::setPrecision(int const n)
     _rounding_precision = n;
     auto &menu_button = get_widget<Gtk::MenuButton>(_builder, "btn-menu");
     auto const menu = menu_button.get_menu_model();
-    auto const section = menu->get_item_link(0, Gio::MENU_LINK_SECTION);
+    auto const section = menu->get_item_link(0, Gio::MenuModel::Link::SECTION);
     auto const type = Glib::VariantType{g_variant_type_new("s")};
-    auto const variant = section->get_item_attribute(n, Gio::MENU_ATTRIBUTE_LABEL, type);
+    auto const variant = section->get_item_attribute(n, Gio::MenuModel::Attribute::LABEL, type);
     auto const label = ' ' + static_cast<Glib::Variant<Glib::ustring> const &>(variant).get();
     get_widget<Gtk::Label>(_builder, "precision").set_label(label);
     Inkscape::Preferences::get()->setInt("/dialogs/attrib/precision", n);

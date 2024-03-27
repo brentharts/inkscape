@@ -40,7 +40,6 @@
 #include <2geom/point.h>
 #include <glibmm/refptr.h>
 #include <gtkmm/box.h>
-#include <sigc++/connection.h>
 
 #include "helper/auto-connection.h"
 #include "message.h"
@@ -99,7 +98,7 @@ public:
     SPDesktopWidget(InkscapeWindow *inkscape_window, SPDocument *document);
     ~SPDesktopWidget() final;
 
-    Inkscape::UI::Widget::CanvasGrid *get_canvas_grid()  { return _canvas_grid.get(); }  // Temp, I hope!
+    Inkscape::UI::Widget::CanvasGrid *get_canvas_grid()  { return _canvas_grid; }  // Temp, I hope!
     Inkscape::UI::Widget::Canvas     *get_canvas()       { return _canvas; }
     SPDesktop                        *get_desktop()      { return _desktop.get(); }
     InkscapeWindow             const *get_window() const { return _window; }
@@ -132,7 +131,7 @@ private:
     Inkscape::UI::Dialog::SwatchesPanel *_panels;
 
     /** A grid to display the canvas, rulers, and scrollbars. */
-    std::unique_ptr<Inkscape::UI::Widget::CanvasGrid> _canvas_grid;
+    Inkscape::UI::Widget::CanvasGrid *_canvas_grid = nullptr;
 
     unsigned int _interaction_disabled_counter = 0;
     double _dt2r;
@@ -150,7 +149,7 @@ public:
     void presentWindow();
     void showInfoDialog(Glib::ustring const &message);
     bool warnDialog (Glib::ustring const &text);
-    Gtk::Box *get_toolbar_by_name(const Glib::ustring &name);
+    Gtk::Widget *get_toolbar_by_name(const Glib::ustring &name);
     void setToolboxFocusTo(char const *);
     void setToolboxAdjustmentValue(char const *id, double value);
     bool isToolboxButtonActive(char const *id) const;
@@ -170,8 +169,6 @@ public:
     void update_rotation();
     void repack_snaptoolbar();
 
-    void iconify();
-    void maximize();
     void fullscreen();
 
     void layoutWidgets();
@@ -186,9 +183,9 @@ public:
 
 private:
     Gtk::Widget *tool_toolbox;
-    Inkscape::UI::Toolbar::Toolbars *tool_toolbars = nullptr;
-    Inkscape::UI::Toolbar::CommandToolbar *command_toolbar = nullptr;
-    Inkscape::UI::Toolbar::SnapToolbar *snap_toolbar = nullptr;
+    std::unique_ptr<Inkscape::UI::Toolbar::Toolbars> tool_toolbars;
+    std::unique_ptr<Inkscape::UI::Toolbar::CommandToolbar> command_toolbar;
+    std::unique_ptr<Inkscape::UI::Toolbar::SnapToolbar> snap_toolbar;
     Inkscape::PrefObserver _tb_snap_pos;
     Inkscape::PrefObserver _tb_icon_sizes1;
     Inkscape::PrefObserver _tb_icon_sizes2;
@@ -197,6 +194,7 @@ private:
 
     void namedviewModified(SPObject *obj, unsigned flags);
     void apply_ctrlbar_settings();
+    void remove_from_top_toolbar_or_hbox(Gtk::Widget &widget);
 };
 
 #endif /* !SEEN_SP_DESKTOP_WIDGET_H */

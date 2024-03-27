@@ -1043,6 +1043,13 @@ void ink_matrix_to_cairo(cairo_matrix_t &cm, Geom::Affine const &m)
     cm.y0 = m[5];
 }
 
+Geom::Affine ink_matrix_to_2geom(cairo_matrix_t const &cairo_matrix)
+{
+    Geom::Affine result;
+    ink_matrix_to_2geom(result, cairo_matrix);
+    return result;
+}
+
 void
 ink_cairo_transform(cairo_t *ct, Geom::Affine const &m)
 {
@@ -1117,7 +1124,7 @@ ink_cairo_surface_copy(Cairo::RefPtr<Cairo::ImageSurface> surface )
     int width  = surface->get_width();
     int height = surface->get_height();
     int stride = surface->get_stride();
-    auto new_surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, width, height); // device scale?
+    auto new_surface = Cairo::ImageSurface::create(Cairo::Surface::Format::ARGB32, width, height); // device scale?
 
     surface->flush();
     memcpy(new_surface->get_data(), surface->get_data(), stride * height);

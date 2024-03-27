@@ -68,7 +68,7 @@
     */
 
 *{
-    font-feature-settings: "tnum=1";
+    font-feature-settings: "tnum";
 }
 
 /* Make icons in treeview etc use theme fg_color, not the stronger text_color */
@@ -370,21 +370,22 @@ SPCanvas {
     background-color: white;
 }
 
-#TextFontFamilyAction_combobox {
-    -GtkComboBox-appears-as-list: true;
-}
-
-#QuickActions,
-#StickyZoom ,#StickyZoom *,
-#LockGuides, #LockGuides *,
-#PreviewMode,#PreviewMode  *,
-#CMS_Adjust, #CMS_Adjust * {
+/* Those are three buttons in canvas corners; their size dictates how large scrollbars are */
+#QuickActions, #LockGuides, #CMS_Adjust {
     padding: 0;
-    min-height:3px;
-    font-size:16px;
+    margin: 0;
+    outline: none;
+    border-radius: 0;
+    border-width: 0px;
+    min-width: 22px;
+    min-height: 22px;
 }
-#QuickActions {
-    padding: 2px 0;
+/* Don't let images inside those buttons inflate their sizes */
+#QuickActions *, #LockGuides *, #CMS_Adjust * {
+    padding: 0;
+}
+#QuickActions image {
+    margin-top: 1px;
 }
 
 /* Keep palette scrollbar from generating warnings. */
@@ -464,18 +465,12 @@ SPCanvas {
 #ObjectsTreeView.view:focus {
     outline-style: double;
     outline-width: 5px;
-    outline-color: alpha (@theme_fg_color, 0.1);
-    -gtk-outline-radius: 50%;
+    outline-color: alpha(@theme_fg_color, 0.1);
 }
 #ObjectsTreeView.view:hover {
-    border-color: alpha (@theme_fg_color, 0.1);
+    border-color: alpha(@theme_fg_color, 0.1);
     border-style: solid;
     border-width: 1px 0px;
-}
-#ObjectsTreeView {
-    -GtkTreeView-expander-size: 12;
-    -GtkTreeView-horizontal-separator: 2;
-    -GtkTreeView-vertical-separator: 2;
 }
 #Objects .search {
   padding: 2px 4px;
@@ -550,7 +545,7 @@ button.close-button:hover{
 }
 
 button.link:hover image {
-    -gtk-icon-effect: dim;
+    -gtk-icon-filter: opacity(0.5);
 }
 
 .marker-item.box {
@@ -1239,9 +1234,8 @@ popover.menu.menuize > stack > box > modelbutton:first-child > * /* Affect child
     border-radius: 3px;
     padding: 3px;
 }
-/* TODO: GTK4: Replace our .focus-within with its then-built-in :focus-within */
-#GradientEdit.focus-within {
-    border-color: alpha(@theme_fg_color, 0.3)
+#GradientEdit:focus-within {
+    border-color: alpha(@theme_fg_color, 0.3);
 }
 
 /* Canvas */
@@ -1250,24 +1244,11 @@ popover.menu.menuize > stack > box > modelbutton:first-child > * /* Affect child
     min-height: 256px;
 }
 
-#CanvasGrid button {
-    min-width:16px;
-    min-height:16px;
-    outline:none;
-    border-radius:0;
-    border-width:0px;
-    padding: 0;
-}
-
-#CanvasGrid #QuickActions image{
-    padding: 4px 0 0 0;
-}
-
-#CanvasGrid button:checked * {
-    background-color:alpha(@theme_selected_bg_color,0.9);
-}
 
 /* IconPreview */
+frame.icon-preview {
+    border-radius: 0;
+}
 button.icon-preview {
     min-width : 0;
     min-height: 0;
@@ -1275,8 +1256,7 @@ button.icon-preview {
 }
 
 /* GtkFrames that formerly had :shadow-type == NONE */
-/* TODO: GTK4: border submode is removed */
-frame.flat > border {
+frame.flat {
     border: none;
  }
 
@@ -1295,6 +1275,28 @@ frame.flat > border {
 .menu_search{
     background-color:alpha(@theme_fg_color,0.1);
     margin:0 0 -8px -8px;
+}
+
+/* limit height of list view items */
+columnview.list-view-small > listview > row > cell {
+    padding: 5px;
+}
+
+/* gridview items with smaller margins */
+gridview.grid-view-small > child box.item-box {
+    padding: 0;
+    margin: 8px;
+    border-spacing: 8px;
+}
+
+/* list view with items based on labels need some extra vertical space */
+listview.list-view-small > row > box.item-box {
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+
+listview.list-view-small > row > box.item-box.separator {
+    margin: 1px;
 }
 
 /* About screen slide show transitions >>>>>>>>>>>>>>>>>>>>>>>>> */

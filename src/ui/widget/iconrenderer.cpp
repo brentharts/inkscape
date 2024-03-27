@@ -21,8 +21,8 @@ IconRenderer::IconRenderer() :
     Gtk::CellRendererPixbuf(),
     _property_icon(*this, "icon", 0)
 {
-    property_mode() = Gtk::CELL_RENDERER_MODE_ACTIVATABLE;
-    property_stock_size().set_value(Gtk::ICON_SIZE_BUTTON);
+    property_mode() = Gtk::CellRendererMode::ACTIVATABLE;
+    property_icon_size().set_value(Gtk::IconSize::NORMAL); // Previously ICON_SIZE_BUTTON
 
     set_icon_name();
     property_icon().signal_changed().connect(sigc::mem_fun(*this, &IconRenderer::set_icon_name));
@@ -66,7 +66,7 @@ void IconRenderer::get_preferred_width_vfunc(Gtk::Widget &widget,
     }
 }
 
-bool IconRenderer::activate_vfunc(GdkEvent * /*event*/,
+bool IconRenderer::activate_vfunc(Glib::RefPtr<Gdk::Event const> const &/*event*/,
                                   Gtk::Widget &/*widget*/,
                                   const Glib::ustring &path,
                                   const Gdk::Rectangle &/*background_area*/,

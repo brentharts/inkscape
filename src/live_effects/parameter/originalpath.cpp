@@ -39,7 +39,7 @@ OriginalPathParam::OriginalPathParam( const Glib::ustring& label, const Glib::us
 Gtk::Widget *
 OriginalPathParam::param_newWidget()
 {
-    auto const _widget = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);
+    auto const _widget = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
 
     { // Label
         auto const pLabel = Gtk::make_managed<Gtk::Label>(param_label);
@@ -49,12 +49,10 @@ OriginalPathParam::param_newWidget()
 
     { // Paste path to link button
         auto const pIcon = Gtk::make_managed<Gtk::Image>();
-        pIcon->set_from_icon_name("edit-clone", Gtk::ICON_SIZE_BUTTON);
+        pIcon->set_from_icon_name("edit-clone");
         auto const pButton = Gtk::make_managed<Gtk::Button>();
-        pButton->set_relief(Gtk::RELIEF_NONE);
-        pIcon->set_visible(true);
-        pButton->add(*pIcon);
-        pButton->set_visible(true);
+        pButton->set_has_frame(false);
+        pButton->set_child(*pIcon);
         pButton->signal_clicked().connect(sigc::mem_fun(*this, &OriginalPathParam::on_link_button_click));
         UI::pack_start(*_widget, *pButton, true, true);
         pButton->set_tooltip_text(_("Link to path in clipboard"));
@@ -62,18 +60,14 @@ OriginalPathParam::param_newWidget()
 
     { // Select original button
         auto const pIcon = Gtk::make_managed<Gtk::Image>();
-        pIcon->set_from_icon_name("edit-select-original", Gtk::ICON_SIZE_BUTTON);
+        pIcon->set_from_icon_name("edit-select-original");
         auto const pButton = Gtk::make_managed<Gtk::Button>();
-        pButton->set_relief(Gtk::RELIEF_NONE);
-        pIcon->set_visible(true);
-        pButton->add(*pIcon);
-        pButton->set_visible(true);
+        pButton->set_has_frame(false);
+        pButton->set_child(*pIcon);
         pButton->signal_clicked().connect(sigc::mem_fun(*this, &OriginalPathParam::on_select_original_button_click));
         UI::pack_start(*_widget, *pButton, true, true);
         pButton->set_tooltip_text(_("Select original"));
     }
-
-    _widget->show_all_children();
 
     return _widget;
 }

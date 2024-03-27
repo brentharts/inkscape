@@ -23,11 +23,11 @@
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/enums.h>
-#include <gtkmm/filechooserbutton.h>
 #include <gtkmm/flowboxchild.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
-#include <gtkmm/radiobutton.h>
+#include <gtkmm/togglebutton.h>
+#include <gtkmm/checkbutton.h>
 
 #include "helper/auto-connection.h"
 #include "ui/widget/export-preview.h"
@@ -74,8 +74,8 @@ public:
     void refresh(bool hide, guint32 bg_color);
     void setDrawing(std::shared_ptr<PreviewDrawing> drawing);
 
-    auto get_radio_group() { return _option.get_group(); }
-    void on_parent_changed(Gtk::Widget *) final;
+    auto get_radio_group() { return &_option; }
+    void on_parent_changed();
     void on_mode_changed(Gtk::SelectionMode mode);
     void set_selected(bool selected);
     void update_selected();
@@ -88,7 +88,7 @@ private:
     Gtk::Grid _grid;
     Gtk::Label _label;
     Gtk::CheckButton _selector;
-    Gtk::RadioButton _option;
+    Gtk::CheckButton _option;
     ExportPreview _preview;
     SPItem *_item = nullptr;
     SPPage *_page = nullptr;
@@ -127,13 +127,13 @@ private:
     std::shared_ptr<PreviewDrawing> _preview_drawing;
     bool setupDone = false; // To prevent setup() call add connections again.
 
-    std::map<selection_mode, Gtk::RadioButton *> selection_buttons;
+    std::map<selection_mode, Gtk::ToggleButton *> selection_buttons;
     Gtk::FlowBox &preview_container;
     Gtk::CheckButton &show_preview;
     Gtk::CheckButton &overwrite;
     Gtk::Label &num_elements;
     Gtk::CheckButton &hide_all;
-    Gtk::FileChooserButton &path_chooser;
+    Gtk::Button &path_chooser;
     Gtk::Entry &name_text;
     Gtk::Button &export_btn;
     Gtk::Button &cancel_btn;
@@ -162,6 +162,7 @@ private:
     void refreshPreview();
     void refreshItems();
     void loadExportHints(bool rename_file);
+    void pickBatchPath();
 
     Glib::ustring getBatchPath() const;
     void setBatchPath(Glib::ustring const &path);

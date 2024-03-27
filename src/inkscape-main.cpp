@@ -14,6 +14,8 @@
 
 #ifdef _WIN32
 #include <windows.h> // SetDllDirectoryW, SetConsoleOutputCP
+#undef IGNORE
+#undef near
 #include <fcntl.h> // _O_BINARY
 #include <boost/algorithm/string/join.hpp>
 #endif
@@ -163,6 +165,8 @@ static void convert_legacy_options(int &argc, char **&argv)
 
 int main(int argc, char *argv[])
 {
+    Gtk::Application::wrap_in_search_entry2();
+
     convert_legacy_options(argc, argv);
 
 #ifdef __APPLE__

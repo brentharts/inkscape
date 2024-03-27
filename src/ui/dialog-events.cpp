@@ -13,7 +13,13 @@
  */
 
 #include <gtkmm/entry.h>
+#include <gtkmm/spinbutton.h>
 #include <gtkmm/window.h>
+#include <gtkmm/version.h>
+
+#ifdef GDK_WINDOWING_X11
+#include <gdk/x11/gdkx.h>
+#endif
 
 #include "desktop.h"
 #include "inkscape.h"
@@ -23,7 +29,7 @@
 /**
  * Remove focus from window to whoever it is transient for.
  */
-void sp_dialog_defocus_cpp(Gtk::Window *win)
+void sp_dialog_defocus(Gtk::Window *win)
 {
     // find out the document window we're transient for
     if (auto w = win->get_transient_for()) {
@@ -32,51 +38,50 @@ void sp_dialog_defocus_cpp(Gtk::Window *win)
     }
 }
 
-void sp_dialog_defocus(GtkWindow *win)
-{
-    // find out the document window we're transient for
-    if (auto w = gtk_window_get_transient_for(GTK_WINDOW(win))) {
-        // switch to it
-        gtk_window_present(w);
-    }
-}
-
-void sp_dialog_defocus_on_enter_cpp(Gtk::Entry *e)
+void sp_dialog_defocus_on_enter(Gtk::Entry *e)
 {
     e->signal_activate().connect([e] {
-        sp_dialog_defocus_cpp(dynamic_cast<Gtk::Window*>(e->get_toplevel()));
+        sp_dialog_defocus(dynamic_cast<Gtk::Window*>(e->get_root()));
     });
 }
 
-static void sp_dialog_defocus_callback(GtkWindow*, gpointer data)
+void sp_dialog_defocus_on_enter(Gtk::SpinButton &s)
 {
-    sp_dialog_defocus(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data))));
-}
-
-void sp_dialog_defocus_on_enter(GtkWidget *w)
-{
-    g_signal_connect(G_OBJECT(w), "activate", G_CALLBACK(sp_dialog_defocus_callback), w);
+#if GTKMM_CHECK_VERSION(4, 14, 0)
+    s.signal_activate().connect([&] {
+        sp_dialog_defocus(dynamic_cast<Gtk::Window*>(s.get_root()));
+    });
+#endif
 }
 
 /**
  * Make the argument dialog transient to the currently active document window.
  */
-void sp_transientize(GtkWidget *dialog)
+void sp_transientize(Gtk::Window &window)
 {
     auto prefs = Inkscape::Preferences::get();
 
-#ifndef _WIN32
+#ifdef GDK_WINDOWING_X11
     // FIXME: Temporary Win32 special code to enable transient dialogs
     // _set_skip_taskbar_hint makes transient dialogs NON-transient! When dialogs
     // are made transient (_set_transient_for), they are already removed from
     // the taskbar in Win32.
-    if (prefs->getBool( "/options/dialogsskiptaskbar/value")) {
-        gtk_window_set_skip_taskbar_hint(GTK_WINDOW (dialog), TRUE);
+    if (prefs->getBool("/options/dialogsskiptaskbar/value")) {
+        // https://discourse.gnome.org/t/how-to-hide-app-from-taskbar-in-gtk4/7084
+        auto root = gtk_widget_get_root(window.Gtk::Widget::gobj());
+        if (GTK_IS_NATIVE(root)) {
+            auto native = GTK_NATIVE(root);
+            auto surface = gtk_native_get_surface(native);
+            if (GDK_IS_X11_SURFACE(surface)) {
+                auto x11surface = GDK_X11_SURFACE(surface);
+                gdk_x11_surface_set_skip_taskbar_hint(x11surface, TRUE);
+            }
+        }
     }
 #endif
 
-    gint transient_policy = prefs->getIntLimited("/options/transientpolicy/value", PREFS_DIALOGS_WINDOWS_NORMAL,
-                                                 PREFS_DIALOGS_WINDOWS_NONE, PREFS_DIALOGS_WINDOWS_AGGRESSIVE);
+    int transient_policy = prefs->getIntLimited("/options/transientpolicy/value", PREFS_DIALOGS_WINDOWS_NORMAL,
+                                                PREFS_DIALOGS_WINDOWS_NONE, PREFS_DIALOGS_WINDOWS_AGGRESSIVE);
 
 #ifdef _WIN32 // Win32 special code to enable transient dialogs
     transient_policy = PREFS_DIALOGS_WINDOWS_AGGRESSIVE;
@@ -85,7 +90,7 @@ void sp_transientize(GtkWidget *dialog)
     if (transient_policy) {
         // if there's an active document window, attach dialog to it as a transient:
         if (SP_ACTIVE_DESKTOP) {
-            SP_ACTIVE_DESKTOP->setWindowTransient(dialog, transient_policy);
+            SP_ACTIVE_DESKTOP->setWindowTransient(window.Gtk::Widget::gobj(), transient_policy);
         }
     }
 }

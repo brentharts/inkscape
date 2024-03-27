@@ -3,25 +3,20 @@
 #ifndef INKSCAPE_UI_WIDGET_OPTGLAREA_H
 #define INKSCAPE_UI_WIDGET_OPTGLAREA_H
 
+#include <epoxy/gl.h>
 #include <glibmm/refptr.h>
 #include <gtkmm/drawingarea.h>
-#include <epoxy/gl.h>
 
-namespace Cairo {
-class Context;
-} // namespace Cairo
-
-namespace Gdk {
-class GLContext;
-} // namespace Gdk
+namespace Cairo { class Context; }
+namespace Gdk { class GLContext; }
 
 namespace Inkscape::UI::Widget {
 
 /**
  * A widget that can dynamically switch between a Gtk::DrawingArea and a Gtk::GLArea.
- * Based on the GTK source code for both widgets.
+ * Based on the source code for both widgets.
  */
-class OptGLArea : public Gtk::DrawingArea
+class OptGLArea : public Gtk::Widget
 {
 public:
     OptGLArea();
@@ -37,7 +32,7 @@ public:
 
     /**
      * Call before doing any OpenGL operations to make the context current.
-     * Automatically done before calling opengl_render.
+     * Automatically done before calling paint_widget().
      */
     void make_current();
 
@@ -49,10 +44,7 @@ public:
 protected:
     void on_realize() override;
     void on_unrealize() override;
-    void on_size_allocate(Gtk::Allocation&) override;
-
-private:
-    bool on_draw(const Cairo::RefPtr<Cairo::Context>&) override;
+    void snapshot_vfunc(Glib::RefPtr<Gtk::Snapshot> const &snapshot) override;
 
     /**
      * Reimplement to create the desired OpenGL context. Return nullptr on error.
@@ -62,21 +54,16 @@ private:
     /**
      * Reimplement to render the widget. The Cairo context is only for when OpenGL is disabled.
      */
-    virtual void paint_widget(const Cairo::RefPtr<Cairo::Context>&) {}
+    virtual void paint_widget(Cairo::RefPtr<Cairo::Context> const &) {}
+
+private:
+    bool opengl_enabled = false;
+
+    struct GLState;
+    std::shared_ptr<GLState> gl;
 
     void init_opengl();
-    void create_framebuffer();
-    void delete_framebuffer();
-    void resize_framebuffer() const;
-
-    Glib::RefPtr<Gdk::GLContext> context;
-
-    bool opengl_enabled;
-    bool need_resize;
-
-    GLuint framebuffer;
-    GLuint renderbuffer;
-    GLuint stencilbuffer;
+    void uninit_opengl();
 };
 
 } // namespace Inkscape::UI::Widget

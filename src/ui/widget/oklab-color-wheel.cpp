@@ -15,7 +15,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <gtkmm/gesturemultipress.h>
+#include <gtkmm/gestureclick.h>
 
 #include "display/cairo-utils.h"
 #include "oklab.h"
@@ -170,7 +170,7 @@ Geom::Point OKWheel::_curColorWheelCoords() const
 }
 
 /** @brief Draw the widget into the Cairo context. */
-bool OKWheel::on_drawing_area_draw(Cairo::RefPtr<Cairo::Context> const &cr)
+void OKWheel::on_drawing_area_draw(Cairo::RefPtr<Cairo::Context> const &cr, int, int)
 {
     if(_updateDimensions()) {
         _redrawDisc();
@@ -212,7 +212,6 @@ bool OKWheel::on_drawing_area_draw(Cairo::RefPtr<Cairo::Context> const &cr)
         cr->stroke();
     }
     cr->restore();
-    return true;
 }
 
 /** @brief Recreate the pixel buffer containing the colourful disc. */
@@ -236,8 +235,8 @@ void OKWheel::_redrawDisc()
         }
     }
 
-    int const stride = Cairo::ImageSurface::format_stride_for_width(Cairo::FORMAT_RGB24, size);
-    _disc = Cairo::ImageSurface::create(_pixbuf.data(), Cairo::FORMAT_RGB24, size, size, stride);
+    int const stride = Cairo::ImageSurface::format_stride_for_width(Cairo::Surface::Format::RGB24, size);
+    _disc = Cairo::ImageSurface::create(_pixbuf.data(), Cairo::Surface::Format::RGB24, size, size, stride);
 }
 
 /** @brief Convert widget (event) coordinates to an abstract coordinate system
@@ -289,26 +288,26 @@ bool OKWheel::_onClick(Geom::Point const &pt)
 }
 
 /** @brief Handle a button press event. */
-Gtk::EventSequenceState OKWheel::on_click_pressed(Gtk::GestureMultiPress const &click,
+Gtk::EventSequenceState OKWheel::on_click_pressed(Gtk::GestureClick const &click,
                                                   int /*n_press*/, double const x, double const y)
 {
     if (click.get_current_button() == 1) {
         // Convert the click coordinates to the abstract coords in which
         // the picker disc is the unit disc in the xy-plane.
         if (_onClick(_event2abstract({x, y}))) {
-            return Gtk::EVENT_SEQUENCE_CLAIMED;
+            return Gtk::EventSequenceState::CLAIMED;
         }
     }
     // TODO: add a context menu to copy out the CSS4 color values.
-    return Gtk::EVENT_SEQUENCE_NONE;
+    return Gtk::EventSequenceState::NONE;
 }
 
 /** @brief Handle a button release event. */
-Gtk::EventSequenceState OKWheel::on_click_released(Gtk::GestureMultiPress const & /*click*/,
+Gtk::EventSequenceState OKWheel::on_click_released(Gtk::GestureClick const & /*click*/,
                                                    int /*n_press*/, double /*x*/, double /*y*/)
 {
     _adjusting = false;
-    return Gtk::EVENT_SEQUENCE_CLAIMED;
+    return Gtk::EventSequenceState::CLAIMED;
 }
 
 /** @brief Handle a drag (motion notify event). */

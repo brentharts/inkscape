@@ -16,7 +16,7 @@
 #include <gtkmm/builder.h>
 #include <gtkmm/label.h>
 #include <gtkmm/paned.h>
-#include <gtkmm/searchentry.h>
+#include <gtkmm/searchentry2.h>
 
 #include "desktop.h"
 #include "libnrtype/font-lister.h"
@@ -37,23 +37,23 @@ FontCollectionsManager::FontCollectionsManager()
     , _font_list_box        (UI::get_widget<Gtk::Box>   (builder, "font_list_box"))
     , _font_count_label     (UI::get_widget<Gtk::Label> (builder, "font_count_label"))
     , _font_list_filter_box (UI::get_widget<Gtk::Box>   (builder, "font_list_filter_box"))
-    , _search_entry         (UI::get_widget<Gtk::SearchEntry>(builder, "search_entry"))
+    , _search_entry         (UI::get_widget<Gtk::SearchEntry2>(builder, "search_entry"))
     , _reset_button         (UI::get_widget<Gtk::Button>(builder, "reset_button"))
     , _create_button        (UI::get_widget<Gtk::Button>(builder, "create_button"))
     , _edit_button          (UI::get_widget<Gtk::Button>(builder, "edit_button"))
     , _delete_button        (UI::get_widget<Gtk::Button>(builder, "delete_button"))
 {
     UI::pack_start(_font_list_box, _font_selector, true, true);
-    _font_list_box.reorder_child(_font_selector, 1);
+    _font_list_box.reorder_child_after(_font_selector, *_font_list_box.get_first_child());
 
     UI::pack_start(_collections_box, _user_font_collections, true, true);
-    _collections_box.reorder_child(_user_font_collections, 0);
+    _collections_box.reorder_child_at_start(_user_font_collections);
 
     _user_font_collections.populate_system_collections();
     _user_font_collections.populate_user_collections();
     _user_font_collections.change_frame_name(_("Font Collections"));
 
-    add(_contents);
+    append(_contents);
 
     // Set the button images.
     _create_button.set_image_from_icon_name(INKSCAPE_ICON("list-add"));
@@ -61,12 +61,11 @@ FontCollectionsManager::FontCollectionsManager()
     _delete_button.set_image_from_icon_name(INKSCAPE_ICON("edit-delete"));
 
     // Paned settings.
-    _paned.child_property_resize(*_paned.get_child1()) = false;
-    _paned.child_property_resize(*_paned.get_child2()) = true;
+    _paned.set_resize_start_child(false);
+    _paned.set_resize_end_child(false);
 
     change_font_count_label();
     _font_selector.hide_others();
-    show_all_children();
 
     // Setup the signals.
     _font_count_changed_connection = Inkscape::FontLister::get_instance()->connectUpdate(sigc::mem_fun(*this, &FontCollectionsManager::change_font_count_label));

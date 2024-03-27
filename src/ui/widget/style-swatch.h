@@ -16,7 +16,6 @@
 
 #include <memory>
 #include <gtkmm/box.h>
-#include <gtkmm/eventbox.h>
 #include <gtkmm/gesture.h> // Gtk::EventSequenceState
 #include <gtkmm/label.h>
 
@@ -27,7 +26,7 @@ class SPStyle;
 class SPCSSAttr;
 
 namespace Gtk {
-class GestureMultiPress;
+class GestureClick;
 class Grid;
 } // namespace Gtk
 
@@ -44,7 +43,7 @@ class ColorPreview;
 class StyleSwatch : public Gtk::Box
 {
 public:
-    StyleSwatch (SPCSSAttr *attr, gchar const *main_tip, Gtk::Orientation orient = Gtk::ORIENTATION_VERTICAL);
+    StyleSwatch (SPCSSAttr *attr, gchar const *main_tip, Gtk::Orientation orient = Gtk::Orientation::VERTICAL);
     ~StyleSwatch() override;
 
     void setStyle(SPStyle *style);
@@ -56,7 +55,7 @@ public:
     void setDesktop(SPDesktop *desktop);
 
 private:
-    Gtk::EventSequenceState on_click(Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_click(Gtk::GestureClick const &click,
                                      int n_press, double x, double y);
 
     using PrefObs = Preferences::PreferencesObserver;
@@ -67,18 +66,15 @@ private:
     std::unique_ptr<PrefObs> _tool_obs;
     std::unique_ptr<PrefObs> _style_obs;
     Glib::ustring _tool_path;
-    Gtk::EventBox _swatch;
     Gtk::Grid *_table;
     Gtk::Label _label[2];
     Gtk::Box _empty_space;
-    Gtk::EventBox _place[2];
-    Gtk::EventBox _opacity_place;
     Gtk::Label _value[2];
+    Gtk::Box _place[2];
     Gtk::Label _opacity_value;
     std::unique_ptr<ColorPreview> _color_preview[2];
     Glib::ustring _color[2];
     Gtk::Box _stroke;
-    Gtk::EventBox _stroke_width_place;
     Gtk::Label _stroke_width;
     Util::Unit *_sw_unit;
 

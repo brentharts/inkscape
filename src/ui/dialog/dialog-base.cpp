@@ -51,7 +51,7 @@ static void remove_first(Glib::ustring &name, Glib::ustring const &pattern)
  * @param dialog_type is the "type" string for the dialog.
  */
 DialogBase::DialogBase(char const * const prefs_path, Glib::ustring dialog_type)
-    : Gtk::Box(Gtk::ORIENTATION_VERTICAL)
+    : Gtk::Box(Gtk::Orientation::VERTICAL)
     , _name("DialogBase")
     , _prefs_path(prefs_path)
     , _dialog_type{std::move(dialog_type)}
@@ -68,11 +68,11 @@ DialogBase::DialogBase(char const * const prefs_path, Glib::ustring dialog_type)
     }
 
     set_name(_dialog_type); // Essential for dialog functionality
-    property_margin().set_value(1); // Essential for dialog UI
+    set_margin(1); // Essential for dialog UI
 
     // TODO: GTK4: See if we can add the Controller on self — since all widgets receive all events.
     Controller::add_key_on_window<&DialogBase::on_window_key_pressed>(*this, *this,
-                                                                      Gtk::PHASE_CAPTURE);
+                                                                      Gtk::PropagationPhase::CAPTURE);
 }
 
 DialogBase::~DialogBase() {
@@ -107,7 +107,7 @@ bool DialogBase::on_window_key_pressed(GtkEventControllerKey const * const contr
                                        GdkModifierType const state)
 {
     // We listen for key on window, so must ensure WE have focus, to not break Esc from canvas etc.
-    auto const &window = dynamic_cast<Gtk::Window const &>(*get_toplevel());
+    auto const &window = dynamic_cast<Gtk::Window const &>(*get_root());
     auto const focus = window.get_focus();
     if (!focus || !is_descendant_of(*focus, *this)) {
         return false;
@@ -128,10 +128,10 @@ bool DialogBase::on_window_key_pressed(GtkEventControllerKey const * const contr
 void DialogBase::blink()
 {
     Gtk::Notebook *notebook = dynamic_cast<Gtk::Notebook *>(get_parent());
-    if (notebook && notebook->get_is_drawable()) {
+    if (notebook) {
         // Switch notebook to this dialog.
         notebook->set_current_page(notebook->page_num(*this));
-        notebook->get_style_context()->add_class("blink");
+        notebook->add_css_class("blink");
 
         // Add timer to turn off blink.
         sigc::slot<bool ()> slot = sigc::mem_fun(*this, &DialogBase::blink_off);
@@ -140,7 +140,7 @@ void DialogBase::blink()
 }
 
 void DialogBase::focus_dialog() {
-    if (auto window = dynamic_cast<Gtk::Window*>(get_toplevel())) {
+    if (auto window = dynamic_cast<Gtk::Window*>(get_root())) {
         window->present();
     }
 
@@ -156,9 +156,9 @@ void DialogBase::focus_dialog() {
 }
 
 void DialogBase::defocus_dialog() {
-    if (auto wnd = dynamic_cast<Gtk::Window*>(get_toplevel())) {
+    if (auto wnd = dynamic_cast<Gtk::Window*>(get_root())) {
         // defocus floating dialog:
-        sp_dialog_defocus_cpp(wnd);
+        sp_dialog_defocus(wnd);
 
         // for docked dialogs, move focus to canvas
         if (auto desktop = getDesktop()) {
@@ -173,8 +173,8 @@ void DialogBase::defocus_dialog() {
 bool DialogBase::blink_off()
 {
     Gtk::Notebook *notebook = dynamic_cast<Gtk::Notebook *>(get_parent());
-    if (notebook && notebook->get_is_drawable()) {
-        notebook->get_style_context()->remove_class("blink");
+    if (notebook) {
+        notebook->remove_css_class("blink");
     }
     return false;
 }
@@ -223,6 +223,7 @@ void DialogBase::setDesktop(SPDesktop *new_desktop)
 
 void DialogBase::fix_inner_scroll(Gtk::Widget * const widget)
 {
+#if 0 // Todo: Is this needed anymore?
     auto const scrollwin = dynamic_cast<Gtk::ScrolledWindow *>(widget);
     if (!scrollwin) return;
 
@@ -251,6 +252,7 @@ void DialogBase::fix_inner_scroll(Gtk::Widget * const widget)
         }
         return false;
     });
+#endif
 }
 
 /**

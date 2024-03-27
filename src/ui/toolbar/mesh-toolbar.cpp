@@ -22,7 +22,7 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/messagedialog.h>
-#include <gtkmm/radiobutton.h>
+#include <gtkmm/togglebutton.h>
 
 #include "desktop.h"
 #include "document-undo.h"
@@ -144,7 +144,7 @@ MeshToolbar::MeshToolbar(SPDesktop *desktop)
     , _edit_fill_btn(&get_widget<Gtk::ToggleButton>(_builder, "_edit_fill_btn"))
     , _edit_stroke_btn(&get_widget<Gtk::ToggleButton>(_builder, "_edit_stroke_btn"))
 {
-    auto *prefs = Inkscape::Preferences::get();
+    auto prefs = Preferences::get();
 
     _toolbar = &get_widget<Gtk::Box>(_builder, "mesh-toolbar");
 
@@ -171,7 +171,7 @@ MeshToolbar::MeshToolbar(SPDesktop *desktop)
     _select_type_item->set_active(0);
 
     _select_type_item->signal_changed().connect(sigc::mem_fun(*this, &MeshToolbar::type_changed));
-    get_widget<Gtk::Box>(_builder, "select_type_box").add(*_select_type_item);
+    get_widget<Gtk::Box>(_builder, "select_type_box").append(*_select_type_item);
 
     // Setup the spin buttons.
     setup_derived_spin_button(_row_item, "mesh_rows", 1, &MeshToolbar::row_changed);
@@ -182,7 +182,7 @@ MeshToolbar::MeshToolbar(SPDesktop *desktop)
 
     int btn_index = 0;
     for_each_child(get_widget<Gtk::Box>(_builder, "new_type_buttons_box"), [&](Gtk::Widget &item){
-        auto &btn = dynamic_cast<Gtk::RadioButton &>(item);
+        auto &btn = dynamic_cast<Gtk::ToggleButton &>(item);
         btn.set_active(btn_index == mode);
         btn.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MeshToolbar::new_geometry_changed), btn_index++));
         return ForEachResult::_continue;
@@ -192,7 +192,7 @@ MeshToolbar::MeshToolbar(SPDesktop *desktop)
 
     btn_index = 0;
     for_each_child(get_widget<Gtk::Box>(_builder, "new_fillstroke_buttons_box"), [&](Gtk::Widget &item){
-        auto &btn = dynamic_cast<Gtk::RadioButton &>(item);
+        auto &btn = dynamic_cast<Gtk::ToggleButton &>(item);
         btn.set_active(btn_index == mode);
         btn.signal_clicked().connect(
             sigc::bind(sigc::mem_fun(*this, &MeshToolbar::new_fillstroke_changed), btn_index++));
@@ -217,12 +217,12 @@ MeshToolbar::MeshToolbar(SPDesktop *desktop)
     // toolbar have been fetched. Otherwise, the children to be moved in the
     // popover will get mapped to a different position and it will probably
     // cause segfault.
-    auto children = _toolbar->get_children();
+    auto children = UI::get_children(*_toolbar);
 
     menu_btn1->init(1, "tag1", popover_box1, children);
     addCollapsibleButton(menu_btn1);
 
-    add(*_toolbar);
+    set_child(*_toolbar);
 
     // Signals.
     _edit_fill_btn->signal_toggled().connect(sigc::mem_fun(*this, &MeshToolbar::toggle_fill_stroke));
@@ -244,8 +244,6 @@ MeshToolbar::MeshToolbar(SPDesktop *desktop)
     get_widget<Gtk::Button>(_builder, "warning_btn").signal_clicked().connect([this] { warning_popup(); });
 
     desktop->connectEventContextChanged(sigc::mem_fun(*this, &MeshToolbar::watch_ec));
-
-    show_all();
 }
 
 MeshToolbar::~MeshToolbar() = default;
@@ -423,8 +421,8 @@ void MeshToolbar::warning_popup()
                   "\n"
                   "For web: convert to bitmap (Edit->Make bitmap copy).\n"
                   "For print: export to PDF.");
-    auto dialog = std::make_unique<Gtk::MessageDialog>(msg, false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
-    dialog_show_modal_and_selfdestruct(std::move(dialog), get_toplevel());
+    auto dialog = std::make_unique<Gtk::MessageDialog>(msg, false, Gtk::MessageType::WARNING, Gtk::ButtonsType::OK, true);
+    dialog_show_modal_and_selfdestruct(std::move(dialog), get_root());
 }
 
 /**

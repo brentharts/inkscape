@@ -18,9 +18,9 @@
 #include <sigc++/functors/mem_fun.h>
 #include <glibmm/ustring.h>
 #include <gtkmm/adjustment.h>
-#include <gtkmm/gesturemultipress.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/radiobuttongroup.h>
+#include <gtkmm/droptarget.h>
+#include <gtkmm/gestureclick.h>
+#include <gtkmm/checkbutton.h>
 
 #include "selected-style.h"
 
@@ -40,6 +40,7 @@
 #include "svg/css-ostringstream.h"
 #include "svg/svg-color.h"
 #include "ui/controller.h"
+#include "ui/clipboard.h"
 #include "ui/cursor-utils.h"
 #include "ui/dialog/dialog-container.h"
 #include "ui/dialog/dialog-base.h"
@@ -52,6 +53,7 @@
 #include "ui/widget/popover-menu-item.h"
 #include "util/safe-printf.h"
 #include "util/units.cpp"
+#include "util-string/ustring-format.h"
 #include "widgets/paintdef.h"
 #include "widgets/spw-utilities.h"
 
@@ -122,15 +124,11 @@ enum ui_drop_target_info {
     APP_OSWB_COLOR
 };
 
-static const std::vector<Gtk::TargetEntry> ui_drop_target_entries = {
-    Gtk::TargetEntry("application/x-oswb-color", Gtk::TargetFlags(0), APP_OSWB_COLOR)
-};
-
 /* convenience function */
 static Dialog::FillAndStroke *get_fill_and_stroke_panel(SPDesktop *desktop);
 
 SelectedStyle::SelectedStyle(bool /*layout*/)
-    : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL)
+    : Gtk::Box(Gtk::Orientation::HORIZONTAL)
     , dragging(false)
 {
     set_name("SelectedStyle");
@@ -142,7 +140,7 @@ SelectedStyle::SelectedStyle(bool /*layout*/)
     // Fill and stroke
     for (int i = 0; i <2; i++) {
         label[i] = Gtk::make_managed<Gtk::Label>(i == 0 ? _("Fill:") : _("Stroke:"));
-        label[i]->set_halign(Gtk::ALIGN_END);
+        label[i]->set_halign(Gtk::Align::END);
 
         // Multiple, Average, or Single
         tag[i] = Gtk::make_managed<Gtk::Label>(); // "m", "a", or empty
@@ -155,40 +153,56 @@ SelectedStyle::SelectedStyle(bool /*layout*/)
 
         // CSS sets width to 54.
         gradient_preview[i] = std::make_unique<GradientImage>(nullptr);
-        gradient_preview[i]->hide();
-        gradient_preview[i]->set_no_show_all();
+        gradient_preview[i]->set_visible(false);
 
         color_preview[i] = std::make_unique<Inkscape::UI::Widget::ColorPreview>(0);
         color_preview[i]->set_size_request(SELECTED_STYLE_PLACE_WIDTH, -1);
         color_preview[i]->set_hexpand(true);
-        color_preview[i]->hide();
-        color_preview[i]->set_no_show_all();
+        color_preview[i]->set_visible(false);
 
         // Shows one or two children at a time.
-        type_box[i] = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);
-        type_box[i]->set_hexpand(false);
-        type_box[i]->add(*type_label[i]);
-        type_box[i]->add(*gradient_preview[i]);
-        type_box[i]->add(*color_preview[i]);
-
-        // Wraps "type_box". Gtk4 change EventBox to Box and remove type_box.
         swatch[i] = Gtk::make_managed<RotateableSwatch>(this, i);
+        swatch[i]->set_orientation(Gtk::Orientation::HORIZONTAL);
+        swatch[i]->set_hexpand(false);
+        swatch[i]->append(*type_label[i]);
+        swatch[i]->append(*gradient_preview[i]);
+        swatch[i]->append(*color_preview[i]);
         swatch[i]->set_tooltip_text(type_strings[0][i][1]);
         swatch[i]->set_size_request(SELECTED_STYLE_PLACE_WIDTH, -1);
-        swatch[i]->add(*type_box[i]);
 
-        // To do: Gtk4 update to C++ controller
         // Drag color from color palette, for example.
         drop[i] = std::make_unique<SelectedStyleDropTracker>();
         drop[i]->parent = this;
         drop[i]->item = i;
+        auto target = Gtk::DropTarget::create(Glib::Value<PaintDef>::value_type(), Gdk::DragAction::COPY | Gdk::DragAction::MOVE);
+        target->signal_drop().connect([this, i] (Glib::ValueBase const &value, double, double) {
+            if (!dropEnabled[i]) {
+                return false;
+            }
 
-        g_signal_connect(swatch[i]->gobj(),
-                         "drag-data-received",
-                         G_CALLBACK(dragDataReceived),
-                         drop[i].get());
-        // swatch[i]->signal_drag_data_received().connect(sigc::bind(sigc::mem_fun(*this, &SelectedStyle::dragDataReceived), drop[i].get());
+            auto const &tracker = *drop[i];
+            auto const &paintdef = *reinterpret_cast<PaintDef *>(g_value_get_boxed(value.gobj()));
 
+            // copied from drag-and-drop.cpp, case PaintDef
+            std::string colorspec;
+            if (paintdef.get_type() == PaintDef::NONE) {
+                colorspec = "none";
+            } else {
+                auto const [r, g, b] = paintdef.get_rgb();
+                colorspec.resize(63);
+                sp_svg_write_color(colorspec.data(), colorspec.size() + 1, SP_RGBA32_U_COMPOSE(r, g, b, 0xff));
+                colorspec.resize(std::strlen(colorspec.c_str()));
+            }
+
+            auto const css = sp_repr_css_attr_new();
+            sp_repr_css_set_property(css, tracker.item == SS_FILL ? "fill" : "stroke", colorspec.c_str());
+            sp_desktop_set_style(tracker.parent->_desktop, css);
+            sp_repr_css_attr_unref(css);
+
+            DocumentUndo::done(tracker.parent->_desktop->getDocument(), _("Drop color"), "");
+            return true;
+        }, true);
+        swatch[i]->add_controller(target);
         Controller::add_click(*swatch[i], {}, sigc::mem_fun(*this,
                                                             i == 0 ?
                                                             &SelectedStyle::on_fill_click :
@@ -205,7 +219,7 @@ SelectedStyle::SelectedStyle(bool /*layout*/)
     // Stroke width
     stroke_width = Gtk::make_managed<Gtk::Label>("1");
     stroke_width_rotateable = Gtk::make_managed<RotateableStrokeWidth>(this);
-    stroke_width_rotateable->add(*stroke_width);
+    stroke_width_rotateable->append(*stroke_width);
     stroke_width_rotateable->set_size_request(SELECTED_STYLE_STROKE_WIDTH, -1);
     Controller::add_click(*stroke_width_rotateable, {},
                           sigc::mem_fun(*this, &SelectedStyle::on_sw_click));
@@ -229,8 +243,7 @@ SelectedStyle::SelectedStyle(bool /*layout*/)
     grid->attach(*opacity_sb,       5, 0, 1, 2);
 
     grid->set_column_spacing(4);
-    grid->show_all();
-    add(*grid);
+    append(*grid);
 
     make_popup_units();
 }
@@ -255,52 +268,7 @@ SelectedStyle::setDesktop(SPDesktop *desktop)
     _sw_unit = desktop->getNamedView()->display_units;
 }
 
-// Todo: use C++ interface
-// void SelectedStyle::drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context,
-//                                        int x, int y, const SelectionData& selection_data,
-//                                        uint info, uint time, SelectedStyleDropTracker *tracker)
-// {
-//     std::cout << "SelectedStyle::drag_data_recieved" << std::endl;
-// }
 
-void SelectedStyle::dragDataReceived( GtkWidget */*widget*/,
-                                      GdkDragContext */*drag_context*/,
-                                      gint /*x*/, gint /*y*/,
-                                      GtkSelectionData *data,
-                                      guint /*info*/,
-                                      guint /*event_time*/,
-                                      gpointer user_data )
-{
-    auto const tracker = static_cast<SelectedStyleDropTracker*>(user_data);
-
-    // copied from drag-and-drop.cpp, case APP_OSWB_COLOR
-    bool worked = false;
-    Glib::ustring colorspec;
-    if (gtk_selection_data_get_format(data) == 8) {
-        PaintDef color;
-        worked = color.fromMIMEData("application/x-oswb-color",
-                                    reinterpret_cast<char const*>(gtk_selection_data_get_data(data)),
-                                    gtk_selection_data_get_length(data));
-        if (worked) {
-            if (color.get_type() == PaintDef::NONE) {
-                colorspec = "none";
-            } else {
-                auto [r, g, b] = color.get_rgb();
-                gchar* tmp = g_strdup_printf("#%02x%02x%02x", r, g, b);
-                colorspec = tmp;
-                g_free(tmp);
-            }
-        }
-    }
-    if (worked) {
-        SPCSSAttr *css = sp_repr_css_attr_new();
-        sp_repr_css_set_property(css, (tracker->item == SS_FILL) ? "fill":"stroke", colorspec.c_str());
-
-        sp_desktop_set_style(tracker->parent->_desktop, css);
-        sp_repr_css_attr_unref(css);
-        DocumentUndo::done(tracker->parent->_desktop->getDocument(), _("Drop color"), "");
-    }
-}
 
 void SelectedStyle::on_fill_remove() {
     SPCSSAttr *css = sp_repr_css_attr_new ();
@@ -499,8 +467,8 @@ void SelectedStyle::on_fill_copy() {
         Glib::ustring text;
         text += c;
         if (!text.empty()) {
-            Glib::RefPtr<Gtk::Clipboard> refClipboard = Gtk::Clipboard::get();
-            refClipboard->set_text(text);
+            auto const display = Gdk::Display::get_default();
+            display->get_primary_clipboard()->set_text(text);
         }
     }
 }
@@ -512,44 +480,47 @@ void SelectedStyle::on_stroke_copy() {
         Glib::ustring text;
         text += c;
         if (!text.empty()) {
-            Glib::RefPtr<Gtk::Clipboard> refClipboard = Gtk::Clipboard::get();
-            refClipboard->set_text(text);
+            auto const display = Gdk::Display::get_default();
+            display->get_primary_clipboard()->set_text(text);
         }
     }
 }
 
-void SelectedStyle::on_fill_paste() {
-    Glib::RefPtr<Gtk::Clipboard> refClipboard = Gtk::Clipboard::get();
-    Glib::ustring const text = refClipboard->wait_for_text();
-
+void SelectedStyle::_on_paste_callback(Glib::RefPtr<Gio::AsyncResult>& result, Glib::ustring typepaste)
+{
+    auto const display = Gdk::Display::get_default();
+    Glib::RefPtr<Gdk::Clipboard> refClipboard = display->get_primary_clipboard();
+    // Parse the clipboard text as if it was a color string.
+    Glib::ustring text;
+    try {
+        text = refClipboard->read_text_finish(result);
+    } catch (Glib::Error const &err) {
+        std::cout << "Pasting text failed: " << err.what() << std::endl;
+        return;
+    }
     if (!text.empty()) {
         guint32 color = sp_svg_read_color(text.c_str(), 0x000000ff); // impossible value, as SVG color cannot have opacity
         if (color == 0x000000ff) // failed to parse color string
             return;
 
         SPCSSAttr *css = sp_repr_css_attr_new ();
-        sp_repr_css_set_property (css, "fill", text.c_str());
+        sp_repr_css_set_property (css, typepaste.c_str(), text.c_str());
         sp_desktop_set_style (_desktop, css);
         sp_repr_css_attr_unref (css);
-        DocumentUndo::done(_desktop->getDocument(), _("Paste fill"), INKSCAPE_ICON("dialog-fill-and-stroke"));
+        DocumentUndo::done(_desktop->getDocument(), typepaste.c_str() == "fill" ? _("Paste fill") : _("Paste stroke"), INKSCAPE_ICON("dialog-fill-and-stroke"));
     }
 }
 
+void SelectedStyle::on_fill_paste() {
+    auto const display = Gdk::Display::get_default();
+    Glib::RefPtr<Gdk::Clipboard> refClipboard = display->get_primary_clipboard();
+    refClipboard->read_text_async(sigc::bind(sigc::mem_fun(*this, &SelectedStyle::_on_paste_callback), "fill"));
+}
+
 void SelectedStyle::on_stroke_paste() {
-    Glib::RefPtr<Gtk::Clipboard> refClipboard = Gtk::Clipboard::get();
-    Glib::ustring const text = refClipboard->wait_for_text();
-
-    if (!text.empty()) {
-        guint32 color = sp_svg_read_color(text.c_str(), 0x000000ff); // impossible value, as SVG color cannot have opacity
-        if (color == 0x000000ff) // failed to parse color string
-            return;
-
-        SPCSSAttr *css = sp_repr_css_attr_new ();
-        sp_repr_css_set_property (css, "stroke", text.c_str());
-        sp_desktop_set_style (_desktop, css);
-        sp_repr_css_attr_unref (css);
-        DocumentUndo::done(_desktop->getDocument(), _("Paste stroke"), INKSCAPE_ICON("dialog-fill-and-stroke"));
-    }
+    auto const display = Gdk::Display::get_default();
+    Glib::RefPtr<Gdk::Clipboard> refClipboard = display->get_primary_clipboard();
+    refClipboard->read_text_async(sigc::bind(sigc::mem_fun(*this, &SelectedStyle::_on_paste_callback), "stroke"));
 }
 
 void SelectedStyle::on_fillstroke_swap() {
@@ -566,7 +537,7 @@ void SelectedStyle::on_stroke_edit() {
         fs->showPageStrokePaint();
 }
 
-Gtk::EventSequenceState SelectedStyle::on_fill_click(Gtk::GestureMultiPress const &click, int n_press, double /*x*/,
+Gtk::EventSequenceState SelectedStyle::on_fill_click(Gtk::GestureClick const &click, int n_press, double /*x*/,
                                                      double /*y*/)
 {
     auto const button = click.get_current_button();
@@ -582,10 +553,10 @@ Gtk::EventSequenceState SelectedStyle::on_fill_click(Gtk::GestureMultiPress cons
             on_fill_remove();
         }
     }
-    return Gtk::EVENT_SEQUENCE_CLAIMED;
+    return Gtk::EventSequenceState::CLAIMED;
 }
 
-Gtk::EventSequenceState SelectedStyle::on_stroke_click(Gtk::GestureMultiPress const &click, int n_press, double /*x*/,
+Gtk::EventSequenceState SelectedStyle::on_stroke_click(Gtk::GestureClick const &click, int n_press, double /*x*/,
                                                        double /*y*/)
 {
     auto const button = click.get_current_button();
@@ -601,10 +572,10 @@ Gtk::EventSequenceState SelectedStyle::on_stroke_click(Gtk::GestureMultiPress co
             on_stroke_remove();
         }
     }
-    return Gtk::EVENT_SEQUENCE_CLAIMED;
+    return Gtk::EventSequenceState::CLAIMED;
 }
 
-Gtk::EventSequenceState SelectedStyle::on_sw_click(Gtk::GestureMultiPress const &click, int n_press, double /*x*/,
+Gtk::EventSequenceState SelectedStyle::on_sw_click(Gtk::GestureClick const &click, int n_press, double /*x*/,
                                                    double /*y*/)
 {
     auto const button = click.get_current_button();
@@ -620,11 +591,11 @@ Gtk::EventSequenceState SelectedStyle::on_sw_click(Gtk::GestureMultiPress const 
     } else if (button == 2) { // middle click, toggle none/lastwidth?
         //
     }
-    return Gtk::EVENT_SEQUENCE_CLAIMED;
+    return Gtk::EventSequenceState::CLAIMED;
 }
 
 Gtk::EventSequenceState
-SelectedStyle::on_opacity_click(Gtk::GestureMultiPress const & /*click*/,
+SelectedStyle::on_opacity_click(Gtk::GestureClick const & /*click*/,
                                 int /*n_press*/, double /*x*/, double /*y*/)
 {
     const char* opacity = opacity_sb->get_value() < 50? "0.5" : (opacity_sb->get_value() == 100? "0" : "1");
@@ -633,7 +604,7 @@ SelectedStyle::on_opacity_click(Gtk::GestureMultiPress const & /*click*/,
     sp_desktop_set_style (_desktop, css);
     sp_repr_css_attr_unref (css);
     DocumentUndo::done(_desktop->getDocument(), _("Change opacity"), INKSCAPE_ICON("dialog-fill-and-stroke"));
-    return Gtk::EVENT_SEQUENCE_CLAIMED;
+    return Gtk::EventSequenceState::CLAIMED;
 }
 
 template <typename Slot, typename ...Args>
@@ -641,14 +612,14 @@ static UI::Widget::PopoverMenuItem *make_menu_item(Glib::ustring const &label, S
                                             Args &&...args)
 {
     auto const item = Gtk::make_managed<UI::Widget::PopoverMenuItem>(std::forward<Args>(args)...);
-    item->add(*Gtk::make_managed<Gtk::Label>(label, Gtk::ALIGN_START, Gtk::ALIGN_START));
+    item->set_child(*Gtk::make_managed<Gtk::Label>(label, Gtk::Align::START, Gtk::Align::START));
     item->signal_activate().connect(std::move(slot));
     return item;
 };
 
 void SelectedStyle::make_popup(FillOrStroke const i)
 {
-    _popup[i] = std::make_unique<UI::Widget::PopoverMenu>(*this, Gtk::POS_TOP);
+    _popup[i] = std::make_unique<UI::Widget::PopoverMenu>(*this, Gtk::PositionType::TOP);
 
 
     auto const add_item = [&](Glib::ustring const &  fill_label, auto const   fill_method,
@@ -705,25 +676,28 @@ void SelectedStyle::make_popup(FillOrStroke const i)
              _("Unset Stroke")        , &SelectedStyle::on_stroke_unset       );
     add_item(_("Remove Fill"  )       , &SelectedStyle::  on_fill_remove      ,
              _("Remove Stroke")       , &SelectedStyle::on_stroke_remove      );
-
-    _popup[i]->show_all_children();
 }
 
 void SelectedStyle::make_popup_units()
 {
-    _popup_sw = std::make_unique<UI::Widget::PopoverMenu>(*this, Gtk::POS_TOP);
+    _popup_sw = std::make_unique<UI::Widget::PopoverMenu>(*this, Gtk::PositionType::TOP);
 
     _popup_sw->append_section_label(_("<b>Stroke Width</b>"));
 
     _popup_sw->append_separator();
 
     _popup_sw->append_section_label(_("Unit"));
-    auto group = Gtk::RadioButtonGroup{};
+    Gtk::CheckButton *group = nullptr;
     auto const &unit_table = Util::UnitTable::get();
     for (auto const &[key, value] : unit_table.units(Inkscape::Util::UNIT_TYPE_LINEAR)) {
         auto const item = Gtk::make_managed<UI::Widget::PopoverMenuItem>();
-        auto const radio = Gtk::make_managed<Gtk::RadioButton>(group, key);
-        item->add(*radio);
+        auto const radio = Gtk::make_managed<Gtk::CheckButton>(key);
+        if (!group) {
+            group = radio;
+        } else {
+            radio->set_group(*group);
+        }
+        item->set_child(*radio);
         _unit_mis.push_back(radio);
         auto const u = unit_table.getUnit(key);
         item->signal_activate().connect(
@@ -735,7 +709,7 @@ void SelectedStyle::make_popup_units()
 
     _popup_sw->append_section_label(_("Width"));
     for (std::size_t i = 0; i < _sw_presets.size(); ++i) {
-        _popup_sw->append(*make_menu_item(Glib::ustring::format(_sw_presets[i]),
+        _popup_sw->append(*make_menu_item(Inkscape::ustring::format_classic(_sw_presets[i]),
             sigc::bind(sigc::mem_fun(*this, &SelectedStyle::on_popup_preset), i)));
     }
 
@@ -743,8 +717,6 @@ void SelectedStyle::make_popup_units()
 
     _popup_sw->append(*make_menu_item(_("Remove Stroke"),
           sigc::mem_fun(*this, &SelectedStyle::on_stroke_remove)));
-
-    _popup_sw->show_all_children();
 }
 
 void SelectedStyle::on_popup_units(Inkscape::Util::Unit const *unit) {
@@ -782,8 +754,8 @@ SelectedStyle::update()
 
         // New
         type_label[i]->show(); // Used by all types except solid color.
-        gradient_preview[i]->hide();
-        color_preview[i]->hide();
+        gradient_preview[i]->set_visible(false);
+        color_preview[i]->set_visible(false);
 
         _mode[i] = SS_NA;
         _paintserver_id[i].clear();
@@ -805,19 +777,13 @@ SelectedStyle::update()
             swatch[i]->set_tooltip_text(type_strings[SS_NA][i][1]);
 
             if (dropEnabled[i]) {
-                swatch[i]->drag_dest_unset();
                 dropEnabled[i] = false;
             }
             break;
         case QUERY_STYLE_SINGLE:
         case QUERY_STYLE_MULTIPLE_AVERAGED:
         case QUERY_STYLE_MULTIPLE_SAME: {
-            if (!dropEnabled[i]) {
-                swatch[i]->drag_dest_set(ui_drop_target_entries,
-                                         Gtk::DestDefaults::DEST_DEFAULT_ALL,
-                                         Gdk::DragAction::ACTION_COPY | Gdk::DragAction::ACTION_MOVE);
-                dropEnabled[i] = true;
-            }
+            dropEnabled[i] = true;
 
             auto paint = i == SS_FILL ? query.fill.upcast() : query.stroke.upcast();
             if (paint->set && paint->isPaintserver()) {
@@ -883,7 +849,7 @@ SelectedStyle::update()
                 // No type_label.
                 swatch[i]->set_tooltip_text(type_strings[SS_COLOR][i][1] + ": " + c_string +
                                             _(", drag to adjust, middle-click to remove"));
-                type_label[i]->hide();
+                type_label[i]->set_visible(false);
                 color_preview[i]->setRgba32(color);
                 color_preview[i]->show();
 
@@ -1010,7 +976,7 @@ void SelectedStyle::opacity_1()   {opacity_sb->set_value(100);}
 
 void SelectedStyle::make_popup_opacity()
 {
-    _popup_opacity = std::make_unique<UI::Widget::PopoverMenu>(*this, Gtk::POS_TOP);
+    _popup_opacity = std::make_unique<UI::Widget::PopoverMenu>(*this, Gtk::PositionType::TOP);
     auto const add_item = [&](Glib::ustring const &label, auto const method)
                           { _popup_opacity->append(*make_menu_item(label, sigc::mem_fun(*this, method))); };
     add_item(_("0 (Transparent)"), &SelectedStyle::opacity_0  );
@@ -1138,10 +1104,7 @@ void RotateableSwatch::do_motion(double by, guint modifier)
         } else if (modifier == 3) {
             cursor_filename = "adjust_alpha.svg";
         }
-
-        auto window = get_window();
-        auto cursor = load_svg_cursor(get_display(), window, cursor_filename);
-        get_window()->set_cursor(cursor);
+        set_svg_cursor(*this, cursor_filename);
 
         cursor_state = modifier;
     }
@@ -1209,7 +1172,9 @@ void RotateableSwatch::do_release(double by, guint modifier)
     color_adjust(hsla, by, startcolor, modifier);
 
     if (cursor_state != -1) {
-        get_window()->set_cursor(); // Use parent window cursor.
+        if (auto window = dynamic_cast<Gtk::Window *>(get_root())) {
+            window->set_cursor(); // Use parent window cursor.
+        }
         cursor_state = -1;
     }
 

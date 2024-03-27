@@ -17,7 +17,11 @@
 #ifndef INKSCAPE_WINDOW_H
 #define INKSCAPE_WINDOW_H
 
+#include <glibmm/refptr.h>
+#include <gdkmm/toplevel.h>
 #include <gtkmm/applicationwindow.h>
+
+#include "helper/auto-connection.h"
 
 namespace Gtk { class Box; }
 
@@ -26,7 +30,8 @@ class SPDocument;
 class SPDesktop;
 class SPDesktopWidget;
 
-class InkscapeWindow final : public Gtk::ApplicationWindow {
+class InkscapeWindow final : public Gtk::ApplicationWindow
+{
 public:
     InkscapeWindow(SPDocument* document);
     ~InkscapeWindow() final;
@@ -42,19 +47,20 @@ private:
     SPDesktop*           _desktop = nullptr;
     SPDesktopWidget*     _desktop_widget = nullptr;
     Gtk::Box*      _mainbox = nullptr;
+    Glib::RefPtr<Gtk::ShortcutController> _shortcut_controller;
 
     void setup_view();
     void add_document_actions();
 
-public:
-    // TODO: Can we avoid it being public? Probably yes in GTK4.
-    bool on_key_press_event(GdkEventKey* event) final;
+    Inkscape::auto_connection _toplevel_state_connection;
+    Gdk::Toplevel::State _old_toplevel_state{};
 
-private:
-    bool on_window_state_changed(GdkEventWindowState const *event);
+    void on_realize() override;
+    Glib::RefPtr<Gdk::Toplevel const> get_toplevel() const;
+    void on_toplevel_state_changed();
     void on_is_active_changed();
-    bool on_delete_event(GdkEventAny* event) final;
-    bool on_configure_event(GdkEventConfigure *event) final;
+    bool on_close_request() override;
+    void on_size_changed();
 
     void update_dialogs();
 };

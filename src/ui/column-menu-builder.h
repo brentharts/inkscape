@@ -25,12 +25,12 @@ template <typename SectionData = std::nullptr_t> // nullptr_t means no sections.
 class ColumnMenuBuilder {
 public:
     ColumnMenuBuilder(Widget::PopoverMenu& menu, int columns,
-                      Gtk::IconSize icon_size = Gtk::ICON_SIZE_MENU,
+                      Gtk::IconSize icon_size = Gtk::IconSize::NORMAL,
                       int const first_row = 0)
-       : _menu(menu)
+        : _menu(menu)
         , _row(first_row)
         , _columns(columns)
-        , _icon_size(static_cast<int>(icon_size))
+        , _icon_size{icon_size}
     {
         assert(_row >= 0);
         assert(_columns >= 1);
@@ -51,7 +51,7 @@ public:
 
             // add separator
             if (_row > 0) {
-                auto const separator = Gtk::make_managed<Gtk::Separator>(Gtk::ORIENTATION_HORIZONTAL);
+                auto const separator = Gtk::make_managed<Gtk::Separator>(Gtk::Orientation::HORIZONTAL);
                 separator->set_visible(true);
                 _menu.attach(*separator, 0, _columns, _row, _row + 1);
                 _row++;
@@ -60,10 +60,9 @@ public:
             _last_section = section;
 
             auto const sep = Gtk::make_managed<Widget::PopoverMenuItem>();
-            sep->get_style_context()->add_class("menu-category");
+            sep->add_css_class("menu-category");
             sep->set_sensitive(false);
-            sep->set_halign(Gtk::ALIGN_START);
-            sep->show_all();
+            sep->set_halign(Gtk::Align::START);
             _menu.attach(*sep, 0, _columns, _row, _row + 1);
             _section = sep;
             _row++;
@@ -92,7 +91,6 @@ public:
         }
         item->set_sensitive(sensitive);
         item->signal_activate().connect(std::move(callback));
-        item->show_all();
 
         add_item(*item, section);
 

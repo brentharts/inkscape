@@ -2,7 +2,7 @@
 /** \file
  *extension parameter for options with multiple predefined value choices
  *
- * Currently implemented as either Gtk::RadioButton or Gtk::ComboBoxText
+ * Currently implemented as either Gtk::CheckButton or Gtk::ComboBoxText
  */
 
 /*
@@ -19,16 +19,16 @@
 
 #include <unordered_set>
 #include <gtkmm/box.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/comboboxtext.h>
-#include <gtkmm/radiobutton.h>
+#include <gtkmm/label.h>
 
 #include "extension/extension.h"
 #include "preferences.h"
 #include "ui/pack.h"
 #include "xml/node.h"
 
-namespace Inkscape {
-namespace Extension {
+namespace Inkscape::Extension {
 
 ParamOptionGroup::ParamOptionGroup(Inkscape::XML::Node *xml, Inkscape::Extension::Extension *ext)
     : InxParameter(xml, ext)
@@ -111,7 +111,6 @@ ParamOptionGroup::~ParamOptionGroup ()
     }
 }
 
-
 /**
  * A function to set the \c _value.
  *
@@ -172,20 +171,19 @@ Glib::ustring ParamOptionGroup::value_from_label(const Glib::ustring label)
     return value;
 }
 
-
-
-/** A special RadioButton class to use in ParamOptionGroup. */
-class RadioWidget : public Gtk::RadioButton {
+/** A special CheckButton class to use in ParamOptionGroup. */
+class RadioWidget : public Gtk::CheckButton {
 private:
     ParamOptionGroup *_pref;
     sigc::signal<void ()> *_changeSignal;
 public:
-    RadioWidget(Gtk::RadioButtonGroup& group, const Glib::ustring& label,
+    RadioWidget(Gtk::CheckButton * const group, Glib::ustring const &label,
                 ParamOptionGroup *pref, sigc::signal<void ()> *changeSignal)
-        : Gtk::RadioButton(group, label)
+        : Gtk::CheckButton{label}
         , _pref(pref)
         , _changeSignal(changeSignal)
     {
+        if (group) set_group(*group);
         add_changesignal();
     };
 
@@ -213,7 +211,6 @@ void RadioWidget::changed()
         _changeSignal->emit();
     }
 }
-
 
 /** A special ComboBoxText class to use in ParamOptionGroup. */
 class ComboWidget : public Gtk::ComboBoxText {
@@ -246,8 +243,6 @@ void ComboWidget::changed()
     }
 }
 
-
-
 /**
  * Creates the widget for the optiongroup parameter.
  */
@@ -257,9 +252,9 @@ Gtk::Widget *ParamOptionGroup::get_widget(sigc::signal<void ()> *changeSignal)
         return nullptr;
     }
 
-    auto const hbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, GUI_PARAM_WIDGETS_SPACING);
+    auto const hbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, GUI_PARAM_WIDGETS_SPACING);
 
-    auto const label = Gtk::make_managed<Gtk::Label>(_text, Gtk::ALIGN_START);
+    auto const label = Gtk::make_managed<Gtk::Label>(_text, Gtk::Align::START);
     UI::pack_start(*hbox, *label, false, false);
 
     if (_mode == COMBOBOX) {
@@ -278,13 +273,14 @@ Gtk::Widget *ParamOptionGroup::get_widget(sigc::signal<void ()> *changeSignal)
 
         UI::pack_end(*hbox, *combo, false, false);
     } else if (_mode == RADIOBUTTON) {
-        label->set_valign(Gtk::ALIGN_START); // align label and first radio
+        label->set_valign(Gtk::Align::START); // align label and first radio
 
-        auto const radios = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 0);
-        Gtk::RadioButtonGroup group;
+        auto const radios = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 0);
+        Gtk::CheckButton *group = nullptr;
 
         for (auto choice : choices) {
             auto const radio = Gtk::make_managed<RadioWidget>(group, choice->_text, this, changeSignal);
+            if (!group) group = radio;
             UI::pack_start(*radios, *radio, true, true);
             if (choice->_value == _value) {
                 radio->set_active();
@@ -294,10 +290,8 @@ Gtk::Widget *ParamOptionGroup::get_widget(sigc::signal<void ()> *changeSignal)
         UI::pack_end(*hbox, *radios, false, false);
     }
 
-    hbox->show_all();
-    return static_cast<Gtk::Widget *>(hbox);
+    return hbox;
 }
-
 
 ParamOptionGroup::ParamOptionGroupOption::ParamOptionGroupOption(Inkscape::XML::Node *xml, Inkscape::Extension::Extension *ext,
                                                                  const Inkscape::Extension::ParamOptionGroup *parent)
@@ -338,10 +332,7 @@ ParamOptionGroup::ParamOptionGroupOption::ParamOptionGroupOption(Inkscape::XML::
     }
 }
 
-
-
-}  /* namespace Extension */
-}  /* namespace Inkscape */
+} // namespace Inkscape::Extension
 
 /*
   Local Variables:

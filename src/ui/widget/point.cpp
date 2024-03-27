@@ -41,17 +41,13 @@ Point::Point(Glib::ustring const &label, Glib::ustring const &tooltip,
                unsigned digits,
                Glib::ustring const &icon,
                bool mnemonic)
-    : Labelled(label, tooltip, new Gtk::Box(Gtk::ORIENTATION_VERTICAL), icon, mnemonic),
+    : Labelled(label, tooltip, new Gtk::Box(Gtk::Orientation::VERTICAL), icon, mnemonic),
       xwidget("X:", {}, adjust, digits),
       ywidget("Y:", {}, adjust, digits)
 {
-    xwidget.drag_dest_unset();
-    ywidget.drag_dest_unset();
-
     auto &box = dynamic_cast<Gtk::Box &>(*getWidget());
     UI::pack_start(box, xwidget, true, true);
     UI::pack_start(box, ywidget, true, true);
-    box.show_all_children();
 }
 
 unsigned Point::getDigits() const
@@ -145,12 +141,12 @@ void Point::clearProgrammatically()
     ywidget.setProgrammatically = false;
 }
 
-Glib::SignalProxy<void> Point::signal_x_value_changed()
+Glib::SignalProxy<void()> Point::signal_x_value_changed()
 {
     return xwidget.signal_value_changed();
 }
 
-Glib::SignalProxy<void> Point::signal_y_value_changed()
+Glib::SignalProxy<void()> Point::signal_y_value_changed()
 {
     return ywidget.signal_value_changed();
 }

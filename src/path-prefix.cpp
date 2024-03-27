@@ -13,7 +13,7 @@
 #endif
 
 #ifdef _WIN32
-#include <windows.h> // for GetModuleFileNameW
+#include <libloaderapi.h> // for GetModuleFileNameW
 #endif
 
 #ifdef __APPLE__
@@ -49,17 +49,19 @@ static std::string _get_bundle_prefix_dir()
     char const *program_dir = get_program_dir();
     auto prefix = Glib::path_get_dirname(program_dir);
 
+#if defined(__APPLE__)
     if (g_str_has_suffix(program_dir, "Contents/MacOS")) {
         // macOS
         prefix += "/Resources";
-    } else if (Glib::path_get_basename(program_dir) == "bin") {
-        // Windows, Linux
-    } else if (Glib::path_get_basename(prefix) == "lib") {
-        // AppImage
-        // program_dir=appdir/lib/x86_64-linux-gnu
-        // prefix_dir=appdir/usr
-        prefix = Glib::build_filename(Glib::path_get_dirname(prefix), "usr");
     }
+#elif defined(__linux__)
+    if (g_str_has_suffix(program_dir, "/lib64")) {
+        // AppImage
+        // program_dir=appdir/lib64
+        // prefix_dir=appdir/usr
+        prefix = Glib::build_filename(prefix, "usr");
+    }
+#endif
 
     return prefix;
 }
@@ -83,7 +85,7 @@ char const *get_inkscape_datadir()
         if (datadir.empty()) {
             datadir = Glib::build_filename(_get_bundle_prefix_dir(), "share");
 
-            if (!Glib::file_test(Glib::build_filename(datadir, "inkscape"), Glib::FILE_TEST_IS_DIR)) {
+            if (!Glib::file_test(Glib::build_filename(datadir, "inkscape"), Glib::FileTest::IS_DIR)) {
                 datadir = INKSCAPE_DATADIR;
             }
         }
@@ -131,7 +133,7 @@ void set_xdg_env()
     //      2. move binary to Inkscape.app/Contents/MacOS and set rpath
     //      3. copy Info.plist
     // to ease up on testing and get correct application behavior (like dock icon).
-    if (!Glib::file_test(bundle_resources_lib_dir + "/gio/modules", Glib::FILE_TEST_EXISTS)) {
+    if (!Glib::file_test(bundle_resources_lib_dir + "/gio/modules", Glib::FileTest::EXISTS)) {
         // doesn't look like a standalone bundle
         return;
     }

@@ -75,32 +75,12 @@ Glib::ustring getLayoutPrefPath(SPDesktop *desktop)
     }
 }
 
-void sp_ui_import_files(char *buffer)
-{
-    auto const doc = SP_ACTIVE_DOCUMENT;
-    if (!doc) {
-        return;
-    }
-
-    char **l = g_uri_list_extract_uris(buffer);
-    for (int i = 0; i < g_strv_length(l); i++) {
-        char *filename = g_filename_from_uri(l[i], nullptr, nullptr);
-        if (filename && std::strlen(filename) > 2) {
-            // Pass off to common implementation
-            // TODO might need to get the proper type of Inkscape::Extension::Extension
-            file_import(doc, filename, nullptr);
-        }
-        g_free(filename);
-    }
-    g_strfreev(l);
-}
-
 void sp_ui_error_dialog(char const *message)
 {
     auto const safeMsg = Inkscape::IO::sanitizeString(message);
 
-    auto dlg = Gtk::MessageDialog(safeMsg, true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_CLOSE);
-    sp_transientize(dlg.Gtk::Widget::gobj());
+    auto dlg = Gtk::MessageDialog(safeMsg, true, Gtk::MessageType::ERROR, Gtk::ButtonsType::CLOSE);
+    sp_transientize(dlg);
 
     Inkscape::UI::dialog_run(dlg);
 }
@@ -119,12 +99,12 @@ bool sp_ui_overwrite_file(std::string const &filename)
                                             basename, dirname);
 
     auto window = SP_ACTIVE_DESKTOP->getToplevel();
-    auto dlg = Gtk::MessageDialog(*window, msg, true, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
-    dlg.add_button(_("_Cancel"), Gtk::RESPONSE_NO);
-    dlg.add_button(_("Replace"), Gtk::RESPONSE_YES);
-    dlg.set_default_response(Gtk::RESPONSE_YES);
+    auto dlg = Gtk::MessageDialog(*window, msg, true, Gtk::MessageType::QUESTION, Gtk::ButtonsType::NONE);
+    dlg.add_button(_("_Cancel"), Gtk::ResponseType::NO);
+    dlg.add_button(_("Replace"), Gtk::ResponseType::YES);
+    dlg.set_default_response(Gtk::ResponseType::YES);
 
-    return Inkscape::UI::dialog_run(dlg) == Gtk::RESPONSE_YES;
+    return Inkscape::UI::dialog_run(dlg) == Gtk::ResponseType::YES;
 }
 
 /*

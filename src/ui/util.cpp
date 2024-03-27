@@ -18,8 +18,6 @@
 #include <cairomm/pattern.h>
 #include <glibmm/i18n.h>
 #include <glibmm/regex.h>
-#include <gtkmm/bin.h>
-#include <gtkmm/container.h>
 #include <gtkmm/image.h>
 #include <gtkmm/label.h>
 #include <gtkmm/messagedialog.h>
@@ -33,7 +31,8 @@
 #include "util/numeric/converters.h"
 
 #if (defined (_WIN32) || defined (_WIN64))
-#include <gdk/gdkwin32.h>
+#undef NOGDI
+#include <gdk/win32/gdkwin32.h>
 #include <dwmapi.h>
 /* For Windows 10 version 1809, 1903, 1909. */
 #ifndef DWMWA_USE_IMMERSIVE_DARK_MODE_OLD
@@ -56,9 +55,10 @@
  * Ellipse text if longer than maxlen, "50% start text + ... + ~50% end text"
  * Text should be > length 8 or just return the original text
  */
-Glib::ustring ink_ellipsize_text(Glib::ustring const &src, size_t maxlen)
+Glib::ustring ink_ellipsize_text(Glib::ustring const &src, std::size_t maxlen)
 {
     if (src.length() > maxlen && maxlen > 8) {
+        using std::size_t;
         size_t p1 = (size_t) maxlen / 2;
         size_t p2 = (size_t) src.length() - (maxlen - p1 - 1);
         return src.substr(0, p1) + "…" + src.substr(p2);
@@ -106,7 +106,7 @@ void set_icon_sizes(Gtk::Widget *parent, int pixel_size)
     if (!parent) return;
     for_each_descendant(*parent, [=](Gtk::Widget &widget) {
         if (auto const ico = dynamic_cast<Gtk::Image *>(&widget)) {
-            ico->set_from_icon_name(ico->get_icon_name(), static_cast<Gtk::IconSize>(Gtk::ICON_SIZE_BUTTON));
+            ico->set_from_icon_name(ico->get_icon_name());
             ico->set_pixel_size(pixel_size);
         }
         return ForEachResult::_continue;
@@ -121,64 +121,41 @@ void set_icon_sizes(GtkWidget* parent, int pixel_size)
 void gui_warning(const std::string &msg, Gtk::Window *parent_window) {
     g_warning("%s", msg.c_str());
     if (INKSCAPE.active_desktop()) {
-        Gtk::MessageDialog warning(_(msg.c_str()), false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+        Gtk::MessageDialog warning(_(msg.c_str()), false, Gtk::MessageType::WARNING, Gtk::ButtonsType::OK, true);
         warning.set_transient_for( parent_window ? *parent_window : *(INKSCAPE.active_desktop()->getToplevel()) );
         dialog_run(warning);
     }
 }
 
 void resize_widget_children(Gtk::Widget *widget) {
+    /* TODO: GTK4: Figure out if actually needed, and if so, needs reworked.
     if(widget) {
         Gtk::Allocation allocation;
         int             baseline;
         widget->get_allocated_size(allocation, baseline);
         widget->size_allocate(allocation, baseline);
     }
-}
-
-Gtk::Widget *get_bin_child(Gtk::Widget &widget)
-{
-    auto const bin = dynamic_cast<Gtk::Bin *>(&widget);
-    return bin ? bin->get_child() : nullptr;
+    */
 }
 
 std::vector<Gtk::Widget *> get_children(Gtk::Widget &widget)
 {
-    auto const container = dynamic_cast<Gtk::Container *>(&widget);
-    if (container) return container->get_children();
-    return {};
-}
-
-Gtk::Widget *get_first_child(Gtk::Widget &widget)
-{
-    auto child = get_bin_child(widget);
-    if (!child) {
-        auto const children = get_children(widget);
-        if (!children.empty()) child = children.front();
+    auto children = std::vector<Gtk::Widget *>{};
+    for (auto child = widget.get_first_child(); child; child = child->get_next_sibling()) {
+        children.push_back(child);
     }
-    return child;
+    return children;
 }
 
-void remove_all_children(Gtk::Widget &widget)
+Gtk::Widget &get_nth_child(Gtk::Widget &widget, std::size_t const index)
 {
-    auto &container = dynamic_cast<Gtk::Container &>(widget);
-    for (auto const child: get_children(container)) {
-        container.remove(*child);
+    auto child = widget.get_first_child();
+    for (std::size_t i = 0; true; ++i) {
+        if (!child) throw std::out_of_range{"get_nth_child()"};
+        if (i == index) break;
+        child = child->get_next_sibling();
     }
-}
-
-void delete_all_children(Gtk::Widget &widget)
-{
-    auto &container = dynamic_cast<Gtk::Container &>(widget);
-    for (auto const child: get_children(container)) {
-        container.remove(*child);
-        delete child;
-    }
-}
-
-Gtk::Widget *get_parent(Gtk::Widget &widget)
-{
-    return static_cast<Gtk::Widget *>(widget.get_parent());
+    return *child;
 }
 
 /**
@@ -205,7 +182,7 @@ Gtk::Widget *find_widget_by_name(Gtk::Widget &parent, Glib::ustring const &name)
 Gtk::Widget *find_focusable_widget(Gtk::Widget &parent)
 {
     return for_each_descendant(parent, [](auto const &widget)
-          { return widget.get_can_focus() ? ForEachResult::_break : ForEachResult::_continue; });
+          { return widget.get_focusable() ? ForEachResult::_break : ForEachResult::_continue; });
 }
 
 /// Returns if widget is a descendant of given ancestor, i.e.: itself, a child, or a childʼs child.
@@ -218,16 +195,38 @@ bool is_descendant_of(Gtk::Widget const &descendant, Gtk::Widget const &ancestor
           { return &parent == &ancestor ? ForEachResult::_break : ForEachResult::_continue; });
 }
 
-/// Get the relative font size as determined by a widgetʼs style/Pango contexts.
-/// This creates an empty Pango Layout for the widget so only call it sparingly!
-int
-get_font_size(Gtk::Widget &widget)
+/// Returns if widget or one of its descendants has focus.
+/// @param widget The widget of interest.
+/// @return If the widget of interest or a descendant has focus.
+bool contains_focus(Gtk::Widget &widget)
 {
-    auto const layout = widget.create_pango_layout({});
-    auto font = layout->get_font_description();
-    if (!font.gobj()) font = layout->get_context()->get_font_description();
-    auto font_size = font.get_size();
-    if (!font.get_size_is_absolute()) font_size /= Pango::SCALE;
+    if (widget.has_focus()) {
+        return true;
+    }
+
+    Gtk::Root const *root = widget.get_root();
+    if (!root) {
+        return false;
+    }
+
+    Gtk::Widget const *focused = root->get_focus();
+    if (!focused) {
+        return false;
+    }
+
+    return focused->is_ancestor(widget);
+}
+
+/// Get the relative font size as determined by a widgetʼs style/Pango contexts.
+int get_font_size(Gtk::Widget &widget)
+{
+    auto pango_context = widget.get_pango_context();
+    auto font_description = pango_context->get_font_description();
+    double font_size = font_description.get_size();
+    font_size /= Pango::SCALE;
+    if (font_description.get_size_is_absolute()) {
+        font_size *= 0.75;
+    }
     return font_size;
 }
 
@@ -245,7 +244,7 @@ void ellipsize(Gtk::Label &label, int const max_width_chars, Pango::EllipsizeMod
 
         tooltip->set_text(label.get_text());
         return true;
-    });
+    }, true);
 }
 
 } // namespace Inkscape::UI
@@ -270,17 +269,12 @@ double get_luminance(Gdk::RGBA const &rgba)
          + 0.114 * rgba.get_blue ();
 }
 
-Gdk::RGBA get_foreground_color(Glib::RefPtr<Gtk::StyleContext const> const &context)
-{
-    return context->get_color(context->get_state());
-}
-
-Gdk::RGBA get_color_with_class(Glib::RefPtr<Gtk::StyleContext> const &context,
+Gdk::RGBA get_color_with_class(Gtk::Widget &widget,
                                Glib::ustring const &css_class)
 {
-    if (!css_class.empty()) context->add_class(css_class);
-    auto result = get_foreground_color(context);
-    if (!css_class.empty()) context->remove_class(css_class);
+    if (!css_class.empty()) widget.add_css_class(css_class);
+    auto result = widget.get_color();
+    if (!css_class.empty()) widget.remove_css_class(css_class);
     return result;
 }
 
@@ -384,12 +378,12 @@ uint32_t conv_gdk_color_to_rgba(const Gdk::RGBA& color, double replace_alpha) {
     return rgba;
 }
 
-void set_dark_titlebar(Glib::RefPtr<Gdk::Window> const &win, bool is_dark)
+void set_dark_titlebar(Glib::RefPtr<Gdk::Surface> const &surface, bool is_dark)
 {
 #if (defined (_WIN32) || defined (_WIN64))
-    if (win->gobj()) {
+    if (surface->gobj()) {
         BOOL w32_darkmode = is_dark;
-        HWND hwnd = (HWND)gdk_win32_window_get_handle((GdkWindow*)win->gobj());
+        HWND hwnd = (HWND)gdk_win32_surface_get_handle((GdkSurface*)surface->gobj());
         if (DwmSetWindowAttribute) {
             DWORD attr = DWMWA_USE_IMMERSIVE_DARK_MODE;
             if (FAILED(DwmSetWindowAttribute(hwnd, attr, &w32_darkmode, sizeof(w32_darkmode)))) {
@@ -426,9 +420,9 @@ static int fmt_number(const _GMatchInfo* match, _GString* ret, void* prec) {
 
 Glib::ustring round_numbers(const Glib::ustring& text, int precision) {
     // match floating point number followed by something else (not a number); repeat
-    static const auto numbers = Glib::Regex::create("([-+]?(?:(?:\\d+\\.?\\d*)|(?:\\.\\d+))(?:[eE][-+]?\\d*)?)([^+\\-0-9]*)", Glib::REGEX_MULTILINE);
+    static const auto numbers = Glib::Regex::create("([-+]?(?:(?:\\d+\\.?\\d*)|(?:\\.\\d+))(?:[eE][-+]?\\d*)?)([^+\\-0-9]*)", Glib::Regex::CompileFlags::MULTILINE);
 
-    return numbers->replace_eval(text, text.size(), 0, Glib::RegexMatchFlags::REGEX_MATCH_NOTEMPTY, &fmt_number, &precision);
+    return numbers->replace_eval(text, text.size(), 0, Glib::Regex::MatchFlags::NOTEMPTY, &fmt_number, &precision);
 }
 
 // Round the selected floating point numbers in the attribute edit popover.
@@ -459,6 +453,33 @@ void truncate_digits(const Glib::RefPtr<Gtk::TextBuffer>& buffer, int precision)
         }
         buffer->select_range(buffer->get_iter_at_offset(start_idx), buffer->get_iter_at_offset(end_idx));
     }
+}
+
+Glib::RefPtr<Gdk::Texture> to_texture(Cairo::RefPtr<Cairo::Surface> const &surface)
+{
+    if (!surface) {
+        return {};
+    }
+
+    assert(surface->get_type() == Cairo::Surface::Type::IMAGE);
+
+    auto img = Cairo::ImageSurface(surface->cobj());
+    assert(img.get_format() == Cairo::ImageSurface::Format::ARGB32);
+
+    auto bytes = g_bytes_new_with_free_func(img.get_data(),
+                                            img.get_stride() * img.get_height(),
+                                            (GDestroyNotify)cairo_surface_destroy,
+                                            cairo_surface_reference(surface->cobj()));
+
+    auto texture = gdk_memory_texture_new(img.get_width(),
+                                          img.get_height(),
+                                          GDK_MEMORY_DEFAULT,
+                                          bytes,
+                                          img.get_stride());
+
+    g_bytes_unref(bytes);
+
+    return Glib::wrap(texture);
 }
 
 /*

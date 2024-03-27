@@ -18,6 +18,9 @@
 
 #include "stroke-style.h"
 
+#include <iostream>
+#include <iomanip>
+
 #include <glibmm/i18n.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/entry.h>
@@ -41,6 +44,7 @@
 #include "ui/icon-loader.h"
 #include "ui/icon-names.h"
 #include "ui/pack.h"
+#include "ui/util.h"
 #include "ui/widget/dash-selector.h"
 #include "ui/widget/marker-combo-box.h"
 #include "ui/widget/unit-menu.h"
@@ -107,8 +111,8 @@ static Gtk::Label *spw_label(Gtk::Grid *table, const gchar *label_text, int col,
   }
   label_widget->set_visible(true);
 
-  label_widget->set_halign(Gtk::ALIGN_START);
-  label_widget->set_valign(Gtk::ALIGN_CENTER);
+  label_widget->set_halign(Gtk::Align::START);
+  label_widget->set_valign(Gtk::Align::CENTER);
   label_widget->set_margin_start(4);
   label_widget->set_margin_end(4);
 
@@ -124,12 +128,12 @@ static Gtk::Label *spw_label(Gtk::Grid *table, const gchar *label_text, int col,
 static Gtk::Box *spw_hbox(Gtk::Grid *table, int width, int col, int row)
 {
   /* Create a new hbox with a 4-pixel spacing between children */
-  auto const hb = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 4);
+  auto const hb = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 4);
   g_assert(hb != nullptr);
   hb->set_visible(true);
   hb->set_hexpand();
-  hb->set_halign(Gtk::ALIGN_FILL);
-  hb->set_valign(Gtk::ALIGN_CENTER);
+  hb->set_halign(Gtk::Align::FILL);
+  hb->set_valign(Gtk::Align::CENTER);
   table->attach(*hb, col, row, width, 1);
   return hb;
 }
@@ -137,27 +141,30 @@ static Gtk::Box *spw_hbox(Gtk::Grid *table, int width, int col, int row)
 /**
  * Construct a stroke-style radio button with a given icon
  *
- * \param[in] grp          The Gtk::RadioButtonGroup to which to add the new button
+ * \param[in] grp          The Gtk::CheckButton with which to group
  * \param[in] icon         The icon to use for the button
  * \param[in] button_type  The type of stroke-style radio button (join/cap)
  * \param[in] stroke_style The style attribute to associate with the button
  */
-StrokeStyle::StrokeStyleButton::StrokeStyleButton(Gtk::RadioButtonGroup &grp,
+StrokeStyle::StrokeStyleButton::StrokeStyleButton(Gtk::ToggleButton    *&grp,
                                                   char const            *icon,
                                                   StrokeStyleButtonType  button_type,
                                                   gchar const           *stroke_style)
     : 
-        Gtk::RadioButton(grp),
         button_type(button_type),
         stroke_style(stroke_style)
 {
+    if (!grp) {
+        grp = this;
+    } else {
+        set_group(*grp);
+    }
     set_visible(true);
-    set_mode(false);
 
-    auto px = Gtk::manage(sp_get_icon_image(icon, Gtk::ICON_SIZE_LARGE_TOOLBAR));
+    auto px = Gtk::manage(sp_get_icon_image(icon, Gtk::IconSize::LARGE));
     g_assert(px != nullptr);
     px->set_visible(true);
-    add(*px);
+    set_child(*px);
 }
 
 std::vector<double> parse_pattern(const Glib::ustring& input) {
@@ -197,12 +204,12 @@ StrokeStyle::StrokeStyle() :
 {
     set_name("StrokeSelector");
     table = Gtk::make_managed<Gtk::Grid>();
-    table->property_margin().set_value(4);
+    table->set_margin(4);
     table->set_row_spacing(4);
     table->set_hexpand(false);
-    table->set_halign(Gtk::ALIGN_CENTER);
+    table->set_halign(Gtk::Align::CENTER);
     table->set_visible(true);
-    add(*table);
+    append(*table);
 
     Gtk::Box *hb;
     gint i = 0;
@@ -221,7 +228,7 @@ StrokeStyle::StrokeStyle() :
     widthSpin->set_visible(true);
     spw_label(table, C_("Stroke width", "_Width:"), 0, i, widthSpin);
 
-    sp_dialog_defocus_on_enter_cpp(widthSpin);
+    sp_dialog_defocus_on_enter(*widthSpin);
 
     UI::pack_start(*hb, *widthSpin, false, false);
     unitSelector = Gtk::make_managed<UnitMenu>();
@@ -251,34 +258,37 @@ StrokeStyle::StrokeStyle() :
                                             //   DashSelector class, so that we do not have to
                                             //   expose any of the underlying widgets?
     dashSelector = Gtk::make_managed<DashSelector>();
-    _pattern = Gtk::make_managed<Gtk::Entry>();
-
-    dashSelector->set_visible(true);
-    dashSelector->set_hexpand();
-    dashSelector->set_halign(Gtk::ALIGN_FILL);
-    dashSelector->set_valign(Gtk::ALIGN_CENTER);
+    dashSelector->changed_signal.connect([this](){
+        if (update || _editing_dash_pattern) {
+            return;
+        }
+        _editing_dash_pattern = true;
+        auto& dash_pattern = dashSelector->get_dash_pattern();
+        update_dash_entry(dash_pattern);
+        setStrokeDash();
+        _editing_dash_pattern = false;
+    });
     table->attach(*dashSelector, 1, i, 3, 1);
-    dashSelector->changed_signal.connect(sigc::mem_fun(*this, &StrokeStyle::setStrokeDash));
 
     i++;
 
-    table->attach(*_pattern, 1, i, 4, 1);
-    _pattern_label = spw_label(table, _("_Pattern:"), 0, i, _pattern);
-    _pattern_label->set_tooltip_text(_("Repeating \"dash gap ...\" pattern"));
-    _pattern->set_no_show_all();
-    _pattern_label->set_no_show_all();
-    _pattern->signal_changed().connect([=](){
-        if (update || _editing_pattern) return;
-
-        auto pat = parse_pattern(_pattern->get_text());
-        _editing_pattern = true;
+    _pattern_entry = Gtk::make_managed<Gtk::Entry>();
+    _pattern_entry->signal_changed().connect([this](){
+        if (update || _editing_dash_pattern) {
+            return;
+        }
+        _editing_dash_pattern = true;
         update = true;
-        dashSelector->set_dash(pat, dashSelector->get_offset());
+        auto pattern = parse_pattern(_pattern_entry->get_text());
+        dashSelector->set_dash_pattern(pattern, dashSelector->get_offset());
         update = false;
         setStrokeDash();
-        _editing_pattern = false;
+        _editing_dash_pattern = false;
     });
-    update_pattern(0, nullptr);
+    table->attach(*_pattern_entry, 1, i, 4, 1);
+
+    _pattern_label = spw_label(table, _("_Pattern:"), 0, i, _pattern_entry);
+    _pattern_label->set_tooltip_text(_("Repeating \"dash gap ...\" pattern"));
 
     i++;
 
@@ -293,24 +303,24 @@ StrokeStyle::StrokeStyle() :
 
     startMarkerCombo = Gtk::make_managed<MarkerComboBox>("marker-start", SP_MARKER_LOC_START);
     startMarkerCombo->set_tooltip_text(_("Start Markers are drawn on the first node of a path or shape"));
-    startMarkerConn = startMarkerCombo->connect_changed([=]{ markerSelectCB(startMarkerCombo, SP_MARKER_LOC_START); });
-    startMarkerCombo->connect_edit([=]{ enterEditMarkerMode(SP_MARKER_LOC_START); });
+    startMarkerConn = startMarkerCombo->connect_changed([this]{ markerSelectCB(startMarkerCombo, SP_MARKER_LOC_START); });
+    startMarkerCombo->connect_edit([this]{ enterEditMarkerMode(SP_MARKER_LOC_START); });
     startMarkerCombo->set_visible(true);
 
     UI::pack_start(*hb, *startMarkerCombo, true, true);
 
     midMarkerCombo = Gtk::make_managed<MarkerComboBox>("marker-mid", SP_MARKER_LOC_MID);
     midMarkerCombo->set_tooltip_text(_("Mid Markers are drawn on every node of a path or shape except the first and last nodes"));
-    midMarkerConn = midMarkerCombo->connect_changed([=]{ markerSelectCB(midMarkerCombo, SP_MARKER_LOC_MID); });
-    midMarkerCombo->connect_edit([=]{ enterEditMarkerMode(SP_MARKER_LOC_MID); });
+    midMarkerConn = midMarkerCombo->connect_changed([this]{ markerSelectCB(midMarkerCombo, SP_MARKER_LOC_MID); });
+    midMarkerCombo->connect_edit([this]{ enterEditMarkerMode(SP_MARKER_LOC_MID); });
     midMarkerCombo->set_visible(true);
 
     UI::pack_start(*hb, *midMarkerCombo, true, true);
 
     endMarkerCombo = Gtk::make_managed<MarkerComboBox>("marker-end", SP_MARKER_LOC_END);
     endMarkerCombo->set_tooltip_text(_("End Markers are drawn on the last node of a path or shape"));
-    endMarkerConn = endMarkerCombo->connect_changed([=]{ markerSelectCB(endMarkerCombo, SP_MARKER_LOC_END); });
-    endMarkerCombo->connect_edit([=]{ enterEditMarkerMode(SP_MARKER_LOC_END); });
+    endMarkerConn = endMarkerCombo->connect_changed([this]{ markerSelectCB(endMarkerCombo, SP_MARKER_LOC_END); });
+    endMarkerCombo->connect_edit([this]{ enterEditMarkerMode(SP_MARKER_LOC_END); });
     endMarkerCombo->set_visible(true);
 
     UI::pack_start(*hb, *endMarkerCombo, true, true);
@@ -323,7 +333,7 @@ StrokeStyle::StrokeStyle() :
 
     hb = spw_hbox(table, 3, 1, i);
 
-    Gtk::RadioButtonGroup joinGrp;
+    Gtk::ToggleButton *joinGrp = nullptr;
 
     joinBevel = makeRadioButton(joinGrp, INKSCAPE_ICON("stroke-join-bevel"),
                                 hb, STROKE_STYLE_BUTTON_JOIN, "bevel");
@@ -362,7 +372,7 @@ StrokeStyle::StrokeStyle() :
     miterLimitSpin->set_tooltip_text(_("Maximum length of the miter (in units of stroke width)"));
     miterLimitSpin->set_width_chars(6);
     miterLimitSpin->set_visible(true);
-    sp_dialog_defocus_on_enter_cpp(miterLimitSpin);
+    sp_dialog_defocus_on_enter(*miterLimitSpin);
 
     UI::pack_start(*hb, *miterLimitSpin, false, false);
     miterLimitAdj->signal_value_changed().connect(sigc::mem_fun(*this, &StrokeStyle::setStrokeMiter));
@@ -376,7 +386,7 @@ StrokeStyle::StrokeStyle() :
 
     hb = spw_hbox(table, 3, 1, i);
 
-    Gtk::RadioButtonGroup capGrp;
+    Gtk::ToggleButton *capGrp = nullptr;
 
     capButt = makeRadioButton(capGrp, INKSCAPE_ICON("stroke-cap-butt"),
                                 hb, STROKE_STYLE_BUTTON_CAP, "butt");
@@ -407,7 +417,7 @@ StrokeStyle::StrokeStyle() :
 
     hb = spw_hbox(table, 4, 1, i);
 
-    Gtk::RadioButtonGroup paintOrderGrp;
+    Gtk::ToggleButton *paintOrderGrp = nullptr;
 
     paintOrderFSM = makeRadioButton(paintOrderGrp, INKSCAPE_ICON("paint-order-fsm"),
                                     hb, STROKE_STYLE_BUTTON_ORDER, "normal");
@@ -478,7 +488,7 @@ void StrokeStyle::_handleDocumentReplaced(SPDesktop *, SPDocument *document)
 /**
  * Helper function for creating stroke-style radio buttons.
  *
- * \param[in] grp           The Gtk::RadioButtonGroup in which to add the button
+ * \param[in] grp           The Gtk::CheckButton with which to group
  * \param[in] icon          The icon for the button
  * \param[in] hb            The Gtk::Box container in which to add the button
  * \param[in] button_type   The type (join/cap) for the button
@@ -488,7 +498,7 @@ void StrokeStyle::_handleDocumentReplaced(SPDesktop *, SPDocument *document)
  *          a handler for the toggle event is connected.
  */
 StrokeStyle::StrokeStyleButton *
-StrokeStyle::makeRadioButton(Gtk::RadioButtonGroup &grp,
+StrokeStyle::makeRadioButton(Gtk::ToggleButton    *&grp,
                              char const            *icon,
                              Gtk::Box              *hb,
                              StrokeStyleButtonType  button_type,
@@ -684,31 +694,34 @@ void
 StrokeStyle::setDashSelectorFromStyle(DashSelector *dsel, SPStyle *style)
 {
     double offset = 0;
-    auto d = getDashFromStyle(style, offset);
-    if (!d.empty()) {
-        dsel->set_dash(d, offset);
-        update_pattern(d.size(), d.data());
-    } else {
-        dsel->set_dash(std::vector<double>(), 0.0);
-        update_pattern(0, nullptr);
-    }
+    auto dash_pattern = getDashFromStyle(style, offset);
+    dsel->set_dash_pattern(dash_pattern, offset);
+    update_dash_entry(dash_pattern);
 }
 
-void StrokeStyle::update_pattern(int ndash, const double* pattern) {
-    if (_editing_pattern || _pattern->has_focus()) return;
+void StrokeStyle::update_dash_entry(const std::vector<double> &dash_pattern)
+{
+    if (_editing_dash_pattern || contains_focus(*_pattern_entry)) { /* The GtkText object has focus. The focus test is required
+                                                                       as the StokeStyle widget is updated after all changed
+                                                                       are made (unnecessarily via selectionModifiedCB()).
+                                                                       Without this test, the cursor is placed at the beginning
+                                                                       of the GtkEntry after each character is typed. */
+        return;
+    }
 
     std::ostringstream ost;
-    for (int i = 0; i < ndash; ++i) {
-        ost << pattern[i] << ' ';
+    for (auto d : dash_pattern) {
+        ost << d << ' ';
     }
-    _pattern->set_text(ost.str().c_str());
-    if (ndash > 0) {
+    _pattern_entry->set_text(ost.str().c_str());
+
+    if (!dash_pattern.empty()) {
         _pattern_label->set_visible(true);
-        _pattern->set_visible(true);
+        _pattern_entry->set_visible(true);
     }
     else {
         _pattern_label->set_visible(false);
-        _pattern->set_visible(false);
+        _pattern_entry->set_visible(false);
     }
 }
 
@@ -718,7 +731,7 @@ void StrokeStyle::update_pattern(int ndash, const double* pattern) {
 void
 StrokeStyle::setJoinType (unsigned const jointype)
 {
-    Gtk::RadioButton *tb = nullptr;
+    Gtk::ToggleButton *tb = nullptr;
     switch (jointype) {
         case SP_STROKE_LINEJOIN_MITER:
             tb = joinMiter;
@@ -744,7 +757,7 @@ StrokeStyle::setJoinType (unsigned const jointype)
 void
 StrokeStyle::setCapType (unsigned const captype)
 {
-    Gtk::RadioButton *tb = nullptr;
+    Gtk::ToggleButton *tb = nullptr;
     switch (captype) {
         case SP_STROKE_LINECAP_BUTT:
             tb = capButt;
@@ -770,7 +783,7 @@ StrokeStyle::setCapType (unsigned const captype)
 void
 StrokeStyle::setPaintOrder (gchar const *paint_order)
 {
-    Gtk::RadioButton *tb = paintOrderFSM;
+    Gtk::ToggleButton *tb = paintOrderFSM;
 
     SPIPaintOrder temp;
     temp.read( paint_order );
@@ -889,7 +902,7 @@ StrokeStyle::updateLine()
         capSquare->set_sensitive(is_enabled);
 
         dashSelector->set_sensitive(is_enabled);
-        _pattern->set_sensitive(is_enabled);
+        _pattern_entry->set_sensitive(is_enabled);
     }
 
     if (result_ml != QUERY_STYLE_NOTHING)
@@ -1026,19 +1039,20 @@ void StrokeStyle::setStrokeWidth()
 }
 
 /**
- * Set the stroke dash pattern, scale to the existing width if needed
+ * Apply the stroke dash pattern to objects, scale to the existing width if needed.
  */
 void StrokeStyle::setStrokeDash()
 {
-    if (update) return;
+    if (update) {
+        return;
+    }
     update = true;
 
     auto document = desktop->getDocument();
     auto prefs = Inkscape::Preferences::get();
 
-    double offset = 0;
-    const auto& dash = dashSelector->get_dash(&offset);
-    update_pattern(dash.size(), dash.data());
+    const auto& dash = dashSelector->get_dash_pattern();
+    double offset    = dashSelector->get_offset();
 
     SPCSSAttr *css = sp_repr_css_attr_new();
     for (auto item : desktop->getSelection()->items()) {

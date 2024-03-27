@@ -28,8 +28,8 @@
 
 namespace Gtk {
 class Adjustment;
-class GestureMultiPress;
-class RadioButton;
+class GestureClick;
+class CheckButton;
 } // namespace Gtk
 
 class SPDesktop;
@@ -144,8 +144,7 @@ protected:
     std::unique_ptr<Gtk::Label> type_label[2]; // 'L', 'R', 'M', or empty.
     std::unique_ptr<GradientImage> gradient_preview[2];
     std::unique_ptr<ColorPreview> color_preview[2];
-    Gtk::Box   *type_box[2]; // Wraps one or two of: "type_label", "gradient_preview", "color_preview"
-    RotateableSwatch *swatch[2]; // Wraps "type_box".
+    RotateableSwatch *swatch[2]; // // Wraps one or two of: "type_label", "gradient_preview", "color_preview"
 
     Gtk::Label *stroke_width; // Stroke width
     RotateableStrokeWidth *stroke_width_rotateable;
@@ -161,21 +160,13 @@ protected:
     auto_connection selection_modified_connection;
     auto_connection subselection_changed_connection;
 
-    static void dragDataReceived( GtkWidget *widget,
-                                  GdkDragContext *drag_context,
-                                  gint x, gint y,
-                                  GtkSelectionData *data,
-                                  guint info,
-                                  guint event_time,
-                                  gpointer user_data );
-
-    Gtk::EventSequenceState on_fill_click   (Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_fill_click   (Gtk::GestureClick const &click,
                                              int n_press, double x, double y);
-    Gtk::EventSequenceState on_stroke_click (Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_stroke_click (Gtk::GestureClick const &click,
                                              int n_press, double x, double y);
-    Gtk::EventSequenceState on_opacity_click(Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_opacity_click(Gtk::GestureClick const &click,
                                              int n_press, double x, double y);
-    Gtk::EventSequenceState on_sw_click     (Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_sw_click     (Gtk::GestureClick const &click,
                                              int n_press, double x, double y);
 
     bool _opacity_blocked = false;
@@ -213,13 +204,14 @@ protected:
     void on_stroke_paste();
     void on_fill_opaque();
     void on_stroke_opaque();
+    void _on_paste_callback(Glib::RefPtr<Gio::AsyncResult> &result, Glib::ustring typepaste);
 
     std::unique_ptr<UI::Widget::PopoverMenu> _popup[2];
     UI::Widget::PopoverMenuItem *_popup_copy[2]{};
     void make_popup(FillOrStroke i);
 
     std::unique_ptr<UI::Widget::PopoverMenu> _popup_sw;
-    std::vector<Gtk::RadioButton *> _unit_mis;
+    std::vector<Gtk::CheckButton *> _unit_mis;
     void make_popup_units();
     void on_popup_units(Inkscape::Util::Unit const *u);
     void on_popup_preset(int i);

@@ -26,6 +26,7 @@
 
 #include <glibmm.h>
 #include <glibmm/i18n.h>
+#include <gdkmm/pixbuf.h>
 
 #include "document.h"
 #include "gradient-chemistry.h"
@@ -53,7 +54,7 @@ GradientVectorSelector::GradientVectorSelector(SPDocument *doc, SPGradient *gr)
 {
     _columns = new GradientSelector::ModelColumns();
     _store = Gtk::ListStore::create(*_columns);
-    set_orientation(Gtk::ORIENTATION_VERTICAL);
+    set_orientation(Gtk::Orientation::VERTICAL);
 
     if (doc) {
         set_gradient(doc, gr);

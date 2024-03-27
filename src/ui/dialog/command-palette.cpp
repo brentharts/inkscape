@@ -24,17 +24,19 @@
 #include <glibmm/main.h>
 #include <glibmm/variant.h>
 #include <giomm/action.h>
+#include <gtkmm/accelerator.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/box.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
+#include <gtkmm/eventcontrollerfocus.h>
 #include <gtkmm/label.h>
 #include <gtkmm/listbox.h>
 #include <gtkmm/listboxrow.h>
 #include <gtkmm/recentmanager.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/searchbar.h>
-#include <gtkmm/searchentry.h>
+#include <gtkmm/searchentry2.h>
 #include <gtkmm/window.h>
 
 #include "desktop.h"
@@ -50,6 +52,7 @@
 #include "io/resource.h"
 #include "ui/builder-utils.h"
 #include "ui/controller.h"
+#include "ui/shortcuts.h"
 #include "ui/util.h"
 #include "util/callback-converter.h"
 
@@ -62,7 +65,7 @@ CommandPalette::CommandPalette()
     : _builder(create_builder("command-palette-main.glade"))
     , _CPBase              (get_widget<Gtk::Box>(_builder, "CPBase"))
     , _CPListBase          (get_widget<Gtk::Box>(_builder, "CPListBase"))
-    , _CPFilter            (get_widget<Gtk::SearchEntry>(_builder, "CPFilter"))
+    , _CPFilter            (get_widget<Gtk::SearchEntry2>(_builder, "CPFilter"))
     , _CPSuggestions       (get_widget<Gtk::ListBox>(_builder, "CPSuggestions"))
     , _CPHistory           (get_widget<Gtk::ListBox>(_builder, "CPHistory"))
     , _CPSuggestionsScroll (get_widget<Gtk::ScrolledWindow>(_builder, "CPSuggestionsScroll"))
@@ -72,8 +75,8 @@ CommandPalette::CommandPalette()
     test_sort();
 
     // TODO: Customise on user language RTL, LTR or better user preference
-    _CPBase.set_halign(Gtk::ALIGN_CENTER);
-    _CPBase.set_valign(Gtk::ALIGN_START);
+    _CPBase.set_halign(Gtk::Align::CENTER);
+    _CPBase.set_valign(Gtk::Align::START);
 
     // Close the CommandPalette when the toplevel Window receives an Escape key press.
     // & also when the focused widget of said window is no longer a descendent of the Palette.
@@ -83,16 +86,20 @@ CommandPalette::CommandPalette()
      * Itʼd probably make sense to move this to the main window when thereʼs time */
     // TODO: GTK4: can maybe move this back to self once Windows donʼt intercept/forward/etc key events
     Controller::add_key_on_window<&CommandPalette::on_window_key_pressed>(_CPBase, *this,
-                                                                          Gtk::PHASE_CAPTURE);
+                                                                          Gtk::PropagationPhase::CAPTURE);
     Controller::add_focus_on_window(_CPBase, sigc::mem_fun(*this, &CommandPalette::on_window_focus));
 
-    _CPFilter.signal_activate().connect(sigc::mem_fun(*this, &CommandPalette::on_activate_cpfilter));
-    _CPFilter.signal_focus   ().connect(sigc::mem_fun(*this, &CommandPalette::on_focus_cpfilter   ));
+    _CPFilter.signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_activate_cpfilter));
+
+    auto focus = Gtk::EventControllerFocus::create();
+    focus->set_propagation_phase(Gtk::PropagationPhase::BUBBLE);
+    _CPFilter.add_controller(focus);
+    focus->signal_enter().connect([this] { on_activate_cpfilter(); });
 
     set_mode(CPMode::SEARCH);
 
     _CPSuggestions.set_activate_on_single_click();
-    _CPSuggestions.set_selection_mode(Gtk::SELECTION_SINGLE);
+    _CPSuggestions.set_selection_mode(Gtk::SelectionMode::SINGLE);
 
     // Setup operations [actions, extensions]
     {
@@ -166,8 +173,8 @@ void CommandPalette::open()
         _win_doc_actions_loaded = true;
     }
 
-    _CPBase.show_all();
     _CPFilter.grab_focus();
+
     _is_open = true;
 
 }
@@ -220,7 +227,6 @@ void CommandPalette::append_recent_file_operation(const Glib::ustring &path, boo
         }
 
         // Hide for recent_file, not required
-        CPActionFullButton.set_no_show_all();
         CPActionFullButton.set_visible(false);
 
         CPName.set_text((is_import ? _("Import") : _("Open")) + (": " + file_name));
@@ -250,7 +256,6 @@ void CommandPalette::append_recent_file_operation(const Glib::ustring &path, boo
 bool CommandPalette::generate_action_operation(const ActionPtrName &action_ptr_name, bool is_suggestion)
 {
     static const auto app = InkscapeApplication::instance();
-    static const auto gapp = app->gtk_app();
     static const InkActionExtraData &action_data = app->get_action_extra_data();
     static const bool show_full_action_name =
         Inkscape::Preferences::get()->getBool("/options/commandpalette/showfullactionname/value");
@@ -283,7 +288,6 @@ bool CommandPalette::generate_action_operation(const ActionPtrName &action_ptr_n
     CPActionFullLabel.set_text(action_ptr_name.second);
 
     if (not show_full_action_name) {
-        CPActionFullButton.set_no_show_all();
         CPActionFullButton.set_visible(false);
     } else {
         CPActionFullButton.signal_clicked().connect(
@@ -293,13 +297,13 @@ bool CommandPalette::generate_action_operation(const ActionPtrName &action_ptr_n
     }
 
     {
-        std::vector<Glib::ustring> accels = gapp->get_accels_for_action(action_ptr_name.second);
+        auto const &accels = Shortcuts::getInstance().get_triggers(action_ptr_name.second);
         std::string accel_label;
         for (const auto &accel : accels) {
             guint key = 0;
             Gdk::ModifierType mods;
-            Gtk::AccelGroup::parse(accel, key, mods);
-            Glib::ustring label = Gtk::AccelGroup::get_label(key, mods);
+            Gtk::Accelerator::parse(accel, key, mods);
+            Glib::ustring label = Gtk::Accelerator::get_label(key, mods);
             accel_label.append(label.raw()).append(1, ' ');
         }
 
@@ -307,7 +311,6 @@ bool CommandPalette::generate_action_operation(const ActionPtrName &action_ptr_n
             accel_label.pop_back();
             CPShortcut.set_text(accel_label);
         } else {
-            CPShortcut.set_no_show_all();
             CPShortcut.set_visible(false);
         }
     }
@@ -409,16 +412,17 @@ void CommandPalette::on_activate_cpfilter()
     }
 }
 
+// Fixme: Why is this unused?
 bool CommandPalette::on_focus_cpfilter(Gtk::DirectionType const direction)
 {
     if (_mode != CPMode::SEARCH) return false;
 
-    if (direction == Gtk::DIR_UP) {
+    if (direction == Gtk::DirectionType::UP) {
         set_mode(CPMode::HISTORY);
         return true;
     }
 
-    if (direction == Gtk::DIR_DOWN) {
+    if (direction == Gtk::DirectionType::DOWN) {
         // Unselect so we go to 1st row
         _CPSuggestions.unselect_all();
     }
@@ -435,14 +439,13 @@ void CommandPalette::hide_suggestions()
 void CommandPalette::show_suggestions()
 {
     _CPBase.set_size_request(-1, _max_height_requestable);
-    _CPListBase.show_all();
+    _CPListBase.set_visible(true);
 }
 
 void CommandPalette::on_action_fullname_clicked(const Glib::ustring &action_fullname)
 {
-    static auto clipboard = Gtk::Clipboard::get();
+    static auto clipboard = Gdk::Display::get_default()->get_clipboard();
     clipboard->set_text(action_fullname);
-    clipboard->store();
 }
 
 void CommandPalette::on_row_activated(Gtk::ListBoxRow *activated_row)
@@ -475,7 +478,7 @@ bool CommandPalette::operate_recent_file(Glib::ustring const &uri, bool const im
     // if the last element in CPHistory is already this, don't update history file
     if (not UI::get_children(_CPHistory).empty()) {
         if (const auto last_operation = _history_xml.get_last_operation(); last_operation.has_value()) {
-            if (uri == last_operation->data) {
+            if (uri.raw() == last_operation->data) {
                 bool last_operation_was_import = last_operation->history_type == HistoryType::IMPORT_FILE;
                 // As previous uri is verfied to be the same as current uri we can write to history if current and
                 // previous operation are not the same.
@@ -515,7 +518,7 @@ bool CommandPalette::operate_recent_file(Glib::ustring const &uri, bool const im
     return true;
 }
 
-static void set_hint_texts(Gtk::Entry &entry, Glib::ustring const &text)
+static void set_hint_texts(Gtk::SearchEntry2 &entry, Glib::ustring const &text)
 {
     entry.set_placeholder_text(text);
     entry.set_tooltip_text    (text);
@@ -535,7 +538,7 @@ bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
     if (const auto last_of_history = _history_xml.get_last_operation(); last_of_history.has_value()) {
         // operation history is not empty
         const auto last_full_action_name = last_of_history->data;
-        if (last_full_action_name != action_ptr_name.second) {
+        if (last_full_action_name != action_ptr_name.second.raw()) {
             // last action is not the same so write this one
             _history_xml.add_action(action_ptr_name.second);   // to history file
             generate_action_operation(action_ptr_name, false); // to _CPHistory
@@ -1077,11 +1080,9 @@ int CommandPalette::on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2)
 }
 
 // Widget.set_sensitive() made the cursor vanish, so… TODO: GTK4: Check if fixed
-static void set_sensitive(Gtk::Entry &entry, bool const sensitive)
+static void set_sensitive(Gtk::SearchEntry2 &entry, bool const sensitive)
 {
     entry.set_editable(sensitive);
-    entry.set_icon_activatable(sensitive, Gtk::ENTRY_ICON_PRIMARY  );
-    entry.set_icon_activatable(sensitive, Gtk::ENTRY_ICON_SECONDARY);
 }
 
 void CommandPalette::set_mode(CPMode mode)
@@ -1094,17 +1095,14 @@ void CommandPalette::set_mode(CPMode mode)
         case CPMode::SEARCH:
             set_sensitive(_CPFilter, true);
             _CPFilter.set_text("");
-            _CPFilter.set_icon_from_icon_name("edit-find-symbolic");
+            // _CPFilter.set_icon_from_icon_name("edit-find-symbolic"); // Icon not modifiable in GTK4.
             set_hint_texts(_CPFilter, _("Search operation..."));
 
             show_suggestions();
 
             // Show Suggestions instead of history
-            _CPHistoryScroll.set_no_show_all();
             _CPHistoryScroll.set_visible(false);
-
-            _CPSuggestionsScroll.set_no_show_all(false);
-            _CPSuggestionsScroll.show_all();
+            _CPSuggestionsScroll.set_visible(true);
 
             _CPSuggestions.unset_filter_func();
             _CPSuggestions.set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter_general));
@@ -1127,7 +1125,7 @@ void CommandPalette::set_mode(CPMode mode)
             set_sensitive(_CPFilter, true);
             _CPFilter.set_text("");
             _CPFilter.grab_focus();
-            _CPFilter.set_icon_from_icon_name("input-keyboard");
+            // _CPFilter.set_icon_from_icon_name("input-keyboard"); // Icon not modifiable in GTK4.
             set_hint_texts(_CPFilter, _("Enter action argument"));
 
             break;
@@ -1136,7 +1134,7 @@ void CommandPalette::set_mode(CPMode mode)
             hide_suggestions();
 
             set_sensitive(_CPFilter, true);
-            _CPFilter.set_icon_from_icon_name("gtk-search");
+            // _CPFilter.set_icon_from_icon_name("gtk-search"); // Icon not modifiable in GTK4.
 
             _cpfilter_search_connection.disconnect();
 
@@ -1149,13 +1147,11 @@ void CommandPalette::set_mode(CPMode mode)
             }
 
             // Show history instead of suggestions
-            _CPSuggestionsScroll.set_no_show_all();
-            _CPHistoryScroll.set_no_show_all(false);
             _CPSuggestionsScroll.set_visible(false);
-            _CPHistoryScroll.show_all();
+            _CPHistoryScroll.set_visible(true);
 
             set_sensitive(_CPFilter, false);
-            _CPFilter.set_icon_from_icon_name("format-justify-fill");
+            // _CPFilter.set_icon_from_icon_name("format-justify-fill"); // Icon not modifiable in GTK4.
             set_hint_texts(_CPFilter, _("History mode"));
 
             _cpfilter_search_connection.disconnect();

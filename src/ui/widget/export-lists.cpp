@@ -13,6 +13,7 @@
 #include <glibmm/convert.h>   // filename_from_utf8
 #include <glibmm/ustring.h>
 #include <gtkmm/builder.h>
+#include <gtkmm/label.h>
 #include <gtkmm/menubutton.h>
 #include <gtkmm/popover.h>
 #include <gtkmm/spinbutton.h>
@@ -25,7 +26,6 @@
 #include "io/sys.h"
 #include "preferences.h"
 #include "ui/icon-loader.h"
-#include "ui/widget/scrollprotected.h"
 #include "ui/builder-utils.h"
 #include "util/units.h"
 
@@ -37,7 +37,7 @@ ExtensionList::ExtensionList()
 }
 
 ExtensionList::ExtensionList(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade)
-    : Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText>(cobject, refGlade)
+    : Gtk::ComboBoxText{cobject}
 {
     init();
 }
@@ -52,10 +52,10 @@ void ExtensionList::init()
     _pref_holder  = &get_widget<Gtk::Viewport>  (_builder, "pref_holder");
 
     _popover_signal = _pref_popover->signal_show().connect([=, this]() {
-        _pref_holder->remove();
+        _pref_holder->unset_child();
         if (auto ext = getExtension()) {
             if (auto gui = ext->autogui(nullptr, nullptr)) {
-                _pref_holder->add(*gui);
+                _pref_holder->set_child(*gui);
                 _pref_popover->grab_focus();
             }
         }
@@ -66,7 +66,7 @@ void ExtensionList::init()
     // limit size of the combobox
     auto cell_renderer = dynamic_cast<Gtk::CellRendererText*>(get_first_cell());
     cell_renderer->set_fixed_size(125, -1);
-    cell_renderer->property_wrap_mode().set_value(Pango::WRAP_WORD);
+    cell_renderer->property_wrap_mode().set_value(Pango::WrapMode::WORD);
     cell_renderer->property_wrap_width().set_value(5);
 }
 
@@ -207,7 +207,7 @@ void ExportList::append_row()
     suffix->set_visible(true);
 
     auto const extension = Gtk::make_managed<ExtensionList>();
-    auto const dpi_sb = Gtk::make_managed<SpinButton>();
+    auto const dpi_sb = Gtk::make_managed<Gtk::SpinButton>();
 
     extension->setup();
     extension->set_visible(true);
@@ -231,12 +231,10 @@ void ExportList::append_row()
     dpi_sb->set_visible(true);
     this->attach(*dpi_sb, _dpi_col, current_row, 1, 1);
 
-    auto const pIcon = Gtk::manage(sp_get_icon_image("window-close", Gtk::ICON_SIZE_SMALL_TOOLBAR));
+    auto const pIcon = Gtk::manage(sp_get_icon_image("window-close", Gtk::IconSize::NORMAL));
     auto const delete_btn = Gtk::make_managed<Gtk::Button>();
-    delete_btn->set_relief(Gtk::RELIEF_NONE);
-    delete_btn->add(*pIcon);
-    delete_btn->show_all();
-    delete_btn->set_no_show_all(true);
+    delete_btn->set_has_frame(false);
+    delete_btn->set_child(*pIcon);
     this->attach(*delete_btn, _delete_col, current_row, 1, 1);
     delete_btn->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &ExportList::delete_row), delete_btn));
 
@@ -251,8 +249,9 @@ void ExportList::delete_row(Gtk::Widget *widget)
     if (_num_rows <= 1) {
         return;
     }
-    int row = this->child_property_top_attach(*widget);
-    this->remove_row(row);
+    int row, ignore;
+    query_child(*widget, ignore, row, ignore, ignore);
+    remove_row(row);
     _num_rows--;
     if (_num_rows <= 1) {
         auto const d_button_0 = this->get_child_at(_delete_col, 1);
@@ -281,7 +280,7 @@ Inkscape::Extension::Output *ExportList::getExtension(int row)
 double ExportList::get_dpi(int row)
 {
     double dpi = default_dpi;
-    SpinButton *spin_sb = dynamic_cast<SpinButton *>(this->get_child_at(_dpi_col, row + 1));
+    auto spin_sb = dynamic_cast<Gtk::SpinButton *>(this->get_child_at(_dpi_col, row + 1));
     if (spin_sb == nullptr) {
         return dpi;
     }

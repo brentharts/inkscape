@@ -21,7 +21,7 @@ ToolbarMenuButton::ToolbarMenuButton(BaseObjectType *cobject, Glib::RefPtr<Gtk::
     set_visible(false);
     signal_show().connect([this]{
         g_assert(_popover_box);
-        if (_popover_box && _popover_box->get_children().empty()) {
+        if (!_popover_box->get_first_child()) {
             set_visible(false);
         }
     }, false);
@@ -40,8 +40,7 @@ void ToolbarMenuButton::init(int priority, std::string tag, Gtk::Box *popover_bo
     // large enough.
     int pos = 0;
     for (auto child : children) {
-        auto style_context = child->get_style_context();
-        bool const is_child = style_context->has_class(_tag);
+        bool const is_child = child->has_css_class(_tag);
         if (is_child) {
             _children.emplace_back(pos, child);
         }
@@ -55,15 +54,10 @@ static int minw(Gtk::Widget const *widget)
     if (!widget) return 0;
 
     int min = 0;
-    int nat = 0;
-    widget->get_preferred_width(min, nat);
+    int ignore = 0;
+    widget->measure(Gtk::Orientation::HORIZONTAL, -1, min, ignore, ignore, ignore);
     return min;
 };
-
-int ToolbarMenuButton::get_required_width() const
-{
-    return minw(_popover_box) - minw(this);
-}
 
 } // namespace Inkscape::UI::Widget
 

@@ -23,6 +23,7 @@
 #include "ui/pack.h"
 #include "ui/tools/tool-base.h"
 #include "ui/util.h"
+#include "ui/widget/spinbutton.h"
 
 // TODO due to internal breakage in glibmm headers, this must be last:
 #include <glibmm/i18n.h>
@@ -88,6 +89,7 @@ LPEFilletChamfer::LPEFilletChamfer(LivePathEffectObject *lpeobject)
     chamfer_steps.param_set_increments(1, 1);
     chamfer_steps.param_make_integer();
     _provides_knotholder_entities = true;
+    _provides_path_adjustment = true;
     helperpath = false;
     previous_unit = Glib::ustring("");
 }
@@ -154,19 +156,12 @@ void LPEFilletChamfer::doOnApply(SPLPEItem const *lpeItem)
     nodesatellites_param.setPathVectorNodeSatellites(_pathvector_nodesatellites);
 }
 
-static void set_entry_width_chars(UI::Widget::Scalar &scalar, int const width_chars)
-{
-    auto const childList = UI::get_children(scalar);
-    auto &entry = dynamic_cast<Gtk::Entry &>(*childList.at(1));
-    entry.set_width_chars(width_chars);
-}
-
 Gtk::Widget *LPEFilletChamfer::newWidget()
 {
     // use manage here, because after deletion of Effect object, others might
     // still be pointing to this widget.
-    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
-    vbox->property_margin().set_value(5);
+    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
+    vbox->set_margin(5);
 
     for (auto const param: param_vector) {
         if (!param->widget_is_visible) continue;
@@ -178,12 +173,12 @@ Gtk::Widget *LPEFilletChamfer::newWidget()
             auto &scalar = dynamic_cast<UI::Widget::Scalar &>(*widg);
             scalar.signal_value_changed().connect(
                 sigc::mem_fun(*this, &LPEFilletChamfer::updateAmount));
-            set_entry_width_chars(scalar, 6);
+            scalar.getSpinButton().set_width_chars(6);
         } else if (param->param_key == "chamfer_steps") {
             auto &scalar = dynamic_cast<UI::Widget::Scalar &>(*widg);
             scalar.signal_value_changed().connect(
                 sigc::mem_fun(*this, &LPEFilletChamfer::updateChamferSteps));
-            set_entry_width_chars(scalar, 3);
+            scalar.getSpinButton().set_width_chars(3);
         }
 
         UI::pack_start(*vbox, *widg, true, true, 2);
@@ -198,7 +193,7 @@ Gtk::Widget *LPEFilletChamfer::newWidget()
 
     // Fillet and chamfer containers
 
-    auto const fillet_container = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 0);
+    auto const fillet_container = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 0);
     Gtk::Button *fillet =  Gtk::make_managed<Gtk::Button>(Glib::ustring(_("Fillet")));
     fillet->signal_clicked().connect(
         sigc::bind(sigc::mem_fun(*this, &LPEFilletChamfer::updateNodeSatelliteType), FILLET));
@@ -209,7 +204,7 @@ Gtk::Widget *LPEFilletChamfer::newWidget()
         sigc::mem_fun(*this, &LPEFilletChamfer::updateNodeSatelliteType), INVERSE_FILLET));
     UI::pack_start(*fillet_container, *inverse_fillet, true, true, 2);
 
-    auto const chamfer_container = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 0);
+    auto const chamfer_container = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 0);
     auto const chamfer = Gtk::make_managed<Gtk::Button>(Glib::ustring(_("Chamfer")));
     chamfer->signal_clicked().connect(
         sigc::bind(sigc::mem_fun(*this, &LPEFilletChamfer::updateNodeSatelliteType), CHAMFER));
@@ -330,7 +325,7 @@ void LPEFilletChamfer::doBeforeEffect(SPLPEItem const *lpeItem)
                     } else {
                         double size = arcLengthAt(amount, curve_in);
                         nodesatellites[i][j].amount = size;
-                    }
+                     }
                 }
                 nodesatellites[i][j].hidden = hide_knots;
                 if (only_selected && isNodePointSelected(curve_in.initialPoint()) ){
@@ -346,13 +341,12 @@ void LPEFilletChamfer::doBeforeEffect(SPLPEItem const *lpeItem)
         if (!_pathvector_nodesatellites) {
             _pathvector_nodesatellites = new PathVectorNodeSatellites();
         }
-        size_t number_nodes = count_pathvector_nodes(pathv);
-        size_t previous_number_nodes = _pathvector_nodesatellites->getTotalNodeSatellites();
-        if (is_load || number_nodes != previous_number_nodes) {
+        if (is_load || _adjust_path) {
             double power = radius;
             if (!flexible) {
                 power = Inkscape::Util::Quantity::convert(power, unit.get_abbreviation(), "px") / getSPDoc()->getDocumentScale()[Geom::X];
             }
+            _adjust_path = false; // not wait till effect finish
             NodeSatelliteType nodesatellite_type = FILLET;
             std::map<std::string, NodeSatelliteType> gchar_map_to_nodesatellite_type = boost::assign::map_list_of(
                 "F", FILLET)("IF", INVERSE_FILLET)("C", CHAMFER)("IC", INVERSE_CHAMFER)("KO", INVALID_SATELLITE);
@@ -379,6 +373,11 @@ void LPEFilletChamfer::doBeforeEffect(SPLPEItem const *lpeItem)
     } else {
         g_warning("LPE Fillet can only be applied to shapes (not groups).");
     }
+}
+
+void
+LPEFilletChamfer::adjustForNewPath() {
+    _adjust_path = true;
 }
 
 void

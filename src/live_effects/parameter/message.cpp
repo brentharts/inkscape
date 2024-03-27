@@ -91,17 +91,17 @@ MessageParam::param_newWidget()
     widg_frame->set_margin_end(_marginend);
     widg_frame->set_margin_start(_marginstart);
 
-    _label = Gtk::make_managed<Gtk::Label>(defmessage, Gtk::ALIGN_END);
+    _label = Gtk::make_managed<Gtk::Label>(defmessage, Gtk::Align::END);
     _label->set_use_underline (true);
     _label->set_use_markup();
-    _label->set_line_wrap(true);
+    _label->set_wrap(true);
     _label->set_size_request(-1, _min_height);
     _label->set_halign(_halign);
     _label->set_valign(_valign);
     _label->set_margin_end(_marginend);
     _label->set_margin_start(_marginstart);
 
-    frame->add(*_label);
+    frame->set_child(*_label);
     return frame;
 }
 

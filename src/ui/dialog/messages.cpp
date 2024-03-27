@@ -41,11 +41,11 @@ Messages::Messages()
     : DialogBase("/dialogs/messages", "Messages")
     , buttonClear(_("_Clear"), _("Clear log messages"))
     , checkCapture(_("Capture log messages"), _("Capture log messages"))
-    , buttonBox(Gtk::ORIENTATION_HORIZONTAL)
+    , buttonBox(Gtk::Orientation::HORIZONTAL)
 {
     messageText.set_editable(false);
-    textScroll.add(messageText);
-    textScroll.set_policy(Gtk::POLICY_ALWAYS, Gtk::POLICY_ALWAYS);
+    textScroll.set_child(messageText);
+    textScroll.set_policy(Gtk::PolicyType::ALWAYS, Gtk::PolicyType::ALWAYS);
     UI::pack_start(*this, textScroll);
 
     buttonBox.set_spacing(6);
@@ -56,12 +56,10 @@ Messages::Messages()
     // sick of this thing shrinking too much
     set_size_request(400, -1);
 
-    show_all_children();
-
     message(_("Ready."));
 
     buttonClear.signal_clicked().connect(sigc::mem_fun(*this, &Messages::clear));
-    checkCapture.signal_clicked().connect(sigc::mem_fun(*this, &Messages::toggleCapture));
+    checkCapture.signal_toggled().connect(sigc::mem_fun(*this, &Messages::toggleCapture));
 }
 
 //#########################################################################

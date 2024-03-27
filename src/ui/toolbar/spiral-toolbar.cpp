@@ -29,6 +29,7 @@
 #include "spiral-toolbar.h"
 
 #include <glibmm/i18n.h>
+#include <gtkmm/adjustment.h>
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/label.h>
@@ -63,7 +64,7 @@ SpiralToolbar::SpiralToolbar(SPDesktop *desktop)
     setup_derived_spin_button(_expansion_item, "expansion", 1.0);
     setup_derived_spin_button(_t0_item, "t0", 0.0);
 
-    add(*_toolbar);
+    set_child(*_toolbar);
 
     get_widget<Gtk::Button>(_builder, "reset_btn")
         .signal_clicked()
@@ -71,8 +72,6 @@ SpiralToolbar::SpiralToolbar(SPDesktop *desktop)
 
     _connection.reset(new sigc::connection(
         desktop->getSelection()->connectChanged(sigc::mem_fun(*this, &SpiralToolbar::selection_changed))));
-
-    show_all();
 }
 
 void SpiralToolbar::setup_derived_spin_button(UI::Widget::SpinButton &btn, Glib::ustring const &name,

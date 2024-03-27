@@ -20,6 +20,7 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
+#include <gtkmm/version.h>
 
 #include <2geom/transforms.h>
 
@@ -34,6 +35,7 @@
 #include "ui/icon-loader.h"
 #include "ui/icon-names.h"
 #include "ui/pack.h"
+#include "ui/widget/spinbutton.h"
 
 namespace Inkscape::UI::Dialog {
 
@@ -82,6 +84,13 @@ Transformation::Transformation()
       resetButton{Gtk::make_managed<Gtk::Button>()},
       applyButton{Gtk::make_managed<Gtk::Button>(_("_Apply"))}
 {
+    _scalar_move_horizontal.getLabel()->set_hexpand();
+    _scalar_move_vertical.getLabel()->set_hexpand();
+    _scalar_scale_horizontal.getLabel()->set_hexpand();
+    _scalar_scale_vertical.getLabel()->set_hexpand();
+    _scalar_skew_horizontal.getLabel()->set_hexpand();
+    _scalar_skew_vertical.getLabel()->set_hexpand();
+
     _check_move_relative.set_use_underline();
     _check_move_relative.set_tooltip_text(_("Add the specified relative displacement to the current position; otherwise, edit the current absolute position directly"));
 
@@ -97,23 +106,23 @@ Transformation::Transformation()
     // Notebook for individual transformations
     UI::pack_start(*this, _notebook, false, false);
 
-    _page_move.set_halign(Gtk::ALIGN_START);
+    _page_move.set_halign(Gtk::Align::START);
     _notebook.append_page(_page_move, _("_Move"), true);
     layoutPageMove();
 
-    _page_scale.set_halign(Gtk::ALIGN_START);
+    _page_scale.set_halign(Gtk::Align::START);
     _notebook.append_page(_page_scale, _("_Scale"), true);
     layoutPageScale();
 
-    _page_rotate.set_halign(Gtk::ALIGN_START);
+    _page_rotate.set_halign(Gtk::Align::START);
     _notebook.append_page(_page_rotate, _("_Rotate"), true);
     layoutPageRotate();
 
-    _page_skew.set_halign(Gtk::ALIGN_START);
+    _page_skew.set_halign(Gtk::Align::START);
     _notebook.append_page(_page_skew, _("Ske_w"), true);
     layoutPageSkew();
 
-    _page_transform.set_halign(Gtk::ALIGN_START);
+    _page_transform.set_halign(Gtk::Align::START);
     _notebook.append_page(_page_transform, _("Matri_x"), true);
     layoutPageTransform();
 
@@ -125,11 +134,10 @@ Transformation::Transformation()
     _check_apply_separately.set_active(prefs->getBool("/dialogs/transformation/applyseparately"));
     _check_apply_separately.signal_toggled().connect(sigc::mem_fun(*this, &Transformation::onApplySeparatelyToggled));
 
+#if GTKMM_CHECK_VERSION(4, 14, 0)
     // make sure all spinbuttons activate Apply on pressing Enter
-    auto const apply_on_activate = [this](UI::Widget::ScalarUnit &scalar)
-    {
-        auto &entry = dynamic_cast<Gtk::Entry &>(*scalar.getWidget());
-        entry.signal_activate().connect(sigc::mem_fun(*this, &Transformation::_apply));
+    auto const apply_on_activate = [this](UI::Widget::ScalarUnit &scalar) {
+        scalar.getSpinButton().signal_activate().connect([this] { _apply(); });
     };
     apply_on_activate(_scalar_move_horizontal );
     apply_on_activate(_scalar_move_vertical   );
@@ -138,31 +146,30 @@ Transformation::Transformation()
     apply_on_activate(_scalar_rotate          );
     apply_on_activate(_scalar_skew_horizontal );
     apply_on_activate(_scalar_skew_vertical   );
+#endif
 
     resetButton->set_image_from_icon_name("reset-settings-symbolic");
     resetButton->set_size_request(30, -1);
-    resetButton->set_halign(Gtk::ALIGN_CENTER);
+    resetButton->set_halign(Gtk::Align::CENTER);
     resetButton->set_use_underline();
     resetButton->set_tooltip_text(_("Reset the values on the current tab to defaults"));
     resetButton->set_sensitive(true);
     resetButton->signal_clicked().connect(sigc::mem_fun(*this, &Transformation::onClear));
 
     applyButton->set_use_underline();
-    applyButton->set_halign(Gtk::ALIGN_CENTER);
+    applyButton->set_halign(Gtk::Align::CENTER);
     applyButton->set_tooltip_text(_("Apply transformation to selection"));
     applyButton->set_sensitive(false);
     applyButton->signal_clicked().connect(sigc::mem_fun(*this, &Transformation::_apply));
-    applyButton->get_style_context()->add_class("wide-apply-button");
+    applyButton->add_css_class("wide-apply-button");
 
     auto const button_box = Gtk::make_managed<Gtk::Box>();
     button_box->set_margin_top(4);
     button_box->set_spacing(8);
-    button_box->set_halign(Gtk::ALIGN_CENTER);
+    button_box->set_halign(Gtk::Align::CENTER);
     UI::pack_start(*button_box, *applyButton);
     UI::pack_start(*button_box, *resetButton);
     UI::pack_start(*this, *button_box, UI::PackOptions::shrink);
-
-    show_all_children();
 }
 
 void Transformation::selectionChanged(Inkscape::Selection *selection)
@@ -278,26 +285,18 @@ void Transformation::layoutPageRotate()
     _scalar_rotate.setIncrements(0.1, 1.0);
     _scalar_rotate.set_hexpand();
 
-    auto object_rotate_left_icon = Gtk::manage(sp_get_icon_image("object-rotate-left", Gtk::ICON_SIZE_SMALL_TOOLBAR));
-
-    _counterclockwise_rotate.add(*object_rotate_left_icon);
-    _counterclockwise_rotate.set_mode(false);
-    _counterclockwise_rotate.set_relief(Gtk::RELIEF_NONE);
+    _counterclockwise_rotate.set_icon_name("object-rotate-left");
+    _counterclockwise_rotate.set_has_frame(false);
     _counterclockwise_rotate.set_tooltip_text(_("Rotate in a counterclockwise direction"));
 
-    auto object_rotate_right_icon = Gtk::manage(sp_get_icon_image("object-rotate-right", Gtk::ICON_SIZE_SMALL_TOOLBAR));
-
-    _clockwise_rotate.add(*object_rotate_right_icon);
-    _clockwise_rotate.set_mode(false);
-    _clockwise_rotate.set_relief(Gtk::RELIEF_NONE);
+    _counterclockwise_rotate.set_icon_name("object-rotate-right");
+    _clockwise_rotate.set_has_frame(false);
     _clockwise_rotate.set_tooltip_text(_("Rotate in a clockwise direction"));
-
-    Gtk::RadioButton::Group group = _counterclockwise_rotate.get_group();
-    _clockwise_rotate.set_group(group);
+    _clockwise_rotate.set_group(_counterclockwise_rotate);
 
     auto const box = Gtk::make_managed<Gtk::Box>();
-    _counterclockwise_rotate.set_halign(Gtk::ALIGN_START);
-    _clockwise_rotate.set_halign(Gtk::ALIGN_START);
+    _counterclockwise_rotate.set_halign(Gtk::Align::START);
+    _clockwise_rotate.set_halign(Gtk::Align::START);
     UI::pack_start(*box, _counterclockwise_rotate);
     UI::pack_start(*box, _clockwise_rotate);
 
@@ -348,7 +347,7 @@ void Transformation::layoutPageTransform()
 {
     _units_transform.setUnitType(UNIT_TYPE_LINEAR);
     _units_transform.set_tooltip_text(_("E and F units"));
-    _units_transform.set_halign(Gtk::ALIGN_END);
+    _units_transform.set_halign(Gtk::Align::END);
     _units_transform.set_margin_top(3);
     _units_transform.set_margin_bottom(3);
 
@@ -444,15 +443,15 @@ void Transformation::layoutPageTransform()
     _page_transform.table().attach(_scalar_transform_f, 2, 3, 1, 1);
 
     auto const img = Gtk::make_managed<Gtk::Image>();
-    img->set_from_icon_name("matrix-2d", Gtk::ICON_SIZE_BUTTON);
+    img->set_from_icon_name("matrix-2d");
     img->set_pixel_size(52);
     img->set_margin_top(4);
     img->set_margin_bottom(4);
     _page_transform.table().attach(*img, 0, 5, 1, 1);
 
     auto const descr = Gtk::make_managed<Gtk::Label>();
-    descr->set_line_wrap();
-    descr->set_line_wrap_mode(Pango::WRAP_WORD);
+    descr->set_wrap();
+    descr->set_wrap_mode(Pango::WrapMode::WORD);
     descr->set_text(
         _("<small>"
         "<a href=\"https://www.w3.org/TR/SVG11/coords.html#TransformMatrixDefined\">"

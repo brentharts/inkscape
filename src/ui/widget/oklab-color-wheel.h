@@ -38,7 +38,7 @@ public:
     guint32 getRgb() const override;
 
 private:
-    bool on_drawing_area_draw(Cairo::RefPtr<Cairo::Context> const &cr) final;
+    void on_drawing_area_draw(Cairo::RefPtr<Cairo::Context> const &cr, int, int) override;
 
     static unsigned constexpr H = 0, S = 1, L = 2; ///< Indices into _values
 
@@ -59,9 +59,9 @@ private:
 
     // Event handlers
     bool _onClick(Geom::Point const &unit_pos);
-    Gtk::EventSequenceState on_click_pressed (Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_click_pressed (Gtk::GestureClick const &click,
                                               int n_press, double x, double y) final;
-    Gtk::EventSequenceState on_click_released(Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_click_released(Gtk::GestureClick const &click,
                                               int n_press, double x, double y) final;
     void on_motion(GtkEventControllerMotion const *motion, double x, double y) final;
 

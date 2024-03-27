@@ -13,10 +13,12 @@
 
 #include "ui/widget/popover-menu-item.h"
 
+#include <pangomm/layout.h>
+#include <giomm/themedicon.h>
 #include <gtkmm/box.h>
 #include <gtkmm/image.h>
 #include <gtkmm/label.h>
-#include <gtkmm/stylecontext.h>
+#include <gtkmm/tooltip.h>
 
 #include "ui/menuize.h"
 #include "ui/util.h"
@@ -34,28 +36,29 @@ PopoverMenuItem::PopoverMenuItem(Glib::ustring const &text,
     , Gtk::Button{}
 {
     get_style_context()->add_class("menuitem");
-    set_relief(Gtk::RELIEF_NONE);
+    set_has_frame(false);
 
     Gtk::Label *label = nullptr;
     Gtk::Image *image = nullptr;
 
     if (!text.empty()) {
-        label = Gtk::make_managed<Gtk::Label>(text, Gtk::ALIGN_START, Gtk::ALIGN_CENTER, mnemonic);
+        label = Gtk::make_managed<Gtk::Label>(text, Gtk::Align::START, Gtk::Align::CENTER, mnemonic);
     }
 
     if (!icon_name.empty()) {
-        image = Gtk::make_managed<Gtk::Image>(icon_name, icon_size);
+        image = Gtk::make_managed<Gtk::Image>(Gio::ThemedIcon::create(icon_name));
+        image->set_icon_size(icon_size);
     }
 
     if (label && image) {
-        auto &hbox = *Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 8);
-        hbox.add(*image);
-        hbox.add(*label);
-        add(hbox);
+        auto &hbox = *Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 8);
+        hbox.append(*image);
+        hbox.append(*label);
+        set_child(hbox);
     } else if (label) {
-        add(*label);
+        set_child(*label);
     } else if (image) {
-        add(*image);
+        set_child(*image);
     }
 
     if (popdown_on_activate) {
@@ -70,7 +73,7 @@ PopoverMenuItem::PopoverMenuItem(Glib::ustring const &text,
     UI::menuize(*this);
 }
 
-Glib::SignalProxy<void> PopoverMenuItem::signal_activate()
+Glib::SignalProxy<void ()> PopoverMenuItem::signal_activate()
 {
     return signal_clicked();
 }

@@ -177,6 +177,7 @@ set(ui_SRC
 	widget/iconrenderer.cpp
 	widget/alignment-selector.cpp
 	widget/anchor-selector.cpp
+	widget/bin.cpp
 	widget/completion-popup.cpp
 	widget/canvas.cpp
 	widget/canvas/stores.cpp
@@ -225,6 +226,8 @@ set(ui_SRC
 	widget/gradient-selector.cpp
 	widget/gradient-vector-selector.cpp
 	widget/gradient-with-stops.cpp
+	widget/icon-combobox.cpp
+	widget/handle-preview.cpp
 	widget/image-properties.cpp
 	widget/imagetoggler.cpp
 	widget/ink-color-wheel.cpp
@@ -270,6 +273,8 @@ set(ui_SRC
 	widget/toolbar-menu-button.cpp
 	widget/unit-menu.cpp
 	widget/unit-tracker.cpp
+	widget/widget-vfuncs-class-init.cpp
+        widget/xml-treeview.cpp
 
 	view/svg-view-widget.cpp
 
@@ -290,7 +295,6 @@ set(ui_SRC
 	icon-names.h
 	icon-loader.h
 	interface.h
-	manage.h
 	menuize.h
 	monitor.h
 	pack.h
@@ -461,6 +465,7 @@ set(ui_SRC
 	widget/alignment-selector.h
 	widget/anchor-selector.h
 	widget/attr-widget.h
+	widget/bin.h
 	widget/canvas.h
 	widget/canvas/fragment.h
 	widget/canvas/prefs.h
@@ -515,6 +520,8 @@ set(ui_SRC
 	widget/gradient-selector.h
 	widget/gradient-vector-selector.h
 	widget/gradient-with-stops.h
+	widget/icon-combobox.h
+	widget/handle-preview.h
 	widget/image-properties.h
 	widget/imagetoggler.h
 	widget/ink-color-wheel.h
@@ -546,7 +553,6 @@ set(ui_SRC
 	widget/scalar-unit.h
 	widget/scalar.h
 	widget/scroll-utils.h
-	widget/scrollprotected.h
 	widget/selected-style.h
 	widget/shapeicon.h
 	widget/spin-scale.h
@@ -560,6 +566,8 @@ set(ui_SRC
 	widget/text.h
 	widget/unit-menu.h
 	widget/unit-tracker.h
+	widget/widget-vfuncs-class-init.h
+        widget/xml-treeview.h
 
 	view/svg-view-widget.h
 )

@@ -27,8 +27,13 @@ class Context;
 class ImageSurface;
 } // namespace Cairo
 
+namespace Gdk {
+class Drag;
+} // namespace Gdk
+
 namespace Gtk {
-class GestureMultiPress;
+class DragSource;
+class GestureClick;
 } // namespace Gtk
 
 class SPGradient;
@@ -80,10 +85,12 @@ public:
     sigc::signal<void ()>& signal_pinned() { return _signal_pinned; };
 
 private:
-    bool on_draw(Cairo::RefPtr<Cairo::Context> const&) override;
-    void on_size_allocate(Gtk::Allocation&) override;
-    void on_drag_data_get(Glib::RefPtr<Gdk::DragContext> const &context, Gtk::SelectionData &selection_data, guint info, guint time) override;
-    void on_drag_begin(Glib::RefPtr<Gdk::DragContext> const&) override;
+    void draw_func(Cairo::RefPtr<Cairo::Context> const&, int width, int height);
+    void size_allocate_vfunc(int width, int height, int baseline) final;
+
+    Glib::RefPtr<Gdk::ContentProvider> on_drag_prepare(Gtk::DragSource const &source,
+                                                       double x, double y);
+    void on_drag_begin(Gtk::DragSource &source, Glib::RefPtr<Gdk::Drag> const &drag);
 
     // Common post-construction setup.
     void common_setup();
@@ -92,9 +99,9 @@ private:
                          double x, double y);
     void on_motion_leave(GtkEventControllerMotion const *motion);
 
-    Gtk::EventSequenceState on_click_pressed (Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_click_pressed (Gtk::GestureClick const &click,
                                               int n_press, double x, double y);
-    Gtk::EventSequenceState on_click_released(Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_click_released(Gtk::GestureClick const &click,
                                               int n_press, double x, double y);
 
     // Perform the on-click action of setting the fill or stroke.

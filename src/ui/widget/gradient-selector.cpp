@@ -40,10 +40,8 @@ namespace Inkscape::UI::Widget {
 
 void GradientSelector::style_button(Gtk::Button *btn, char const *iconName)
 {
-    GtkWidget *child = sp_get_icon_image(iconName, GTK_ICON_SIZE_SMALL_TOOLBAR);
-    gtk_widget_set_visible(child, true);
-    btn->add(*manage(Glib::wrap(child)));
-    btn->set_relief(Gtk::RELIEF_NONE);
+    btn->set_image_from_icon_name(iconName, Gtk::IconSize::NORMAL); // Previously GTK_ICON_SIZE_SMALL_TOOLBAR
+    btn->set_has_frame(false);
 }
 
 GradientSelector::GradientSelector()
@@ -52,7 +50,7 @@ GradientSelector::GradientSelector()
     , _gradientUnits(SP_GRADIENT_UNITS_USERSPACEONUSE)
     , _gradientSpread(SP_GRADIENT_SPREAD_PAD)
 {
-    set_orientation(Gtk::ORIENTATION_VERTICAL);
+    set_orientation(Gtk::Orientation::VERTICAL);
 
     /* Vectors */
     _vectors = Gtk::make_managed<GradientVectorSelector>(nullptr, nullptr);
@@ -99,9 +97,9 @@ GradientSelector::GradientSelector()
     _text_renderer->signal_edited().connect(sigc::mem_fun(*this, &GradientSelector::onGradientRename));
 
     _scrolled_window = Gtk::make_managed<Gtk::ScrolledWindow>();
-    _scrolled_window->add(*_treeview);
-    _scrolled_window->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    _scrolled_window->set_shadow_type(Gtk::SHADOW_IN);
+    _scrolled_window->set_child(*_treeview);
+    _scrolled_window->set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
+    _scrolled_window->set_has_frame(true);
     _scrolled_window->set_size_request(0, 180);
     _scrolled_window->set_hexpand();
     _scrolled_window->set_visible(true);
@@ -110,7 +108,7 @@ GradientSelector::GradientSelector()
 
 
     /* Create box for buttons */
-    auto const hb = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 0);
+    auto const hb = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 0);
     UI::pack_start(*this, *hb, false, false);
 
     _add = Gtk::make_managed<Gtk::Button>();
@@ -121,7 +119,7 @@ GradientSelector::GradientSelector()
 
     _add->signal_clicked().connect(sigc::mem_fun(*this, &GradientSelector::add_vector_clicked));
     _add->set_sensitive(false);
-    _add->set_relief(Gtk::RELIEF_NONE);
+    _add->set_has_frame(false);
     _add->set_tooltip_text(_("Create a duplicate gradient"));
 
     _del2 = Gtk::make_managed<Gtk::Button>();
@@ -131,7 +129,7 @@ GradientSelector::GradientSelector()
     UI::pack_start(*hb, *_del2, false, false);
     _del2->signal_clicked().connect(sigc::mem_fun(*this, &GradientSelector::delete_vector_clicked_2));
     _del2->set_sensitive(false);
-    _del2->set_relief(Gtk::RELIEF_NONE);
+    _del2->set_has_frame(false);
     _del2->set_tooltip_text(_("Delete unused gradient"));
 
     // The only use of this button is hidden!
@@ -142,9 +140,9 @@ GradientSelector::GradientSelector()
     UI::pack_start(*hb, *_edit, false, false);
     _edit->signal_clicked().connect(sigc::mem_fun(*this, &GradientSelector::edit_vector_clicked));
     _edit->set_sensitive(false);
-    _edit->set_relief(Gtk::RELIEF_NONE);
+    _edit->set_has_frame(false);
     _edit->set_tooltip_text(_("Edit gradient"));
-    _edit->set_no_show_all();
+    _edit->set_visible(false);
 
     _del = Gtk::make_managed<Gtk::Button>();
     style_button(_del, INKSCAPE_ICON("list-remove"));
@@ -153,10 +151,8 @@ GradientSelector::GradientSelector()
     UI::pack_start(*hb, *_del, false, false);
     _del->signal_clicked().connect(sigc::mem_fun(*this, &GradientSelector::delete_vector_clicked));
     _del->set_sensitive(false);
-    _del->set_relief(Gtk::RELIEF_NONE);
+    _del->set_has_frame(false);
     _del->set_tooltip_text(_("Delete swatch"));
-
-    hb->show_all();
 }
 
 GradientSelector::~GradientSelector() = default;
@@ -176,7 +172,7 @@ void GradientSelector::setMode(SelectorMode mode)
                 it->set_visible(false);
             }
             for (auto &swatch_widget : _swatch_widgets) {
-                swatch_widget->show_all();
+                swatch_widget->set_visible(true);
             }
 
             auto icon_column = _treeview->get_column(0);
@@ -185,7 +181,7 @@ void GradientSelector::setMode(SelectorMode mode)
             _vectors->setSwatched();
         } else {
             for (auto &it : _nonsolid) {
-                it->show_all();
+                it->set_visible(true);
             }
             for (auto &swatch_widget : _swatch_widgets) {
                 swatch_widget->set_visible(false);
@@ -277,10 +273,15 @@ bool GradientSelector::onKeyPressed(GtkEventControllerKey const * controller,
                                     GdkModifierType const state)
 {
     auto display = Gdk::Display::get_default();
-    auto keymap = display->get_keymap();
     auto key = 0u;
-    gdk_keymap_translate_keyboard_state(keymap, keycode, state, 0,
-                                        &key, 0, 0, 0);
+    gdk_display_translate_key(gdk_display_get_default(),
+                              keycode,
+                              state,
+                              0,
+                              &key,
+                              nullptr,
+                              nullptr,
+                              nullptr);
     switch (key) {
         case GDK_KEY_Up:
         case GDK_KEY_KP_Up:
@@ -415,7 +416,7 @@ void GradientSelector::setVector(SPDocument *doc, SPGradient *vector)
                 }
             } else {
                 for (auto &it : _nonsolid) {
-                    it->show_all();
+                    it->set_visible(true);
                 }
             }
         } else if (_mode != MODE_SWATCH) {
@@ -424,7 +425,7 @@ void GradientSelector::setVector(SPDocument *doc, SPGradient *vector)
                 swatch_widget->set_visible(false);
             }
             for (auto &it : _nonsolid) {
-                it->show_all();
+                it->set_visible(true);
             }
         }
 

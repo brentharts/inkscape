@@ -18,7 +18,6 @@
 #include <gtkmm/label.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/separator.h>
-#include <gtkmm/stylecontext.h>
 #include <gtkmm/window.h>
 
 #include "ui/menuize.h"
@@ -41,28 +40,31 @@ public:
         , CssNameClassInit{"menu"}
         , Gtk::Grid{}
     {
-        get_style_context()->add_class("menu");
-        set_orientation(Gtk::ORIENTATION_VERTICAL);
+        add_css_class("menu");
+        set_orientation(Gtk::Orientation::VERTICAL);
     }
 };
 
 PopoverMenu::PopoverMenu(Gtk::Widget &parent, Gtk::PositionType const position)
+: PopoverMenu{&parent, position}
+{}
+
+PopoverMenu::PopoverMenu(Gtk::Widget *const parent, Gtk::PositionType const position)
     : Glib::ObjectBase{"PopoverMenu"}
     , Gtk::Popover{}
     , _scrolled_window{*Gtk::make_managed<Gtk::ScrolledWindow>()}
     , _grid           {*Gtk::make_managed<PopoverMenuGrid    >()}
 {
-    auto const style_context = get_style_context();
-    style_context->add_class("popover-menu");
-    style_context->add_class("menu");
+    add_css_class("popover-menu");
+    add_css_class("menu");
 
-    set_relative_to(parent);
+    if (parent) set_parent(*parent);
     set_position(position);
 
     _scrolled_window.set_propagate_natural_width (true);
     _scrolled_window.set_propagate_natural_height(true);
-    _scrolled_window.add(_grid);
-    add(_scrolled_window);
+    _scrolled_window.set_child(_grid);
+    set_child(_scrolled_window);
 
     signal_show().connect([this]
     {
@@ -97,7 +99,7 @@ void PopoverMenu::append(Gtk::Widget &item)
 {
     check_child_invariants();
 
-    _grid.attach_next_to(item, Gtk::POS_BOTTOM);
+    _grid.attach_next_to(item, Gtk::PositionType::BOTTOM);
     _items.push_back(&item);
 }
 
@@ -105,7 +107,7 @@ void PopoverMenu::prepend(Gtk::Widget &item)
 {
     check_child_invariants();
 
-    _grid.attach_next_to(item, Gtk::POS_TOP);
+    _grid.attach_next_to(item, Gtk::PositionType::TOP);
     _items.push_back(&item);
 }
 
@@ -134,14 +136,14 @@ void PopoverMenu::append_section_label(Glib::ustring const &markup)
     auto const label = Gtk::make_managed<Gtk::Label>();
     label->set_markup(markup);
     auto const item = Gtk::make_managed<PopoverMenuItem>();
-    item->add(*label);
+    item->set_child(*label);
     item->set_sensitive(false);
     append(*item);
 }
 
 void PopoverMenu::append_separator()
 {
-    append(*Gtk::make_managed<Gtk::Separator>(Gtk::ORIENTATION_HORIZONTAL));
+    append(*Gtk::make_managed<Gtk::Separator>(Gtk::Orientation::HORIZONTAL));
 }
 
 void PopoverMenu::popup_at(Gtk::Widget &widget,
@@ -163,16 +165,15 @@ std::vector<Gtk::Widget *> const &PopoverMenu::get_items()
 void PopoverMenu::check_child_invariants()
 {
     // Check no one (accidentally?) removes our Grid or ScrolledWindow.
-    g_assert(_scrolled_window.get_parent() ==  this);
-    // ScrolledWindow will have interposed a Gtk::Viewport between, so:
-    g_assert(_grid.get_parent());
+    // GtkPopover interposes a content widget and ScrolledWindow a Viewport, so:
+    g_assert(is_descendant_of(_scrolled_window, *this));
     g_assert(is_descendant_of(_grid, _scrolled_window));
 }
 
 void PopoverMenu::set_scrolled_window_size()
 {
     static constexpr int padding = 16; // Spare some window size for border etc.
-    auto &window = dynamic_cast<Gtk::Window const &>(*get_toplevel());
+    auto &window = dynamic_cast<Gtk::Window const &>(*get_root());
     _scrolled_window.set_max_content_width (window.get_width () - 2 * padding);
     _scrolled_window.set_max_content_height(window.get_height() - 2 * padding);
 }
@@ -182,15 +183,13 @@ bool PopoverMenu::activate(Glib::ustring const &search) {
     Gtk::Widget *fallback_match = nullptr; 
     for (auto item : _items) {
         if (!_active_search) {
-            if (auto container = dynamic_cast<Gtk::Container *>(item->get_parent())) {
-                _active_search = Gtk::make_managed<Gtk::Label>(search);
-                _active_search->get_style_context()->add_class("menu_search");
-                _active_search->set_xalign(0.1);
-                container->add(*_active_search);
-            }
+            _active_search = Gtk::make_managed<Gtk::Label>(search);
+            _active_search->get_style_context()->add_class("menu_search");
+            _active_search->set_xalign(0.1);
+            _grid.attach_next_to(*_active_search, Gtk::PositionType::BOTTOM);
         }
         for (auto const widg : UI::get_children(*item)) {
-            item->unset_state_flags(Gtk::STATE_FLAG_FOCUSED | Gtk::STATE_FLAG_PRELIGHT);
+            item->unset_state_flags(Gtk::StateFlags::FOCUSED | Gtk::StateFlags::PRELIGHT);
             if (!search.empty()) {
                  for (auto const mi : UI::get_children(*widg)) {
                     if (auto label = dynamic_cast<Gtk::Label *>(mi)) {
@@ -233,7 +232,7 @@ void PopoverMenu::unset_items_focus_hover(Gtk::Widget * const except_active)
 {
     for (auto const item : _items) {
         if (item != except_active) {
-            item->unset_state_flags(Gtk::STATE_FLAG_FOCUSED | Gtk::STATE_FLAG_PRELIGHT);
+            item->unset_state_flags(Gtk::StateFlags::FOCUSED | Gtk::StateFlags::PRELIGHT);
         }
     }
 }

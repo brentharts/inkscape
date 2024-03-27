@@ -27,6 +27,7 @@
 #include "helper/geom.h"
 #include "object/sp-lpe-item.h"
 #include "ui/pack.h"
+#include "util-string/ustring-format.h"
 
 namespace Inkscape {
 namespace LivePathEffect {
@@ -102,13 +103,13 @@ void LPERoughen::doOnApply(SPLPEItem const *lpeitem)
 
             if (param->param_key == "max_segment_size") {
                 auto const minor = std::min(bbox->width(), bbox->height());
-                auto const max_segment_size_str = Glib::ustring::format(minor / 50.0);
+                auto const max_segment_size_str = Inkscape::ustring::format_classic(minor / 50.0);
                 param->param_readSVGValue(max_segment_size_str.c_str());
             } else if (param->param_key == "displace_x") {
-                auto const displace_x_str = Glib::ustring::format(bbox->width() / 150.0);
+                auto const displace_x_str = Inkscape::ustring::format_classic(bbox->width() / 150.0);
                 param->param_readSVGValue(displace_x_str.c_str());
             } else if (param->param_key == "displace_y") {
-                auto const displace_y_str = Glib::ustring::format(bbox->height() / 150.0);
+                auto const displace_y_str = Inkscape::ustring::format_classic(bbox->height() / 150.0);
                 param->param_readSVGValue(displace_y_str.c_str());
             }
         }
@@ -137,8 +138,8 @@ void LPERoughen::doBeforeEffect(SPLPEItem const *lpeitem)
 
 Gtk::Widget *LPERoughen::newWidget()
 {
-    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 2);
-    vbox->property_margin().set_value(5);
+    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 2);
+    vbox->set_margin(5);
 
     std::vector<Parameter *>::iterator it = param_vector.begin();
     while (it != param_vector.end()) {
@@ -147,18 +148,18 @@ Gtk::Widget *LPERoughen::newWidget()
             auto widg = param->param_newWidget();
             if (param->param_key == "method") {
                 auto const method_label = Gtk::make_managed<Gtk::Label>(
-                    Glib::ustring(_("<b>Resolution</b>")), Gtk::ALIGN_START);
+                    Glib::ustring(_("<b>Resolution</b>")), Gtk::Align::START);
                 method_label->set_use_markup(true);
                 UI::pack_start(*vbox, *method_label, false, false, 2);
-                UI::pack_start(*vbox, *Gtk::make_managed<Gtk::Separator>(Gtk::ORIENTATION_HORIZONTAL),
+                UI::pack_start(*vbox, *Gtk::make_managed<Gtk::Separator>(Gtk::Orientation::HORIZONTAL),
                                UI::PackOptions::expand_widget);
             }
             if (param->param_key == "handles") {
                 auto const options = Gtk::make_managed<Gtk::Label>(
-                    Glib::ustring(_("<b>Options</b>")), Gtk::ALIGN_START);
+                    Glib::ustring(_("<b>Options</b>")), Gtk::Align::START);
                 options->set_use_markup(true);
                 UI::pack_start(*vbox, *options, false, false, 2);
-                UI::pack_start(*vbox, *Gtk::make_managed<Gtk::Separator>(Gtk::ORIENTATION_HORIZONTAL),
+                UI::pack_start(*vbox, *Gtk::make_managed<Gtk::Separator>(Gtk::Orientation::HORIZONTAL),
                                UI::PackOptions::expand_widget);
             }
 

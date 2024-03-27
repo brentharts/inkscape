@@ -22,6 +22,7 @@
 #include <glibmm/regex.h>
 #include <gtkmm/box.h>
 #include <gtkmm/scale.h>
+#include <sigc++/functors/mem_fun.h>
 
 #include "desktop.h"
 #include "inkscape.h"
@@ -45,9 +46,9 @@ namespace Inkscape::UI::Widget {
 
 DialogPage::DialogPage()
 {
-    property_margin().set_value(12);
+    set_margin(12);
 
-    set_orientation(Gtk::ORIENTATION_VERTICAL);
+    set_orientation(Gtk::Orientation::VERTICAL);
     set_column_spacing(12);
     set_row_spacing(6);
 }
@@ -78,12 +79,12 @@ void DialogPage::add_line(bool                 indent,
     hb->set_spacing(12);
     hb->set_hexpand(true);
     UI::pack_start(*hb, widget, expand_widget, expand_widget);
-    hb->set_valign(Gtk::ALIGN_CENTER);
+    hb->set_valign(Gtk::Align::CENTER);
     
     // Add a label in the first column if provided
     if (!label.empty()) {
-        auto const label_widget = Gtk::make_managed<Gtk::Label>(label, Gtk::ALIGN_START,
-                                                                Gtk::ALIGN_CENTER, true);
+        auto const label_widget = Gtk::make_managed<Gtk::Label>(label, Gtk::Align::START,
+                                                                Gtk::Align::CENTER, true);
         label_widget->set_mnemonic_widget(widget);
         label_widget->set_markup(label_widget->get_text());
         
@@ -91,21 +92,21 @@ void DialogPage::add_line(bool                 indent,
             label_widget->set_margin_start(12);
         }
 
-        label_widget->set_valign(Gtk::ALIGN_CENTER);
-        attach_next_to(*label_widget, Gtk::POS_BOTTOM);
+        label_widget->set_valign(Gtk::Align::CENTER);
+        attach_next_to(*label_widget, Gtk::PositionType::BOTTOM);
 
-        attach_next_to(*hb, *label_widget, Gtk::POS_RIGHT, 1, 1);
+        attach_next_to(*hb, *label_widget, Gtk::PositionType::RIGHT, 1, 1);
     } else {
         if (indent) {
             hb->set_margin_start(12);
         }
 
-        attach_next_to(*hb, Gtk::POS_BOTTOM, 2, 1);
+        attach_next_to(*hb, Gtk::PositionType::BOTTOM, 2, 1);
     }
 
     // Add a label on the right of the widget if desired
     if (!suffix.empty()) {
-        auto const suffix_widget = Gtk::make_managed<Gtk::Label>(suffix, Gtk::ALIGN_START, Gtk::ALIGN_CENTER, true);
+        auto const suffix_widget = Gtk::make_managed<Gtk::Label>(suffix, Gtk::Align::START, Gtk::Align::CENTER, true);
         suffix_widget->set_markup(suffix_widget->get_text());
         UI::pack_start(*hb, *suffix_widget,false,false);
     }
@@ -120,11 +121,11 @@ void DialogPage::add_group_header(Glib::ustring name, int columns)
     if (name.empty()) return;
 
     auto const label_widget = Gtk::make_managed<Gtk::Label>(Glib::ustring("<b>").append(name).append("</b>"),
-                                                            Gtk::ALIGN_START, Gtk::ALIGN_CENTER, true);
+                                                            Gtk::Align::START, Gtk::Align::CENTER, true);
     
     label_widget->set_use_markup(true);
-    label_widget->set_valign(Gtk::ALIGN_CENTER);
-    attach_next_to(*label_widget, Gtk::POS_BOTTOM, columns, 1);
+    label_widget->set_valign(Gtk::Align::CENTER);
+    attach_next_to(*label_widget, Gtk::PositionType::BOTTOM, columns, 1);
 }
 
 void DialogPage::add_group_note(Glib::ustring name)
@@ -132,12 +133,12 @@ void DialogPage::add_group_note(Glib::ustring name)
     if (name.empty()) return;
 
     auto const label_widget = Gtk::make_managed<Gtk::Label>(Glib::ustring("<i>").append(name).append("</i>"),
-                                                            Gtk::ALIGN_START , Gtk::ALIGN_CENTER, true);
+                                                            Gtk::Align::START , Gtk::Align::CENTER, true);
     label_widget->set_use_markup(true);
-    label_widget->set_valign(Gtk::ALIGN_CENTER);
-    label_widget->set_line_wrap(true);
-    label_widget->set_line_wrap_mode(Pango::WRAP_WORD);
-    attach_next_to(*label_widget, Gtk::POS_BOTTOM, 2, 1);
+    label_widget->set_valign(Gtk::Align::CENTER);
+    label_widget->set_wrap(true);
+    label_widget->set_wrap_mode(Pango::WrapMode::WORD);
+    attach_next_to(*label_widget, Gtk::PositionType::BOTTOM, 2, 1);
 }
 
 void DialogPage::set_tip(Gtk::Widget& widget, Glib::ustring const &tip)
@@ -173,11 +174,12 @@ void PrefRadioButton::init(Glib::ustring const &label, Glib::ustring const &pref
     _string_value = string_value;
     (void)default_value;
     this->set_label(label);
+
     if (group_member)
     {
-        Gtk::RadioButtonGroup rbg = group_member->get_group();
-        this->set_group(rbg);
+        this->set_group(*group_member);
     }
+
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     Glib::ustring val = prefs->getString(_prefs_path);
     if ( !val.empty() )
@@ -193,11 +195,12 @@ void PrefRadioButton::init(Glib::ustring const &label, Glib::ustring const &pref
     _value_type = VAL_INT;
     _int_value = int_value;
     this->set_label(label);
+
     if (group_member)
     {
-        Gtk::RadioButtonGroup rbg = group_member->get_group();
-        this->set_group(rbg);
+        this->set_group(*group_member);
     }
+
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     if (default_value)
         this->set_active( prefs->getInt(_prefs_path, int_value) == _int_value );
@@ -227,7 +230,7 @@ PrefRadioButtons::PrefRadioButtons(const std::vector<PrefItem>& buttons, const G
         auto* btn = Gtk::make_managed<PrefRadioButton>();
         btn->init(item.label, prefs_path, item.int_value, item.is_default, group);
         btn->set_tooltip_text(item.tooltip);
-        add(*btn);
+        append(*btn);
         if (!group) group = btn;
     }
 }
@@ -262,6 +265,7 @@ void PrefSpinButton::init(Glib::ustring const &prefs_path,
     else
         this->set_digits(2);
 
+    signal_value_changed().connect(sigc::mem_fun(*this, &PrefSpinButton::on_value_changed));
 }
 
 void PrefSpinButton::on_value_changed()
@@ -309,7 +313,7 @@ void PrefSpinUnit::init(Glib::ustring const &prefs_path,
     }
     setValue(value, unitstr);
 
-    signal_value_changed().connect_notify(sigc::mem_fun(*this, &PrefSpinUnit::on_my_value_changed));
+    signal_value_changed().connect(sigc::mem_fun(*this, &PrefSpinUnit::on_my_value_changed));
 }
 
 void PrefSpinUnit::on_my_value_changed()
@@ -329,6 +333,8 @@ ZoomCorrRuler::ZoomCorrRuler(int width, int height) :
     _border(5)
 {
     set_size(width, height);
+
+    set_draw_func(sigc::mem_fun(*this, &ZoomCorrRuler::on_draw));
 }
 
 void ZoomCorrRuler::set_size(int x, int y)
@@ -372,7 +378,9 @@ draw_number(cairo_t *cr, Geom::Point pos, double num) {
  * \arg major_interval Number of marks after which to draw a major mark
  */
 void
-ZoomCorrRuler::draw_marks(Cairo::RefPtr<Cairo::Context> cr, double dist, int major_interval) {
+ZoomCorrRuler::draw_marks(Cairo::RefPtr<Cairo::Context> const &cr,
+                          double const dist, int const major_interval)
+{
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     const double zoomcorr = prefs->getDouble("/options/zoomcorrection/value", 1.0);
     double mark = 0;
@@ -408,13 +416,13 @@ ZoomCorrRuler::draw_marks(Cairo::RefPtr<Cairo::Context> cr, double dist, int maj
     }
 }
 
-bool
-ZoomCorrRuler::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
-    auto const w = get_width();
+void
+ZoomCorrRuler::on_draw(Cairo::RefPtr<Cairo::Context> const &cr, int const width, int const height)
+{
+    auto const &w = width;
     _drawing_width = w - _border * 2;
 
-    auto const fg = get_foreground_color(get_style_context());
-
+    auto const fg = get_color();
     cr->set_line_width(1);
     cr->set_source_rgb(fg.get_red(), fg.get_green(), fg.get_blue());
 
@@ -440,8 +448,6 @@ ZoomCorrRuler::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
         draw_marks(cr, 1, 1);
     }
     cr->stroke();
-
-    return true;
 }
 
 void
@@ -504,7 +510,7 @@ ZoomCorrRulerSlider::init(int ruler_width, int ruler_height, double lower, doubl
 
     _ruler.set_size(ruler_width, ruler_height);
 
-    _slider = Gtk::make_managed<Gtk::Scale>(Gtk::ORIENTATION_HORIZONTAL);
+    _slider = Gtk::make_managed<Gtk::Scale>(Gtk::Orientation::HORIZONTAL);
 
     _slider->set_size_request(_ruler.width(), -1);
     _slider->set_range (lower, upper);
@@ -521,15 +527,15 @@ ZoomCorrRulerSlider::init(int ruler_width, int ruler_height, double lower, doubl
     _sb->set_increments (step_increment, 0);
     _sb->set_value (value);
     _sb->set_digits(2);
-    _sb->set_halign(Gtk::ALIGN_CENTER);
-    _sb->set_valign(Gtk::ALIGN_END);
+    _sb->set_halign(Gtk::Align::CENTER);
+    _sb->set_valign(Gtk::Align::END);
 
     _unit.set_sensitive(false);
     _unit.setUnitType(UNIT_TYPE_LINEAR);
     _unit.set_sensitive(true);
     _unit.setUnit(prefs->getString("/options/zoomcorrection/unit"));
-    _unit.set_halign(Gtk::ALIGN_CENTER);
-    _unit.set_valign(Gtk::ALIGN_END);
+    _unit.set_halign(Gtk::Align::CENTER);
+    _unit.set_valign(Gtk::Align::END);
 
     _slider->set_hexpand(true);
     _ruler.set_hexpand(true);
@@ -586,7 +592,7 @@ PrefSlider::init(Glib::ustring const &prefs_path,
 
     freeze = false;
 
-    _slider = Gtk::make_managed<Gtk::Scale>(Gtk::ORIENTATION_HORIZONTAL);
+    _slider = Gtk::make_managed<Gtk::Scale>(Gtk::Orientation::HORIZONTAL);
 
     _slider->set_range (lower, upper);
     _slider->set_increments (step_increment, page_increment);
@@ -600,8 +606,8 @@ PrefSlider::init(Glib::ustring const &prefs_path,
         _sb->set_increments (step_increment, 0);
         _sb->set_value (value);
         _sb->set_digits(digits);
-        _sb->set_halign(Gtk::ALIGN_CENTER);
-        _sb->set_valign(Gtk::ALIGN_END);
+        _sb->set_halign(Gtk::Align::CENTER);
+        _sb->set_valign(Gtk::Align::END);
     }
 
     auto const table = Gtk::make_managed<Gtk::Grid>();
@@ -740,13 +746,13 @@ void PrefEntryFileButtonHBox::init(Glib::ustring const &prefs_path,
     relatedEntry->set_text(prefs->getString(_prefs_path));
     
     relatedButton = Gtk::make_managed<Gtk::Button>();
-    auto const pixlabel = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 3);
-    Gtk::Image *im = sp_get_icon_image("applications-graphics", Gtk::ICON_SIZE_BUTTON);
+    auto const pixlabel = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 3);
+    auto const im = sp_get_icon_image("applications-graphics", Gtk::IconSize::NORMAL);
     UI::pack_start(*pixlabel, *im);
     auto const l = Gtk::make_managed<Gtk::Label>();
     l->set_markup_with_mnemonic(_("_Browse..."));
     UI::pack_start(*pixlabel, *l);
-    relatedButton->add(*pixlabel); 
+    relatedButton->set_child(*pixlabel);
 
     UI::pack_end(*this, *relatedButton, false, false, 4);
     UI::pack_start(*this, *relatedEntry, true, true);
@@ -783,7 +789,7 @@ void PrefEntryFileButtonHBox::onRelatedButtonClickedCallback()
                     *desktop->getToplevel(),
                     open_path,
                     Inkscape::UI::Dialog::EXE_TYPES,
-                    _("Select a bitmap editor"));
+                    _("Select a bitmap editor")).release();
         }
         
         // Show the dialog.
@@ -822,13 +828,13 @@ void PrefOpenFolder::init(Glib::ustring const &entry_string, Glib::ustring const
 {
     relatedEntry = Gtk::make_managed<Gtk::Entry>();
     relatedButton = Gtk::make_managed<Gtk::Button>();
-    auto const pixlabel = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 3);
-    Gtk::Image *im = sp_get_icon_image("document-open", Gtk::ICON_SIZE_BUTTON);
+    auto const pixlabel = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 3);
+    auto const im = sp_get_icon_image("document-open", Gtk::IconSize::NORMAL);
     UI::pack_start(*pixlabel, *im);
     auto const l = Gtk::make_managed<Gtk::Label>();
     l->set_markup_with_mnemonic(_("Open"));
     UI::pack_start(*pixlabel, *l);
-    relatedButton->add(*pixlabel);
+    relatedButton->set_child(*pixlabel);
     relatedButton->set_tooltip_text(tooltip);
     relatedEntry->set_text(entry_string);
     relatedEntry->set_sensitive(false);
@@ -845,11 +851,11 @@ void PrefOpenFolder::onRelatedButtonClickedCallback()
     ShellExecute(NULL, "open", relatedEntry->get_text().c_str(), NULL, NULL, SW_SHOWDEFAULT);
 #elif defined(__APPLE__)
     std::vector<std::string> argv = { "open", relatedEntry->get_text().raw() };
-    Glib::spawn_async("", argv, Glib::SpawnFlags::SPAWN_SEARCH_PATH);
+    Glib::spawn_async("", argv, Glib::SpawnFlags::SEARCH_PATH);
 #else
     char * const path = g_filename_to_uri(relatedEntry->get_text().c_str(), NULL, NULL);
     std::vector<std::string> argv = { "xdg-open", path };
-    Glib::spawn_async("", argv, Glib::SpawnFlags::SPAWN_SEARCH_PATH);
+    Glib::spawn_async("", argv, Glib::SpawnFlags::SEARCH_PATH);
     g_free(path);
 #endif
 }
@@ -886,15 +892,15 @@ void PrefMultiEntry::init(Glib::ustring const &prefs_path, int height)
     // TODO: Figure out if there's a way to specify height in lines instead of px
     //       and how to obtain a reasonable default width if 'expand_widget' is not used
     set_size_request(100, height);
-    set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    set_shadow_type(Gtk::SHADOW_IN);
+    set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
+    set_has_frame(true);
 
-    add(_text);
+    set_child(_text);
 
     _prefs_path = prefs_path;
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     Glib::ustring value = prefs->getString(_prefs_path);
-    value = Glib::Regex::create("\\|")->replace_literal(value, 0, "\n", (Glib::RegexMatchFlags)0);
+    value = Glib::Regex::create("\\|")->replace_literal(value, 0, "\n", (Glib::Regex::MatchFlags)0);
     _text.get_buffer()->set_text(value);
     _text.get_buffer()->signal_changed().connect(sigc::mem_fun(*this, &PrefMultiEntry::on_changed));
 }
@@ -905,7 +911,7 @@ void PrefMultiEntry::on_changed()
     {
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         Glib::ustring value = _text.get_buffer()->get_text();
-        value = Glib::Regex::create("\\n")->replace_literal(value, 0, "|", (Glib::RegexMatchFlags)0);
+        value = Glib::Regex::create("\\n")->replace_literal(value, 0, "|", (Glib::Regex::MatchFlags)0);
         prefs->setString(_prefs_path, value);
     } 
 }

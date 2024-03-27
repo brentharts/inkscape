@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <2geom/transforms.h>
+#include <giomm/appinfo.h>
 #include <gtkmm/window.h>
 
 #include "document.h"
@@ -38,22 +39,20 @@
 
 namespace Inkscape::UI::View {
 
-SVGViewWidget::SVGViewWidget(SPDocument* document)
+SVGViewWidget::SVGViewWidget(SPDocument *document)
 {
-    _canvas = Gtk::make_managed<Inkscape::UI::Widget::Canvas>();
-    _canvas->property_expand().set_value(true);
-    property_expand().set_value(false);
-    add(*_canvas);
+    _canvas = std::make_unique<Inkscape::UI::Widget::Canvas>();
 
-    _parent = new Inkscape::CanvasItemGroup(_canvas->get_canvas_item_root());
-    _drawing = new Inkscape::CanvasItemDrawing(_parent);
+    _canvas->set_expand(true);
+    set_expand(false);
+    set_child(*_canvas);
+
+    _drawing = new Inkscape::CanvasItemDrawing(_canvas->get_canvas_item_root());
     _canvas->set_drawing(_drawing->get_drawing());
     _drawing->connect_drawing_event(sigc::mem_fun(*this, &SVGViewWidget::event));
     _drawing->get_drawing()->setCursorTolerance(0);
 
     setDocument(document);
-
-    show_all();
 }
 
 SVGViewWidget::~SVGViewWidget()
@@ -105,29 +104,20 @@ void SVGViewWidget::setResize(int width, int height)
     queue_resize();
 }
 
-void SVGViewWidget::on_size_allocate(Gtk::Allocation &allocation)
+void SVGViewWidget::on_size_allocate(int const width, int const height, int const baseline)
 {
-    if (!(_allocation == allocation)) {
-        _allocation = allocation;
-
-        double width  = allocation.get_width();
-        double height = allocation.get_height();
-
-        if (width < 0.0 || height < 0.0) {
+    if (!(_width == width && _height == height)) {
+        if (width < 0 || height < 0) {
             std::cerr << "SVGViewWidget::size_allocate: negative dimensions!" << std::endl;
-            Gtk::Box::on_size_allocate(allocation);
-            return;
+        } else {
+            _width = width;
+            _height = height;
+
+            if (_document) doRescale();
         }
-
-        _rescale = true;
-        _keepaspect = true;
-        _width = width;
-        _height = height;
-
-        if (_document) doRescale();
     }
 
-    Gtk::Box::on_size_allocate(allocation);
+    Bin::on_size_allocate(width, height, baseline);
 }
 
 /**
@@ -150,25 +140,19 @@ bool SVGViewWidget::event(CanvasEvent const &event, DrawingItem *drawing_item)
         },
         [&] (ButtonReleaseEvent const &event) {
             if (event.button == 1 && _clicking && href) {
-                if (auto window = dynamic_cast<Gtk::Window*>(_canvas->get_toplevel())) {
-                    window->show_uri(href, event.time);
-                }
+                Gio::AppInfo::launch_default_for_uri(href);
             }
             _clicking = false;
         },
         [&] (EnterEvent const &event) {
             if (href) {
-                auto display = Gdk::Display::get_default();
-                auto cursor = Gdk::Cursor::create(display, "pointer");
-                auto window = _canvas->get_window(); // GDK Window
-                window->set_cursor(cursor);
+                set_cursor("pointer");
                 set_tooltip_text(href);
             }
         },
         [&] (LeaveEvent const &event) {
             if (href) {
-                auto window = _canvas->get_window(); // GDK Window
-                window->set_cursor();
+                set_cursor(Glib::RefPtr<Gdk::Cursor>{});
                 set_tooltip_text("");
             }
         },

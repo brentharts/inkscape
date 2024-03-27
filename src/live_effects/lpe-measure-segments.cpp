@@ -52,6 +52,7 @@
 #include "ui/pack.h"
 #include "util/safe-printf.h"
 #include "util/units.h"
+#include "util-string/ustring-format.h"
 #include "xml/node.h"
 #include "xml/sp-css-attr.h"
 
@@ -199,20 +200,20 @@ Gtk::Widget *
 LPEMeasureSegments::newWidget()
 {
     // use manage here, because after deletion of Effect object, others might still be pointing to this widget.
-    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
+    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
 
-    auto const vbox0 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 2);
-    vbox0->property_margin().set_value(5);
+    auto const vbox0 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 2);
+    vbox0->set_margin(5);
 
-    auto const vbox1 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 2);
-    vbox1->property_margin().set_value(5);
+    auto const vbox1 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 2);
+    vbox1->set_margin(5);
 
-    auto const vbox2 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 2);
-    vbox2->property_margin().set_value(5);
+    auto const vbox2 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 2);
+    vbox2->set_margin(5);
 
     //Help page
-    auto const vbox3 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 2);
-    vbox3->property_margin().set_value(5);
+    auto const vbox3 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 2);
+    vbox3->set_margin(5);
 
     std::vector<Parameter *>::iterator it = param_vector.begin();
     while (it != param_vector.end()) {
@@ -266,10 +267,6 @@ LPEMeasureSegments::newWidget()
     notebook->append_page (*vbox1, Glib::ustring(_("Projection")));
     notebook->append_page (*vbox2, Glib::ustring(_("Options")));
     notebook->append_page (*vbox3, Glib::ustring(_("Help")));
-    vbox0->show_all();
-    vbox1->show_all();
-    vbox2->show_all();
-    vbox3->show_all();
     UI::pack_start(*vbox, *notebook, true, true, 2);
     notebook->set_current_page(pagenumber);
     notebook->signal_switch_page().connect(sigc::mem_fun(*this, &LPEMeasureSegments::on_my_switch_page));
@@ -365,7 +362,7 @@ LPEMeasureSegments::createTextLabel(Geom::Point &pos, size_t counter, double len
     Glib::ustring lpobjid = this->lpeobj->getId();
     Glib::ustring itemid  = sp_lpe_item->getId();
     Glib::ustring id = Glib::ustring("text-on-");
-    id += Glib::ustring::format(counter);
+    id += Inkscape::ustring::format_classic(counter);
     id += "-";
     id += lpobjid;
     SPObject *elemref = nullptr;
@@ -475,7 +472,7 @@ LPEMeasureSegments::createTextLabel(Geom::Point &pos, size_t counter, double len
     }
 
     if (showindex) {
-        label_value = Glib::ustring("[") + Glib::ustring::format(counter) + Glib::ustring("] ") + label_value;
+        label_value = Glib::ustring("[") + Inkscape::ustring::format_classic(counter) + Glib::ustring("] ") + label_value;
     }
     if (!valid) {
         label_value = Glib::ustring(_("Non Uniform Scale"));
@@ -519,7 +516,7 @@ LPEMeasureSegments::createLine(Geom::Point start,Geom::Point end, Glib::ustring 
     Glib::ustring lpobjid = this->lpeobj->getId();
     Glib::ustring itemid  = sp_lpe_item->getId(); 
     Glib::ustring id = name;
-    id += Glib::ustring::format(counter);
+    id += Inkscape::ustring::format_classic(counter);
     id += "-";
     id += lpobjid;
     Inkscape::XML::Document *xml_doc = document->getReprDoc();
@@ -797,7 +794,7 @@ getNodes(SPItem * item, Geom::Affine transform, bool onbbox, bool centers, bool 
 static void extractFirstPoint(Geom::Point & dest, const Glib::ustring & lpobjid, const char *const prefix, const gint idx, SPDocument *const document)
 {
     Glib::ustring id = Glib::ustring(prefix);
-    id += Glib::ustring::format(idx);
+    id += Inkscape::ustring::format_classic(idx);
     id += "-";
     id += lpobjid;
     auto path = cast<SPPath>(document->getObjectById(id));
@@ -1046,22 +1043,22 @@ LPEMeasureSegments::doBeforeEffect (SPLPEItem const* lpeitem)
                     extractFirstPoint(end_stored, lpobjid, "infoline-on-end-", counter, document);
                     extractFirstPoint(next_stored, lpobjid, "infoline-on-start-", counter+1, document);
                     Glib::ustring infoline_on_start = "infoline-on-start-";
-                    infoline_on_start += Glib::ustring::format(counter);
+                    infoline_on_start += Inkscape::ustring::format_classic(counter);
                     infoline_on_start += "-";
                     infoline_on_start += lpobjid;
                     
                     Glib::ustring infoline_on_end = "infoline-on-end-";
-                    infoline_on_end += Glib::ustring::format(counter);
+                    infoline_on_end += Inkscape::ustring::format_classic(counter);
                     infoline_on_end += "-";
                     infoline_on_end += lpobjid;
                     
                     Glib::ustring infoline = "infoline-";
-                    infoline += Glib::ustring::format(counter);
+                    infoline += Inkscape::ustring::format_classic(counter);
                     infoline += "-";
                     infoline += lpobjid;
                     
                     Glib::ustring texton = "text-on-";
-                    texton += Glib::ustring::format(counter);
+                    texton += Inkscape::ustring::format_classic(counter);
                     texton += "-";
                     texton += lpobjid;
                     items.push_back(infoline_on_start);

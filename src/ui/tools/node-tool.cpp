@@ -43,6 +43,7 @@
 #include "ui/tool/path-manipulator.h"
 #include "ui/tools/node-tool.h"
 #include "ui/widget/events/canvas-event.h"
+#include "util-string/ustring-format.h"
 
 using Inkscape::Modifiers::Modifier;
 
@@ -711,7 +712,7 @@ void NodeTool::update_tip()
             nodestring += " ";
             // TRANSLATORS: %1 is an angle in degrees, formatted with two decimal places.
             nodestring += Glib::ustring::compose(_("Angle: %1°."),
-                                                 Glib::ustring::format(std::fixed, std::setprecision(2), angle));
+                                                 Inkscape::ustring::format_classic(std::fixed, std::setprecision(2), angle));
         }
 
         if (this->_last_over) {
@@ -785,7 +786,7 @@ void NodeTool::select_point(ButtonReleaseEvent const &event)
     auto selection = _desktop->getSelection();
 
     auto item_clicked = sp_event_context_find_item(_desktop, event.pos,
-        (event.modifiers & GDK_MOD1_MASK) && !(event.modifiers & GDK_CONTROL_MASK), true);
+        (event.modifiers & GDK_ALT_MASK) && !(event.modifiers & GDK_CONTROL_MASK), true);
 
     if (!item_clicked) { // nothing under cursor
         // if no Shift, deselect

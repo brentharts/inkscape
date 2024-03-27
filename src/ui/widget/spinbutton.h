@@ -15,7 +15,6 @@
 #include <glibmm/ustring.h>
 #include <gtkmm/spinbutton.h>
 
-#include "scrollprotected.h"
 #include "ui/popup-menu.h"
 #include "ui/widget/popover-menu.h"
 
@@ -37,7 +36,7 @@ public:
     MathSpinButton(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade);
 
 private:
-    int on_input(double* newvalue) final;
+    int on_input(double &newvalue);
 };
 
 /**
@@ -46,15 +45,19 @@ private:
  *
  * Calling "set_numeric()" effectively disables the expression parsing. If no unit menu is linked, all unitlike characters are ignored.
  */
-class SpinButton : public ScrollProtected<Gtk::SpinButton>
+class SpinButton : public Gtk::SpinButton
 {
 public:
     using NumericMenuData = std::map<double, Glib::ustring>;
     // We canʼt inherit ctors as if we declare SpinButton(), inherited ctors donʼt call it. Really!
     template <typename ...Args>
     SpinButton(Args &&...args)
-    : ScrollProtected(std::forward<Args>(args)...)
-    { construct(); } // Do the non-templated stuff
+        : Gtk::SpinButton(std::forward<Args>(args)...)
+    { _construct(); } // Do the non-templated stuff
+
+    SpinButton(BaseObjectType *cobject, Glib::RefPtr<Gtk::Builder> const &)
+        : Gtk::SpinButton(cobject)
+    { _construct(); }
 
     void setUnitMenu(UnitMenu* unit_menu) { _unit_menu = unit_menu; };
     void addUnitTracker(UnitTracker* ut) { _unit_tracker = ut; };
@@ -68,22 +71,23 @@ public:
 
     void defocus();
 
+    // set key up/down increment to override spin button adjustment step setting
+    void set_increment(double delta);
+
 private:
     UnitMenu    *_unit_menu    = nullptr; ///< Linked unit menu for unit conversion in entered expressions.
     UnitTracker *_unit_tracker = nullptr; ///< Linked unit tracker for unit conversion in entered expressions.
     double _on_focus_in_value  = 0.;
     Gtk::Widget *_defocus_widget = nullptr; ///< Widget that should grab focus when the spinbutton defocuses
-
     bool _zeroable = false; ///< Reset-value should be zero
     bool _oneable  = false; ///< Reset-value should be one
-
     bool _stay = false; ///< Whether to ignore defocusing
     bool _dont_evaluate = false; ///< Don't attempt to evaluate expressions
-
     NumericMenuData _custom_menu_data;
     bool _custom_popup = false;
+    double _increment = 0.0;    // if > 0, key up/down will increment/decrement current value by this amount
 
-    void construct();
+    void _construct();
 
     /**
      * This callback function should try to convert the entered text to a number and write it to newvalue.
@@ -92,7 +96,7 @@ private:
      * @retval false No conversion done, continue with default handler.
      * @retval true  Conversion successful, don't call default handler.
      */
-    int on_input(double* newvalue) final;
+    int on_input(double &newvalue);
 
     /**
      * When focus is obtained, save the value to enable undo later.
@@ -117,7 +121,7 @@ private:
      */
     void undo();
 
-  public:
+public:
     inline void set_defocus_widget(const decltype(_defocus_widget) widget) { _defocus_widget = widget; }
     inline void set_dont_evaluate(bool flag) { _dont_evaluate = flag; }
 

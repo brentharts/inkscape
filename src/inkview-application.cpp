@@ -38,14 +38,14 @@
 #endif // ENABLE_NLS
 
 // This is a bit confusing as there are two ways to handle command line arguments and files
-// depending on if the Gio::APPLICATION_HANDLES_OPEN and/or Gio::APPLICATION_HANDLES_COMMAND_LINE
+// depending on if the Gio::Application::Flags::HANDLES_OPEN and/or Gio::Application::Flags::HANDLES_COMMAND_LINE
 // flags are set. If the open flag is set and the command line not, the all the remainng arguments
 // after calling on_handle_local_options() are assumed to be filenames.
 
 InkviewApplication::InkviewApplication()
     : Gtk::Application("org.inkscape.Inkview",
-                       Gio::APPLICATION_HANDLES_OPEN | // Use default file opening.
-                       Gio::APPLICATION_NON_UNIQUE   ) // Allows different instances of Inkview to run at same time.
+                       Gio::Application::Flags::HANDLES_OPEN | // Use default file opening.
+                       Gio::Application::Flags::NON_UNIQUE   ) // Allows different instances of Inkview to run at same time.
     , fullscreen(false)
     , recursive(false)
     , timer(0)
@@ -71,18 +71,18 @@ InkviewApplication::InkviewApplication()
 #endif
 
     // Will automatically handle character conversions.
-    // Note: OPTION_TYPE_FILENAME => std::string, OPTION_TYPE_STRING => Glib::ustring.
+    // Note: OptionType::FILENAME => std::string, OptionType::STRING => Glib::ustring.
 
     // clang-format off
-    add_main_option_entry(OPTION_TYPE_BOOL,   "version",    'V', N_("Print Inkview version"),                       "");
-    add_main_option_entry(OPTION_TYPE_BOOL,   "fullscreen", 'f', N_("Launch in fullscreen mode"),                   "");
-    add_main_option_entry(OPTION_TYPE_BOOL,   "recursive",  'r', N_("Search folders recursively"),                  "");
-    add_main_option_entry(OPTION_TYPE_INT,    "timer",      't', N_("Change image every NUMBER seconds"), N_("NUMBER"));
-    add_main_option_entry(OPTION_TYPE_DOUBLE, "scale",      's', N_("Scale image by factor NUMBER"),      N_("NUMBER"));
-    add_main_option_entry(OPTION_TYPE_BOOL,   "preload",    'p', N_("Preload files"),                               "");
+    add_main_option_entry(OptionType::BOOL,   "version",    'V', N_("Print Inkview version"),                       "");
+    add_main_option_entry(OptionType::BOOL,   "fullscreen", 'f', N_("Launch in fullscreen mode"),                   "");
+    add_main_option_entry(OptionType::BOOL,   "recursive",  'r', N_("Search folders recursively"),                  "");
+    add_main_option_entry(OptionType::INT,    "timer",      't', N_("Change image every NUMBER seconds"), N_("NUMBER"));
+    add_main_option_entry(OptionType::DOUBLE, "scale",      's', N_("Scale image by factor NUMBER"),      N_("NUMBER"));
+    add_main_option_entry(OptionType::BOOL,   "preload",    'p', N_("Preload files"),                               "");
     // clang-format on
 
-    signal_handle_local_options().connect(sigc::mem_fun(*this, &InkviewApplication::on_handle_local_options));
+    signal_handle_local_options().connect(sigc::mem_fun(*this, &InkviewApplication::on_handle_local_options), true);
 
     // This is normally called for us... but after the "handle_local_options" signal is emitted. If
     // we want to rely on actions for handling options, we need to call it here. This appears to
@@ -112,7 +112,7 @@ InkviewApplication::on_activate()
     // show file chooser dialog if no files/folders are given on the command line
     // TODO: A FileChooserNative would be preferential, but offers no easy way to allow files AND folders
     Glib::ustring title = _("Select Files or Folders to view");
-    Gtk::FileChooserDialog file_chooser(title + "…", Gtk::FILE_CHOOSER_ACTION_OPEN);
+    Gtk::FileChooserDialog file_chooser(title + "…", Gtk::FileChooser::Action::OPEN);
     file_chooser.add_button(_("Select"), 42); // use custom response ID that is not intercepted by the file chooser
                                               // (allows to pick files AND folders)
     file_chooser.set_select_multiple();
@@ -124,7 +124,7 @@ InkviewApplication::on_activate()
 
     int res = Inkscape::UI::dialog_run(file_chooser);
     if (res == 42) {
-        auto files = file_chooser.get_files();
+        auto files = file_chooser.get_files2();
         if (!files.empty()) {
             on_open(files, "");
         }
@@ -141,7 +141,7 @@ void InkviewApplication::on_open(Gio::Application::type_vec_files const &files, 
         return; // Fixme: Exit with code 1 - see https://gitlab.com/inkscape/inkscape/-/issues/270.
     }
 
-    window->show_all();
+    window->set_visible(true);
     add_window(*window);
 }
 

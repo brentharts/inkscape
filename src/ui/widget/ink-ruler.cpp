@@ -16,10 +16,11 @@
 #include <sigc++/functors/mem_fun.h>
 #include <cairomm/context.h>
 #include <glibmm/ustring.h>
+#include <giomm/menu.h>
+#include <giomm/menuitem.h>
 #include <gdkmm/general.h>
 #include <gtkmm/drawingarea.h>
-#include <gtkmm/popover.h>
-#include <gtkmm/stylecontext.h>
+#include <gtkmm/popovermenu.h>
 
 #include "ink-ruler.h"
 #include "inkscape.h"
@@ -53,8 +54,11 @@ static double half_width = 5.0;
 namespace Inkscape::UI::Widget {
 
 Ruler::Ruler(Gtk::Orientation orientation)
-    : _orientation(orientation)
-    , _drawing_area(Gtk::make_managed<Gtk::DrawingArea>())
+    : Glib::ObjectBase{"InkRuler"}
+    , WidgetVfuncsClassInit{}
+    , Gtk::DrawingArea{}
+    , _orientation(orientation)
+    , _popover{create_context_menu()}
     , _backing_store(nullptr)
     , _lower(0)
     , _upper(1000)
@@ -65,26 +69,27 @@ Ruler::Ruler(Gtk::Orientation orientation)
     , _position(0)
 {
     set_name("InkRuler");
-    get_style_context()->add_class(_orientation == Gtk::ORIENTATION_HORIZONTAL ? "horz" : "vert");
+    add_css_class(_orientation == Gtk::Orientation::HORIZONTAL ? "horz" : "vert");
 
-    _drawing_area->set_visible(true);
-    _drawing_area->signal_draw().connect(sigc::mem_fun(*this, &Ruler::on_drawing_area_draw));
-    _drawing_area->property_expand() = true; // DrawingArea fills self Box,
-    property_expand() = false;               // but the Box doesnʼt expand.
-    add(*_drawing_area);
+    set_draw_func(sigc::mem_fun(*this, &Ruler::draw_func));
 
-    Controller::add_motion<nullptr, &Ruler::on_motion, nullptr>(*_drawing_area, *this);
-    Controller::add_click(*_drawing_area, sigc::mem_fun(*this, &Ruler::on_click_pressed), {}, Controller::Button::right);
+    Controller::add_motion<nullptr, &Ruler::on_motion, nullptr>(*this, *this);
+    Controller::add_click(*this, sigc::mem_fun(*this, &Ruler::on_click_pressed), {}, Controller::Button::right);
 
-    set_no_show_all();
+    set_visible(false);
 
     auto prefs = Inkscape::Preferences::get();
     _watch_prefs = prefs->createObserver("/options/ruler/show_bbox", sigc::mem_fun(*this, &Ruler::on_prefs_changed));
     on_prefs_changed();
 
-    set_context_menu();
+    INKSCAPE.themecontext->getChangeThemeSignal().connect([this]{ css_changed(nullptr); });
 
-    INKSCAPE.themecontext->getChangeThemeSignal().connect(sigc::mem_fun(*this, &Ruler::on_style_updated));
+    signal_destroy().connect([this]{ unparent_children(); });
+}
+
+Ruler::~Ruler()
+{
+    unparent_children();
 }
 
 void Ruler::on_prefs_changed()
@@ -93,7 +98,7 @@ void Ruler::on_prefs_changed()
     _sel_visible = prefs->getBool("/options/ruler/show_bbox", true);
 
     _backing_store_valid = false;
-    _drawing_area->queue_draw();
+    queue_draw();
 }
 
 // Set display unit for ruler.
@@ -104,7 +109,7 @@ Ruler::set_unit(Inkscape::Util::Unit const *unit)
         _unit = unit;
 
         _backing_store_valid = false;
-        _drawing_area->queue_draw();
+        queue_draw();
     }
 }
 
@@ -122,7 +127,7 @@ Ruler::set_range(double lower, double upper)
         }
 
         _backing_store_valid = false;
-        _drawing_area->queue_draw();
+        queue_draw();
     }
 }
 
@@ -136,7 +141,7 @@ void Ruler::set_page(double lower, double upper)
         _page_upper = upper;
 
         _backing_store_valid = false;
-        _drawing_area->queue_draw();
+        queue_draw();
     }
 }
 
@@ -150,7 +155,7 @@ void Ruler::set_selection(double lower, double upper)
         _sel_upper = upper;
 
         _backing_store_valid = false;
-        _drawing_area->queue_draw();
+        queue_draw();
     }
 }
 
@@ -160,7 +165,13 @@ void
 Ruler::add_track_widget(Gtk::Widget& widget)
 {
     Controller::add_motion<nullptr, &Ruler::on_motion, nullptr>(widget, *this,
-        Gtk::PHASE_TARGET, Controller::When::before); // We connected 1st to event, so continue
+        Gtk::PropagationPhase::TARGET, Controller::When::before); // We connected 1st to event, so continue
+}
+
+void
+Ruler::size_allocate_vfunc(int const width, int const height, int const baseline)
+{
+    _popover->present();
 }
 
 // Draws marker in response to motion events from canvas.  Position is defined in ruler pixel
@@ -169,12 +180,12 @@ Ruler::add_track_widget(Gtk::Widget& widget)
 void
 Ruler::on_motion(GtkEventControllerMotion const * motion, double const x, double const y)
 {
-    // This may come from a widget other than _drawing_area, so translate to accommodate border etc
+    // This may come from a widget other than `this`, so translate to accommodate border, etc.
     auto const widget = Glib::wrap(gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(motion)));
-    int drawing_x, drawing_y;
-    widget->translate_coordinates(*_drawing_area, std::lround(x), std::lround(y), drawing_x, drawing_y);
+    double drawing_x{}, drawing_y{};
+    widget->translate_coordinates(*this, std::lround(x), std::lround(y), drawing_x, drawing_y);
 
-    double const position = _orientation == Gtk::ORIENTATION_HORIZONTAL ? drawing_x : drawing_y;
+    double const position = _orientation == Gtk::Orientation::HORIZONTAL ? drawing_x : drawing_y;
     if (position == _position) return;
 
     _position = position;
@@ -184,21 +195,21 @@ Ruler::on_motion(GtkEventControllerMotion const * motion, double const x, double
     region->do_union(_rect);
     _rect = new_rect;
     // Queue repaint
-    _drawing_area->queue_draw_region(region);
+    queue_draw();
 }
 
 Gtk::EventSequenceState
-Ruler::on_click_pressed(Gtk::GestureMultiPress const & /*click*/,
+Ruler::on_click_pressed(Gtk::GestureClick const & /*click*/,
                         int /*n_press*/, double const x, double const y)
 {
     UI::popup_at(*_popover, *this, x, y);
-    return Gtk::EVENT_SEQUENCE_CLAIMED;
+    return Gtk::EventSequenceState::CLAIMED;
 }
 
 std::pair<int, int>
 Ruler::get_drawing_size()
 {
-    return {_drawing_area->get_width(), _drawing_area->get_height()};
+    return {get_width(), get_height()};
 }
 
 // Update backing store when scale changes.
@@ -218,7 +229,7 @@ Ruler::draw_scale(const::Cairo::RefPtr<::Cairo::Context>& cr_in)
     if (double psize = std::abs(_page_upper - _page_lower)) {
         Gdk::Cairo::set_source_rgba(cr, _page_fill);
         cr->begin_new_path();
-        if (_orientation == Gtk::ORIENTATION_HORIZONTAL) {
+        if (_orientation == Gtk::Orientation::HORIZONTAL) {
             cr->rectangle(_page_lower, 0, psize, aheight);
         } else {
             cr->rectangle(0, _page_lower, awidth, psize);
@@ -231,13 +242,13 @@ Ruler::draw_scale(const::Cairo::RefPtr<::Cairo::Context>& cr_in)
     cr->set_line_width(1.0);
 
     // aparallel is the longer, oriented dimension of the ruler; aperpendicular shorter.
-    auto const [aparallel, aperpendicular] = _orientation == Gtk::ORIENTATION_HORIZONTAL
+    auto const [aparallel, aperpendicular] = _orientation == Gtk::Orientation::HORIZONTAL
                                              ? std::pair{awidth , aheight}
                                              : std::pair{aheight, awidth };
 
     // Draw bottom/right line of ruler
     Gdk::Cairo::set_source_rgba(cr, _foreground);
-    if (_orientation == Gtk::ORIENTATION_HORIZONTAL) {
+    if (_orientation == Gtk::Orientation::HORIZONTAL) {
         cr->move_to(0     , aheight - 0.5);
         cr->line_to(awidth, aheight - 0.5);
     } else {
@@ -247,15 +258,15 @@ Ruler::draw_scale(const::Cairo::RefPtr<::Cairo::Context>& cr_in)
     cr->stroke();
 
     // Draw a shadow which overlaps any previously painted object.
-    auto paint_shadow = [=, this] (double size_x, double size_y, double width, double height) {
+    auto paint_shadow = [&] (double size_x, double size_y, double width, double height) {
         auto trans = change_alpha(_shadow, 0.0);
         auto gr = create_cubic_gradient(Geom::Rect(0, 0, size_x, size_y), _shadow, trans, Geom::Point(0, 0.5), Geom::Point(0.5, 1));
         cr->rectangle(0, 0, width, height);
         cr->set_source(gr);
         cr->fill();
     };
-    int gradient_size = 4;
-    if (_orientation == Gtk::ORIENTATION_HORIZONTAL) {
+    static constexpr int gradient_size = 4;
+    if (_orientation == Gtk::Orientation::HORIZONTAL) {
         paint_shadow(0, gradient_size, awidth, gradient_size);
     } else {
         paint_shadow(gradient_size, 0, gradient_size, aheight);
@@ -332,7 +343,7 @@ Ruler::draw_scale(const::Cairo::RefPtr<::Cairo::Context>& cr_in)
             // Align text to pixel
             int x = 3;
             int y = position + 2.5;
-            if (_orientation == Gtk::ORIENTATION_HORIZONTAL) {
+            if (_orientation == Gtk::Orientation::HORIZONTAL) {
                 x = position + 2.5;
                 y = 3;
             }
@@ -347,7 +358,7 @@ Ruler::draw_scale(const::Cairo::RefPtr<::Cairo::Context>& cr_in)
 
         // Draw ticks
         Gdk::Cairo::set_source_rgba(cr, _foreground);
-        if (_orientation == Gtk::ORIENTATION_HORIZONTAL) {
+        if (_orientation == Gtk::Orientation::HORIZONTAL) {
             cr->move_to(position, aheight - size);
             cr->line_to(position, aheight       );
         } else {
@@ -367,7 +378,7 @@ Ruler::draw_scale(const::Cairo::RefPtr<::Cairo::Context>& cr_in)
         double sx0 = floor(aperpendicular * 0.7);
         double sx1 = sx0;
 
-        if (_orientation == Gtk::ORIENTATION_HORIZONTAL) {
+        if (_orientation == Gtk::Orientation::HORIZONTAL) {
             std::swap(sy0, sx0);
             std::swap(sy1, sx1);
         }
@@ -376,7 +387,7 @@ Ruler::draw_scale(const::Cairo::RefPtr<::Cairo::Context>& cr_in)
 
         if (fabs(delta) > 2 * radius) {
             Gdk::Cairo::set_source_rgba(cr, _select_stroke);
-            if (_orientation == Gtk::ORIENTATION_HORIZONTAL) {
+            if (_orientation == Gtk::Orientation::HORIZONTAL) {
                 cr->move_to(sx0 + dxy, sy0);
                 cr->line_to(sx1 - dxy, sy1);
             }
@@ -412,7 +423,7 @@ Ruler::draw_scale(const::Cairo::RefPtr<::Cairo::Context>& cr_in)
  */
 Cairo::RefPtr<Cairo::Surface> Ruler::draw_label(Cairo::RefPtr<Cairo::Surface> const &surface_in, int label_value)
 {
-    bool rotate = _orientation != Gtk::ORIENTATION_HORIZONTAL;
+    bool rotate = _orientation != Gtk::Orientation::HORIZONTAL;
 
     Glib::RefPtr<Pango::Layout> layout = create_pango_layout(std::to_string(label_value));
 
@@ -445,7 +456,7 @@ Ruler::draw_marker(const Cairo::RefPtr<::Cairo::Context>& cr)
 {
     auto const [awidth, aheight] = get_drawing_size();
     Gdk::Cairo::set_source_rgba(cr, _foreground);
-    if (_orientation == Gtk::ORIENTATION_HORIZONTAL) {
+    if (_orientation == Gtk::Orientation::HORIZONTAL) {
         cr->move_to(_position             , aheight             );
         cr->line_to(_position - half_width, aheight - half_width);
         cr->line_to(_position + half_width, aheight - half_width);
@@ -473,7 +484,7 @@ Ruler::marker_rect()
     rect.height = 0;
 
     // Find size of rectangle to enclose triangle.
-    if (_orientation == Gtk::ORIENTATION_HORIZONTAL) {
+    if (_orientation == Gtk::Orientation::HORIZONTAL) {
         rect.x = std::floor(_position - half_width);
         rect.y = std::floor(  aheight - half_width);
         rect.width  = std::ceil(half_width * 2.0 + 1);
@@ -489,8 +500,9 @@ Ruler::marker_rect()
 }
 
 // Draw the ruler using the tick backing store.
-bool
-Ruler::on_drawing_area_draw(const::Cairo::RefPtr<::Cairo::Context>& cr) {
+void
+Ruler::draw_func(Cairo::RefPtr<Cairo::Context> const &cr, int /*width*/, int /*height*/)
+{
     if (!_backing_store_valid) {
         draw_scale (cr);
     }
@@ -499,41 +511,36 @@ Ruler::on_drawing_area_draw(const::Cairo::RefPtr<::Cairo::Context>& cr) {
     cr->paint();
 
     draw_marker (cr);
-
-    return true;
 }
 
 // Update ruler on style change (font-size, etc.)
 void
-Ruler::on_style_updated() {
-    Gtk::Box::on_style_updated();
-
-    Glib::RefPtr<Gtk::StyleContext> style_context = get_style_context();
-
+Ruler::css_changed(GtkCssStyleChange * const change)
+{
     // Cache all our colors to speed up rendering.
 
-    _foreground = get_foreground_color(style_context);
+    _foreground = get_color();
     _font_size = get_font_size(*this);
 
-    _shadow = get_color_with_class(style_context, "shadow");
-    _page_fill = get_color_with_class(style_context, "page");
+    _shadow = get_color_with_class(*this, "shadow");
+    _page_fill = get_color_with_class(*this, "page");
 
-    style_context->add_class("selection");
-    _select_fill = get_color_with_class(style_context, "background");
-    _select_stroke = get_color_with_class(style_context, "border");
-    style_context->remove_class("selection");
+    add_css_class("selection");
+    _select_fill = get_color_with_class(*this, "background");
+    _select_stroke = get_color_with_class(*this, "border");
+    remove_css_class("selection");
 
     _label_cache.clear();
     _backing_store_valid = false;
 
     queue_resize();
-    _drawing_area->queue_draw();
+    queue_draw();
 }
 
 /**
  * Return a contextmenu for the ruler
  */
-void Ruler::set_context_menu()
+std::unique_ptr<Gtk::Popover> Ruler::create_context_menu()
 {
     auto unit_menu = Gio::Menu::create();
 
@@ -544,8 +551,15 @@ void Ruler::set_context_menu()
         unit_menu->append_item(item);
     }
 
-    _popover = Gtk::make_managed<Gtk::Popover>(*this, unit_menu);
-    _popover->set_modal(true); // set_autohide in Gtk4
+    auto popover = std::make_unique<Gtk::PopoverMenu>(unit_menu);
+    popover->set_parent(*this);
+    popover->set_autohide(true);
+    return popover;
+}
+
+void Ruler::unparent_children()
+{
+    _popover->unparent();
 }
 
 } // namespace Inkscape::UI::Widget

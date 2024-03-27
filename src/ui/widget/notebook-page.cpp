@@ -21,11 +21,11 @@ namespace UI {
 namespace Widget {
 
 NotebookPage::NotebookPage(int n_rows, int n_columns, bool expand, bool fill, guint padding)
-    : Gtk::Box(Gtk::ORIENTATION_VERTICAL)
+    : Gtk::Box(Gtk::Orientation::VERTICAL)
     , _table(Gtk::make_managed<Gtk::Grid>())
 {
     set_name("NotebookPage");
-    property_margin().set_value(4);
+    set_margin(4);
     set_spacing(4);
 
     _table->set_row_spacing(4);

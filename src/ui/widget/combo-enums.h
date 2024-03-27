@@ -22,7 +22,6 @@
 
 #include "attr-widget.h"
 #include "ui/widget/labelled.h"
-#include "ui/widget/scrollprotected.h"
 #include "util/enums.h"
 
 namespace Inkscape::UI::Widget {
@@ -31,7 +30,7 @@ namespace Inkscape::UI::Widget {
  * Simplified management of enumerations in the UI as combobox.
  */
 template <typename E> class ComboBoxEnum
-    : public ScrollProtected<Gtk::ComboBox>
+    : public Gtk::ComboBox
     , public AttrWidget
 {
 public:
@@ -101,7 +100,7 @@ private:
     void sort_items() {
         if (_sort) {
             _model->set_default_sort_func(sigc::mem_fun(*this, &ComboBoxEnum<E>::on_sort_compare));
-            _model->set_sort_column(_columns.label, Gtk::SORT_ASCENDING);
+            _model->set_sort_column(_columns.label, Gtk::SortType::ASCENDING);
         }
     }
 
@@ -138,7 +137,7 @@ public:
     }
 
     void remove_row(E id) {
-        auto const &children = _model->children();
+        auto &&children = _model->children();
         auto const e = children.end();
         for (auto i = children.begin(); i != e; ++i) {
             if (auto const data = i->get_value(_columns.data); data->id == id) {

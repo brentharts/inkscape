@@ -17,11 +17,12 @@
 #include <tuple>
 #include <utility>
 #include <glibmm/i18n.h>
-#include <gdkmm/dragcontext.h>
+#include <glibmm/value.h>
+#include <gdkmm/contentprovider.h>
 #include <gtkmm/button.h>
-#include <gtkmm/eventbox.h>
+#include <gtkmm/dragsource.h>
 #include <gtkmm/menubutton.h>
-#include <gtkmm/gesturemultipress.h>
+#include <gtkmm/gestureclick.h>
 #include <gtkmm/scrollbar.h>
 #include <gtkmm/separator.h>
 
@@ -30,6 +31,7 @@
 #include "inkscape.h"
 #include "inkscape-window.h"
 #include "ui/column-menu-builder.h"
+#include "ui/controller.h"
 #include "ui/dialog/dialog-base.h"
 #include "ui/dialog/dialog-data.h"
 #include "ui/dialog/dialog-container.h"
@@ -52,16 +54,16 @@ std::list<DialogNotebook *> DialogNotebook::_instances;
 DialogNotebook::DialogNotebook(DialogContainer *container)
     : Gtk::ScrolledWindow()
     , _container(container)
-    , _menu    {*this, Gtk::POS_BOTTOM}
-    , _menutabs{*this, Gtk::POS_BOTTOM}
+    , _menu    {nullptr, Gtk::PositionType::BOTTOM}
+    , _menutabs{*this  , Gtk::PositionType::BOTTOM}
     , _labels_auto(true)
     , _detaching_duplicate(false)
     , _selected_page(nullptr)
     , _label_visible(true)
 {
     set_name("DialogNotebook");
-    set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
-    set_shadow_type(Gtk::SHADOW_NONE);
+    set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::NEVER);
+    set_has_frame(false);
     set_vexpand(true);
     set_hexpand(true);
 
@@ -143,7 +145,7 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
         return a.order < b.order;
     });
 
-    auto builder = ColumnMenuBuilder<DialogData::Category>{_menu, 2, Gtk::ICON_SIZE_MENU,
+    auto builder = ColumnMenuBuilder<DialogData::Category>{_menu, 2, Gtk::IconSize::NORMAL,
                                                            row};
     for (auto const &data : all_dialogs) {
         auto callback = [key = data.key]{
@@ -162,34 +164,32 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
     }
 
     if (prefs->getBool("/theme/symbolicIcons", true)) {
-        _menu.get_style_context()->add_class("symbolic");
+        _menu.add_css_class("symbolic");
     }
 
-    _menu.show_all_children();
-
     auto const menubtn = Gtk::make_managed<Gtk::MenuButton>();
-    menubtn->set_image_from_icon_name("go-down-symbolic");
+    menubtn->set_icon_name("go-down-symbolic");
     menubtn->set_popover(_menu);
-    _notebook.set_action_widget(menubtn, Gtk::PACK_END);
+    _notebook.set_action_widget(menubtn, Gtk::PackType::END);
     menubtn->set_visible(true);
-    menubtn->set_relief(Gtk::RELIEF_NORMAL);
-    menubtn->set_valign(Gtk::ALIGN_CENTER);
-    menubtn->set_halign(Gtk::ALIGN_CENTER);
-    menubtn->set_can_focus(false);
+    menubtn->set_has_frame(true);
+    menubtn->set_valign(Gtk::Align::CENTER);
+    menubtn->set_halign(Gtk::Align::CENTER);
+    menubtn->set_focusable(false);
     menubtn->set_name("DialogMenuButton");
 
     // =============== Signals ==================
-    _conn.emplace_back(signal_size_allocate().connect(sigc::mem_fun(*this, &DialogNotebook::on_size_allocate_scroll)));
-    _conn.emplace_back(_notebook.signal_drag_begin().connect(sigc::mem_fun(*this, &DialogNotebook::on_drag_begin)));
-    _conn.emplace_back(_notebook.signal_drag_end().connect(sigc::mem_fun(*this, &DialogNotebook::on_drag_end)));
+    auto &source = Controller::add_drag_source(*this);
+    _conn.emplace_back(source.signal_drag_begin().connect(sigc::mem_fun(*this, &DialogNotebook::on_drag_begin)));
+    _conn.emplace_back(source.signal_drag_end().connect(sigc::mem_fun(*this, &DialogNotebook::on_drag_end)));
     _conn.emplace_back(_notebook.signal_page_added().connect(sigc::mem_fun(*this, &DialogNotebook::on_page_added)));
     _conn.emplace_back(_notebook.signal_page_removed().connect(sigc::mem_fun(*this, &DialogNotebook::on_page_removed)));
     _conn.emplace_back(_notebook.signal_switch_page().connect(sigc::mem_fun(*this, &DialogNotebook::on_page_switch)));
 
     // ============= Finish setup ===============
     _reload_context = true;
-    add(_notebook);
-    show_all();
+    set_child(_notebook);
+    set_visible(true);
 
     _instances.push_back(this);
 }
@@ -209,18 +209,18 @@ DialogNotebook::~DialogNotebook()
     }
 
     _instances.remove(this);
+
+    _menutabs.unparent();
 }
 
 void DialogNotebook::add_highlight_header()
 {
-    const auto &style = _notebook.get_style_context();
-    style->add_class("nb-highlight");
+    _notebook.add_css_class("nb-highlight");
 }
 
 void DialogNotebook::remove_highlight_header()
 {
-    const auto &style = _notebook.get_style_context();
-    style->remove_class("nb-highlight");
+    _notebook.remove_css_class("nb-highlight");
 }
 
 /**
@@ -283,30 +283,31 @@ void DialogNotebook::add_page(Gtk::Widget &page, Gtk::Widget &tab, Glib::ustring
         wrapper->set_overlay_scrolling(false);
         wrapper->get_style_context()->add_class("noborder");
 
-        auto const wrapperbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL,0);
+        auto const wrapperbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL,0);
         wrapperbox->set_vexpand(true);
 
         // This used to transfer pack-type and child properties, but now those are set on children.
         for_each_child(*box, [=](Gtk::Widget &child) {
+            child.reference();
             box       ->remove(child);
-            wrapperbox->add   (child);
+            wrapperbox->append(child);
+            child.unreference();
             return ForEachResult::_continue;
         });
 
-        wrapper->add(*wrapperbox);
-        box    ->add(*wrapper);
+        wrapper->set_child(*wrapperbox);
+        box    ->append(*wrapper);
 
         if (provide_scroll(page)) {
-            wrapper->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_EXTERNAL);
+            wrapper->set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::EXTERNAL);
         } else {
-            wrapper->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+            wrapper->set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
         }
     }
 
     int page_number = _notebook.append_page(page, tab);
     _notebook.set_tab_reorderable(page);
     _notebook.set_tab_detachable(page);
-    _notebook.show_all();
     _notebook.set_current_page(page_number);
 }
 
@@ -338,7 +339,6 @@ void DialogNotebook::move_page(Gtk::Widget &page)
     // Set default settings for a new page
     _notebook.set_tab_reorderable(page);
     _notebook.set_tab_detachable(page);
-    _notebook.show_all();
     _reload_context = true;
 }
 
@@ -358,7 +358,7 @@ void DialogNotebook::close_tab_callback()
 
     if (dynamic_cast<DialogBase*>(_notebook.get_nth_page(page_number))) {
         // is this a dialog in a floating window?
-        if (auto window = dynamic_cast<DialogWindow*>(_container->get_toplevel())) {
+        if (auto window = dynamic_cast<DialogWindow*>(_container->get_root())) {
             // store state of floating dialog before it gets deleted
             DialogManager::singleton().store_state(*window);
         }
@@ -376,8 +376,8 @@ void DialogNotebook::close_tab_callback()
     }
 
     // Update tab labels by comparing the sum of their widths to the allocation
-    Gtk::Allocation allocation = get_allocation();
-    on_size_allocate_scroll(allocation);
+    on_size_allocate_scroll(get_width());
+
     _reload_context = true;
 }
 
@@ -392,9 +392,7 @@ void DialogNotebook::close_notebook_callback()
         multipaned->remove(*this);
     } else if (get_parent()) {
         std::cerr << "DialogNotebook::close_notebook_callback: Unexpected parent!" << std::endl;
-        get_parent()->remove(*this);
     }
-    delete this;
 }
 
 /**
@@ -418,7 +416,7 @@ DialogWindow* DialogNotebook::pop_tab_callback()
     // Move page to notebook in new dialog window (attached to active InkscapeWindow).
     auto inkscape_window = _container->get_inkscape_window();
     auto window = new DialogWindow(inkscape_window, page);
-    window->show_all();
+    window->set_visible(true);
 
     if (_notebook.get_n_pages() == 0) {
         close_notebook_callback();
@@ -426,18 +424,21 @@ DialogWindow* DialogNotebook::pop_tab_callback()
     }
 
     // Update tab labels by comparing the sum of their widths to the allocation
-    Gtk::Allocation allocation = get_allocation();
-    on_size_allocate_scroll(allocation);
+    on_size_allocate_scroll(get_width());
 
     return window;
 }
 
 // ========= Signal handlers - notebook =========
 
-[[nodiscard]] static bool should_set_floating(Glib::RefPtr<Gdk::DragContext> const &context)
+[[nodiscard]] static bool should_set_floating(/*Glib::RefPtr<Gdk::DragContext> const &context*/)
 {
+#if 0 // TODO: GTK4: We donʼt seem able to test this anymore. Is always true OK?
     auto const window = context->get_dest_window();
     return !window || window->get_window_type() == Gdk::WINDOW_FOREIGN;
+#else
+    return true;
+#endif
 }
 
 /**
@@ -448,7 +449,7 @@ DialogWindow* DialogNotebook::pop_tab_callback()
  *
  * BUG: this has inconsistent behavior on Wayland.
  */
-void DialogNotebook::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
+void DialogNotebook::on_drag_end(Glib::RefPtr<Gdk::Drag> const &/*drag*/, bool /*delete_data*/)
 {
     // Remove dropzone highlights
     DialogMultipaned::remove_drop_zone_highlight_instances();
@@ -456,7 +457,7 @@ void DialogNotebook::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
         instance->remove_highlight_header();
     }
 
-    bool const set_floating = should_set_floating(context);
+    bool const set_floating = should_set_floating();
     if (set_floating) {
         // Find page
         if (auto const page = _notebook.get_nth_page(_notebook.get_current_page())) {
@@ -465,13 +466,15 @@ void DialogNotebook::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
             auto window = new DialogWindow(inkscape_window, page);
 
             // Move window to mouse pointer
+#if 0 // TODO: GTK4: removed the way to do this, so if we want it we must use platform-specific API
             if (auto device = context->get_device()) {
                 int x = 0, y = 0;
                 device->get_position(x, y);
                 window->move(std::max(0, x - 50), std::max(0, y - 50));
             }
-
-            window->show_all();
+#else
+            static_cast<void>(window);
+#endif
         }
     }
 
@@ -485,12 +488,13 @@ void DialogNotebook::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
     }
 
     // Update tab labels by comparing the sum of their widths to the allocation
-    Gtk::Allocation allocation = get_allocation();
-    on_size_allocate_scroll(allocation);
+    on_size_allocate_scroll(get_width());
 }
 
-void DialogNotebook::on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context)
+void DialogNotebook::on_drag_begin(Glib::RefPtr<Gdk::Drag> const &)
 {
+    // TODO: GTK4: I donʼt THINK we need to set a ContentProvider, but check...!
+
     DialogMultipaned::add_drop_zone_highlight_instances();
     for (auto instance : _instances) {
         instance->add_highlight_header();
@@ -535,8 +539,7 @@ void DialogNotebook::on_page_added(Gtk::Widget *page, int page_num)
     }
 
     // Update tab labels by comparing the sum of their widths to the allocation
-    Gtk::Allocation allocation = get_allocation();
-    on_size_allocate_scroll(allocation);
+    on_size_allocate_scroll(get_width());
 
     // Reload the context menu next time it is shown, to reflect new tabs/order.
     _reload_context = true;
@@ -570,11 +573,18 @@ void DialogNotebook::on_page_removed(Gtk::Widget *page, int page_num)
     _reload_context = true;
 }
 
+void DialogNotebook::size_allocate_vfunc(int const width, int const height, int const baseline)
+{
+    Gtk::ScrolledWindow::size_allocate_vfunc(width, height, baseline);
+
+    on_size_allocate_scroll(width);
+}
+
 /**
  * We need to remove the scrollbar to snap a whole DialogNotebook to width 0.
  *
  */
-void DialogNotebook::on_size_allocate_scroll(Gtk::Allocation &a)
+void DialogNotebook::on_size_allocate_scroll(int const width)
 {
     // magic number
     static constexpr int MIN_HEIGHT = 60;
@@ -589,10 +599,10 @@ void DialogNotebook::on_size_allocate_scroll(Gtk::Allocation &a)
                 if (height > 1) {
                     auto property = scrolledwindow->property_vscrollbar_policy();
                     auto const policy = property.get_value();
-                    if (height >= MIN_HEIGHT && policy != Gtk::POLICY_AUTOMATIC) {
-                        property.set_value(Gtk::POLICY_AUTOMATIC);
-                    } else if (height < MIN_HEIGHT && policy != Gtk::POLICY_EXTERNAL) {
-                        property.set_value(Gtk::POLICY_EXTERNAL);
+                    if (height >= MIN_HEIGHT && policy != Gtk::PolicyType::AUTOMATIC) {
+                        property.set_value(Gtk::PolicyType::AUTOMATIC);
+                    } else if (height < MIN_HEIGHT && policy != Gtk::PolicyType::EXTERNAL) {
+                        property.set_value(Gtk::PolicyType::EXTERNAL);
                     } else {
                         // we don't need to update; break
                         return ForEachResult::_break;
@@ -603,17 +613,25 @@ void DialogNotebook::on_size_allocate_scroll(Gtk::Allocation &a)
         return ForEachResult::_continue;
     });
 
-    set_allocation(a);
+    // set_allocation(a); // TODO: GTK4: lacks this. Is it needed?
+
     // only update notebook tabs on horizontal changes
-    if (a.get_width() != _prev_alloc_width) {
-        on_size_allocate_notebook(a);
+    if (width != _prev_alloc_width) {
+        on_size_allocate_notebook(width);
     }
+}
+
+[[nodiscard]] static int measure_min_width(Gtk::Widget const &widget)
+{
+    int min_width, ignore;
+    widget.measure(Gtk::Orientation::HORIZONTAL, -1, min_width, ignore, ignore, ignore);
+    return min_width;
 }
 
 /**
  * This function hides the tab labels if necessary (and _labels_auto == true)
  */
-void DialogNotebook::on_size_allocate_notebook(Gtk::Allocation &a)
+void DialogNotebook::on_size_allocate_notebook(int const alloc_width)
 {
     // we unset scrollable when FULL mode on to prevent overflow with 
     // container at full size that makes an unmaximized desktop freeze 
@@ -625,24 +643,19 @@ void DialogNotebook::on_size_allocate_notebook(Gtk::Allocation &a)
         return;
     }
 
-    int alloc_width = get_allocation().get_width();
     // Don't update on closed dialog container, prevent console errors
     if (alloc_width < 2) {
         _notebook.set_scrollable(true);
         return;
     }
 
-    int nat_width = 0;
-    int initial_width = 0;
-    int total_width = 0;
-    _notebook.get_preferred_width(initial_width, nat_width); // get current notebook allocation
-
+    auto const initial_width = measure_min_width(_notebook);
     for_each_child(_notebook, [this](Gtk::Widget &page){
-        auto const cover = dynamic_cast<Gtk::EventBox *>(_notebook.get_tab_label(page));
-        if (cover) cover->show_all();
+        auto const tab = dynamic_cast<Gtk::Box *>(_notebook.get_tab_label(page));
+        if (tab) tab->set_visible(true);
         return ForEachResult::_continue;
     });
-    _notebook.get_preferred_width(total_width, nat_width); // get full notebook allocation (all open)
+    auto const total_width = measure_min_width(_notebook);
 
     prev_tabstatus = tabstatus;
     if (_single_tab_width != _none_tab_width && 
@@ -689,27 +702,27 @@ void DialogNotebook::on_size_allocate_notebook(Gtk::Allocation &a)
 /**
  * Signal handler to close a tab on middle-click or to open menu on right-click.
  */
-Gtk::EventSequenceState DialogNotebook::on_tab_click_event(Gtk::GestureMultiPress const &click,
+Gtk::EventSequenceState DialogNotebook::on_tab_click_event(Gtk::GestureClick const &click,
                                                            int /*n_press*/, double /*x*/, double /*y*/,
                                                            Gtk::Widget *page)
 {
     if (_menutabs.get_visible()) {
         _menutabs.popdown();
-        return Gtk::EVENT_SEQUENCE_NONE;
+        return Gtk::EventSequenceState::NONE;
     }
 
     auto const button = click.get_current_button();
     if (button == 2) { // Close tab
         _selected_page = page;
         close_tab_callback();
-        return Gtk::EVENT_SEQUENCE_CLAIMED;
+        return Gtk::EventSequenceState::CLAIMED;
     } else if (button == 3) { // Show menu
         _selected_page = page;
         reload_tab_menu();
         _menutabs.popup_at(*_notebook.get_tab_label(*page));
-        return Gtk::EVENT_SEQUENCE_CLAIMED;
+        return Gtk::EventSequenceState::CLAIMED;
     }
-    return Gtk::EVENT_SEQUENCE_NONE;
+    return Gtk::EventSequenceState::NONE;
 }
 
 void DialogNotebook::on_close_button_click_event(Gtk::Widget *page)
@@ -720,7 +733,7 @@ void DialogNotebook::on_close_button_click_event(Gtk::Widget *page)
 
 // ================== Helpers ===================
 
-/// Get the icon, label, and close button from a tab "cover" i.e. EventBox.
+/// Get the icon, label, and close button from a tab
 static std::optional<std::tuple<Gtk::Image *, Gtk::Label *, Gtk::Button *>>
 get_cover_box_children(Gtk::Widget * const tab_label)
 {
@@ -728,12 +741,7 @@ get_cover_box_children(Gtk::Widget * const tab_label)
         return std::nullopt;
     }
 
-    auto const cover = dynamic_cast<Gtk::EventBox *>(tab_label);
-    if (!cover) {
-        return std::nullopt;
-    }
-
-    auto const box = dynamic_cast<Gtk::Box *>(cover->get_child());
+    auto const box = dynamic_cast<Gtk::Box *>(tab_label);
     if (!box) {
         return std::nullopt;
     }
@@ -778,11 +786,11 @@ void DialogNotebook::reload_tab_menu()
                 return ForEachResult::_continue;
             }
 
-            auto const boxmenu = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 8);
-            boxmenu->set_halign(Gtk::ALIGN_START);
+            auto const boxmenu = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 8);
+            boxmenu->set_halign(Gtk::Align::START);
 
             auto const menuitem = Gtk::make_managed<UI::Widget::PopoverMenuItem>();
-            menuitem->add(*boxmenu);
+            menuitem->set_child(*boxmenu);
 
             auto const &[icon, label, close] = *children;
 
@@ -792,14 +800,14 @@ void DialogNotebook::reload_tab_menu()
                     if (symbolic && name.find("-symbolic") == Glib::ustring::npos) {
                         name += Glib::ustring("-symbolic");
                     }
-                    Gtk::Image *iconend  = sp_get_icon_image(name, Gtk::ICON_SIZE_MENU);
-                    boxmenu->add(*iconend);
+                    Gtk::Image *iconend  = sp_get_icon_image(name, Gtk::IconSize::NORMAL);
+                    boxmenu->append(*iconend);
                 }
             }
 
             auto const labelto = Gtk::make_managed<Gtk::Label>(label->get_text());
             labelto->set_hexpand(true);
-            boxmenu->add(*labelto);
+            boxmenu->append(*labelto);
 
             size_t const pagenum = _notebook.page_num(page);
             _connmenu.emplace_back(
@@ -810,8 +818,6 @@ void DialogNotebook::reload_tab_menu()
             return ForEachResult::_continue;
         });
     }
-
-    _menutabs.show_all();
 }
 
 /**
@@ -861,19 +867,12 @@ void DialogNotebook::toggle_tab_labels_callback(bool show)
 
 void DialogNotebook::on_page_switch(Gtk::Widget *curr_page, guint)
 {
-    if (auto container = dynamic_cast<Gtk::Container *>(curr_page)) {
-        container->show_all_children();
-    }
-
     for_each_child(_notebook, [=, this](Gtk::Widget &page){
         if (auto const dialogbase = dynamic_cast<DialogBase *>(&page)) {
             if (auto const widgs = UI::get_children(*dialogbase); !widgs.empty()) {
-                if (curr_page == &page) {
-                    widgs[0]->show_now();
-                } else {
-                    widgs[0]->set_visible(false);
-                }
+                widgs[0]->set_visible(curr_page == &page);
             }
+
             if (_prev_alloc_width) {
                 dialogbase->setShowing(curr_page == &page);
             }
@@ -918,9 +917,9 @@ void DialogNotebook::on_page_switch(Gtk::Widget *curr_page, guint)
 
     if (_prev_alloc_width) {
         if (!_label_visible) {
-            queue_allocate(); 
+            queue_allocate();
         }
-        auto window = dynamic_cast<DialogWindow*>(_container->get_toplevel());
+        auto window = dynamic_cast<DialogWindow*>(_container->get_root());
         if (window) {
             resize_widget_children(window->get_container());
         } else {
@@ -954,12 +953,13 @@ void DialogNotebook::add_tab_connections(Gtk::Widget * const page)
             sigc::bind(sigc::mem_fun(*this, &DialogNotebook::on_close_button_click_event), page), true);
     _tab_connections.emplace(page, std::move(close_connection));
 
-    auto click = Gtk::GestureMultiPress::create(*tab);
+    auto click = Gtk::GestureClick::create();
+    tab->add_controller(click);
     click->set_button(0); // all
     click->signal_pressed().connect([this, page, &click = *click.get()](int const n_press, double const x, double const y)
     {
         auto const state = on_tab_click_event(click, n_press, x, y, page);
-        if (state != Gtk::EVENT_SEQUENCE_NONE) click.set_state(state);
+        if (state != Gtk::EventSequenceState::NONE) click.set_state(state);
     });
     _tab_connections.emplace(page, std::move(click));
 }
@@ -973,23 +973,12 @@ void DialogNotebook::remove_tab_connections(Gtk::Widget *page)
     _tab_connections.erase(first, last);
 }
 
-void DialogNotebook::get_preferred_height_for_width_vfunc(int width, int& minimum_height, int& natural_height) const {
-    Gtk::ScrolledWindow::get_preferred_height_for_width_vfunc(width, minimum_height, natural_height);
-    if (_natural_height > 0) {
-        natural_height = _natural_height;
-        if (minimum_height > _natural_height) {
-            minimum_height = _natural_height;
-        }
-    }
-}
-
-void DialogNotebook::get_preferred_height_vfunc(int& minimum_height, int& natural_height) const {
-    Gtk::ScrolledWindow::get_preferred_height_vfunc(minimum_height, natural_height);
-    if (_natural_height > 0) {
-        natural_height = _natural_height;
-        if (minimum_height > _natural_height) {
-            minimum_height = _natural_height;
-        }
+void DialogNotebook::measure_vfunc(Gtk::Orientation orientation, int for_size, int &min, int &nat, int &min_baseline, int &nat_baseline) const
+{
+    Gtk::ScrolledWindow::measure_vfunc(orientation, for_size, min, nat, min_baseline, nat_baseline);
+    if (orientation == Gtk::Orientation::VERTICAL && _natural_height > 0) {
+        nat = _natural_height;
+        min = std::min(min, _natural_height);
     }
 }
 

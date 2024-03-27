@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /**
  * @file
- * Inkview - An SVG file viewer.
+ * Inkscape - An SVG editor.
  */
 /*
  * Authors:
@@ -16,8 +16,10 @@
 #include "inkscape-window.h"
 
 #include <iostream>
+#include <gdkmm/surface.h>
 #include <gtkmm/box.h>
-#include <gtkmm/menubar.h>
+#include <gtkmm/popovermenubar.h>
+#include <gtkmm/shortcutcontroller.h>
 #include <sigc++/functors/mem_fun.h>
 
 #include "desktop.h"
@@ -70,24 +72,13 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
         return;
     }
 
+    set_name("InkscapeWindow");
+    set_show_menubar(true);
+
     _app = InkscapeApplication::instance();
     _app->gtk_app()->add_window(*this);
 
     set_resizable(true);
-
-    // =============== Build interface ===============
-
-    // Main box
-    _mainbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
-    _mainbox->set_name("DesktopMainBox");
-    _mainbox->set_visible(true);
-    add(*_mainbox);
-
-    // Desktop widget (=> MultiPaned)
-    _desktop_widget = Gtk::make_managed<SPDesktopWidget>(this, _document);
-    _desktop_widget->set_window(this);
-    _desktop_widget->set_visible(true);
-    _desktop = _desktop_widget->get_desktop();
 
     // =================== Actions ===================
 
@@ -121,6 +112,20 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
     // tooltips to the menu label-to-tooltip map.
     build_menu();
 
+    // =============== Build interface ===============
+
+    // Main box
+    _mainbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
+    _mainbox->set_name("DesktopMainBox");
+    _mainbox->set_visible(true);
+    set_child(*_mainbox);
+
+    // Desktop widget (=> MultiPaned) (After actions added as this initializes shortcuts via CommandDialog.)
+    _desktop_widget = Gtk::make_managed<SPDesktopWidget>(this, _document);
+    _desktop_widget->set_window(this);
+    _desktop_widget->set_visible(true);
+    _desktop = _desktop_widget->get_desktop();
+
     // ========== Drag and Drop of Documents =========
     ink_drag_setup(_desktop_widget);
 
@@ -128,8 +133,10 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
     Inkscape::UI::pack_start(*_mainbox, *_desktop_widget, true, true);
 
     // ================== Callbacks ==================
-    signal_window_state_event()          .connect(sigc::mem_fun(*this, &InkscapeWindow::on_window_state_changed));
-    property_is_active().signal_changed().connect(sigc::mem_fun(*this, &InkscapeWindow::on_is_active_changed   ));
+    property_is_active().signal_changed().connect(sigc::mem_fun(*this, &InkscapeWindow::on_is_active_changed));
+    signal_close_request().connect(sigc::mem_fun(*this, &InkscapeWindow::on_close_request), false); // before
+    property_default_width ().signal_changed().connect(sigc::mem_fun(*this, &InkscapeWindow::on_size_changed));
+    property_default_height().signal_changed().connect(sigc::mem_fun(*this, &InkscapeWindow::on_size_changed));
 
     // ================ Window Options ===============
     setup_view();
@@ -148,14 +155,42 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     bool shift_icons = prefs->getInt("/theme/shiftIcons", true);
     for (auto const child : Inkscape::UI::get_children(*this)) {
-        if (auto const menubar = dynamic_cast<Gtk::MenuBar *>(child)) {
+        if (auto const menubar = dynamic_cast<Gtk::PopoverMenuBar *>(child)) {
             bool const shifted = set_tooltips_and_shift_icons(*menubar, shift_icons);
             if (shifted) shift_icons = false;
         }
     }
 
-    // ========= Update text for Accellerators =======
-    Inkscape::Shortcuts::getInstance().update_gui_text_recursive(this);
+    // ================== Shortcuts ==================
+    auto& shortcuts_instance = Inkscape::Shortcuts::getInstance();
+    _shortcut_controller = Gtk::ShortcutController::create(shortcuts_instance.get_liststore());
+    _shortcut_controller->set_scope(Gtk::ShortcutScope::GLOBAL);
+    _shortcut_controller->set_propagation_phase(Gtk::PropagationPhase::BUBBLE);
+    add_controller(_shortcut_controller);
+
+    // Update shortcuts in menus (due to bug in Gtk4 where menus are not updated when liststore is changed).
+    // However, this will not remove a shortcut label if there is no longer a shortcut for menu item.
+    shortcuts_instance.connect_changed([this]() {
+        remove_controller(_shortcut_controller);
+        add_controller(_shortcut_controller);
+        // Todo: Trigger update_gui_text_recursive here rather than in preferences dialog.
+    });
+
+    // Add shortcuts to tooltips, etc. (but not menus).
+    shortcuts_instance.update_gui_text_recursive(this);
+
+    // ==== Other ====
+    set_visible(true);  // Gtk4: This 'hack' is required for windows created via 'File->New' to be shown. If called before 'build_menu()', menu will not be visible.
+}
+
+void InkscapeWindow::on_realize()
+{
+    Gtk::ApplicationWindow::on_realize();
+
+    // Note: Toplevel only becomes non-null after realisation.
+    _toplevel_state_connection = get_toplevel()->property_state().signal_changed().connect(
+        sigc::mem_fun(*this, &InkscapeWindow::on_toplevel_state_changed)
+    );
 }
 
 InkscapeWindow::~InkscapeWindow()
@@ -186,7 +221,7 @@ InkscapeWindow::setup_view()
 {
     // Make sure the GdkWindow is fully initialized before resizing/moving
     // (ensures the monitor it'll be shown on is known)
-    realize();
+    Gtk::Widget::realize();
 
     // Resize the window to match the document properties
     sp_namedview_window_from_document(_desktop); // This should probably be a member function here.
@@ -197,7 +232,6 @@ InkscapeWindow::setup_view()
     // TODO: This does *not* work when called from 'change_document()', i.e. when the window is already visible.
     //       This can result in off-screen windows! We previously worked around this by hiding and re-showing
     //       the window, but a call to set_visible(false) causes Inkscape to just exit since the migration to Gtk::Application
-    set_visible(true);
     
     _desktop->schedule_zoom_from_document();
     sp_namedview_update_layers_from_document(_desktop);
@@ -206,52 +240,6 @@ InkscapeWindow::setup_view()
     if (nv && nv->lockguides) {
         nv->setLockGuides(true);
     }
-}
-
-bool InkscapeWindow::on_key_press_event(GdkEventKey *event)
-{
-    if constexpr (false) {
-        std::cout << "InkscapeWindow::on_key_press_event: GDK_KEY_PRESS: " << std::hex
-                  << " hardware: " << event->hardware_keycode
-                  << " state: "    << event->state
-                  << " keyval: "   << event->keyval << std::endl;
-    }
-
-    // Key press and release events are normally sent first to Gtk::Window for processing as
-    // accelerators and menomics before bubbling up from the "grab" or "focus" widget (unlike other
-    // events which always bubble up). This would means that key combinations used for accelerators
-    // won't reach the focus widget (and our tool event handlers). As we use single keys for
-    // accelerators, we wouldn't even be able to type text! We can get around this by sending key
-    // events first to the focus widget.
-    //
-    // See https://developer.gnome.org/gtk3/stable/chap-input-handling.html (Event Propagation)
-    //
-    // TODO: GTK4: We wonʼt be able to do this, but shouldnʼt need to, if instead of using
-    // Application.set_accels_for_action(), we use GtkShortcutController in CAPTURE phase.
-    // ::key-press-event handlers will be replaced by GtkEventControllerKey, w/ phase TBC.
-    // See: https://gitlab.com/dboles/inkscape/-/issues/1
-    auto focus = get_focus();
-    if (focus) {
-        if (focus->event(reinterpret_cast<GdkEvent *>(event))) {
-            return true;
-        }
-    }
-
-    // Try to find action to call; calling it here makes it higher priority than dialog mnemonics;
-    // this is needed because GTK tries to activate widgets with matching mnemonics first,
-    // even if they are invisible (!) and/or disabled. That cripples some Alt+key shortcuts when
-    // we open and dock some dialogs, whether they are visible or not.
-    // On macOS situation is even worse, as dialogs can steal many common <option>+key shortcuts.
-    if (Inkscape::Shortcuts::getInstance().invoke_action(event)) {
-        return true;
-    }
-
-    // TODO: GTK4: Ditto above.
-    if (Gtk::Window::on_key_press_event(event)) {
-        return true;
-    }
-
-    return false;
 }
 
 /**
@@ -277,12 +265,21 @@ static void retransientize_dialogs(Gtk::Window &parent)
     }
 }
 
-// TODO: GTK4: Just change over to GdkTopLevel::notify:state & GdkToplevelState.
-bool
-InkscapeWindow::on_window_state_changed(GdkEventWindowState const * const event)
+Glib::RefPtr<Gdk::Toplevel const>
+InkscapeWindow::get_toplevel() const
 {
-   _desktop->onWindowStateChanged(event->changed_mask, event->new_window_state);
-   return false;
+    return std::dynamic_pointer_cast<Gdk::Toplevel const>(get_surface());
+}
+
+void
+InkscapeWindow::on_toplevel_state_changed()
+{
+    // The initial old state is empty {}, as is the new state if we do not have a toplevel anymore.
+    Gdk::Toplevel::State new_toplevel_state{};
+    if (auto const toplevel = get_toplevel()) new_toplevel_state = toplevel->get_state();
+    auto const changed_mask = _old_toplevel_state ^ new_toplevel_state;
+    _old_toplevel_state = new_toplevel_state;
+   _desktop->onWindowStateChanged(changed_mask, new_toplevel_state);
 }
 
 void
@@ -310,7 +307,7 @@ InkscapeWindow::on_is_active_changed()
 
 // Called when a window is closed via the 'X' in the window bar.
 bool
-InkscapeWindow::on_delete_event(GdkEventAny* event)
+InkscapeWindow::on_close_request()
 {
     if (_app) {
         _app->destroy_window(this);
@@ -321,12 +318,13 @@ InkscapeWindow::on_delete_event(GdkEventAny* event)
 /**
  * Configure is called when the widget's size, position or stack changes.
  */
-bool InkscapeWindow::on_configure_event(GdkEventConfigure *event)
+void
+InkscapeWindow::on_size_changed()
 {
-    bool ret = Gtk::ApplicationWindow::on_configure_event(event);
     // Store the desktop widget size on resize.
-    if (!_desktop || !get_realized())
-        return ret;
+    if (!_desktop || !get_realized()) {
+        return;
+    }
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     bool maxed = _desktop->is_maximized();
@@ -340,19 +338,22 @@ bool InkscapeWindow::on_configure_event(GdkEventConfigure *event)
     if (!_desktop->is_iconified() && !maxed && !full) {
         // Get size is more accurate than frame extends for window size.
         int w,h = 0;
-        get_size(w, h);
+        get_default_size(w, h);
         prefs->setInt("/desktop/geometry/width", w);
         prefs->setInt("/desktop/geometry/height", h);
 
         // Frame extends returns real positions, unlike get_position()
-        if (Glib::RefPtr<Gdk::Window> gdkw = get_window()) {
+        // TODO: GTK4: get_frame_extents() and Window.get_position() are gone.
+        // We will must add backend-specific code to get the position or give up
+#if 0
+        if (auto const surface = get_surface()) {
             Gdk::Rectangle rect;
-            gdkw->get_frame_extents(rect);
+            surface->get_frame_extents(rect);
             prefs->setInt("/desktop/geometry/x", rect.get_x());
             prefs->setInt("/desktop/geometry/y", rect.get_y());
         }
+#endif
     }
-    return ret;
 }
 
 void InkscapeWindow::update_dialogs()

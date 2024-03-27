@@ -38,6 +38,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/object.h>
 #include <gtkmm/separator.h>
+#include <gtkmm/version.h>
 
 #include "document-undo.h"
 #include "document.h"
@@ -50,6 +51,7 @@
 #include "ui/pack.h"
 #include "ui/syntax.h"
 #include "ui/widget/frame.h"
+#include "util-string/ustring-format.h"
 #include "widgets/sp-attribute-widget.h"
 
 namespace Inkscape::UI::Dialog {
@@ -121,19 +123,19 @@ void ObjectProperties::_init()
     grid_top->set_column_spacing(spacing);
 
     _exp_properties.set_label(_("Properties"));
-    _exp_properties.add(*grid_top);
+    _exp_properties.set_child(*grid_top);
     UI::pack_start(*this, _exp_properties, false, false);
 
     /* Create the label for the object id */
     _label_id.set_label(_label_id.get_label() + " ");
-    _label_id.set_halign(Gtk::ALIGN_START);
-    _label_id.set_valign(Gtk::ALIGN_CENTER);
+    _label_id.set_halign(Gtk::Align::START);
+    _label_id.set_valign(Gtk::Align::CENTER);
 
     /* Create the entry box for the object id */
     _entry_id.set_tooltip_text(_("The id= attribute (only letters, digits, and the characters .-_: allowed)"));
     _entry_id.set_max_length(64);
     _entry_id.set_hexpand();
-    _entry_id.set_valign(Gtk::ALIGN_CENTER);
+    _entry_id.set_valign(Gtk::Align::CENTER);
 
     _label_id.set_mnemonic_widget(_entry_id);
 
@@ -144,15 +146,15 @@ void ObjectProperties::_init()
 
     /* Create the label for the object label */
     _label_label.set_label(_label_label.get_label() + " ");
-    _label_label.set_halign(Gtk::ALIGN_START);
-    _label_label.set_valign(Gtk::ALIGN_CENTER);
+    _label_label.set_halign(Gtk::Align::START);
+    _label_label.set_valign(Gtk::Align::CENTER);
 
     /* Create the entry box for the object label */
     _entry_label.set_tooltip_text(_("A freeform label for the object"));
     _entry_label.set_max_length(256);
 
     _entry_label.set_hexpand();
-    _entry_label.set_valign(Gtk::ALIGN_CENTER);
+    _entry_label.set_valign(Gtk::Align::CENTER);
 
     _label_label.set_mnemonic_widget(_entry_label);
 
@@ -161,22 +163,22 @@ void ObjectProperties::_init()
 
     /* Create the label for the object title */
     _label_title.set_label(_label_title.get_label() + " ");
-    _label_title.set_halign(Gtk::ALIGN_START);
-    _label_title.set_valign(Gtk::ALIGN_CENTER);
+    _label_title.set_halign(Gtk::Align::START);
+    _label_title.set_valign(Gtk::Align::CENTER);
 
     /* Create the entry box for the object title */
     _entry_title.set_sensitive (FALSE);
     _entry_title.set_max_length (256);
 
     _entry_title.set_hexpand();
-    _entry_title.set_valign(Gtk::ALIGN_CENTER);
+    _entry_title.set_valign(Gtk::Align::CENTER);
 
     _label_title.set_mnemonic_widget(_entry_title);
     // pressing enter in the label field is the same as clicking Set:
     _entry_title.signal_activate().connect(sigc::mem_fun(*this, &ObjectProperties::_labelChanged));
 
     _label_color.set_mnemonic_widget(_highlight_color);
-    _label_color.set_halign(Gtk::ALIGN_START);
+    _label_color.set_halign(Gtk::Align::START);
     _highlight_color.connectChanged(sigc::mem_fun(*this, &ObjectProperties::_highlightChanged));
 
     /* Create the frame for the object description */
@@ -189,17 +191,17 @@ void ObjectProperties::_init()
 
     /* Create the text view box for the object description */
     _ft_description.set_sensitive(false);
-    frame_desc->add(_ft_description);
-    _ft_description.property_margin().set_value(0);
+    frame_desc->set_child(_ft_description);
+    _ft_description.set_margin(0);
 
-    _tv_description.set_wrap_mode(Gtk::WRAP_WORD);
+    _tv_description.set_wrap_mode(Gtk::WrapMode::WORD);
     _tv_description.get_buffer()->set_text("");
-    _ft_description.add(_tv_description);
+    _ft_description.set_child(_tv_description);
     _tv_description.add_mnemonic_label(*label_desc);
 
     /* Create the label for the object title */
-    _label_dpi.set_halign(Gtk::ALIGN_START);
-    _label_dpi.set_valign(Gtk::ALIGN_CENTER);
+    _label_dpi.set_halign(Gtk::Align::START);
+    _label_dpi.set_valign(Gtk::Align::CENTER);
 
     /* Create the entry box for the SVG DPI */
     _spin_dpi.set_digits(2);
@@ -212,23 +214,25 @@ void ObjectProperties::_init()
 
     _label_dpi.set_mnemonic_widget(_spin_dpi);
     // pressing enter in the label field is the same as clicking Set:
+#if GTKMM_CHECK_VERSION(4, 14, 0)
     _spin_dpi.signal_activate().connect(sigc::mem_fun(*this, &ObjectProperties::_labelChanged));
+#endif
 
     /* Check boxes */
-    auto const hb_checkboxes = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);
+    auto const hb_checkboxes = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
 
     auto const grid_cb = Gtk::make_managed<Gtk::Grid>();
     grid_cb->set_row_homogeneous();
     grid_cb->set_column_homogeneous(true);
     grid_cb->set_row_spacing(spacing);
     grid_cb->set_column_spacing(spacing);
-    grid_cb->property_margin().set_value(0);
+    grid_cb->set_margin(0);
     UI::pack_start(*hb_checkboxes, *grid_cb, true, true);
 
     /* Hide */
     _cb_hide.set_tooltip_text (_("Check to make the object invisible"));
     _cb_hide.set_hexpand();
-    _cb_hide.set_valign(Gtk::ALIGN_CENTER);
+    _cb_hide.set_valign(Gtk::Align::CENTER);
     grid_cb->attach(_cb_hide, 0, 0, 1, 1);
 
     _cb_hide.signal_toggled().connect(sigc::mem_fun(*this, &ObjectProperties::_hiddenToggled));
@@ -237,7 +241,7 @@ void ObjectProperties::_init()
     // TRANSLATORS: "Lock" is a verb here
     _cb_lock.set_tooltip_text(_("Check to make the object insensitive (not selectable by mouse)"));
     _cb_lock.set_hexpand();
-    _cb_lock.set_valign(Gtk::ALIGN_CENTER);
+    _cb_lock.set_valign(Gtk::Align::CENTER);
     grid_cb->attach(_cb_lock, 1, 0, 1, 1);
 
     _cb_lock.signal_toggled().connect(sigc::mem_fun(*this, &ObjectProperties::_sensitivityToggled));
@@ -245,7 +249,7 @@ void ObjectProperties::_init()
     /* Preserve aspect ratio */
     _cb_aspect_ratio.set_tooltip_text(_("Check to preserve aspect ratio on images"));
     _cb_aspect_ratio.set_hexpand();
-    _cb_aspect_ratio.set_valign(Gtk::ALIGN_CENTER);
+    _cb_aspect_ratio.set_valign(Gtk::Align::CENTER);
     grid_cb->attach(_cb_aspect_ratio, 0, 1, 1, 1);
 
     _cb_aspect_ratio.signal_toggled().connect(sigc::mem_fun(*this, &ObjectProperties::_aspectRatioToggled));
@@ -253,7 +257,7 @@ void ObjectProperties::_init()
     /* Button for setting the object's id, label, title and description. */
     auto const btn_set = Gtk::make_managed<Gtk::Button>(_("_Set"), true);
     btn_set->set_hexpand();
-    btn_set->set_valign(Gtk::ALIGN_CENTER);
+    btn_set->set_valign(Gtk::Align::CENTER);
     grid_cb->attach(*btn_set, 1, 1, 1, 1);
 
     btn_set->signal_clicked().connect(sigc::mem_fun(*this, &ObjectProperties::_labelChanged));
@@ -272,21 +276,21 @@ void ObjectProperties::_init()
     grid_top->attach(*hb_checkboxes,   0, 6, 2, 1);
 
     _attr_table->create(_int_labels, _int_attrs);
-    auto vbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
+    auto vbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
     auto js = Gtk::make_managed<Gtk::Label>();
     js->set_markup(_("<small><i>Enter JavaScript code for interactive behavior in a browser.</i></small>"));
-    js->set_ellipsize(Pango::EllipsizeMode::ELLIPSIZE_END);
+    js->set_ellipsize(Pango::EllipsizeMode::END);
     js->set_xalign(0.0);
     vbox->set_spacing(spacing);
-    vbox->add(*_attr_table);
-    vbox->add(*js);
-    _exp_interactivity.add(*vbox);
+    vbox->append(*_attr_table);
+    vbox->append(*js);
+    _exp_interactivity.set_child(*vbox);
 
-    auto sep = Gtk::make_managed<Gtk::Separator>(Gtk::ORIENTATION_HORIZONTAL);
+    auto sep = Gtk::make_managed<Gtk::Separator>(Gtk::Orientation::HORIZONTAL);
     UI::pack_start(*this, *sep, false, false);
     UI::pack_start(*this, _exp_interactivity, false, false);
 
-    show_all();
+    set_visible(true);
 }
 
 void ObjectProperties::update_entries()
@@ -451,7 +455,7 @@ void ObjectProperties::_labelChanged()
 
     /* Retrieve the DPI */
     if (is<SPImage>(obj)) {
-        Glib::ustring dpi_value = Glib::ustring::format(_spin_dpi.get_value());
+        Glib::ustring dpi_value = Inkscape::ustring::format_classic(_spin_dpi.get_value());
         obj->setAttribute("inkscape:svg-dpi", dpi_value);
         DocumentUndo::done(getDocument(), _("Set image DPI"), INKSCAPE_ICON("dialog-object-properties"));
     }
@@ -513,7 +517,7 @@ void ObjectProperties::_aspectRatioToggled()
     }
     /* Retrieve the DPI */
     if (is<SPImage>(item)) {
-        Glib::ustring dpi_value = Glib::ustring::format(_spin_dpi.get_value());
+        Glib::ustring dpi_value = Inkscape::ustring::format_classic(_spin_dpi.get_value());
         item->setAttribute("preserveAspectRatio", active);
         DocumentUndo::done(getDocument(), _("Set preserve ratio"), INKSCAPE_ICON("dialog-object-properties"));
     }

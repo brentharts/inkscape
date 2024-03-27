@@ -90,6 +90,7 @@ private:
     Gtk::ComboBoxText &_combo_page_sizes;
     Gtk::Entry *_entry_page_sizes;
     Gtk::Entry &_text_page_margins;
+    Gtk::Popover &_margin_popover;
     Gtk::Entry &_text_page_bleeds;
     Gtk::Entry &_text_page_label;
     Gtk::Label &_label_page_pos;

@@ -58,7 +58,7 @@ Find::Find()
 
       entry_find(_("F_ind:"), _("Find objects by their content or properties (exact or partial match)")),
       entry_replace(_("R_eplace:"), _("Replace match with this value")),
-      label_group{Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL)},
+      label_group{Gtk::SizeGroup::create(Gtk::SizeGroup::Mode::HORIZONTAL)},
 
       check_scope_all(_("_All")),
       check_scope_layer(_("Current _layer")),
@@ -100,8 +100,8 @@ Find::Find()
       check_offsets(_("Offsets")),
       frame_types(_("Object types")),
 
-      _left_size_group(Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL)),
-      _right_size_group(Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL)),
+      _left_size_group(Gtk::SizeGroup::create(Gtk::SizeGroup::Mode::HORIZONTAL)),
+      _right_size_group(Gtk::SizeGroup::create(Gtk::SizeGroup::Mode::HORIZONTAL)),
 
       status(""),
       button_find(_("_Find")),
@@ -109,27 +109,33 @@ Find::Find()
       _action_replace(false),
       blocked(false),
 
-      hbox_searchin(Gtk::ORIENTATION_HORIZONTAL),
-      vbox_scope(Gtk::ORIENTATION_VERTICAL),
-      vbox_searchin(Gtk::ORIENTATION_VERTICAL),
-      vbox_options1(Gtk::ORIENTATION_VERTICAL),
-      vbox_options2(Gtk::ORIENTATION_VERTICAL),
-      hbox_options(Gtk::ORIENTATION_HORIZONTAL),
-      vbox_expander(Gtk::ORIENTATION_VERTICAL),
-      hbox_properties(Gtk::ORIENTATION_HORIZONTAL),
-      vbox_properties1(Gtk::ORIENTATION_VERTICAL),
-      vbox_properties2(Gtk::ORIENTATION_VERTICAL),
-      vbox_types1(Gtk::ORIENTATION_VERTICAL),
-      vbox_types2(Gtk::ORIENTATION_VERTICAL),
-      hbox_types(Gtk::ORIENTATION_HORIZONTAL),
-      hboxbutton_row(Gtk::ORIENTATION_HORIZONTAL)
+      hbox_searchin(Gtk::Orientation::HORIZONTAL),
+      vbox_scope(Gtk::Orientation::VERTICAL),
+      vbox_searchin(Gtk::Orientation::VERTICAL),
+      vbox_options1(Gtk::Orientation::VERTICAL),
+      vbox_options2(Gtk::Orientation::VERTICAL),
+      hbox_options(Gtk::Orientation::HORIZONTAL),
+      vbox_expander(Gtk::Orientation::VERTICAL),
+      hbox_properties(Gtk::Orientation::HORIZONTAL),
+      vbox_properties1(Gtk::Orientation::VERTICAL),
+      vbox_properties2(Gtk::Orientation::VERTICAL),
+      vbox_types1(Gtk::Orientation::VERTICAL),
+      vbox_types2(Gtk::Orientation::VERTICAL),
+      hbox_types(Gtk::Orientation::HORIZONTAL),
+      hboxbutton_row(Gtk::Orientation::HORIZONTAL)
 {
     auto const label1 = entry_find.getLabel();
+    entry_find.getEntry()->set_hexpand();
+    entry_find.getEntry()->set_halign(Gtk::Align::FILL);
     label_group->add_widget(*label1);
     label1->set_xalign(0);
+    label1->set_hexpand(false);
     auto const label2 = entry_replace.getLabel();
+    entry_replace.getEntry()->set_hexpand();
+    entry_replace.getEntry()->set_halign(Gtk::Align::FILL);
     label_group->add_widget(*label2);
     label2->set_xalign(0);
+    label2->set_hexpand(false);
 
     static constexpr int MARGIN = 4;
     set_margin_start(MARGIN);
@@ -222,22 +228,20 @@ Find::Find()
     entry_find.getEntry()->set_width_chars(25);
     entry_replace.getEntry()->set_width_chars(25);
 
-    Gtk::RadioButtonGroup grp_searchin = check_searchin_text.get_group();
-    check_searchin_property.set_group(grp_searchin);
+    check_searchin_property.set_group(check_searchin_text);
     UI::pack_start(vbox_searchin, check_searchin_text, UI::PackOptions::shrink);
     UI::pack_start(vbox_searchin, check_searchin_property, UI::PackOptions::shrink);
-    frame_searchin.add(vbox_searchin);
+    frame_searchin.set_child(vbox_searchin);
 
-    Gtk::RadioButtonGroup grp_scope = check_scope_all.get_group();
-    check_scope_layer.set_group(grp_scope);
-    check_scope_selection.set_group(grp_scope);
+    check_scope_layer    .set_group(check_scope_all);
+    check_scope_selection.set_group(check_scope_all);
     UI::pack_start(vbox_scope, check_scope_all, UI::PackOptions::shrink);
     UI::pack_start(vbox_scope, check_scope_layer, UI::PackOptions::shrink);
     UI::pack_start(vbox_scope, check_scope_selection, UI::PackOptions::shrink);
     hbox_searchin.set_spacing(12);
     UI::pack_start(hbox_searchin, frame_searchin, UI::PackOptions::shrink);
     UI::pack_start(hbox_searchin, frame_scope, UI::PackOptions::shrink);
-    frame_scope.add(vbox_scope);
+    frame_scope.set_child(vbox_scope);
 
     UI::pack_start(vbox_options1, check_case_sensitive, UI::PackOptions::shrink);
     UI::pack_start(vbox_options1, check_include_hidden, UI::PackOptions::shrink);
@@ -250,7 +254,7 @@ Find::Find()
     hbox_options.set_spacing(4);
     UI::pack_start(hbox_options, vbox_options1, UI::PackOptions::shrink);
     UI::pack_start(hbox_options, vbox_options2, UI::PackOptions::shrink);
-    frame_options.add(hbox_options);
+    frame_options.set_child(hbox_options);
 
     UI::pack_start(vbox_properties1, check_ids, UI::PackOptions::shrink);
     UI::pack_start(vbox_properties1, check_style, UI::PackOptions::shrink);
@@ -259,7 +263,7 @@ Find::Find()
     UI::pack_start(vbox_properties1, check_title, UI::PackOptions::shrink);
     UI::pack_start(vbox_properties2, check_attributevalue, UI::PackOptions::shrink);
     UI::pack_start(vbox_properties2, check_attributename, UI::PackOptions::shrink);
-    vbox_properties2.set_valign(Gtk::ALIGN_START);
+    vbox_properties2.set_valign(Gtk::Align::START);
     _left_size_group->add_widget(check_ids);
     _left_size_group->add_widget(check_style);
     _left_size_group->add_widget(check_font);
@@ -270,7 +274,7 @@ Find::Find()
     hbox_properties.set_spacing(4);
     UI::pack_start(hbox_properties, vbox_properties1, UI::PackOptions::shrink);
     UI::pack_start(hbox_properties, vbox_properties2, UI::PackOptions::shrink);
-    frame_properties.add(hbox_properties);
+    frame_properties.set_child(hbox_properties);
 
     UI::pack_start(vbox_types1, check_alltypes, UI::PackOptions::shrink);
     UI::pack_start(vbox_types1, check_paths, UI::PackOptions::shrink);
@@ -283,7 +287,7 @@ Find::Find()
     UI::pack_start(vbox_types2, check_ellipses, UI::PackOptions::shrink);
     UI::pack_start(vbox_types2, check_stars, UI::PackOptions::shrink);
     UI::pack_start(vbox_types2, check_spirals, UI::PackOptions::shrink);
-    vbox_types2.set_valign(Gtk::ALIGN_END);
+    vbox_types2.set_valign(Gtk::Align::END);
     _left_size_group->add_widget(check_alltypes);
     _left_size_group->add_widget(check_paths);
     _left_size_group->add_widget(check_texts);
@@ -298,7 +302,7 @@ Find::Find()
     hbox_types.set_spacing(4);
     UI::pack_start(hbox_types, vbox_types1, UI::PackOptions::shrink);
     UI::pack_start(hbox_types, vbox_types2, UI::PackOptions::shrink);
-    frame_types.add(hbox_types);
+    frame_types.set_child(hbox_types);
 
     vbox_expander.set_spacing(4);
     UI::pack_start(vbox_expander, frame_options, true, true);
@@ -306,7 +310,7 @@ Find::Find()
     UI::pack_start(vbox_expander, frame_types, true, true);
 
     expander_options.set_use_underline();
-    expander_options.add(vbox_expander);
+    expander_options.set_child(vbox_expander);
 
     box_buttons.set_spacing(6);
     box_buttons.set_homogeneous(true);
@@ -346,25 +350,24 @@ Find::Find()
     expander_options.property_expanded().signal_changed().connect(sigc::mem_fun(*this, &Find::onExpander));
     button_find.signal_clicked().connect(sigc::mem_fun(*this, &Find::onFind));
     button_replace.signal_clicked().connect(sigc::mem_fun(*this, &Find::onReplace));
-    check_searchin_text.signal_clicked().connect(sigc::mem_fun(*this, &Find::onSearchinText));
-    check_searchin_property.signal_clicked().connect(sigc::mem_fun(*this, &Find::onSearchinProperty));
-    check_alltypes.signal_clicked().connect(sigc::mem_fun(*this, &Find::onToggleAlltypes));
+    check_searchin_text.signal_toggled().connect(sigc::mem_fun(*this, &Find::onSearchinText));
+    check_searchin_property.signal_toggled().connect(sigc::mem_fun(*this, &Find::onSearchinProperty));
+    check_alltypes.signal_toggled().connect(sigc::mem_fun(*this, &Find::onToggleAlltypes));
 
     for (auto & checkProperty : checkProperties) {
-        checkProperty->signal_clicked().connect(sigc::mem_fun(*this, &Find::onToggleCheck));
+        checkProperty->signal_toggled().connect(sigc::mem_fun(*this, &Find::onToggleCheck));
     }
 
     for (auto & checkType : checkTypes) {
-        checkType->signal_clicked().connect(sigc::mem_fun(*this, &Find::onToggleCheck));
+        checkType->signal_toggled().connect(sigc::mem_fun(*this, &Find::onToggleCheck));
     }
 
     onSearchinText();
     onToggleAlltypes();
 
-    show_all_children();
-
-    button_find.set_can_default();
+    button_find.set_receives_default();
     //button_find.grab_default(); // activatable by Enter
+
     entry_find.getEntry()->grab_focus();
 }
 

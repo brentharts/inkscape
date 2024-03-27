@@ -82,7 +82,7 @@ void SatelliteArrayParam::initui()
         _tree->set_model(_store);
 
         _tree->set_reorderable(true);
-        _tree->enable_model_drag_dest(Gdk::ACTION_MOVE);
+        _tree->enable_model_drag_dest(Gdk::DragAction::MOVE);
 
         auto const toggle_active = Gtk::make_managed<Gtk::CellRendererToggle>();
         int activeColNum = _tree->append_column(_("Active"), *toggle_active) - 1;
@@ -102,8 +102,8 @@ void SatelliteArrayParam::initui()
         _scroller = std::make_unique<Gtk::ScrolledWindow>();
         // quick little hack -- newer versions of gtk gave the item zero space allotment
         _scroller->set_size_request(-1, 120);
-        _scroller->add(*_tree);
-        _scroller->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+        _scroller->set_child(*_tree);
+        _scroller->set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
     }
     param_readSVGValue(param_getSVGValue().c_str());
 }
@@ -331,8 +331,8 @@ Gtk::Widget *SatelliteArrayParam::param_newWidget()
         return nullptr;
     }
 
-    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
-    auto const hbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);
+    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
+    auto const hbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
 
     _tree.reset();
     _scroller.reset();
@@ -343,56 +343,46 @@ Gtk::Widget *SatelliteArrayParam::param_newWidget()
     UI::pack_start(*vbox, *_scroller, UI::PackOptions::expand_widget);
 
     { // Paste item to link button
-        Gtk::Image *pIcon = Gtk::manage(sp_get_icon_image("edit-clone", Gtk::ICON_SIZE_BUTTON));
+        auto const pIcon = Gtk::manage(sp_get_icon_image("edit-clone", Gtk::IconSize::NORMAL));
         auto const pButton = Gtk::make_managed<Gtk::Button>();
-        pButton->set_relief(Gtk::RELIEF_NONE);
-        pIcon->set_visible(true);
-        pButton->add(*pIcon);
-        pButton->set_visible(true);
+        pButton->set_has_frame(false);
+        pButton->set_child(*pIcon);
         pButton->signal_clicked().connect(sigc::mem_fun(*this, &SatelliteArrayParam::on_link_button_click));
         UI::pack_start(*hbox, *pButton, UI::PackOptions::shrink);
         pButton->set_tooltip_text(_("Link to item"));
     }
 
     { // Remove linked item
-        Gtk::Image *pIcon = Gtk::manage(sp_get_icon_image("list-remove", Gtk::ICON_SIZE_BUTTON));
+        auto const pIcon = Gtk::manage(sp_get_icon_image("list-remove", Gtk::IconSize::NORMAL));
         auto const pButton = Gtk::make_managed<Gtk::Button>();
-        pButton->set_relief(Gtk::RELIEF_NONE);
-        pIcon->set_visible(true);
-        pButton->add(*pIcon);
-        pButton->set_visible(true);
+        pButton->set_has_frame(false);
+        pButton->set_child(*pIcon);
         pButton->signal_clicked().connect(sigc::mem_fun(*this, &SatelliteArrayParam::on_remove_button_click));
         UI::pack_start(*hbox, *pButton, UI::PackOptions::shrink);
         pButton->set_tooltip_text(_("Remove Item"));
     }
 
     { // Move Down
-        Gtk::Image *pIcon = Gtk::manage(sp_get_icon_image("go-down", Gtk::ICON_SIZE_BUTTON));
+        auto const pIcon = Gtk::manage(sp_get_icon_image("go-down", Gtk::IconSize::NORMAL));
         auto const pButton = Gtk::make_managed<Gtk::Button>();
-        pButton->set_relief(Gtk::RELIEF_NONE);
-        pIcon->set_visible(true);
-        pButton->add(*pIcon);
-        pButton->set_visible(true);
+        pButton->set_has_frame(false);
+        pButton->set_child(*pIcon);
         pButton->signal_clicked().connect(sigc::mem_fun(*this, &SatelliteArrayParam::on_down_button_click));
         UI::pack_end(*hbox, *pButton, UI::PackOptions::shrink);
         pButton->set_tooltip_text(_("Move Down"));
     }
 
     { // Move Down
-        Gtk::Image *pIcon = Gtk::manage(sp_get_icon_image("go-up", Gtk::ICON_SIZE_BUTTON));
+        auto const pIcon = Gtk::manage(sp_get_icon_image("go-up", Gtk::IconSize::NORMAL));
         auto const pButton = Gtk::make_managed<Gtk::Button>();
-        pButton->set_relief(Gtk::RELIEF_NONE);
-        pIcon->set_visible(true);
-        pButton->add(*pIcon);
-        pButton->set_visible(true);
+        pButton->set_has_frame(false);
+        pButton->set_child(*pIcon);
         pButton->signal_clicked().connect(sigc::mem_fun(*this, &SatelliteArrayParam::on_up_button_click));
         UI::pack_end(*hbox, *pButton, UI::PackOptions::shrink);
         pButton->set_tooltip_text(_("Move Up"));
     }
 
     UI::pack_end(*vbox, *hbox, UI::PackOptions::shrink);
-
-    vbox->show_all_children(true);
 
     return vbox;
 }

@@ -22,6 +22,7 @@
 #include "ui/icon-names.h"
 #include "ui/pack.h"
 #include "ui/util.h"
+#include "ui/widget/spinbutton.h"
 
 // TODO due to internal breakage in glibmm headers, this must be last:
 #include <glibmm/i18n.h>
@@ -288,13 +289,13 @@ Gtk::Widget *LPETransform2Pts::newWidget()
 {
     // use manage here, because after deletion of Effect object, others might
     // still be pointing to this widget.
-    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 6);
-    vbox->property_margin().set_value(5);
+    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 6);
+    vbox->set_margin(5);
 
-    auto const button1 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
-    auto const button2 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
-    auto const button3 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
-    auto const button4 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
+    auto const button1 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
+    auto const button2 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
+    auto const button3 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
+    auto const button4 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
 
     for (auto const param: param_vector) {
         if (!param->widget_is_visible) continue;
@@ -308,10 +309,7 @@ Gtk::Widget *LPETransform2Pts::newWidget()
             auto &scalar = dynamic_cast<UI::Widget::Scalar &>(*widg);
             Gtk::manage(&scalar);
             scalar.signal_value_changed().connect(sigc::mem_fun(*this, &LPETransform2Pts::updateIndex));
-
-            auto const child_list = UI::get_children(scalar);
-            auto &entry = dynamic_cast<Gtk::Entry &>(*child_list.at(1));
-            entry.set_width_chars(3);
+            scalar.getSpinButton().set_width_chars(3);
         } else if (param->param_key == "from_original_width" || param->param_key == "elastic") {
             parent = button1;
         } else if (param->param_key == "flip_horizontal" || param->param_key == "flip_vertical") {

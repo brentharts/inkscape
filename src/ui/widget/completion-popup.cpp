@@ -3,7 +3,7 @@
 #include <cassert>
 #include <gtkmm/entrycompletion.h>
 #include <gtkmm/menubutton.h>
-#include <gtkmm/searchentry.h>
+#include <gtkmm/searchentry2.h>
 #include <gtkmm/liststore.h>
 
 #include "completion-popup.h"
@@ -23,19 +23,18 @@ enum Columns {
 
 CompletionPopup::CompletionPopup() :
     _builder(create_builder("completion-box.glade")),
-    _search(get_widget<Gtk::SearchEntry>(_builder, "search")),
+    _search(get_widget<Gtk::SearchEntry2>(_builder, "search")),
     _button(get_widget<Gtk::MenuButton>(_builder, "menu-btn")),
-    _popover_menu{*this, Gtk::POS_BOTTOM},
+    _popover_menu{nullptr, Gtk::PositionType::BOTTOM},
     _completion(get_object<Gtk::EntryCompletion>(_builder, "completion"))
 {
-    _popover_menu.show_all_children();
-    Controller::add_key<&CompletionPopup::onPopoverKeyPressed>(_popover_menu, *this, Gtk::PHASE_CAPTURE);
+    Controller::add_key<&CompletionPopup::onPopoverKeyPressed>(_popover_menu, *this, Gtk::PropagationPhase::CAPTURE);
     _button.set_popover(_popover_menu);
 
-    _list = Glib::RefPtr<Gtk::ListStore>::cast_dynamic(_builder->get_object("list"));
+    _list = std::dynamic_pointer_cast<Gtk::ListStore>(_builder->get_object("list"));
     assert(_list);
 
-    add(get_widget<Gtk::Box>(_builder, "main-box"));
+    append(get_widget<Gtk::Box>(_builder, "main-box"));
 
     _completion->set_match_func([=](const Glib::ustring& text, const Gtk::TreeModel::const_iterator& it){
         Glib::ustring str;
@@ -61,7 +60,7 @@ CompletionPopup::CompletionPopup() :
         clear();
     });
 
-    _button.signal_toggled().connect([&]{
+    _button.property_active().signal_changed().connect([this] {
         if (!_button.get_active()) {
             return;
         }
@@ -69,7 +68,7 @@ CompletionPopup::CompletionPopup() :
         clear();
         _menu_search.clear();
         _popover_menu.activate({});
-    }, false);
+    });
 
     _search.signal_stop_search().connect([this](){
         clear();
@@ -137,7 +136,7 @@ PopoverMenu& CompletionPopup::get_menu() {
     return _popover_menu;
 }
 
-Gtk::SearchEntry& CompletionPopup::get_entry() {
+Gtk::SearchEntry2& CompletionPopup::get_entry() {
     return _search;
 }
 
@@ -155,7 +154,7 @@ sigc::signal<bool ()>& CompletionPopup::on_focus() {
 
 /// Clear search box without triggering completion popup menu
 void CompletionPopup::clear() {
-    _search.get_buffer()->set_text(Glib::ustring());
+    _search.set_text({});
 }
 
 } // namespace Inkscape::UI::Widget

@@ -96,15 +96,15 @@ SpellCheck::SpellCheck()
     , ignore_button(_("_Ignore"), true)
     , add_button(_("A_dd"), true)
     , dictionary_label(_("Language"))
-    , dictionary_hbox(Gtk::ORIENTATION_HORIZONTAL, 0)
+    , dictionary_hbox(Gtk::Orientation::HORIZONTAL, 0)
     , stop_button(_("_Stop"), true)
     , start_button(_("_Start"), true)
-    , suggestion_hbox(Gtk::ORIENTATION_HORIZONTAL)
-    , changebutton_vbox(Gtk::ORIENTATION_VERTICAL)
+    , suggestion_hbox(Gtk::Orientation::HORIZONTAL)
+    , changebutton_vbox(Gtk::Orientation::VERTICAL)
 {
     _prefs = Inkscape::Preferences::get();
 
-    banner_hbox.add(banner_label);
+    banner_hbox.set_child(banner_label);
 
     if (_langs.empty()) {
         _langs = get_available_langs();
@@ -114,10 +114,10 @@ SpellCheck::SpellCheck()
         }
     }
 
-    scrolled_window.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    scrolled_window.set_shadow_type(Gtk::SHADOW_IN);
+    scrolled_window.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
+    scrolled_window.set_has_frame(true);
     scrolled_window.set_size_request(120, 96);
-    scrolled_window.add(tree_view);
+    scrolled_window.set_child(tree_view);
 
     model = Gtk::ListStore::create(tree_columns);
     tree_view.set_model(model);
@@ -150,17 +150,17 @@ SpellCheck::SpellCheck()
     UI::pack_start(changebutton_vbox, ignore_button, false, false);
     UI::pack_start(changebutton_vbox, add_button, false, false);
 
-    suggestion_hbox.pack_start (scrolled_window, true, true, 4);
-    suggestion_hbox.pack_end (changebutton_vbox, false, false, 0);
+    UI::pack_start(suggestion_hbox, scrolled_window, true, true, 4);
+    UI::pack_end(suggestion_hbox, changebutton_vbox, false, false, 0);
 
     stop_button.set_tooltip_text(_("Stop the check"));
     start_button.set_tooltip_text(_("Start the check"));
 
-    actionbutton_hbox.set_halign(Gtk::ALIGN_END);
+    actionbutton_hbox.set_halign(Gtk::Align::END);
     actionbutton_hbox.set_homogeneous(true);
     actionbutton_hbox.set_spacing(4);
-    actionbutton_hbox.add(stop_button);
-    actionbutton_hbox.add(start_button);
+    actionbutton_hbox.append(stop_button);
+    actionbutton_hbox.append(start_button);
 
     /*
      * Main dialog
@@ -184,8 +184,6 @@ SpellCheck::SpellCheck()
     tree_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SpellCheck::onTreeSelectionChange));
     dictionary_combo.signal_changed().connect(sigc::mem_fun(*this, &SpellCheck::onLanguageChanged));
     pref_button.signal_clicked().connect(sigc::ptr_fun(show_spellcheck_preferences_dialog));
-
-    show_all_children ();
 
     tree_view.set_sensitive(false);
     accept_button.set_sensitive(false);

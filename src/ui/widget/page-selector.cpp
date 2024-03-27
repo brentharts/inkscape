@@ -30,18 +30,18 @@ namespace UI {
 namespace Widget {
 
 PageSelector::PageSelector(SPDesktop *desktop)
-    : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL)
+    : Gtk::Box(Gtk::Orientation::HORIZONTAL)
     , _desktop(desktop)
 {
     set_name("PageSelector");
 
-    _prev_button.add(*Gtk::manage(sp_get_icon_image(INKSCAPE_ICON("pan-start"), Gtk::ICON_SIZE_MENU)));
-    _prev_button.set_relief(Gtk::RELIEF_NONE);
+    _prev_button.set_image_from_icon_name(INKSCAPE_ICON("pan-start"), Gtk::IconSize::NORMAL);
+    _prev_button.set_has_frame(false);
     _prev_button.set_tooltip_text(_("Move to previous page"));
     _prev_button.signal_clicked().connect(sigc::mem_fun(*this, &PageSelector::prevPage));
 
-    _next_button.add(*Gtk::manage(sp_get_icon_image(INKSCAPE_ICON("pan-end"), Gtk::ICON_SIZE_MENU)));
-    _next_button.set_relief(Gtk::RELIEF_NONE);
+    _next_button.set_image_from_icon_name(INKSCAPE_ICON("pan-end"), Gtk::IconSize::NORMAL);
+    _next_button.set_has_frame(false);
     _next_button.set_tooltip_text(_("Move to next page"));
     _next_button.signal_clicked().connect(sigc::mem_fun(*this, &PageSelector::nextPage));
 
@@ -62,8 +62,6 @@ PageSelector::PageSelector(SPDesktop *desktop)
     _doc_replaced_connection =
         _desktop->connectDocumentReplaced(sigc::hide<0>(sigc::mem_fun(*this, &PageSelector::setDocument)));
 
-    this->show_all();
-    this->set_no_show_all();
     setDocument(desktop->getDocument());
 }
 
@@ -126,8 +124,8 @@ void PageSelector::selectonChanged(SPPage *page)
 
     if (!active || active->get_value(_model_columns.object) != page) {
         for (auto row : _page_model->children()) {
-            if (page == row->get_value(_model_columns.object)) {
-                _selector.set_active(row);
+            if (page == row.get_value(_model_columns.object)) {
+                _selector.set_active(row.get_iter());
                 break;
             }
         }

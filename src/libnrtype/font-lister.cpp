@@ -227,12 +227,12 @@ void FontLister::apply_collections(std::set <Glib::ustring>& selected_collection
     FontCollections *font_collections = Inkscape::FontCollections::get();
 
     for (auto const &col : selected_collections) {
-        if (col == Inkscape::DOCUMENT_FONTS) {
+        if (col.raw() == Inkscape::DOCUMENT_FONTS) {
             DocumentFonts* document_fonts = Inkscape::DocumentFonts::get();
             for (auto const &font : document_fonts->get_fonts()) {
                 fonts.insert(font);
             }
-        } else if (col == Inkscape::RECENTLY_USED_FONTS) {
+        } else if (col.raw() == Inkscape::RECENTLY_USED_FONTS) {
             RecentlyUsedFonts *recently_used = Inkscape::RecentlyUsedFonts::get();
             for (auto const &font : recently_used->get_fonts()) {
                 fonts.insert(font);
@@ -443,10 +443,10 @@ int FontLister::add_document_fonts_at_top(SPDocument *document)
         auto const fam = data_family.substr(0, i);
 
         // Return the system font matching the given family name.
-        auto find_matching_system_font = [this] (Glib::ustring const &fam) -> Gtk::TreeRow {
+        auto find_matching_system_font = [this] (Glib::ustring const &fam) -> Gtk::TreeIter<Gtk::TreeRow> {
             for (auto &row : font_list_store->children()) {
                 if (row[font_list.onSystem] && familyNamesAreEqual(fam, row[font_list.family])) {
-                    return row;
+                    return row.get_iter();
                 }
             }
             return {};
@@ -456,8 +456,9 @@ int FontLister::add_document_fonts_at_top(SPDocument *document)
         Styles data_styles;
 
         // Populate with the styles of the matching system font, if any.
-        if (auto const row = find_matching_system_font(fam)) {
-            ensureRowStyles(row);
+        if (auto const iter = find_matching_system_font(fam)) {
+            auto const row = *iter;
+            ensureRowStyles(iter);
             data_styles = *row.get_value(font_list.styles);
         }
 
@@ -634,7 +635,7 @@ std::pair<Glib::ustring, Glib::ustring> FontLister::ui_from_fontspec(Glib::ustri
     //   'Delicious, 500' with a style of 'Medium Italic'. We chop of any weight numbers
     //   at the end of the family:  match ",[1-9]00^".
     Glib::RefPtr<Glib::Regex> weight = Glib::Regex::create(",[1-9]00$");
-    Family = weight->replace(Family, 0, "", Glib::REGEX_MATCH_PARTIAL);
+    Family = weight->replace(Family, 0, "", Glib::Regex::MatchFlags::PARTIAL);
 
     // Pango canonized strings remove space after comma between family names. Put it back.
     size_t i = 0;
@@ -1094,7 +1095,7 @@ Gtk::TreeModel::Row FontLister::get_row_for_font(Glib::ustring const &family)
 
 Gtk::TreePath FontLister::get_path_for_font(Glib::ustring const &family)
 {
-    return font_list_store->get_path(get_row_for_font(family));
+    return font_list_store->get_path(get_row_for_font(family).get_iter());
 }
 
 bool FontLister::is_path_for_font(Gtk::TreePath path, Glib::ustring family)
@@ -1249,7 +1250,7 @@ bool font_lister_separator_func(Glib::RefPtr<Gtk::TreeModel> const &/*model*/,
 
     // Of what use is 'model', can we avoid using font_lister?
     Inkscape::FontLister* font_lister = Inkscape::FontLister::get_instance();
-    Gtk::TreeModel::Row row = *iter;
+    auto row = *iter;
     Glib::ustring entry = row[font_lister->font_list.family];
     return entry == "#";
 }
@@ -1345,7 +1346,7 @@ void font_lister_style_cell_data_func(Gtk::CellRenderer *const renderer,
                                       Gtk::TreeModel::const_iterator const &iter)
 {
     Inkscape::FontLister* font_lister = Inkscape::FontLister::get_instance();
-    auto &row = *iter;
+    auto const &row = *iter;
 
     Glib::ustring family = font_lister->get_font_family();
     Glib::ustring style  = row[font_lister->font_style_list.cssStyle];

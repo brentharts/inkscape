@@ -24,17 +24,17 @@
 #include <gtkmm/box.h>
 #include <gtkmm/gesture.h> // Gtk::EventSequenceState
 #include <gtkmm/scale.h>
-#include "scrollprotected.h"
 
 namespace Gtk {
 class Adjustment;
-class GestureMultiPress;
+class GestureClick;
+class Snapshot;
 class SpinButton;
 } // namespace Gtk
 
-class InkScale final : public Inkscape::UI::Widget::ScrollProtected<Gtk::Scale>
+class InkScale final : public Gtk::Scale
 {
-    using parent_type = ScrollProtected<Gtk::Scale>;
+    using parent_type = Gtk::Scale;
 
 public:
     InkScale(Glib::RefPtr<Gtk::Adjustment>, Gtk::SpinButton* spinbutton);
@@ -42,11 +42,11 @@ public:
     void set_label(Glib::ustring label);
 
 private:
-    bool on_draw(const::Cairo::RefPtr<::Cairo::Context>& cr) final;
+    void snapshot_vfunc(Glib::RefPtr<Gtk::Snapshot> const &snapshot) final;
 
-    Gtk::EventSequenceState on_click_pressed (Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_click_pressed (Gtk::GestureClick const &click,
                                               int n_press, double x, double y);
-    Gtk::EventSequenceState on_click_released(Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_click_released(Gtk::GestureClick const &click,
                                               int n_press, double x, double y);
     void on_motion_enter (GtkEventControllerMotion const *motion, double x, double y);
     void on_motion_motion(GtkEventControllerMotion const *motion, double x, double y);
@@ -89,7 +89,8 @@ private:
     InkScale                      *_scale        = nullptr;
     GtkWidget                     *_focus_widget = nullptr;
 
-    bool on_key_release_event(GdkEventKey* key_event) override;
+    bool on_key_released(GtkEventControllerKey const * controller,
+                         unsigned keyval, unsigned keycode, GdkModifierType state);
 };
 
 #endif // SEEN_INK_SPINSCALE_H

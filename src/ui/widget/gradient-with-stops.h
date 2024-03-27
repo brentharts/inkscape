@@ -17,29 +17,30 @@
 #include <glibmm/refptr.h>
 #include <gdkmm/rgba.h>
 #include <gtk/gtk.h> // GtkEventControllerKey|Motion
-#include <gtkmm/box.h>
+#include <gtkmm/drawingarea.h>
 #include <gtkmm/gesture.h> // Gtk::EventSequenceState
 #include <sigc++/signal.h>
 
 #include "helper/auto-connection.h"
 #include "ui/svg-renderer.h"
+#include "ui/widget/widget-vfuncs-class-init.h"
 
 namespace Gdk {
 class Cursor;
 } // namespace Gdk
 
 namespace Gtk {
-class DrawingArea;
-class GestureMultiPress;
+class GestureClick;
 } // namespace Gtk
 
 class SPGradient;
 
 namespace Inkscape::UI::Widget {
 
-// Box because GTK3 does not bother applying CSS bits like min-width|height on DrawingArea
-// TODO: GTK4: Revisit whether that is still the case; hopefully it isnʼt, then just be DrawingArea
-class GradientWithStops : public Gtk::Box {
+class GradientWithStops
+    : public WidgetVfuncsClassInit
+    , public Gtk::DrawingArea
+{
 public:
     GradientWithStops();
     ~GradientWithStops() override;
@@ -69,17 +70,16 @@ public:
     }
 
 private:
-    bool on_drawing_area_draw(Cairo::RefPtr<Cairo::Context> const &cr);
-    void on_style_updated() final;
-    Gtk::EventSequenceState on_click_pressed (Gtk::GestureMultiPress const &click,
+    void draw_func(Cairo::RefPtr<Cairo::Context> const &cr, int width, int height);
+    void css_changed(GtkCssStyleChange *change) final;
+    Gtk::EventSequenceState on_click_pressed (Gtk::GestureClick const &click,
                                               int n_press, double x, double y);
-    Gtk::EventSequenceState on_click_released(Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_click_released(Gtk::GestureClick const &click,
                                               int n_press, double x, double y);
     void on_motion(GtkEventControllerMotion const *motion, double x, double y);
     bool on_key_pressed(GtkEventControllerKey const *controller,
                         unsigned keyval, unsigned keycode, GdkModifierType state);
-    bool on_focus(Gtk::DirectionType direction) final;
-    void on_drawing_area_has_focus();
+    std::optional<bool> focus(Gtk::DirectionType direction) final;
 
     void modified();
 
@@ -110,9 +110,8 @@ private:
     limits_t get_stop_limits(int index) const;
 
     Glib::RefPtr<Gdk::Cursor> const *get_cursor(double x, double y) const;
-    void set_cursor(Glib::RefPtr<Gdk::Cursor> const *cursor);
+    void set_stop_cursor(Glib::RefPtr<Gdk::Cursor> const *cursor);
 
-    Gtk::DrawingArea *_drawing_area;
     SPGradient* _gradient = nullptr;
 
     struct stop_t {
@@ -147,7 +146,7 @@ private:
     Glib::RefPtr<Gdk::Cursor> _cursor_insert;
     Glib::RefPtr<Gdk::Cursor> const *_cursor_current = nullptr;
 
-    // TODO: customize this amount or read prefs
+   // TODO: customize this amount or read prefs
     double _stop_move_increment = 0.01;
 };
 

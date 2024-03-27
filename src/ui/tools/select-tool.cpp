@@ -338,8 +338,7 @@ void SelectTool::sp_select_context_cycle_through_items(Selection *selection, Scr
 
     std::vector<SPItem *>::iterator next = cycling_items.end();
 
-    if ((scroll_event.direction == GDK_SCROLL_UP) ||
-        (scroll_event.direction == GDK_SCROLL_SMOOTH && scroll_event.delta.y() < 0)) {
+    if (scroll_event.delta.y() < 0) {
         if (! cycling_cur_item) {
             next = cycling_items.begin();
         } else {
@@ -354,7 +353,7 @@ void SelectTool::sp_select_context_cycle_through_items(Selection *selection, Scr
                 }
             }
         }
-    } else { 
+    } else if (scroll_event.delta.y() > 0) {
         if (! cycling_cur_item) {
             next = cycling_items.end();
             --next;
@@ -475,7 +474,7 @@ bool SelectTool::root_handler(CanvasEvent const &event)
             }
         },
         [&] (MotionEvent const &event) {
-            if (grabbed && event.modifiers & (GDK_SHIFT_MASK | GDK_MOD1_MASK)) {
+            if (grabbed && event.modifiers & (GDK_SHIFT_MASK | GDK_ALT_MASK)) {
                 _desktop->getSnapIndicator()->remove_snaptarget();
             }
 
@@ -775,7 +774,7 @@ bool SelectTool::root_handler(CanvasEvent const &event)
             ret = true;
 
             // TODO Simplify this (or remove it, if canvas exists, window must exist).
-            GtkWindow *w = GTK_WINDOW(gtk_widget_get_toplevel(_desktop->getCanvas()->Gtk::Widget::gobj()));
+            GtkWindow *w = GTK_WINDOW(gtk_widget_get_root(_desktop->getCanvas()->Gtk::Widget::gobj()));
             if (w) {
                 gtk_window_present(w);
                 _desktop->getCanvas()->grab_focus();

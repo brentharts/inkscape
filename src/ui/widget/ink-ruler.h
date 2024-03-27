@@ -13,6 +13,7 @@
 
 /* Rewrite of the C Ruler. */
 
+#include <memory>
 #include <unordered_map>
 #include <utility>
 #include <cairomm/refptr.h>
@@ -20,18 +21,19 @@
 #include <pangomm/fontdescription.h>
 #include <gdkmm/rgba.h>
 #include <gtk/gtk.h> // GtkEventControllerMotion
-#include <gtkmm/box.h>
+#include <gtkmm/drawingarea.h>
 #include <gtkmm/enums.h> // Gtk::Orientation
 #include <gtkmm/gesture.h> // Gtk::EventSequenceState
+
 #include "preferences.h"
+#include "ui/widget/widget-vfuncs-class-init.h"
 
 namespace Cairo {
 class Context;
 } // namespace Cairo
 
 namespace Gtk {
-class DrawingArea;
-class GestureMultiPress;
+class GestureClick;
 class Popover;
 } // namespace Gtk
 
@@ -41,12 +43,13 @@ class Unit;
 
 namespace Inkscape::UI::Widget {
   
-// Box because GTK3 does not bother applying CSS bits like border-*|min-width|height on DrawingArea
-// TODO: GTK4: Revisit whether that is still the case; hopefully it isnʼt, then just be DrawingArea
-class Ruler : public Gtk::Box
+class Ruler
+    : public WidgetVfuncsClassInit
+    , public Gtk::DrawingArea
 {
 public:
     Ruler(Gtk::Orientation orientation);
+    ~Ruler() override;
 
     void set_unit(Inkscape::Util::Unit const *unit);
     void set_range(double lower, double upper);
@@ -56,24 +59,26 @@ public:
     void add_track_widget(Gtk::Widget& widget);
 
 private:
+    void size_allocate_vfunc(int width, int height, int baseline) final;
+    void unparent_children();
+
     std::pair<int, int> get_drawing_size();
     bool draw_scale(const Cairo::RefPtr<::Cairo::Context>& cr);
     void draw_marker(const Cairo::RefPtr<::Cairo::Context>& cr);
     Cairo::RectangleInt marker_rect();
-    bool on_drawing_area_draw(Cairo::RefPtr<::Cairo::Context> const &cr);
-    void on_style_updated() override;
+    void draw_func(Cairo::RefPtr<Cairo::Context> const &cr, int width, int height);
+    void css_changed(GtkCssStyleChange *) final;
     void on_prefs_changed();
 
     void on_motion(GtkEventControllerMotion const *motion, double x, double y);
-    Gtk::EventSequenceState on_click_pressed(Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_click_pressed(Gtk::GestureClick const &click,
                                              int n_press, double x, double y);
 
-    void set_context_menu();
+    [[nodiscard]] std::unique_ptr<Gtk::Popover> create_context_menu();
     Cairo::RefPtr<Cairo::Surface> draw_label(Cairo::RefPtr<Cairo::Surface> const &surface_in, int label_value);
 
-    Gtk::DrawingArea *_drawing_area;
     Inkscape::PrefObserver _watch_prefs;
-    Gtk::Popover* _popover = nullptr;
+    std::unique_ptr<Gtk::Popover> _popover;
     Gtk::Orientation    _orientation;
     Inkscape::Util::Unit const* _unit;
     double _lower;

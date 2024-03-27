@@ -23,13 +23,15 @@
 // For updating from selection
 #include "desktop.h"
 #include "object/sp-text.h"
+#include "ui/util.h"
 
 namespace Inkscape {
 namespace UI {
 namespace Widget {
 
 FontVariationAxis::FontVariationAxis(Glib::ustring name_, OTVarAxis const &axis)
-    : name(std::move(name_))
+    : Gtk::Box(Gtk::Orientation::HORIZONTAL)
+    , name(std::move(name_))
 {
 
     // std::cout << "FontVariationAxis::FontVariationAxis:: "
@@ -40,7 +42,7 @@ FontVariationAxis::FontVariationAxis(Glib::ustring name_, OTVarAxis const &axis)
     //           << " val:  " << axis.set_val << std::endl;
 
     label = Gtk::make_managed<Gtk::Label>(name);
-    add(*label);
+    append(*label);
 
     precision = 2 - int( log10(axis.maximum - axis.minimum));
     if (precision < 0) precision = 0;
@@ -50,22 +52,19 @@ FontVariationAxis::FontVariationAxis(Glib::ustring name_, OTVarAxis const &axis)
     scale->set_value (axis.set_val);
     scale->set_digits (precision);
     scale->set_hexpand(true);
-    add( *scale );
+    append(*scale);
 
     def = axis.def; // Default value
 }
 
-
 // ------------------------------------------------------------- //
 
-FontVariations::FontVariations () :
-    Gtk::Grid ()
+FontVariations::FontVariations()
+    : Gtk::Box(Gtk::Orientation::VERTICAL)
 {
     // std::cout << "FontVariations::FontVariations" << std::endl;
-    set_orientation( Gtk::ORIENTATION_VERTICAL );
     set_name ("FontVariations");
-    size_group = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
-    show_all_children();
+    size_group = Gtk::SizeGroup::create(Gtk::SizeGroup::Mode::HORIZONTAL);
 }
 
 
@@ -74,7 +73,7 @@ void FontVariations::update(Glib::ustring const &font_spec)
 {
     auto res = FontFactory::get().FaceFromFontSpecification(font_spec.c_str());
 
-    auto children = get_children();
+    auto children = UI::get_children(*this);
     for (auto child : children) {
         remove(*child);
     }
@@ -84,14 +83,12 @@ void FontVariations::update(Glib::ustring const &font_spec)
         // std::cout << "Creating axis: " << a.first << std::endl;
         auto const axis = Gtk::make_managed<FontVariationAxis>(a.first, a.second);
         axes.push_back( axis );
-        add( *axis );
+        append(*axis);
         size_group->add_widget( *(axis->get_label()) ); // Keep labels the same width
         axis->get_scale()->signal_value_changed().connect(
             sigc::mem_fun(*this, &FontVariations::on_variations_change)
             );
     }
-
-    show_all_children();
 }
 
 void

@@ -25,6 +25,7 @@
 #include <librevenge-stream/librevenge-stream.h>
 #include <libvisio/libvisio.h>
 #include <sigc++/functors/mem_fun.h>
+#include <gtkmm/adjustment.h>
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/dialog.h>
@@ -64,9 +65,9 @@ private:
 
     // Signal handlers
     void _onPageNumberChanged();
-    Gtk::EventSequenceState _onSpinButtonClickPressed (Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState _onSpinButtonClickPressed (Gtk::GestureClick const &click,
                                                        int n_press, double x, double y);
-    Gtk::EventSequenceState _onSpinButtonClickReleased(Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState _onSpinButtonClickReleased(Gtk::GestureClick const &click,
                                                        int n_press, double x, double y);
 
     class Gtk::Box * vbox1;
@@ -98,23 +99,22 @@ VsdImportDialog::VsdImportDialog(const std::vector<RVNGString> &vec)
     // Dialog settings
     this->set_title(_("Page Selector"));
     this->set_modal(true);
-    sp_transientize(this->Gtk::Widget::gobj());  //Make transient
-    this->property_window_position().set_value(Gtk::WIN_POS_NONE);
+    sp_transientize(*this);
     this->set_resizable(true);
     this->property_destroy_with_parent().set_value(false);
 
     // Preview area
-    vbox1 = Gtk::make_managed<class Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 4);
-    vbox1->property_margin().set_value(4);
+    vbox1 = Gtk::make_managed<class Gtk::Box>(Gtk::Orientation::VERTICAL, 4);
+    vbox1->set_margin(4);
     UI::pack_start(*this->get_content_area(), *vbox1);
 
     // CONTROLS
-    _page_selector_box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 4);
+    _page_selector_box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 4);
 
     // Labels
     _labelSelect = Gtk::make_managed<class Gtk::Label>(_("Select page:"));
     _labelTotalPages = Gtk::make_managed<class Gtk::Label>();
-    _labelSelect->set_line_wrap(false);
+    _labelSelect->set_wrap(false);
     _labelSelect->set_use_markup(false);
     _labelSelect->set_selectable(false);
     UI::pack_start(*_page_selector_box, *_labelSelect, UI::PackOptions::shrink);
@@ -122,13 +122,12 @@ VsdImportDialog::VsdImportDialog(const std::vector<RVNGString> &vec)
     // Adjustment + spinner
     auto _pageNumberSpin_adj = Gtk::Adjustment::create(1, 1, _vec.size(), 1, 10, 0);
     _pageNumberSpin = Gtk::make_managed<Gtk::SpinButton>(_pageNumberSpin_adj, 1, 0);
-    _pageNumberSpin->set_can_focus();
-    _pageNumberSpin->set_update_policy(Gtk::UPDATE_ALWAYS);
+    _pageNumberSpin->set_focusable();
     _pageNumberSpin->set_numeric(true);
     _pageNumberSpin->set_wrap(false);
     UI::pack_start(*_page_selector_box, *_pageNumberSpin, UI::PackOptions::shrink);
 
-    _labelTotalPages->set_line_wrap(false);
+    _labelTotalPages->set_wrap(false);
     _labelTotalPages->set_use_markup(false);
     _labelTotalPages->set_selectable(false);
     gchar *label_text = g_strdup_printf(_("out of %i"), num_pages);
@@ -141,17 +140,17 @@ VsdImportDialog::VsdImportDialog(const std::vector<RVNGString> &vec)
     // Buttons
     cancelbutton = Gtk::make_managed<Gtk::Button>(_("_Cancel"), true);
     okbutton    = Gtk::make_managed<Gtk::Button>(_("_OK"),    true);
-    this->add_action_widget(*cancelbutton, Gtk::RESPONSE_CANCEL);
-    this->add_action_widget(*okbutton, Gtk::RESPONSE_OK);
+    this->add_action_widget(*cancelbutton, Gtk::ResponseType::CANCEL);
+    this->add_action_widget(*okbutton, Gtk::ResponseType::OK);
 
-    // Show all widgets in dialog
-    this->show_all();
+    // Show dialog
+    this->set_visible(true);
 
     // Connect signals
     _pageNumberSpin->signal_value_changed().connect(sigc::mem_fun(*this, &VsdImportDialog::_onPageNumberChanged));
     UI::Controller::add_click(*_pageNumberSpin, sigc::mem_fun(*this, &VsdImportDialog::_onSpinButtonClickPressed ),
                                                 sigc::mem_fun(*this, &VsdImportDialog::_onSpinButtonClickReleased),
-                              UI::Controller::Button::any, Gtk::PHASE_TARGET);
+                              UI::Controller::Button::any, Gtk::PropagationPhase::TARGET);
 
     _setPreviewPage();
 }
@@ -161,7 +160,7 @@ VsdImportDialog::~VsdImportDialog() = default;
 bool VsdImportDialog::showDialog()
 {
     gint b = UI::dialog_run(*this);
-    if (b == Gtk::RESPONSE_OK || b == Gtk::RESPONSE_ACCEPT) {
+    if (b == Gtk::ResponseType::OK || b == Gtk::ResponseType::ACCEPT) {
         return TRUE;
     } else {
         return FALSE;
@@ -181,20 +180,20 @@ void VsdImportDialog::_onPageNumberChanged()
 }
 
 Gtk::EventSequenceState
-VsdImportDialog::_onSpinButtonClickPressed(Gtk::GestureMultiPress const & /*click*/,
+VsdImportDialog::_onSpinButtonClickPressed(Gtk::GestureClick const & /*click*/,
                                            int /*n_press*/, double /*x*/, double /*y*/)
 {
     _spinning = true;
-    return Gtk::EVENT_SEQUENCE_NONE;
+    return Gtk::EventSequenceState::NONE;
 }
 
 Gtk::EventSequenceState
-VsdImportDialog::_onSpinButtonClickReleased(Gtk::GestureMultiPress const & /*click*/,
+VsdImportDialog::_onSpinButtonClickReleased(Gtk::GestureClick const & /*click*/,
                                             int /*n_press*/, double /*x*/, double /*y*/)
 {
     _spinning = false;
     _setPreviewPage();
-    return Gtk::EVENT_SEQUENCE_NONE;
+    return Gtk::EventSequenceState::NONE;
 }
 
 /**
@@ -234,7 +233,6 @@ void VsdImportDialog::_setPreviewPage()
     }
 
     _previewArea->setResize(400, 400);
-    _previewArea->show_all();
 }
 
 SPDocument *VsdInput::open(Inkscape::Extension::Input * /*mod*/, const gchar * uri)

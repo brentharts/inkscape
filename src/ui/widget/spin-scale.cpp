@@ -35,7 +35,7 @@ SpinScale::SpinScale(Glib::ustring label, double value,
     , _inkspinscale(value, lower, upper, step_increment, page_increment, 0)
 {
     set_name("SpinScale");
-    _inkspinscale.drag_dest_unset();
+
     _inkspinscale.set_label(std::move(label));
     _inkspinscale.set_digits (digits);
     _inkspinscale.set_tooltip_text (tip_text);
@@ -45,8 +45,6 @@ SpinScale::SpinScale(Glib::ustring label, double value,
     signal_value_changed().connect(signal_attr_changed().make_slot());
 
     UI::pack_start(*this, _inkspinscale);
-
-    show_all_children();
 }
 
 SpinScale::SpinScale(Glib::ustring label,
@@ -65,8 +63,6 @@ SpinScale::SpinScale(Glib::ustring label,
     signal_value_changed().connect(signal_attr_changed().make_slot());
 
     UI::pack_start(*this, _inkspinscale);
-
-    show_all_children();
 }
 
 Glib::ustring SpinScale::get_as_attribute() const
@@ -88,7 +84,7 @@ void SpinScale::set_from_attribute(SPObject* o)
         _adjustment->set_value(get_default()->as_double());
 }
 
-Glib::SignalProxy<void> SpinScale::signal_value_changed()
+Glib::SignalProxy<void()> SpinScale::signal_value_changed()
 {
     return _adjustment->signal_value_changed();
 }
@@ -129,28 +125,26 @@ DualSpinScale::DualSpinScale(Glib::ustring label1, Glib::ustring label2,
     _s2.get_adjustment()->signal_value_changed().connect(_signal_value_changed.make_slot());
     _s1.get_adjustment()->signal_value_changed().connect(sigc::mem_fun(*this, &DualSpinScale::update_linked));
 
-    _link.set_relief(Gtk::RELIEF_NONE);
+    _link.set_has_frame(false);
     _link.set_focus_on_click(false);
-    _link.set_can_focus(false);
-    _link.get_style_context()->add_class("link-edit-button");
-    _link.set_valign(Gtk::ALIGN_CENTER);
+    _link.set_focusable(false);
+    _link.add_css_class("link-edit-button");
+    _link.set_valign(Gtk::Align::CENTER);
     _link.signal_clicked().connect(sigc::mem_fun(*this, &DualSpinScale::link_toggled));
 
-    auto const vb = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
-    vb->add(_s1);
+    auto const vb = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
+    vb->append(_s1);
     _s1.set_margin_bottom(3);
-    vb->add(_s2);
+    vb->append(_s2);
     UI::pack_start(*this, *vb);
     UI::pack_start(*this, _link, false, false);
     set_link_active(true);
     _s2.set_sensitive(false);
-
-    show_all();
 }
 
 void DualSpinScale::set_link_active(bool link) {
     _linked = link;
-    _link.set_image_from_icon_name(_linked ? "entries-linked" : "entries-unlinked", Gtk::ICON_SIZE_LARGE_TOOLBAR);
+    _link.set_image_from_icon_name(_linked ? "entries-linked" : "entries-unlinked", Gtk::IconSize::LARGE);
 }
 
 Glib::ustring DualSpinScale::get_as_attribute() const

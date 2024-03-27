@@ -60,7 +60,7 @@ Print::Print(SPDocument *doc, SPItem *base) :
     title += jobname;
     _printop->set_job_name(title);
 
-    _printop->set_unit(Gtk::UNIT_POINTS);
+    _printop->set_unit(Gtk::Unit::POINTS);
     Glib::RefPtr<Gtk::PageSetup> page_setup = Gtk::PageSetup::create();
 
     // Default to a custom paper size, in case we can't find a more specific size
@@ -82,7 +82,7 @@ Print::Print(SPDocument *doc, SPItem *base) :
     _workaround._doc = _doc;
     _workaround._base = _base;
     _workaround._tab = &_tab;
-    _printop->signal_create_custom_widget().connect(sigc::mem_fun(*this, &Print::create_custom_widget));
+    _printop->signal_create_custom_widget().connect(sigc::mem_fun(*this, &Print::create_custom_widget), true);
     _printop->signal_begin_print().connect(sigc::mem_fun(*this, &Print::begin_print));
     _printop->signal_draw_page().connect(sigc::mem_fun(*this, &Print::draw_page));
 
@@ -111,7 +111,7 @@ void Print::setup_page(const Glib::RefPtr<Gtk::PrintContext>& context, int page_
  */
 void Print::set_paper_size(const Glib::RefPtr<Gtk::PageSetup> &page_setup, double page_width, double page_height)
 {
-    auto p_size = Gtk::PaperSize("custom", "custom", page_width, page_height, Gtk::UNIT_POINTS);
+    auto p_size = Gtk::PaperSize("custom", "custom", page_width, page_height, Gtk::Unit::POINTS);
 
     // Some print drivers, like the EPSON's ESC/P-R CUPS driver, don't accept custom
     // page sizes, so we'll try to find a known page size.
@@ -121,20 +121,20 @@ void Print::set_paper_size(const Glib::RefPtr<Gtk::PageSetup> &page_setup, doubl
     // mode.
     // As a compromise, we'll only rotate the page if we actually find a matching paper size,
     // since laser cutter beds tend to be custom sizes.
-    Gtk::PageOrientation orientation = Gtk::PAGE_ORIENTATION_PORTRAIT;
+    Gtk::PageOrientation orientation = Gtk::PageOrientation::PORTRAIT;
     if (page_width > page_height) {
-        orientation = Gtk::PAGE_ORIENTATION_REVERSE_LANDSCAPE;
+        orientation = Gtk::PageOrientation::REVERSE_LANDSCAPE;
         std::swap(page_width, page_height);
     }
 
     // attempt to match document size against known paper sizes
     std::vector<Gtk::PaperSize> known_sizes = Gtk::PaperSize::get_paper_sizes(false);
     for (auto& size : known_sizes) {
-        if (fabs(size.get_width(Gtk::UNIT_POINTS) - page_width) >= 1.0) {
+        if (fabs(size.get_width(Gtk::Unit::POINTS) - page_width) >= 1.0) {
             // width (short edge) doesn't match
             continue;
         }
-        if (fabs(size.get_height(Gtk::UNIT_POINTS) - page_height) >= 1.0) {
+        if (fabs(size.get_height(Gtk::Unit::POINTS) - page_height) >= 1.0) {
             // height (short edge) doesn't match
             continue;
         }
@@ -219,45 +219,37 @@ void Print::draw_page(const Glib::RefPtr<Gtk::PrintContext>& context, int page_n
         else {
             g_warning("%s", _("Could not open temporary PNG for bitmap printing"));
         }
-    }
-    else {
+    } else {
         // Render as vectors
         prefs->setBool("/dialogs/printing/asbitmap", false);
-        Inkscape::Extension::Internal::CairoRenderer renderer;
-        Inkscape::Extension::Internal::CairoRenderContext *ctx = renderer.createContext();
+        Extension::Internal::CairoRenderer renderer;
+        auto ctx = renderer.createContext();
 
-        // ctx->setPSLevel(CAIRO_PS_LEVEL_3);
-        ctx->setTextToPath(false);
-        ctx->setFilterToBitmap(true);
-        ctx->setBitmapResolution(72);
+        ctx.setTextToPath(false);
+        ctx.setFilterToBitmap(true);
+        ctx.setBitmapResolution(72);
 
         auto cr = context->get_cairo_context();
         auto surface = cr->get_target();
         auto ctm = cr->get_matrix();
 
-        bool ret = ctx->setSurfaceTarget(surface->cobj(), true, &ctm);
+        bool ret = ctx.setSurfaceTarget(surface->cobj(), true, &ctm);
         if (ret) {
-            ret = renderer.setupDocument (ctx, _workaround._doc);
+            ret = renderer.setupDocument(&ctx, _workaround._doc);
             if (ret) {
                 if (auto page = pm.getPage(page_nr)) {
-                    renderer.renderPage(ctx, _workaround._doc, page, false);
+                    renderer.renderPage(&ctx, _workaround._doc, page, false);
                 } else {
-                    renderer.renderItem(ctx, _workaround._base);
+                    renderer.renderItem(&ctx, _workaround._base);
                 }
-                ctx->finish(false);  // do not finish the cairo_surface_t - it's owned by our GtkPrintContext!
-            }
-            else {
+                ctx.finish(false);  // do not finish the cairo_surface_t - it's owned by our GtkPrintContext!
+            } else {
                 g_warning("%s", _("Could not set up Document"));
             }
-        }
-        else {
+        } else {
             g_warning("%s", _("Failed to set CairoRenderContext"));
         }
-
-        // Clean up
-        renderer.destroyContext(ctx);
     }
-
 }
 
 Gtk::Widget *Print::create_custom_widget()
@@ -270,25 +262,25 @@ void Print::begin_print(const Glib::RefPtr<Gtk::PrintContext>&)
     // Could change which pages get printed here, but nothing to do.
 }
 
-Gtk::PrintOperationResult Print::run(Gtk::PrintOperationAction, Gtk::Window &parent_window)
+Gtk::PrintOperation::Result Print::run(Gtk::PrintOperation::Action, Gtk::Window &parent_window)
 {
     // Remember to restore the previous print settings
     _printop->set_print_settings(get_printer_settings());
 
     try {
-        Gtk::PrintOperationResult res = _printop->run(Gtk::PRINT_OPERATION_ACTION_PRINT_DIALOG, parent_window);
+        Gtk::PrintOperation::Result res = _printop->run(Gtk::PrintOperation::Action::PRINT_DIALOG, parent_window);
 
         // Save printer settings (but only on success)
-        if (res == Gtk::PRINT_OPERATION_RESULT_APPLY) {
+        if (res == Gtk::PrintOperation::Result::APPLY) {
             get_printer_settings() = _printop->get_print_settings();
         }
 
         return res;
     } catch (const Glib::Error &e) {
-        g_warning("Failed to print '%s': %s", _doc->getDocumentName(), e.what().c_str());
+        g_warning("Failed to print '%s': %s", _doc->getDocumentName(), e.what());
     }
 
-    return Gtk::PRINT_OPERATION_RESULT_ERROR;
+    return Gtk::PrintOperation::Result::ERROR;
 }
 
 

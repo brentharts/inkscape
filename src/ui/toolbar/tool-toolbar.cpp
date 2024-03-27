@@ -22,9 +22,9 @@
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
 #include <gtkmm/flowbox.h>
-#include <gtkmm/gesturemultipress.h>
+#include <gtkmm/gestureclick.h>
 #include <gtkmm/popover.h>
-#include <gtkmm/radiobutton.h>
+#include <gtkmm/togglebutton.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/separator.h>
 
@@ -46,39 +46,32 @@ ToolToolbar::ToolToolbar(InkscapeWindow *window)
 {
     set_name("ToolToolbar");
 
-    Gtk::ScrolledWindow* tool_toolbar = nullptr;
-
     auto builder = Inkscape::UI::create_builder("toolbar-tool.ui");
-    builder->get_widget("tool-toolbar", tool_toolbar);
-    if (!tool_toolbar) {
-        std::cerr << "ToolToolbar: Failed to load tool toolbar!" << std::endl;
-        return;
-    }
+    auto &tool_toolbar = UI::get_widget<Gtk::ScrolledWindow>(builder, "tool-toolbar");
 
     attachHandlers(builder, window);
 
-    UI::pack_start(*this, *tool_toolbar, true, true);
+    UI::pack_start(*this, tool_toolbar, true, true);
 
     // Hide/show buttons based on preferences.
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    buttons_pref_observer = prefs->createObserver(tools_button_path, [=]() { set_visible_buttons(); });
-    set_visible_buttons(); // Must come after pack_start()
+    buttons_pref_observer = prefs->createObserver(tools_button_path, [&]{ set_visible_buttons(tool_toolbar); });
+    set_visible_buttons(tool_toolbar); // Must come after pack_start()
 }
 
 ToolToolbar::~ToolToolbar() = default;
 
-void ToolToolbar::set_visible_buttons()
+void ToolToolbar::set_visible_buttons(Gtk::ScrolledWindow &tool_toolbar)
 {
     int buttons_before_separator = 0;
     Gtk::Widget* last_sep = nullptr;
     Gtk::FlowBox* last_box = nullptr;
-
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
-    for_each_descendant(*this, [&](Gtk::Widget &widget) {
+    // We recurse from the ScrolledWindow, not this, to skip context PopoverMenu
+    for_each_descendant(tool_toolbar, [&](Gtk::Widget &widget) {
         if (auto const flowbox = dynamic_cast<Gtk::FlowBox *>(&widget)) {
             flowbox->set_visible(true);
-            flowbox->set_no_show_all();
             flowbox->set_max_children_per_line(1);
             last_box = flowbox;
         } else if (auto const btn = dynamic_cast<Gtk::Button *>(&widget)) {
@@ -123,13 +116,13 @@ std::unique_ptr<UI::Widget::PopoverMenu> ToolToolbar::makeContextMenu(InkscapeWi
 
     auto &item = *Gtk::make_managed<UI::Widget::PopoverMenuItem>(_("Open tool preferences"), false,
                                                                  icon_name);
-    item.signal_activate().connect([=]
+    item.signal_activate().connect([=, this]
     {
         tool_preferences(_context_menu_tool_name, window);
         _context_menu_tool_name.clear();
     });
 
-    auto menu = std::make_unique<UI::Widget::PopoverMenu>(*this, Gtk::POS_BOTTOM);
+    auto menu = std::make_unique<UI::Widget::PopoverMenu>(*this, Gtk::PositionType::BOTTOM);
     menu->append(item);
     return menu;
 }
@@ -145,13 +138,13 @@ void ToolToolbar::showContextMenu(InkscapeWindow * const window,
  * @brief Attach handlers to all tool buttons, so that double-clicking on a tool
  *        in the toolbar opens up that tool's preferences, and a right click opens a
  *        context menu with the same functionality.
- * @param builder The builder that contains a loaded UI structure containing RadioButton's.
+ * @param builder The builder that contains a loaded UI structure containing ToggleButtons.
  * @param window The Inkscape window which will display the preferences dialog.
  */
 void ToolToolbar::attachHandlers(Glib::RefPtr<Gtk::Builder> builder, InkscapeWindow *window)
 {
     for (auto &object : builder->get_objects()) {
-        auto const radio = dynamic_cast<Gtk::RadioButton *>(object.get());
+        auto const radio = dynamic_cast<Gtk::ToggleButton *>(object.get());
         if (!radio) {
             continue;
         }
@@ -163,21 +156,21 @@ void ToolToolbar::attachHandlers(Glib::RefPtr<Gtk::Builder> builder, InkscapeWin
         }
 
         auto tool_name = Glib::ustring((gchar const *)action_target.get_data());
-        auto on_click_pressed = [=, tool_name = std::move(tool_name)]
-                                (Gtk::GestureMultiPress const &click,
+        auto on_click_pressed = [=, this, tool_name = std::move(tool_name)]
+                                (Gtk::GestureClick const &click,
                                  int const n_press, double /*x*/, double /*y*/)
         {
             // Open tool preferences upon double click
             auto const button = click.get_current_button();
             if (button == 1 && n_press == 2) {
                 tool_preferences(tool_name, window);
-                return Gtk::EVENT_SEQUENCE_CLAIMED;
+                return Gtk::EventSequenceState::CLAIMED;
             }
             if (button == 3) {
                 showContextMenu(window, *radio, tool_name);
-                return Gtk::EVENT_SEQUENCE_CLAIMED;
+                return Gtk::EventSequenceState::CLAIMED;
             }
-            return Gtk::EVENT_SEQUENCE_NONE;
+            return Gtk::EventSequenceState::NONE;
         };
         Controller::add_click(*radio, std::move(on_click_pressed), {},
                               Controller::Button::any);

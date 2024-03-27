@@ -12,9 +12,10 @@
 
 #include "dialog-window.h"
 
+#include <algorithm>
 #include <iostream>
-
 #include <glibmm/i18n.h>
+#include <giomm/actiongroup.h>
 #include <gtkmm/application.h>
 #include <gtkmm/box.h>
 
@@ -23,6 +24,7 @@
 #include "inkscape-application.h"
 #include "inkscape-window.h"
 #include "preferences.h"
+#include "ui/controller.h"
 #include "ui/dialog/dialog-base.h"
 #include "ui/dialog/dialog-container.h"
 #include "ui/dialog/dialog-manager.h"
@@ -42,6 +44,12 @@ static constexpr int NOTEBOOK_TAB_HEIGHT        =  36;
 
 namespace Inkscape::UI::Dialog {
 
+[[nodiscard]] static auto get_max_margin(Gtk::Widget const &widget)
+{
+    return std::max({widget.get_margin_top(), widget.get_margin_bottom(),
+                     widget.get_margin_start(), widget.get_margin_end()});
+}
+
 // Create a dialog window and move page from old notebook.
 DialogWindow::DialogWindow(InkscapeWindow *inkscape_window, Gtk::Widget *page)
     : Gtk::Window()
@@ -53,22 +61,19 @@ DialogWindow::DialogWindow(InkscapeWindow *inkscape_window, Gtk::Widget *page)
     g_assert(_inkscape_window != nullptr);
 
     // ============ Initialization ===============
-    // Setting the window type
-    set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
+    set_name("DialogWindow");
     set_transient_for(*inkscape_window);
-
-    // Add the dialog window to our app
     _app->gtk_app()->add_window(*this);
 
-    this->signal_delete_event().connect([=](GdkEventAny *) {
+    signal_close_request().connect([this]{
         DialogManager::singleton().store_state(*this);
         delete this;
         return true;
-    });
+    }, false); // before GTKʼs default handler, so it wonʼt try to double-delete
 
     auto win_action_group = dynamic_cast<Gio::ActionGroup *>(inkscape_window);
     if (win_action_group) {
-        // Must use C API as C++ API takes a RefPtr which we can't get (easily).
+        // C++ API requires Glib::RefPtr<Gio::ActionGroup>, use C API here.
         gtk_widget_insert_action_group(Gtk::Widget::gobj(), "win", win_action_group->gobj());
     } else {
         std::cerr << "DialogWindow::DialogWindow: Can't find InkscapeWindow Gio:ActionGroup!" << std::endl;
@@ -83,8 +88,8 @@ DialogWindow::DialogWindow(InkscapeWindow *inkscape_window, Gtk::Widget *page)
     int window_height = INITIAL_WINDOW_HEIGHT;
 
     // =============== Outer Box ================
-    auto const box_outer = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
-    add(*box_outer);
+    auto const box_outer = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
+    set_child(*box_outer);
 
     // =============== Container ================
     _container = Gtk::make_managed<DialogContainer>(inkscape_window);
@@ -96,12 +101,14 @@ DialogWindow::DialogWindow(InkscapeWindow *inkscape_window, Gtk::Widget *page)
     // If there is no page, create an empty Dialogwindow to be populated later
     if (page) {
         // ============= Initial Column =============
-        DialogMultipaned *column = _container->create_column();
-        columns->append(*column);
+        auto col = _container->create_column();
+        auto const column = col.get();
+        columns->append(std::move(col));
 
         // ============== New Notebook ==============
-        auto const dialog_notebook = Gtk::make_managed<DialogNotebook>(_container);
-        column->append(*dialog_notebook);
+        auto nb = std::make_unique<DialogNotebook>(_container);
+        auto const dialog_notebook = nb.get();
+        column->append(std::move(nb));
         column->set_dropzone_sizes(drop_size, drop_size);
         dialog_notebook->move_page(*page);
 
@@ -115,9 +122,9 @@ DialogWindow::DialogWindow(InkscapeWindow *inkscape_window, Gtk::Widget *page)
         // Set window size considering what the dialog needs
         Gtk::Requisition minimum_size, natural_size;
         dialog->get_preferred_size(minimum_size, natural_size);
-        int overhead = 2 * (drop_size + dialog->property_margin().get_value());
-        int width = natural_size.width + overhead;
-        int height = natural_size.height + overhead + NOTEBOOK_TAB_HEIGHT;
+        int overhead = 2 * (drop_size + get_max_margin(*dialog));
+        int width = natural_size.get_width() + overhead;
+        int height = natural_size.get_height() + overhead + NOTEBOOK_TAB_HEIGHT;
         window_width = std::max(width, window_width);
         window_height = std::max(height, window_height);
     }
@@ -134,6 +141,10 @@ DialogWindow::DialogWindow(InkscapeWindow *inkscape_window, Gtk::Widget *page)
     auto const themecontext = INKSCAPE.themecontext;
     g_assert(themecontext);
     themecontext->themechangecallback();
+
+    // TODO: Double-check the phase. This needs to be called after default Window handlerʼs CAPTURE
+    Controller::add_key<&DialogWindow::on_key_pressed>
+                       (*this, *this, Gtk::PropagationPhase::TARGET);
 
     // window is created hidden; don't show it now, its size needs to be restored
 }
@@ -190,29 +201,26 @@ void DialogWindow::update_dialogs()
 void DialogWindow::update_window_size_to_fit_children()
 {
     // Declare variables
-    int pos_x = 0, pos_y = 0;
     int width = 0, height = 0;
-    int overhead = 0, baseline;
-    Gtk::Allocation allocation;
+    int overhead = 0;
 
     // Read needed data
-    get_position(pos_x, pos_y);
-    get_allocated_size(allocation, baseline);
+    auto allocation = get_allocation();
     auto const &dialogs = _container->get_dialogs();
 
     // Get largest sizes for dialogs
     for (auto const &[name, dialog] : dialogs) {
         Gtk::Requisition minimum_size, natural_size;
         dialog->get_preferred_size(minimum_size, natural_size);
-        width = std::max(natural_size.width, width);
-        height = std::max(natural_size.height, height);
-        overhead = std::max(overhead, dialog->property_margin().get_value());
+        width = std::max(natural_size.get_width(), width);
+        height = std::max(natural_size.get_height(), height);
+        overhead = std::max(overhead, get_max_margin(*dialog));
     }
 
     // Compute sizes including overhead
     overhead = 2 * (WINDOW_DROPZONE_SIZE_LARGE + overhead);
-    width = width + overhead;
-    height = height + overhead + NOTEBOOK_TAB_HEIGHT;
+    width += overhead;
+    height += overhead + NOTEBOOK_TAB_HEIGHT;
 
     // If sizes are lower then current, don't change them
     if (allocation.get_width() >= width && allocation.get_height() >= height) {
@@ -223,44 +231,19 @@ void DialogWindow::update_window_size_to_fit_children()
     width = std::max(width, allocation.get_width());
     height = std::max(height, allocation.get_height());
 
-    // Compute new positions to keep window centered
-    pos_x = pos_x - (width - allocation.get_width()) / 2;
-    pos_y = pos_y - (height - allocation.get_height()) / 2;
-
-    // Keep window inside the screen
-    pos_x = std::max(pos_x, 0);
-    pos_y = std::max(pos_y, 0);
-
     // Resize window
-    move(pos_x, pos_y);
-    resize(width, height);
+    set_default_size(width, height);
+
+    // Note: This function also used to maintain the center of the window
+    // before GTK4 removed the ability to do that.
 }
 
-// mimic InkscapeWindow handling of shortcuts to make them work with active floating dialog window
-bool DialogWindow::on_key_press_event(GdkEventKey *key_event)
+bool DialogWindow::on_key_pressed(GtkEventControllerKey * const controller,
+                                  unsigned const keyval, unsigned const keycode,
+                                  GdkModifierType const state)
 {
-    // TODO: GTK4: We wonʼt be able to do this, but shouldnʼt need to, if instead of using
-    // Application.set_accels_for_action(), we use GtkShortcutController in CAPTURE phase.
-    // ::key-press-event handlers will be replaced by GtkEventControllerKey, w/ phase TBC.
-    // See: https://gitlab.com/dboles/inkscape/-/issues/1
-    auto focus = get_focus();
-    if (focus) {
-        if (focus->event(reinterpret_cast<GdkEvent *>(key_event))) {
-            return true;
-        }
-    }
-
-    // Pass key event to this window or to app (via this window).
-    if (Gtk::Window::on_key_press_event(key_event)) {
-        return true;
-    }
-
-    // Pass key event to active InkscapeWindow to handle win (and app) level shortcuts.
-    if (auto win = _app->get_active_window(); win && win->on_key_press_event(key_event)) {
-        return true;
-    }
-
-    return false;
+    assert(_inkscape_window);
+    return gtk_event_controller_key_forward(controller, _inkscape_window->Gtk::Widget::gobj());
 }
 
 } // namespace Inkscape::UI::Dialog

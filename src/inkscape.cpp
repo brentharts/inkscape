@@ -20,10 +20,13 @@
 #include <fstream>
 #include <map>
 #include <boost/stacktrace.hpp>
+#undef near
+#undef IGNORE
 #include <glibmm/regex.h>
 #include <glibmm/i18n.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/convert.h>
+#include <glibmm/main.h>
 #include <gtkmm/icontheme.h>
 #include <gtkmm/label.h>
 #include <gtkmm/messagedialog.h>
@@ -96,7 +99,7 @@ public:
     void handleError( Glib::ustring const& primary, Glib::ustring const& secondary ) const override
     {
         if (_useGui) {
-            Gtk::MessageDialog err(primary, false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+            Gtk::MessageDialog err(primary, false, Gtk::MessageType::WARNING, Gtk::ButtonsType::OK, true);
             err.set_secondary_text(secondary);
             Inkscape::UI::dialog_run(err);
         } else {
@@ -222,10 +225,14 @@ Application::Application(bool use_gui) :
 
     if (use_gui) {
         using namespace Inkscape::IO::Resource;
-        auto icon_theme = Gtk::IconTheme::get_default();
-        icon_theme->prepend_search_path(get_path_string(SYSTEM, ICONS));
-        icon_theme->prepend_search_path(get_path_string(SHARED, ICONS));
-        icon_theme->prepend_search_path(get_path_string(USER, ICONS));
+
+        auto display = Gdk::Display::get_default();
+        auto icon_theme = Gtk::IconTheme::get_for_display(display);
+        // Fixme: Previously prepend_search_path() in the reverse order.
+        icon_theme->add_search_path(get_path_string(USER, ICONS));
+        icon_theme->add_search_path(get_path_string(SHARED, ICONS));
+        icon_theme->add_search_path(get_path_string(SYSTEM, ICONS));
+
         themecontext = new Inkscape::UI::ThemeContext();
         themecontext->add_gtk_css(false);
         auto scale = prefs->getDoubleLimited(UI::ThemeContext::get_font_scale_pref_path(), 100, 50, 150);
@@ -237,13 +244,13 @@ Application::Application(bool use_gui) :
     Glib::ustring ui_language = prefs->getString("/ui/language");
     if(!ui_language.empty())
     {
-        setenv("LANGUAGE", ui_language, true);
+        Glib::setenv("LANGUAGE", ui_language.raw(), true);
 #ifdef _WIN32
         // locale may be set to C with some Windows Region Formats (like English(Europe)).
         // forcing the LANGUAGE variable to be ignored
         // see :guess_category_value:gettext-runtime/intl/dcigettext.c,
         // and :gl_locale_name_from_win32_LANGID:gettext-runtime/gnulib-lib/localename.c
-        setenv("LANG", ui_language, true);
+        Glib::setenv("LANG", ui_language.raw(), true);
 #endif
     }
 
@@ -305,7 +312,7 @@ void Application::mapalt(guint maskvalue)
     if ( maskvalue < 2 || maskvalue > 5 ) {  // MOD5 is the highest defined in gdktypes.h
         _mapalt = 0;
     } else {
-        _mapalt = (GDK_MOD1_MASK << (maskvalue-1));
+        _mapalt = (GDK_ALT_MASK << (maskvalue-1));
     }
 }
 
@@ -517,12 +524,23 @@ Application::crash_handler (int /*signum*/)
 
     if ( exists() && instance().use_gui() ) {
         try {
+            auto mainloop = Glib::MainLoop::create();
             auto builder = UI::create_builder("dialog-crash.glade");
-            UI::get_widget<Gtk::Label>(builder, "message").set_label(b);
+            auto &autosaves = UI::get_widget<Gtk::Label>(builder, "autosaves");
+            if (std::strlen(b) == 0) {
+                autosaves.set_visible(false);
+            } else {
+                autosaves.set_label(b);
+            }
             UI::get_object<Gtk::TextBuffer>(builder, "stacktrace")->set_text("<pre>\n" + boost::stacktrace::to_string(boost::stacktrace::stacktrace()) + "</pre>\n<details><summary>System info</summary>\n" + debug_info() + "\n</details>");
-            Gtk::MessageDialog &m = UI::get_widget<Gtk::MessageDialog>(builder, "crash_dialog");
-            sp_transientize(m.Gtk::Widget::gobj());
-            UI::dialog_run(m);
+            auto &window = UI::get_widget<Gtk::Window>(builder, "crash_dialog");
+            auto &button_ok = UI::get_widget<Gtk::Button>(builder, "button_ok");
+            button_ok.signal_clicked().connect([&] { window.close(); });
+            button_ok.grab_focus();
+            window.signal_close_request().connect([&] { mainloop->quit(); return false; }, true);
+            sp_transientize(window);
+            window.present();
+            mainloop->run();
         } catch (const Glib::Error &ex) {
             g_message("Glade file loading failed for crash handler... Anyway, error was: %s", b);
             std::cerr << boost::stacktrace::stacktrace();

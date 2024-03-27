@@ -35,7 +35,6 @@
 #include "ui/widget/color-slider.h"
 #include "ui/widget/ink-color-wheel.h"
 #include "ui/widget/oklab-color-wheel.h"
-#include "ui/widget/scrollprotected.h"
 
 constexpr static int CSC_CHANNEL_R     = (1 << 0);
 constexpr static int CSC_CHANNEL_G     = (1 << 1);
@@ -175,7 +174,7 @@ ColorScales<MODE>::ColorScales(SelectedColor &color, bool no_alpha)
 template <SPColorScalesMode MODE>
 void ColorScales<MODE>::_initUI(bool no_alpha)
 {
-    set_orientation(Gtk::ORIENTATION_VERTICAL);
+    set_orientation(Gtk::Orientation::VERTICAL);
 
     Gtk::Expander *wheel_frame = nullptr;
 
@@ -195,8 +194,8 @@ void ColorScales<MODE>::_initUI(bool no_alpha)
         }
 
         _wheel->set_visible(true);
-        _wheel->set_halign(Gtk::ALIGN_FILL);
-        _wheel->set_valign(Gtk::ALIGN_FILL);
+        _wheel->set_halign(Gtk::Align::FILL);
+        _wheel->set_valign(Gtk::Align::FILL);
         _wheel->set_hexpand(true);
         _wheel->set_vexpand(true);
         _wheel->set_name("ColorWheel");
@@ -208,7 +207,7 @@ void ColorScales<MODE>::_initUI(bool no_alpha)
         /* Expander */
         // Label icon
         auto const expander_icon = Gtk::manage(
-                sp_get_icon_image("color-wheel", Gtk::ICON_SIZE_BUTTON)
+                sp_get_icon_image("color-wheel", Gtk::IconSize::NORMAL)
         );
         expander_icon->set_visible(true);
         expander_icon->set_margin_start(2 * XPAD);
@@ -221,7 +220,7 @@ void ColorScales<MODE>::_initUI(bool no_alpha)
         expander_box->set_visible(true);
         UI::pack_start(*expander_box, *expander_icon);
         UI::pack_start(*expander_box, *expander_label);
-        expander_box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+        expander_box->set_orientation(Gtk::Orientation::HORIZONTAL);
         // Expander
         wheel_frame = Gtk::make_managed<Gtk::Expander>();
         wheel_frame->set_visible(true);
@@ -229,8 +228,8 @@ void ColorScales<MODE>::_initUI(bool no_alpha)
         wheel_frame->set_margin_end(XPAD);
         wheel_frame->set_margin_top(2 * YPAD);
         wheel_frame->set_margin_bottom(2 * YPAD);
-        wheel_frame->set_halign(Gtk::ALIGN_FILL);
-        wheel_frame->set_valign(Gtk::ALIGN_FILL);
+        wheel_frame->set_halign(Gtk::Align::FILL);
+        wheel_frame->set_valign(Gtk::Align::FILL);
         wheel_frame->set_hexpand(true);
         wheel_frame->set_vexpand(false);
         wheel_frame->set_label_widget(*expander_box);
@@ -244,20 +243,19 @@ void ColorScales<MODE>::_initUI(bool no_alpha)
             Inkscape::Preferences::get()->setBool(_prefs + _pref_wheel_visibility, visible);
         });
 
-        wheel_frame->add(*_wheel);
-        add(*wheel_frame);
+        wheel_frame->set_child(*_wheel);
+        append(*wheel_frame);
     }
 
     /* Create sliders */
     auto const grid = Gtk::make_managed<Gtk::Grid>();
-    grid->set_visible(true);
-    add(*grid);
+    append(*grid);
 
-    for (gint i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++) {
         /* Label */
         _l[i] = Gtk::make_managed<Gtk::Label>("", true);
 
-        _l[i]->set_halign(Gtk::ALIGN_START);
+        _l[i]->set_halign(Gtk::Align::START);
         _l[i]->set_visible(true);
 
         _l[i]->set_margin_start(2 * XPAD);
@@ -280,8 +278,8 @@ void ColorScales<MODE>::_initUI(bool no_alpha)
         grid->attach(*_s[i], 1, i, 1, 1);
 
         /* Spinbutton */
-        _b[i] = Gtk::make_managed<ScrollProtected<Gtk::SpinButton>>(_a[i], 1.0);
-        sp_dialog_defocus_on_enter(_b[i]->gobj());
+        _b[i] = Gtk::make_managed<Gtk::SpinButton>(_a[i], 1.0);
+        sp_dialog_defocus_on_enter(*_b[i]);
         _l[i]->set_mnemonic_widget(*_b[i]);
         _b[i]->set_visible(true);
 
@@ -289,8 +287,8 @@ void ColorScales<MODE>::_initUI(bool no_alpha)
         _b[i]->set_margin_end(XPAD);
         _b[i]->set_margin_top(YPAD);
         _b[i]->set_margin_bottom(YPAD);
-        _b[i]->set_halign(Gtk::ALIGN_END);
-        _b[i]->set_valign(Gtk::ALIGN_CENTER);
+        _b[i]->set_halign(Gtk::Align::END);
+        _b[i]->set_valign(Gtk::Align::CENTER);
         grid->attach(*_b[i], 2, i, 1, 1);
 
         /* Signals */
@@ -299,11 +297,6 @@ void ColorScales<MODE>::_initUI(bool no_alpha)
         _s[i]->signal_released.connect([this](){ _sliderAnyReleased(); });
         _s[i]->signal_value_changed.connect([this](){ _sliderAnyChanged(); });
     }
-
-    // Prevent 5th bar from being shown by PanelDialog::show_all_children
-    _l[4]->set_no_show_all(true);
-    _s[4]->set_no_show_all(true);
-    _b[4]->set_no_show_all(true);
 
     setupMode(no_alpha);
 
@@ -792,9 +785,6 @@ void ColorScales<MODE>::setupMode(bool no_alpha)
         _l[alpha_index]->set_visible(false);
         _s[alpha_index]->set_visible(false);
         _b[alpha_index]->set_visible(false);
-        _l[alpha_index]->set_no_show_all(true);
-        _s[alpha_index]->set_no_show_all(true);
-        _b[alpha_index]->set_no_show_all(true);
     }
 }
 

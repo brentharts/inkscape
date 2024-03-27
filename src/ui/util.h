@@ -22,7 +22,6 @@
 #include <gdkmm/rgba.h>
 #include <gtkmm/cellrenderer.h>
 #include <gtkmm/enums.h>
-#include <gtkmm/stylecontext.h>
 #include <gtkmm/widget.h>
 
 #include <2geom/affine.h>
@@ -48,10 +47,11 @@ class ustring;
 
 namespace Gtk {
 class Label;
+class TextBuffer;
 class Widget;
 } // namespace Gtk
 
-Glib::ustring ink_ellipsize_text (Glib::ustring const &src, size_t maxlen);
+Glib::ustring ink_ellipsize_text(Glib::ustring const &src, std::size_t maxlen);
 
 void reveal_widget(Gtk::Widget *widget, bool show);
 
@@ -71,20 +71,17 @@ void gui_warning(const std::string &msg, Gtk::Window * parent_window = nullptr);
 /// Whether for_each_*() will continue or stop after calling Func per child.
 enum class ForEachResult {_continue, _break};
 
-/// If widget is a Gtk::Bin, returns its get_child(), otherwise returns nullptr.
-Gtk::Widget *get_bin_child(Gtk::Widget &widget);
-/// If widget is Gtk::Container, returns its children(), otherwise empty vector.
-/// Accessing children changes between GTK3 & GTK4, so best consolidate it here.
+/// Get a vector of the widgetʼs children, from get_first_child() through each get_next_sibling().
 std::vector<Gtk::Widget *> get_children(Gtk::Widget &widget);
-/// If widget is Gtk::Container return its 1st child, otherwise returns nullptr.
-/// Accessing children changes between GTK3 & GTK4, so best consolidate it here.
-Gtk::Widget *get_first_child(Gtk::Widget &widget);
+/// Get the widgetʼs child at the given position. Throws std::out_of_range if the index is invalid.
+Gtk::Widget &get_nth_child(Gtk::Widget &widget, std::size_t index);
 /// For each child in get_children(widget), call widget.remove(*child). May not cause delete child!
-void remove_all_children(Gtk::Widget &widget);
-/// For each child in get_children(widget), call widget.remove(*child) then also do `delete child`.
-void delete_all_children(Gtk::Widget &widget);
-/// Gets widgetʼs parent cast from Container.
-Gtk::Widget *get_parent(Gtk::Widget &widget);
+template <typename Widget> void remove_all_children(Widget &widget)
+{
+    for (auto const child: get_children(widget)) {
+        widget.remove(*child);
+    }
+}
 
 /// Call Func with a reference to each child of parent, until it returns _break.
 /// Accessing children changes between GTK3 & GTK4, so best consolidate it here.
@@ -102,11 +99,6 @@ Gtk::Widget *for_each_child(Gtk::Widget &widget, Func &&func,
 
     if (plus_self && func(widget) == ForEachResult::_break) return &widget;
     if (!recurse && level > 0) return nullptr;
-
-    if (auto const child = get_bin_child(widget)) {
-        auto const descendant = for_each_child(*child, func, true, recurse, level + 1);
-        if (descendant) return descendant;
-    }
 
     for (auto const child: get_children(widget)) {
         auto const descendant = for_each_child(*child, func, true, recurse, level + 1);
@@ -131,7 +123,7 @@ template <typename Func>
 Gtk::Widget *for_each_parent(Gtk::Widget &widget, Func &&func)
 {
     static_assert(std::is_invocable_r_v<ForEachResult, Func, Gtk::Widget &>);
-    for (auto parent = get_parent(widget); parent; parent = get_parent(*parent)) {
+    for (auto parent = widget.get_parent(); parent; parent = parent->get_parent()) {
         if (func(*parent) == ForEachResult::_break) {
             return parent;
         }
@@ -142,6 +134,7 @@ Gtk::Widget *for_each_parent(Gtk::Widget &widget, Func &&func)
 [[nodiscard]] Gtk::Widget *find_widget_by_name(Gtk::Widget &parent, Glib::ustring const &name);
 [[nodiscard]] Gtk::Widget *find_focusable_widget(Gtk::Widget &parent);
 [[nodiscard]] bool is_descendant_of(Gtk::Widget const &descendant, Gtk::Widget const &ancestor);
+[[nodiscard]] bool contains_focus(Gtk::Widget &widget);
 
 [[nodiscard]] int get_font_size(Gtk::Widget &widget);
 
@@ -163,13 +156,10 @@ Gdk::RGBA change_alpha(const Gdk::RGBA& color, double new_alpha);
 /// This uses the perceived brightness formula given at: https://www.w3.org/TR/AERT/#color-contrast
 double get_luminance(const Gdk::RGBA &color);
 
-// Get the foreground / CSS color for a StyleContext based on its current state.
-Gdk::RGBA get_foreground_color(Glib::RefPtr<Gtk::StyleContext const> const &context);
-
-// Get CSS color for a StyleContext, based on its current state & a given class.
+// Get CSS color for a Widget, based on its current state & a given CSS class.
 // N.B.!! Big GTK devs donʼt think changing classes should work ‘within a frame’
 // …but it does… & GTK3 GtkCalendar does that – so keep doing it, till we canʼt!
-Gdk::RGBA get_color_with_class(Glib::RefPtr<Gtk::StyleContext> const &context,
+Gdk::RGBA get_color_with_class(Gtk::Widget &widget,
                                Glib::ustring const &css_class);
 
 guint32 to_guint32(Gdk::RGBA const &rgba);
@@ -196,7 +186,8 @@ Cairo::RefPtr<Cairo::LinearGradient> create_cubic_gradient(
     int steps = 8
 );
 
-void set_dark_titlebar(Glib::RefPtr<Gdk::Window> const &win, bool is_dark);
+// If on Windows, get the native window & set it to DWMA_USE_IMMERSIVE_DARK_MODE
+void set_dark_titlebar(Glib::RefPtr<Gdk::Surface> const &surface, bool is_dark);
 
 // Cover for Glib::wrap not passing through const.
 template <typename T>
@@ -214,6 +205,12 @@ Glib::ustring round_numbers(const Glib::ustring& text, int precision);
 
 // As above, but operating in-place on a TextBuffer
 void truncate_digits(const Glib::RefPtr<Gtk::TextBuffer>& buffer, int precision);
+
+/**
+ * Convert an image surface in ARGB32 format to a texture.
+ * The texture shares data with the surface, so the surface shouldn't modified afterwards.
+ */
+Glib::RefPtr<Gdk::Texture> to_texture(Cairo::RefPtr<Cairo::Surface> const &surface);
 
 #endif // UI_UTIL_SEEN
 

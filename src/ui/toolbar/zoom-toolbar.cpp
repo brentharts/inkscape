@@ -24,9 +24,7 @@ ZoomToolbar::ZoomToolbar(SPDesktop *desktop)
 {
     _toolbar = &get_widget<Gtk::Box>(_builder, "zoom-toolbar");
 
-    add(*_toolbar);
-
-    show_all();
+    set_child(*_toolbar);
 }
 
 ZoomToolbar::~ZoomToolbar() = default;

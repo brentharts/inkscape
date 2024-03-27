@@ -30,6 +30,7 @@
 #include "object/sp-radial-gradient.h"
 #include "ui/controller.h"
 #include "ui/pack.h"
+#include "ui/util.h"
 #include "ui/widget/color-preview.h"
 #include "util/units.h"
 #include "xml/sp-css-attr.h"
@@ -88,20 +89,20 @@ void tool_obs_callback(StyleSwatch &_style_swatch, Preferences::Entry const &val
 }
 
 StyleSwatch::StyleSwatch(SPCSSAttr *css, gchar const *main_tip, Gtk::Orientation orient)
-    : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL),
+    : Gtk::Box(Gtk::Orientation::HORIZONTAL),
       _desktop(nullptr),
       _css(nullptr),
       _table(Gtk::make_managed<Gtk::Grid>()),
       _sw_unit(nullptr),
-      _stroke(Gtk::ORIENTATION_HORIZONTAL)
+      _stroke(Gtk::Orientation::HORIZONTAL)
 {
     set_name("StyleSwatch");
     _label[SS_FILL].set_markup(_("Fill:"));
     _label[SS_STROKE].set_markup(_("Stroke:"));
 
     for (int i = SS_FILL; i <= SS_STROKE; i++) {
-        _label[i].set_halign(Gtk::ALIGN_START);
-        _label[i].set_valign(Gtk::ALIGN_CENTER);
+        _label[i].set_halign(Gtk::Align::START);
+        _label[i].set_valign(Gtk::Align::CENTER);
         _label[i].set_margin_top(0);
         _label[i].set_margin_bottom(0);
         _label[i].set_margin_start(0);
@@ -110,8 +111,8 @@ StyleSwatch::StyleSwatch(SPCSSAttr *css, gchar const *main_tip, Gtk::Orientation
         _color_preview[i] = std::make_unique<ColorPreview>(0);
     }
 
-    _opacity_value.set_halign(Gtk::ALIGN_START);
-    _opacity_value.set_valign(Gtk::ALIGN_CENTER);
+    _opacity_value.set_halign(Gtk::Align::START);
+    _opacity_value.set_valign(Gtk::Align::CENTER);
     _opacity_value.set_margin_top(0);
     _opacity_value.set_margin_bottom(0);
     _opacity_value.set_margin_start(0);
@@ -125,20 +126,16 @@ StyleSwatch::StyleSwatch(SPCSSAttr *css, gchar const *main_tip, Gtk::Orientation
     _stroke.set_hexpand(false);
 
     UI::pack_start(_stroke, _place[SS_STROKE]);
-    _stroke_width_place.add(_stroke_width);
-    UI::pack_start(_stroke, _stroke_width_place, UI::PackOptions::shrink);
+    UI::pack_start(_stroke, _stroke_width, UI::PackOptions::shrink);
     
-    _opacity_place.add(_opacity_value);
-
-    if (orient == Gtk::ORIENTATION_VERTICAL) {
+    if (orient == Gtk::Orientation::VERTICAL) {
         _table->attach(_label[SS_FILL],   0, 0, 1, 1);
         _table->attach(_label[SS_STROKE], 0, 1, 1, 1);
         _table->attach(_place[SS_FILL],   1, 0, 1, 1);
         _table->attach(_stroke,           1, 1, 1, 1);
         _table->attach(_empty_space,      2, 0, 1, 2);
-        _table->attach(_opacity_place,    2, 0, 1, 2);
-        _swatch.add(*_table);
-        UI::pack_start(*this, _swatch, true, true);
+        _table->attach(_opacity_value,    2, 0, 1, 2);
+        UI::pack_start(*this, *_table, true, true);
 
         set_size_request (STYLE_SWATCH_WIDTH, -1);
     }
@@ -149,10 +146,9 @@ StyleSwatch::StyleSwatch(SPCSSAttr *css, gchar const *main_tip, Gtk::Orientation
         _label[SS_STROKE].set_margin_start(6);
         _table->attach(_label[SS_STROKE], 2, 0, 1, 1);
         _table->attach(_stroke,           3, 0, 1, 1);
-        _opacity_place.set_margin_start(6);
-        _table->attach(_opacity_place,    4, 0, 1, 1);
-        _swatch.add(*_table);
-        UI::pack_start(*this, _swatch, true, true);
+        _opacity_value.set_margin_start(6);
+        _table->attach(_opacity_value,    4, 0, 1, 1);
+        UI::pack_start(*this, *_table, true, true);
 
         int patch_w = 6 * 6;
         _place[SS_FILL].set_size_request(patch_w, -1);
@@ -161,11 +157,10 @@ StyleSwatch::StyleSwatch(SPCSSAttr *css, gchar const *main_tip, Gtk::Orientation
 
     setStyle (css);
 
-    Controller::add_click(_swatch, sigc::mem_fun(*this, &StyleSwatch::on_click));
+    Controller::add_click(*_table, sigc::mem_fun(*this, &StyleSwatch::on_click));
 
-    if (main_tip)
-    {
-        _swatch.set_tooltip_text(main_tip);
+    if (main_tip) {
+        _table->set_tooltip_text(main_tip);
     }
 }
 
@@ -177,15 +172,15 @@ void StyleSwatch::setDesktop(SPDesktop *desktop) {
     _desktop = desktop;
 }
 
-Gtk::EventSequenceState StyleSwatch::on_click(Gtk::GestureMultiPress const & /*click*/,
+Gtk::EventSequenceState StyleSwatch::on_click(Gtk::GestureClick const & /*click*/,
                                               int /*n_press*/, double /*x*/, double /*y*/)
 {
     if (_desktop && !_tool_name.empty()) {
         auto win = _desktop->getInkscapeWindow();
         open_tool_preferences(win, _tool_name);
-        return Gtk::EVENT_SEQUENCE_CLAIMED;
+        return Gtk::EventSequenceState::CLAIMED;
     }
-    return Gtk::EVENT_SEQUENCE_NONE;
+    return Gtk::EventSequenceState::NONE;
 }
 
 StyleSwatch::~StyleSwatch()
@@ -236,13 +231,13 @@ void StyleSwatch::setStyle(SPCSSAttr *css)
 
 void StyleSwatch::setStyle(SPStyle *query)
 {
-    _place[SS_FILL].remove();
-    _place[SS_STROKE].remove();
+    UI::remove_all_children(_place[SS_FILL  ]);
+    UI::remove_all_children(_place[SS_STROKE]);
 
     bool has_stroke = true;
 
     for (int i = SS_FILL; i <= SS_STROKE; i++) {
-        Gtk::EventBox *place = &(_place[i]);
+        auto const place = &_place[i];
 
         SPIPaint *paint;
         if (i == SS_FILL) {
@@ -256,23 +251,21 @@ void StyleSwatch::setStyle(SPStyle *query)
 
             if (is<SPLinearGradient>(server)) {
                 _value[i].set_markup(_("L Gradient"));
-                place->add(_value[i]);
+                place->append(_value[i]);
                 place->set_tooltip_text((i == SS_FILL)? (_("Linear gradient (fill)")) : (_("Linear gradient (stroke)")));
             } else if (is<SPRadialGradient>(server)) {
                 _value[i].set_markup(_("R Gradient"));
-                place->add(_value[i]);
+                place->append(_value[i]);
                 place->set_tooltip_text((i == SS_FILL)? (_("Radial gradient (fill)")) : (_("Radial gradient (stroke)")));
             } else if (is<SPPattern>(server)) {
                 _value[i].set_markup(_("Pattern"));
-                place->add(_value[i]);
+                place->append(_value[i]);
                 place->set_tooltip_text((i == SS_FILL)? (_("Pattern (fill)")) : (_("Pattern (stroke)")));
             }
-
         } else if (paint->set && paint->isColor()) {
             guint32 color = paint->value.color.toRGBA32( SP_SCALE24_TO_FLOAT ((i == SS_FILL)? query->fill_opacity.value : query->stroke_opacity.value) );
             _color_preview[i]->setRgba32(color);
-            _color_preview[i]->show_all();
-            place->add(*_color_preview[i]);
+            place->append(*_color_preview[i]);
             gchar *tip;
             if (i == SS_FILL) {
                 tip = g_strdup_printf (_("Fill: %06x/%.3g"), color >> 8, SP_RGBA32_A_F(color));
@@ -283,12 +276,12 @@ void StyleSwatch::setStyle(SPStyle *query)
             g_free (tip);
         } else if (paint->set && paint->isNone()) {
             _value[i].set_markup(C_("Fill and stroke", "<i>None</i>"));
-            place->add(_value[i]);
+            place->append(_value[i]);
             place->set_tooltip_text((i == SS_FILL)? (C_("Fill and stroke", "No fill")) : (C_("Fill and stroke", "No stroke")));
             if (i == SS_STROKE) has_stroke = false;
         } else if (!paint->set) {
             _value[i].set_markup(_("<b>Unset</b>"));
-            place->add(_value[i]);
+            place->append(_value[i]);
             place->set_tooltip_text((i == SS_FILL)? (_("Unset fill")) : (_("Unset stroke")));
             if (i == SS_STROKE) has_stroke = false;
         }
@@ -302,7 +295,7 @@ void StyleSwatch::setStyle(SPStyle *query)
             swidth += "</small>";
             _stroke_width.set_markup(swidth.c_str());
             auto str = Glib::ustring::compose(_("Stroke width: %1"), _("Hairline"));
-            _stroke_width_place.set_tooltip_text(str);
+            _stroke_width.set_tooltip_text(str);
         } else {
             double w;
             if (_sw_unit) {
@@ -323,14 +316,13 @@ void StyleSwatch::setStyle(SPStyle *query)
                 gchar *str = g_strdup_printf(_("Stroke width: %.5g%s"),
                                              w,
                                              _sw_unit? _sw_unit->abbr.c_str() : "px");
-                _stroke_width_place.set_tooltip_text(str);
+                _stroke_width.set_tooltip_text(str);
                 g_free (str);
             }
         }
     } else {
-        _stroke_width_place.set_tooltip_text("");
+        _stroke_width.set_tooltip_text("");
         _stroke_width.set_markup("");
-        _stroke_width.set_has_tooltip(false);
     }
 
     gdouble op = SP_SCALE24_TO_FLOAT(query->opacity.value);
@@ -346,16 +338,13 @@ void StyleSwatch::setStyle(SPStyle *query)
         }
         {
             gchar *str = g_strdup_printf(_("Opacity: %2.1f %%"), (op*100.0));
-            _opacity_place.set_tooltip_text(str);
+            _opacity_value.set_tooltip_text(str);
             g_free (str);
         }
     } else {
-        _opacity_place.set_tooltip_text("");
+        _opacity_value.set_tooltip_text("");
         _opacity_value.set_markup("");
-        _opacity_value.set_has_tooltip(false);
     }
-
-    show_all();
 }
 
 } // namespace Inkscape::UI::Widget

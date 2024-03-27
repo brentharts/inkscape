@@ -31,7 +31,6 @@
 #include <glibmm/i18n.h>
 #include <gtkmm/combobox.h>
 #include <gtkmm/label.h>
-#include <gtkmm/radiobutton.h>
 #include <gtkmm/togglebutton.h>
 
 #include "desktop-style.h"
@@ -58,7 +57,6 @@
 #include "ui/widget/gradient-editor.h"
 #include "ui/widget/gradient-selector.h"
 #include "ui/widget/pattern-editor.h"
-#include "ui/widget/scrollprotected.h"
 #include "ui/widget/swatch-selector.h"
 #include "widgets/widget-sizes.h"
 #include "xml/repr.h"
@@ -89,9 +87,9 @@ static gchar const *modeStrings[] = {
 #endif
 
 namespace {
-GtkWidget *_scrollprotected_combo_box_new_with_model(GtkTreeModel *model)
+GtkWidget *ink_combo_box_new_with_model(GtkTreeModel *model)
 {
-    auto const combobox = Gtk::make_managed<Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBox>>();
+    auto const combobox = Gtk::make_managed<Gtk::ComboBox>();
     gtk_combo_box_set_model(combobox->gobj(), model);
     return combobox->Gtk::Widget::gobj();
 }
@@ -101,18 +99,13 @@ namespace Inkscape {
 namespace UI {
 namespace Widget {
 
-class FillRuleRadioButton : public Gtk::RadioButton {
+class FillRuleRadioButton : public Gtk::ToggleButton {
   private:
     PaintSelector::FillRule _fillrule;
 
   public:
-    FillRuleRadioButton()
-        : Gtk::RadioButton()
-    {}
-
-    FillRuleRadioButton(Gtk::RadioButton::Group &group)
-        : Gtk::RadioButton(group)
-    {}
+    FillRuleRadioButton() = default;
+    FillRuleRadioButton(Gtk::ToggleButton &group) { set_group(group); }
 
     inline void set_fillrule(PaintSelector::FillRule fillrule) { _fillrule = fillrule; }
     inline PaintSelector::FillRule get_fillrule() const { return _fillrule; }
@@ -148,7 +141,7 @@ GradientSelectorInterface *PaintSelector::getGradientFromData() const
 
 PaintSelector::PaintSelector(FillOrStroke kind)
 {
-    set_orientation(Gtk::ORIENTATION_VERTICAL);
+    set_orientation(Gtk::Orientation::VERTICAL);
 
     _mode = static_cast<PaintSelector::Mode>(-1); // huh?  do you mean 0xff?  --  I think this means "not in the enum"
 
@@ -180,27 +173,23 @@ PaintSelector::PaintSelector(FillOrStroke kind)
         UI::pack_end(*_style, *_fillrulebox, true, false);
 
         _evenodd = Gtk::make_managed<FillRuleRadioButton>();
-        _evenodd->set_relief(Gtk::RELIEF_NONE);
-        _evenodd->set_mode(false);
+        _evenodd->set_has_frame(false);
         // TRANSLATORS: for info, see http://www.w3.org/TR/2000/CR-SVG-20000802/painting.html#FillRuleProperty
         _evenodd->set_tooltip_text(
             _("Any path self-intersections or subpaths create holes in the fill (fill-rule: evenodd)"));
         _evenodd->set_fillrule(PaintSelector::FILLRULE_EVENODD);
-        auto w = sp_get_icon_image("fill-rule-even-odd", GTK_ICON_SIZE_MENU);
-        gtk_container_add(GTK_CONTAINER(_evenodd->gobj()), w);
+        _evenodd->set_image_from_icon_name("fill-rule-even-odd", Gtk::IconSize::NORMAL); // Previously GTK_ICON_SIZE_MENU
         UI::pack_start(*_fillrulebox, *_evenodd, false, false);
         _evenodd->signal_toggled().connect(
             sigc::bind(sigc::mem_fun(*this, &PaintSelector::fillrule_toggled), _evenodd));
 
-        auto grp = _evenodd->get_group();
-        _nonzero = Gtk::make_managed<FillRuleRadioButton>(grp);
-        _nonzero->set_relief(Gtk::RELIEF_NONE);
-        _nonzero->set_mode(false);
+        _nonzero = Gtk::make_managed<FillRuleRadioButton>();
+        _nonzero->set_group(*_evenodd);
+        _nonzero->set_has_frame(false);
         // TRANSLATORS: for info, see http://www.w3.org/TR/2000/CR-SVG-20000802/painting.html#FillRuleProperty
         _nonzero->set_tooltip_text(_("Fill is solid unless a subpath is counterdirectional (fill-rule: nonzero)"));
         _nonzero->set_fillrule(PaintSelector::FILLRULE_NONZERO);
-        w = sp_get_icon_image("fill-rule-nonzero", GTK_ICON_SIZE_MENU);
-        gtk_container_add(GTK_CONTAINER(_nonzero->gobj()), w);
+        _nonzero->set_image_from_icon_name("fill-rule-nonzero", Gtk::IconSize::NORMAL); // Previously GTK_ICON_SIZE_MENU
         UI::pack_start(*_fillrulebox, *_nonzero, false, false);
         _nonzero->signal_toggled().connect(
             sigc::bind(sigc::mem_fun(*this, &PaintSelector::fillrule_toggled), _nonzero));
@@ -208,12 +197,12 @@ PaintSelector::PaintSelector(FillOrStroke kind)
 
     /* Frame */
     _label = Gtk::make_managed<Gtk::Label>("");
-    auto const lbbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 0);
+    auto const lbbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 0);
     _label->set_visible(true);
     UI::pack_start(*lbbox, *_label, false, false, 4);
     UI::pack_start(*this, *lbbox, false, false, 4);
 
-    _frame = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
+    _frame = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
     _frame->set_visible(true);
     UI::pack_start(*this, *_frame, true, true);
 
@@ -229,30 +218,18 @@ PaintSelector::PaintSelector(FillOrStroke kind)
     // from _new function
     setMode(PaintSelector::MODE_MULTIPLE);
 
-    if (kind == FILL)
-        _fillrulebox->show_all();
-    else
-        _fillrulebox->set_visible(false);
-
-    show_all();
-
-    // don't let docking manager uncover hidden widgets
-    set_no_show_all();
+    _fillrulebox->set_visible(kind == FILL);
 }
 
 StyleToggleButton *PaintSelector::style_button_add(gchar const *pixmap, PaintSelector::Mode mode, gchar const *tip)
 {
-    GtkWidget *w;
-
     auto const b = Gtk::make_managed<StyleToggleButton>();
     b->set_tooltip_text(tip);
     b->set_visible(true);
-    b->set_relief(Gtk::RELIEF_NONE);
-    b->set_mode(false);
+    b->set_has_frame(false);
     b->set_style(mode);
 
-    w = sp_get_icon_image(pixmap, GTK_ICON_SIZE_BUTTON);
-    gtk_container_add(GTK_CONTAINER(b->gobj()), w);
+    b->set_image_from_icon_name(pixmap, Gtk::IconSize::NORMAL); // Previously GTK_ICON_SIZE_BUTTON
 
     UI::pack_start(*_style, *b, false, false);
     b->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &PaintSelector::style_button_toggled), b));
@@ -572,14 +549,14 @@ void PaintSelector::set_mode_color(PaintSelector::Mode /*mode*/)
         /* Create new color selector */
         /* Create vbox */
         if (!_selector_solid_color) {
-            _selector_solid_color = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 4);
+            _selector_solid_color = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 4);
 
             /* Color selector */
             auto const color_selector = Gtk::make_managed<ColorNotebook>(*_selected_color);
             color_selector->set_visible(true);
             UI::pack_start(*_selector_solid_color, *color_selector, true, true);
             /* Pack everything to frame */
-            _frame->add(*_selector_solid_color);
+            _frame->append(*_selector_solid_color);
             color_selector->set_label(_("<b>Flat color</b>"));
         }
 
@@ -628,7 +605,7 @@ void PaintSelector::set_mode_gradient(PaintSelector::Mode mode)
                 _selector_gradient->signal_changed().connect(sigc::mem_fun(*this, &PaintSelector::gradient_changed));
                 _selector_gradient->signal_stop_selected().connect([=](SPStop* stop) { _signal_stop_selected.emit(stop); });
                 /* Pack everything to frame */
-                _frame->add(*_selector_gradient);
+                _frame->append(*_selector_gradient);
             }
             catch (std::exception& ex) {
                 g_error("Creation of GradientEditor widget failed: %s.", ex.what());
@@ -859,9 +836,9 @@ void PaintSelector::set_mode_mesh(PaintSelector::Mode mode)
 
         if (!_selector_mesh) {
             /* Create vbox */
-            _selector_mesh = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 4);
+            _selector_mesh = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 4);
 
-            auto const hb = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 1);
+            auto const hb = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 1);
 
             /**
              * Create a combo_box and store with 4 columns,
@@ -869,7 +846,7 @@ void PaintSelector::set_mode_mesh(PaintSelector::Mode mode)
              */
             GtkListStore *store =
                 gtk_list_store_new(COMBO_N_COLS, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_STRING, G_TYPE_BOOLEAN);
-            GtkWidget *combo = _scrollprotected_combo_box_new_with_model(GTK_TREE_MODEL(store));
+            GtkWidget *combo = ink_combo_box_new_with_model(GTK_TREE_MODEL(store));
             gtk_combo_box_set_row_separator_func(GTK_COMBO_BOX(combo), PaintSelector::isSeparator, nullptr, nullptr);
 
             GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
@@ -883,22 +860,21 @@ void PaintSelector::set_mode_mesh(PaintSelector::Mode mode)
             _meshmenu = combo;
             g_object_ref(G_OBJECT(combo));
 
-            gtk_container_add(GTK_CONTAINER(hb->gobj()), combo);
+            gtk_box_append(hb->gobj(), combo);
             UI::pack_start(*_selector_mesh, *hb, false, false, AUX_BETWEEN_BUTTON_GROUPS);
 
             g_object_unref(G_OBJECT(store));
 
-            auto const hb2 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 0);
+            auto const hb2 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 0);
 
             auto const l = Gtk::make_managed<Gtk::Label>();
             l->set_markup(_("Use the <b>Mesh tool</b> to modify the mesh."));
-            l->set_line_wrap(true);
+            l->set_wrap(true);
             l->set_size_request(180, -1);
             UI::pack_start(*hb2, *l, true, true, AUX_BETWEEN_BUTTON_GROUPS);
             UI::pack_start(*_selector_mesh, *hb2, false, false, AUX_BETWEEN_BUTTON_GROUPS);
-            _selector_mesh->show_all();
 
-            _frame->add(*_selector_mesh);
+            _frame->append(*_selector_mesh);
         }
 
         _selector_mesh->set_visible(true);
@@ -1015,8 +991,7 @@ void PaintSelector::set_mode_pattern(PaintSelector::Mode mode)
             _selector_pattern->signal_changed().connect([=](){ _signal_changed.emit(); });
             _selector_pattern->signal_color_changed().connect([=](unsigned){ _signal_changed.emit(); });
             _selector_pattern->signal_edit().connect([=](){ _signal_edit_pattern.emit(); });
-            _selector_pattern->show_all();
-            _frame->add(*_selector_pattern);
+            _frame->append(*_selector_pattern);
         }
 
         SPDocument* document = SP_ACTIVE_DOCUMENT;
@@ -1144,7 +1119,7 @@ void PaintSelector::set_mode_swatch(PaintSelector::Mode mode)
             gsel->signal_changed().connect(sigc::mem_fun(*this, &PaintSelector::gradient_changed));
 
             // Pack everything to frame
-            _frame->add(*_selector_swatch);
+            _frame->append(*_selector_swatch);
         } else {
             // Necessary when creating new swatches via the Fill and Stroke dialog
             _selector_swatch->setVector(nullptr, nullptr);

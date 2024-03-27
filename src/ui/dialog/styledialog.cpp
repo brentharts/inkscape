@@ -32,6 +32,7 @@
 #include <gtkmm/cellrenderertoggle.h>
 #include <gtkmm/dialog.h>
 #include <gtkmm/entry.h>
+#include <gtkmm/eventcontrollerfocus.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/treemodel.h>
@@ -240,18 +241,18 @@ StyleDialog::StyleDialog()
     g_debug("StyleDialog::StyleDialog");
 
     UI::pack_start(_mainBox, _scrolledWindow, UI::PackOptions::expand_widget);
-    _scrolledWindow.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    _scrolledWindow.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
 
     _styleBox.set_name("StyleBox");
-    _styleBox.set_orientation(Gtk::ORIENTATION_VERTICAL);
-    _styleBox.set_valign(Gtk::ALIGN_START);
+    _styleBox.set_orientation(Gtk::Orientation::VERTICAL);
+    _styleBox.set_valign(Gtk::Align::START);
 
-    _scrolledWindow.add(_styleBox);
+    _scrolledWindow.set_child(_styleBox);
     _scrolledWindow.set_overlay_scrolling(false);
     _vadj = _scrolledWindow.get_vadjustment();
     _vadj->signal_value_changed().connect(sigc::mem_fun(*this, &StyleDialog::_vscroll));
 
-    _mainBox.set_orientation(Gtk::ORIENTATION_VERTICAL);
+    _mainBox.set_orientation(Gtk::Orientation::VERTICAL);
 
     UI::pack_start(*this, _mainBox, UI::PackOptions::expand_widget);
 }
@@ -426,7 +427,7 @@ void StyleDialog::readStyleElement()
     _owner_style.clear();
     // If text node is empty, return (avoids problem with negative below).
 
-    UI::delete_all_children(_styleBox);
+    UI::remove_all_children(_styleBox);
 
     Inkscape::Selection *selection = getSelection();
     SPObject *obj = nullptr;
@@ -449,7 +450,7 @@ void StyleDialog::readStyleElement()
 
     css_selector->set_text("element");
 
-    css_tree->get_style_context()->add_class("style_element");
+    css_tree->add_css_class("style_element");
     Glib::RefPtr<Gtk::TreeStore> store = Gtk::TreeStore::create(_mColumns);
     css_tree->set_model(store);
     _addTreeViewHandlers(*css_tree); // TODO: GTK4: Just add one on self as weʼll get events there?
@@ -628,7 +629,7 @@ void StyleDialog::readStyleElement()
 
         css_selector->set_text(selector);
 
-        css_tree->get_style_context()->add_class("style_sheet");
+        css_tree->add_css_class("style_sheet");
         Glib::RefPtr<Gtk::TreeStore> store = Gtk::TreeStore::create(_mColumns);
         css_tree->set_model(store);
         _addTreeViewHandlers(*css_tree); // TODO: GTK4: Just add one on self as weʼll get events there?
@@ -766,7 +767,7 @@ void StyleDialog::readStyleElement()
 
     css_selector->set_text("element.attributes");
 
-    css_tree->get_style_context()->add_class("style_attribute");
+    css_tree->add_css_class("style_attribute");
     store = Gtk::TreeStore::create(_mColumns);
     css_tree->set_model(store);
     _addTreeViewHandlers(*css_tree); // TODO: GTK4: Just add one on self as weʼll get events there?
@@ -850,7 +851,7 @@ void StyleDialog::readStyleElement()
         }
 
         if (!hasattributes) {
-            UI::delete_all_children(*css_selector_container);
+            UI::remove_all_children(*css_selector_container);
         }
 
         UI::pack_start(_styleBox, *css_selector_container, UI::PackOptions::expand_widget);
@@ -873,8 +874,6 @@ void StyleDialog::readStyleElement()
         obj->style->readFromObject(obj);
         obj->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
     }
-
-    _mainBox.show_all_children();
 
     _updating = false;
 }
@@ -923,12 +922,13 @@ void StyleDialog::_onLinkObj(Glib::ustring const &path, Glib::RefPtr<Gtk::TreeSt
 void StyleDialog::_onPropDelete(Glib::ustring const &path, Glib::RefPtr<Gtk::TreeStore> const &store)
 {
     g_debug("StyleDialog::_onPropDelete");
-    Gtk::TreeModel::Row row = *store->get_iter(path);
+    auto iter = store->get_iter(path);
+    auto row = *iter;
     if (row) {
         Glib::ustring selector = row[_mColumns._colSelector];
         row[_mColumns._colName] = Glib::ustring{};
         _deleted_pos = row[_mColumns._colSelectorPos];
-        store->erase(row);
+        store->erase(iter);
         _deletion = true;
         _writeStyleElement(store, selector);
         _deletion = false;
@@ -1254,7 +1254,7 @@ gboolean sp_styledialog_store_move_to_next(gpointer data)
 {
     StyleDialog *styledialog = reinterpret_cast<StyleDialog *>(data);
     auto selection = styledialog->_current_css_tree->get_selection();
-    Gtk::TreeModel::iterator iter = *(selection->get_selected());
+    Gtk::TreeModel::iterator iter = selection->get_selected();
     if (!iter) {
         return false;
     }
@@ -1278,8 +1278,9 @@ void StyleDialog::_nameEdited(const Glib::ustring &path, const Glib::ustring &na
 
     _scrollock = true;
 
-    Gtk::TreeModel::Row row = *store->get_iter(path);
-    _current_path = row;
+    auto iter = store->get_iter(path);
+    auto row = *iter;
+    _current_path = store->get_path(iter);
 
     if (!row) return;
 
@@ -1304,7 +1305,7 @@ void StyleDialog::_nameEdited(const Glib::ustring &path, const Glib::ustring &na
 
     if (finalname.empty() && value.empty()) {
         _deleted_pos = row[_mColumns._colSelectorPos];
-        store->erase(row);
+        store->erase(iter);
     }
 
     auto const col = pos < 1 || is_attr ? 2 : 3;
@@ -1331,7 +1332,8 @@ void StyleDialog::_valueEdited(const Glib::ustring &path, const Glib::ustring &v
 
     _scrollock = true;
 
-    Gtk::TreeModel::Row row = *store->get_iter(path);
+    auto iter = store->get_iter(path);
+    auto row = *iter;
     if (row) {
         Glib::ustring finalvalue = value;
         auto i = std::min(finalvalue.find(";"), finalvalue.find(":"));
@@ -1347,7 +1349,7 @@ void StyleDialog::_valueEdited(const Glib::ustring &path, const Glib::ustring &v
         Glib::ustring name = row[_mColumns._colName];
         if (name.empty() && finalvalue.empty()) {
             _deleted_pos = row[_mColumns._colSelectorPos];
-            store->erase(row);
+            store->erase(iter);
         }
         _writeStyleElement(store, selector);
         if (selector != "style_properties" && selector != "attributes") {
@@ -1385,7 +1387,10 @@ void StyleDialog::_addTreeViewHandlers(Gtk::TreeView &treeview)
     Controller::add_key<nullptr, &StyleDialog::_onTreeViewKeyReleased>(treeview, *this);
 
     // and since the above somehow doesnʼt fire on focus-out of final cell, we have to do this too…
-    treeview.signal_focus().connect(sigc::mem_fun(*this, &StyleDialog::_onTreeViewFocus));
+    auto focus = Gtk::EventControllerFocus::create();
+    focus->set_propagation_phase(Gtk::PropagationPhase::BUBBLE);
+    treeview.add_controller(focus);
+    focus->signal_leave().connect([this] { _onTreeViewFocusLeave(); });
 
     // If TreeView can-focus, above arenʼt needed, BUT it causes CRITICALs… so just be Good Enough™
     // Doing that also means we need 2 presses of Tab, the 1st to dismiss the completion: not ideal
@@ -1433,18 +1438,16 @@ bool StyleDialog::_onTreeViewKeyReleased(GtkEventControllerKey const * /*control
     return false;
 }
 
-bool StyleDialog::_onTreeViewFocus(Gtk::DirectionType const direction)
+void StyleDialog::_onTreeViewFocusLeave()
 {
-    g_debug("StyleDialog::_onTreeViewFocus");
+    g_debug("StyleDialog::_onTreeViewFocusLeave");
 
-    if (_editingEntry != nullptr && direction == Gtk::DIR_TAB_FORWARD) {
-        g_debug("StyleDialog::_onTreeViewFocus: _editingEntry != nullptr && Tab");
+    if (_editingEntry) {
+        g_debug("StyleDialog::_onTreeViewFocus: _editingEntry != nullptr");
 
         // If !change, entry stays visible after Tab, but remove_widget() crashes so… Donʼt Do That
         _editingEntry->editing_done();
     }
-
-    return false;
 }
 
 /**
@@ -1461,7 +1464,7 @@ std::vector<SPObject *> StyleDialog::_getObjVec(Glib::ustring selector)
     return getDocument()->getObjectsBySelector(selector);
 }
 
-void StyleDialog::_closeDialog(Gtk::Dialog *textDialogPtr) { textDialogPtr->response(Gtk::RESPONSE_OK); }
+void StyleDialog::_closeDialog(Gtk::Dialog *textDialogPtr) { textDialogPtr->response(Gtk::ResponseType::OK); }
 
 
 void StyleDialog::removeObservers()

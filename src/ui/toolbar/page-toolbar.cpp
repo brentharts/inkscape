@@ -16,6 +16,7 @@
 
 #include <regex>
 #include <glibmm/i18n.h>
+#include <gtkmm/box.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/entrycompletion.h>
@@ -34,7 +35,9 @@
 #include "object/sp-page.h"
 #include "ui/builder-utils.h"
 #include "ui/icon-names.h"
+#include "ui/popup-menu.h"
 #include "ui/tools/pages-tool.h"
+#include "ui/util.h"
 #include "ui/widget/toolbar-menu-button.h"
 #include "util/paper.h"
 #include "util/units.h"
@@ -63,6 +66,7 @@ PageToolbar::PageToolbar(SPDesktop *desktop)
     , _builder(create_builder("toolbar-page.ui"))
     , _combo_page_sizes(get_widget<Gtk::ComboBoxText>(_builder, "_combo_page_sizes"))
     , _text_page_margins(get_widget<Gtk::Entry>(_builder, "_text_page_margins"))
+    , _margin_popover(get_widget<Gtk::Popover>(_builder, "margin_popover"))
     , _text_page_bleeds(get_widget<Gtk::Entry>(_builder, "_text_page_bleeds"))
     , _text_page_label(get_widget<Gtk::Entry>(_builder, "_text_page_label"))
     , _label_page_pos(get_widget<Gtk::Label>(_builder, "_label_page_pos"))
@@ -78,6 +82,8 @@ PageToolbar::PageToolbar(SPDesktop *desktop)
     , _margin_bottom(get_derived_widget<UI::Widget::MathSpinButton>(_builder, "_margin_bottom"))
     , _margin_left(get_derived_widget<UI::Widget::MathSpinButton>(_builder, "_margin_left"))
 {
+    set_name("PageToolbar");
+
     _toolbar = &get_widget<Gtk::Box>(_builder, "page-toolbar");
 
     // Fetch all the ToolbarMenuButtons at once from the UI file
@@ -89,12 +95,12 @@ PageToolbar::PageToolbar(SPDesktop *desktop)
     // toolbar have been fetched. Otherwise, the children to be moved in the
     // popover will get mapped to a different position and it will probably
     // cause segfault.
-    auto children = _toolbar->get_children();
+    auto children = UI::get_children(*_toolbar);
 
     menu_btn1->init(1, "tag1", popover_box1, children);
     addCollapsibleButton(menu_btn1);
 
-    add(*_toolbar);
+    set_child(*_toolbar);
 
     _text_page_label.signal_changed().connect(sigc::mem_fun(*this, &PageToolbar::labelEdited));
 
@@ -112,7 +118,12 @@ PageToolbar::PageToolbar(SPDesktop *desktop)
 
     _text_page_bleeds.signal_activate().connect(sigc::mem_fun(*this, &PageToolbar::bleedsEdited));
     _text_page_margins.signal_activate().connect(sigc::mem_fun(*this, &PageToolbar::marginsEdited));
-    _text_page_margins.signal_icon_press().connect([=](Gtk::EntryIconPosition, const GdkEventButton *) {
+
+    _margin_popover.set_name("MarginPopover");
+    _margin_popover.set_parent(*this);
+    signal_destroy().connect([this] { _margin_popover.unparent(); }); // Unparenting in destructor is too late.
+
+    _text_page_margins.signal_icon_press().connect([&](Gtk::Entry::IconPosition) {
         if (auto page = _document->getPageManager().getSelected()) {
             auto const &margin = page->getMarginBox();
             auto unit = _document->getDisplayUnit()->abbr;
@@ -123,7 +134,7 @@ PageToolbar::PageToolbar(SPDesktop *desktop)
             _margin_left.set_value(margin.left().toValue(unit) * scale[Geom::X]);
             _text_page_bleeds.set_text(page->getBleedLabel());
         }
-        get_widget<Gtk::Popover>(_builder, "margin_popover").set_visible(true);
+        UI::popup_at(_margin_popover, _text_page_margins);
     });
     _margin_top.signal_value_changed().connect(sigc::mem_fun(*this, &PageToolbar::marginTopEdited));
     _margin_right.signal_value_changed().connect(sigc::mem_fun(*this, &PageToolbar::marginRightEdited));
@@ -144,10 +155,10 @@ PageToolbar::PageToolbar(SPDesktop *desktop)
         _entry_page_sizes->set_placeholder_text(_("ex.: 100x100cm"));
         _entry_page_sizes->set_tooltip_text(_("Type in width & height of a page. (ex.: 15x10cm, 10in x 100mm)\n"
                                               "or choose preset from dropdown."));
-        _entry_page_sizes->get_style_context()->add_class("symbolic");
+        _entry_page_sizes->add_css_class("symbolic");
         _entry_page_sizes->signal_activate().connect(sigc::mem_fun(*this, &PageToolbar::sizeChanged));
 
-        _entry_page_sizes->signal_icon_press().connect([=](Gtk::EntryIconPosition, const GdkEventButton *) {
+        _entry_page_sizes->signal_icon_press().connect([this] (Gtk::Entry::IconPosition) {
             _document->getPageManager().changeOrientation();
             DocumentUndo::maybeDone(_document, "page-resize", _("Resize Page"), INKSCAPE_ICON("tool-pages"));
             setSizeText();
@@ -165,13 +176,13 @@ PageToolbar::PageToolbar(SPDesktop *desktop)
 
     // Watch for when the tool changes
     _ec_connection = _desktop->connectEventContextChanged(sigc::mem_fun(*this, &PageToolbar::toolChanged));
-    _doc_connection = _desktop->connectDocumentReplaced([=](SPDesktop *desktop, SPDocument *doc) {
+    _doc_connection = _desktop->connectDocumentReplaced([this](SPDesktop *desktop, SPDocument *doc) {
         if (doc) {
             toolChanged(desktop, desktop->getTool());
         }
     });
 
-    show_all();
+    toolChanged(desktop, desktop->getTool());
 }
 
 /**
@@ -413,9 +424,8 @@ void PageToolbar::setSizeText(SPPage *page, bool display_only)
     auto label = _document->getPageManager().getSizeLabel(page);
 
     // If this is a known size in our list, add the size paren to it.
-    for (auto iter : _sizes_search->children()) {
-        auto row = *iter;
-        if (label == row[cols.name]) {
+    for (auto &row : _sizes_search->children()) {
+        if (label == row[cols.name].operator Glib::ustring().raw()) {
             label = label + " (" + row[cols.label] + ")";
             break;
         }
@@ -426,9 +436,9 @@ void PageToolbar::setSizeText(SPPage *page, bool display_only)
     auto box = page ? page->getDesktopRect() : *_document->preferredBounds();
     auto const icon = box.width() > box.height() ? "page-landscape" : "page-portrait";
     if (box.width() == box.height()) {
-        _entry_page_sizes->unset_icon(Gtk::ENTRY_ICON_SECONDARY);
+        _entry_page_sizes->unset_icon(Gtk::Entry::IconPosition::SECONDARY);
     } else {
-        _entry_page_sizes->set_icon_from_icon_name(INKSCAPE_ICON(icon), Gtk::ENTRY_ICON_SECONDARY);
+        _entry_page_sizes->set_icon_from_icon_name(INKSCAPE_ICON(icon), Gtk::Entry::IconPosition::SECONDARY);
     }
 
     if (!display_only) {

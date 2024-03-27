@@ -119,7 +119,7 @@ bool DropperTool::root_handler(CanvasEvent const &event)
     auto modifiers = event.modifiersAfter();
     stroke   = modifiers & GDK_SHIFT_MASK;
     dropping = modifiers & GDK_CONTROL_MASK; // Even on macOS.
-    invert   = modifiers & GDK_MOD1_MASK;
+    invert   = modifiers & GDK_ALT_MASK;
 
     // Get color from selected object
     // Only if dropping mode enabled and object's color is set.
@@ -283,7 +283,7 @@ bool DropperTool::root_handler(CanvasEvent const &event)
             if (dropping) {
                 auto const button_w = event.pos;
                 // Remember clicked item, disregarding groups, honoring Alt.
-                item_to_select = sp_event_context_find_item(_desktop, button_w, event.modifiers & GDK_MOD1_MASK, true);
+                item_to_select = sp_event_context_find_item(_desktop, button_w, event.modifiers & GDK_ALT_MASK, true);
 
                 // Change selected object to object under cursor.
                 if (item_to_select) {
@@ -369,10 +369,7 @@ bool DropperTool::root_handler(CanvasEvent const &event)
                                 : (stroke ? "dropper-pick-stroke.svg" : "dropper-pick-fill.svg");
 
     // We do this ourselves to get color correct.
-    auto display = _desktop->getCanvas()->get_display();
-    auto window = _desktop->getCanvas()->get_window();
-    auto cursor = load_svg_cursor(display, window, _cursor_filename, get_color(invert));
-    window->set_cursor(cursor);
+    set_svg_cursor(*_desktop->getCanvas(), _cursor_filename, get_color(invert));
 
     if (!ret) {
         ret = ToolBase::root_handler(event);

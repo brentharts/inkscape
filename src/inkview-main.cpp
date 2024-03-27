@@ -15,6 +15,8 @@
 
 #ifdef _WIN32
 #include <windows.h> // SetConsoleOutputCP
+#undef IGNORE
+#undef near
 #include <fcntl.h> // _O_BINARY
 #endif
 
@@ -22,6 +24,8 @@
 
 int main(int argc, char *argv[])
 {
+    Gtk::Application::wrap_in_search_entry2();
+
 #ifdef _WIN32
     // temporarily switch console encoding to UTF8 while Inkview runs
     // as everything else is a mess and it seems to work just fine

@@ -16,16 +16,15 @@
 #include <gtk/gtk.h>
  
 namespace Gtk {
-class Window;
 class Entry;
-}
+class SpinButton;
+class Window;
+} // namespace Gtk
 
-void sp_dialog_defocus_cpp         (Gtk::Window *win);
-void sp_dialog_defocus_on_enter_cpp(Gtk::Entry *e);
-
-void sp_dialog_defocus         (GtkWindow *win);
-void sp_dialog_defocus_on_enter(GtkWidget *w);
-void sp_transientize           (GtkWidget *win);
+void sp_dialog_defocus(Gtk::Window *win);
+void sp_dialog_defocus_on_enter(Gtk::Entry *e);
+void sp_dialog_defocus_on_enter(Gtk::SpinButton &s);
+void sp_transientize(Gtk::Window &win);
 
 #endif // SEEN_DIALOG_EVENTS_H
 

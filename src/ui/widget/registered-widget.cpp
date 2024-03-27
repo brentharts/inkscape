@@ -17,7 +17,7 @@
 #include "registered-widget.h"
 
 #include <glibmm/i18n.h>
-#include <gtkmm/radiobutton.h>
+#include <gtkmm/label.h>
 
 #include "object/sp-root.h"
 #include "svg/svg-color.h"
@@ -47,10 +47,10 @@ RegisteredCheckButton::RegisteredCheckButton(Glib::ustring const &label, Glib::u
     auto const l = Gtk::make_managed<Gtk::Label>();
     l->set_markup(label);
     l->set_use_underline(true);
-    add(*l);
+    set_child(*l);
 
-    set_halign(right ? Gtk::ALIGN_END : Gtk::ALIGN_START);
-    set_valign(Gtk::ALIGN_CENTER);
+    set_halign(right ? Gtk::Align::END : Gtk::Align::START);
+    set_valign(Gtk::Align::CENTER);
 }
 
 void
@@ -110,8 +110,8 @@ RegisteredToggleButton::RegisteredToggleButton(
 
     set_tooltip_text(tip);
 
-    set_halign(right ? Gtk::ALIGN_END : Gtk::ALIGN_START);
-    set_valign(Gtk::ALIGN_CENTER);
+    set_halign(right ? Gtk::Align::END : Gtk::Align::START);
+    set_valign(Gtk::Align::CENTER);
 }
 
 void

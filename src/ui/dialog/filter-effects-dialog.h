@@ -19,6 +19,7 @@
 #define INKSCAPE_UI_DIALOG_FILTER_EFFECTS_H
 
 #include <memory>
+#include <2geom/point.h>
 #include <sigc++/connection.h>
 #include <sigc++/signal.h>
 #include <glibmm/property.h>
@@ -30,6 +31,7 @@
 #include <gtkmm/builder.h>
 #include <gtkmm/cellrenderertoggle.h>
 #include <gtkmm/gesture.h> // Gtk::EventSequenceState
+#include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treemodelcolumn.h>
@@ -39,20 +41,26 @@
 #include "display/nr-filter-types.h"
 #include "helper/auto-connection.h"
 #include "ui/dialog/dialog-base.h"
+#include "ui/widget/bin.h"
 #include "ui/widget/combo-enums.h"
 #include "ui/widget/completion-popup.h"
 #include "xml/helper-observer.h"
 
+namespace Gdk {
+class Drag;
+} // namespace Gdk
+
 namespace Gtk {
 class Button;
 class CheckButton;
-class GestureMultiPress;
+class DragSource;
+class GestureClick;
 class Grid;
 class Label;
 class ListStore;
 class Paned;
 class ScrolledWindow;
-class Widget;
+class ToggleButton;
 } // namespace Gtk
 
 class SPFilter;
@@ -73,6 +81,8 @@ class MultiSpinButton;
 
 class FilterEffectsDialog : public DialogBase
 {
+    using parent_type = DialogBase;
+
 public:
     FilterEffectsDialog();
     ~FilterEffectsDialog() override;
@@ -80,7 +90,6 @@ public:
     void set_attrs_locked(const bool);
 
 private:
-    void show_all_vfunc() override;
     void documentReplaced() override;
     void selectionChanged(Inkscape::Selection *selection) override;
     void selectionModified(Inkscape::Selection *selection, guint flags) override;
@@ -137,7 +146,7 @@ private:
         void selection_toggled(Gtk::TreeModel::iterator iter, bool toggle);
 
         void update_counts();
-        Gtk::EventSequenceState filter_list_click_released(Gtk::GestureMultiPress const &click,
+        Gtk::EventSequenceState filter_list_click_released(Gtk::GestureClick const &click,
                                                            int n_press, double x, double y);
         void remove_filter();
         void duplicate_filter();
@@ -211,6 +220,8 @@ private:
 
     class PrimitiveList : public Gtk::TreeView
     {
+        using parent_type = Gtk::TreeView;
+
     public:
         PrimitiveList(FilterEffectsDialog&);
 
@@ -230,19 +241,22 @@ private:
         int get_inputs_count() const;
 
     private:
-        bool on_draw_signal(const Cairo::RefPtr<Cairo::Context> &cr);
-        void on_drag_end(const Glib::RefPtr<Gdk::DragContext>&) override;
+        void snapshot_vfunc(Glib::RefPtr<Gtk::Snapshot> const &snapshot) final;
 
-        Gtk::EventSequenceState on_click_pressed (Gtk::GestureMultiPress const &click,
+        void on_drag_end(Gtk::DragSource const &source,
+                         Glib::RefPtr<Gdk::Drag> const &drag, bool delete_data);
+
+        Gtk::EventSequenceState on_click_pressed (Gtk::GestureClick const &click,
                                                   int n_press, double x, double y);
-        Gtk::EventSequenceState on_click_released(Gtk::GestureMultiPress const &click,
+        Gtk::EventSequenceState on_click_released(Gtk::GestureClick const &click,
                                                   int n_press, double x, double y);
         void on_motion_motion(GtkEventControllerMotion const *motion,
                               double x, double y);
 
         void init_text();
 
-        bool do_connection_node(const Gtk::TreeModel::iterator& row, const int input, std::vector<Gdk::Point>& points,
+        bool do_connection_node(const Gtk::TreeModel::iterator& row, const int input,
+                                std::vector<Geom::Point> &points,
                                 const int ix, const int iy);
 
         const Gtk::TreeModel::iterator find_result(const Gtk::TreeModel::iterator& start, const SPAttr attr, int& src_id, const int pos);
@@ -296,6 +310,7 @@ private:
     void add_effects(Inkscape::UI::Widget::CompletionPopup& popup, bool symbolic);
 
     Glib::RefPtr<Gtk::Builder> _builder;
+    UI::Widget::Bin _bin;
     Glib::ustring _prefs = "/dialogs/filters";
     Gtk::Paned& _paned;
     Gtk::Grid& _main_grid;
@@ -304,6 +319,7 @@ private:
     Gtk::Box& _search_wide_box;
     Gtk::ScrolledWindow& _filter_wnd;
     bool _narrow_dialog = true;
+    Gtk::ToggleButton *_show_sources = nullptr;
     Gtk::CheckButton& _cur_filter_btn;
     sigc::connection _cur_filter_toggle;
     // View/add primitives

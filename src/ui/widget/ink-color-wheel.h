@@ -30,12 +30,16 @@
 
 #include "hsluv.h"
 
+#include "ui/widget/widget-vfuncs-class-init.h" // for focus
+
 namespace Gtk {
 class DrawingArea;
-class GestureMultiPress;
+class GestureClick;
 } // namespace Gtk
 
 namespace Inkscape::UI::Widget {
+
+class Bin;
 
 struct ColorPoint final
 {
@@ -104,6 +108,7 @@ protected:
 
     /// Call when color has changed! Emits signal_color_changed & calls _drawing_area->queue_draw()
     void color_changed();
+    void queue_drawing_area_draw();
 
     [[nodiscard]] Gtk::Allocation get_drawing_area_allocation() const;
     [[nodiscard]] bool drawing_area_has_focus() const;
@@ -112,14 +117,15 @@ protected:
 private:
     sigc::signal<void ()> _signal_color_changed;
 
+    UI::Widget::Bin *_bin;
     Gtk::DrawingArea *_drawing_area;
-    virtual void on_drawing_area_size (Gtk::Allocation const &allocation) {}
-    virtual bool on_drawing_area_draw (Cairo::RefPtr<Cairo::Context> const &cr) = 0;
-    virtual bool on_drawing_area_focus(Gtk::DirectionType /*direction*/) { return false; }
+    virtual void on_drawing_area_size(int width, int height, int baseline) {}
+    virtual void on_drawing_area_draw(Cairo::RefPtr<Cairo::Context> const &cr, int, int) = 0;
+
     /// All event controllers are connected to the DrawingArea.
-    virtual Gtk::EventSequenceState on_click_pressed (Gtk::GestureMultiPress const &click,
+    virtual Gtk::EventSequenceState on_click_pressed (Gtk::GestureClick const &click,
                                                       int n_press, double x, double y) = 0;
-    virtual Gtk::EventSequenceState on_click_released(Gtk::GestureMultiPress const &click,
+    virtual Gtk::EventSequenceState on_click_released(Gtk::GestureClick const &click,
                                                       int n_press, double x, double y) = 0;
     virtual void on_motion(GtkEventControllerMotion const *motion, double x, double y) = 0;
     virtual bool on_key_pressed(GtkEventControllerKey const *key_event,
@@ -132,9 +138,14 @@ private:
 /**
  * @class ColorWheelHSL
  */
-class ColorWheelHSL : public ColorWheel
+class ColorWheelHSL
+    : public WidgetVfuncsClassInit // As Gtkmm4 doesn't wrap focus_vfunc
+    , public ColorWheel
 {
 public:
+    ColorWheelHSL()
+        : Glib::ObjectBase{"ColorWheelHSL"}
+        , WidgetVfuncsClassInit{} {}
     bool setHue       (double h, bool emit = true) final;
     bool setSaturation(double s, bool emit = true) final;
     bool setLightness (double l, bool emit = true) final;
@@ -146,9 +157,9 @@ public:
     void getHsl(double *h, double *s, double *l) const;
 
 private:
-    void on_drawing_area_size (Gtk::Allocation const &allocation      ) final;
-    bool on_drawing_area_draw (Cairo::RefPtr<Cairo::Context> const &cr) final;
-    bool on_drawing_area_focus(Gtk::DirectionType direction) final;
+    void on_drawing_area_size(int width, int height, int baseline) override;
+    void on_drawing_area_draw(Cairo::RefPtr<Cairo::Context> const &cr, int, int) override;
+    std::optional<bool> focus(Gtk::DirectionType direction) override;
 
     bool _set_from_xy(double x, double y);
     bool set_from_xy_delta(double dx, double dy);
@@ -166,9 +177,9 @@ private:
     DragMode _mode = DragMode::NONE;
     bool _focus_on_ring = true;
 
-    Gtk::EventSequenceState on_click_pressed (Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_click_pressed (Gtk::GestureClick const &click,
                                               int n_press, double x, double y) final;
-    Gtk::EventSequenceState on_click_released(Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_click_released(Gtk::GestureClick const &click,
                                               int n_press, double x, double y) final;
     void on_motion(GtkEventControllerMotion const *motion, double x, double y) final;
     bool on_key_pressed(GtkEventControllerKey const *key_event,
@@ -177,7 +188,7 @@ private:
     // caches to speed up drawing
     using TriangleCorners = std::array<ColorPoint, 3>;
     using MinMax          = std::array<double    , 2>;
-    std::optional<int                > _cache_width, _cache_height;
+    std::optional<Geom::IntPoint> _cache_size;
     std::optional<MinMax             > _radii;
     std::optional<TriangleCorners    > _triangle_corners;
     std::optional<Geom::Point        > _marker_point;
@@ -212,16 +223,16 @@ public:
     void updateGeometry();
 
 private:
-    bool on_drawing_area_draw(Cairo::RefPtr<Cairo::Context> const &cr) final;
+    void on_drawing_area_draw(Cairo::RefPtr<Cairo::Context> const &cr, int, int) final;
 
     bool _set_from_xy(double const x, double const y);
     void _setFromPoint(Geom::Point const &pt) { _set_from_xy(pt[Geom::X], pt[Geom::Y]); }
     void _updatePolygon();
     bool _vertex() const;
 
-    Gtk::EventSequenceState on_click_pressed (Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_click_pressed (Gtk::GestureClick const &click,
                                               int n_press, double x, double y) final;
-    Gtk::EventSequenceState on_click_released(Gtk::GestureMultiPress const &click,
+    Gtk::EventSequenceState on_click_released(Gtk::GestureClick const &click,
                                               int n_press, double x, double y) final;
     void on_motion(GtkEventControllerMotion const *motion, double x, double y) final;
     bool on_key_pressed(GtkEventControllerKey const *key_event,
@@ -231,7 +242,7 @@ private:
     std::unique_ptr<Hsluv::PickerGeometry> _picker_geometry;
     std::vector<guint32> _buffer_polygon;
     Cairo::RefPtr<::Cairo::ImageSurface> _surface_polygon;
-    int _cache_width = 0, _cache_height = 0;
+    Geom::IntPoint _cache_size;
     int _square_size = 1;
 };
 

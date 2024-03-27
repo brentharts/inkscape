@@ -30,7 +30,8 @@
 namespace Gtk {
 class Adjustment;
 class Builder;
-class GestureMultiPress;
+class CheckButton;
+class GestureClick;
 } // namespace Gtk
 
 class SPDocument;
@@ -86,7 +87,7 @@ public:
     Gtk::Adjustment *GetVAdj() { return _vadj.get(); };
     Gtk::ToggleButton *GetGuideLock()  { return &_guide_lock; }
     Gtk::ToggleButton *GetCmsAdjust()  { return &_cms_adjust; }
-    Gtk::ToggleButton *GetStickyZoom();
+    Gtk::CheckButton  *GetStickyZoom();
     Dialog::CommandPalette *getCommandPalette() { return _command_palette.get(); }
 
     // Motion event handler, and delayed snap event callback.
@@ -97,7 +98,7 @@ public:
 
 private:
     // Signal callbacks
-    void on_size_allocate(Gtk::Allocation &allocation) final;
+    void size_allocate_vfunc(int width, int height, int baseline) final;
     void on_realize() final;
 
     // The widgets
@@ -129,7 +130,7 @@ private:
     SPDocument *_document = nullptr;
 
     // Store allocation so we don't redraw too often.
-    Gtk::Allocation _allocation;
+    int _width{}, _height{};
 
     // Connections for page and selection tracking
     auto_connection _page_selected_connection;
@@ -149,9 +150,9 @@ private:
     Geom::IntPoint _rulerToCanvas(bool horiz) const;
     void _createGuideItem(Geom::Point const &pos, bool horiz);
     void _createGuide(Geom::Point origin, Geom::Point normal);
-    Gtk::EventSequenceState _rulerButtonPress  (Gtk::GestureMultiPress const &gesture,
+    Gtk::EventSequenceState _rulerButtonPress  (Gtk::GestureClick const &gesture,
                                                 int n_press, double x, double y);
-    Gtk::EventSequenceState _rulerButtonRelease(Gtk::GestureMultiPress const &gesture,
+    Gtk::EventSequenceState _rulerButtonRelease(Gtk::GestureClick const &gesture,
                                                 int n_press, double x, double y, bool horiz);
     void _rulerMotion(GtkEventControllerMotion const *controller, double x, double y, bool horiz);
     void _blinkLockButton();

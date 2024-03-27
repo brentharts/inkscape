@@ -309,31 +309,32 @@ int gui_request_dpi_fix_method(SPDocument *doc)
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     Gtk::Dialog scale_dialog(_("Convert legacy Inkscape file"));
     scale_dialog.set_transient_for(*(INKSCAPE.active_desktop()->getToplevel()));
-    scale_dialog.property_margin().set_value(10);
+    scale_dialog.set_margin(10);
     scale_dialog.set_resizable(false);
     Gtk::Label explanation;
     explanation.set_markup(Glib::ustring("<b>") + doc->getDocumentName() + "</b>\n" +
                            _("was created in an older version of Inkscape (90 DPI) and we need "
                              "to make it compatible with newer versions (96 DPI). Tell us about this file:\n"));
-    explanation.set_line_wrap(true);
+    explanation.set_wrap(true);
     explanation.set_size_request(600, -1);
-    Gtk::RadioButton::Group c1, c2;
 
     Gtk::Label choice1_label;
     choice1_label.set_markup(_("This file contains digital artwork for screen display. <b>(Choose if unsure.)</b>"));
-    Gtk::RadioButton choice1(c1);
-    choice1.add(choice1_label);
-    Gtk::RadioButton choice2(c1, _("This file is intended for physical output, such as paper or 3D prints."));
+    Gtk::CheckButton choice1;
+    choice1.set_child(choice1_label);
+    Gtk::CheckButton choice2(_("This file is intended for physical output, such as paper or 3D prints."));
+    choice2.set_group(choice1);
     Gtk::Label choice2_1_label;
     choice2_1_label.set_markup(_("The appearance of elements such as clips, masks, filters, and clones\n"
                                  "is most important. <b>(Choose if unsure.)</b>"));
-    Gtk::RadioButton choice2_1(c2);
-    choice2_1.add(choice2_1_label);
-    Gtk::RadioButton choice2_2(c2, _("The accuracy of the physical unit size and position values of objects\n"
-                                     "in the file is most important. (Experimental.)"));
+    Gtk::CheckButton choice2_1;
+    choice2_1.set_child(choice2_1_label);
+    Gtk::CheckButton choice2_2(_("The accuracy of the physical unit size and position values of objects\n"
+                                 "in the file is most important. (Experimental.)"));
+    choice2_2.set_group(choice2_1);
     Gtk::CheckButton backup_button(_("Create a backup file in same directory."));
     Gtk::Expander moreinfo(_("More details..."));
-    Gtk::Label moreinfo_text("", Gtk::ALIGN_START);
+    Gtk::Label moreinfo_text("", Gtk::Align::START);
     moreinfo_text.set_markup(
         // TRANSLATORS: Please don't translate link unless the page exists in your language. Add your language
         // code to the link this way: https://inkscape.org/[lang]/learn/faq#dpi_change
@@ -351,7 +352,7 @@ int gui_request_dpi_fix_method(SPDocument *doc)
           "More information about this change are available in the <a "
           "href='https://inkscape.org/en/learn/faq#dpi_change'>Inkscape FAQ</a>"
           "</small>"));
-    moreinfo_text.set_line_wrap(true);
+    moreinfo_text.set_wrap(true);
     moreinfo_text.set_margin_bottom(20);
     moreinfo_text.set_margin_top(20);
     moreinfo_text.set_margin_start(30);
@@ -363,8 +364,8 @@ int gui_request_dpi_fix_method(SPDocument *doc)
     choice2_1.set_visible(true);
     choice2_2.set_visible(true);
 
-    b.set_halign(Gtk::ALIGN_START);
-    b.set_valign(Gtk::ALIGN_START);
+    b.set_halign(Gtk::Align::START);
+    b.set_valign(Gtk::Align::START);
     b.set_hexpand(false);
     b.set_vexpand(false);
     b.set_margin_start(30);
@@ -381,11 +382,10 @@ int gui_request_dpi_fix_method(SPDocument *doc)
     Inkscape::UI::pack_start(*content, backup_button, false, false, 5);
     Inkscape::UI::pack_start(*content, moreinfo,      false, false, 5);
     // clang-format on
-    moreinfo.add(moreinfo_text);
-    scale_dialog.show_all_children();
+    moreinfo.set_child(moreinfo_text);
     b.set_visible(false);
-    choice1.signal_clicked().connect(sigc::mem_fun(b, &Gtk::Box::hide));
-    choice2.signal_clicked().connect(sigc::mem_fun(b, &Gtk::Box::show));
+    choice1.signal_toggled().connect(sigc::mem_fun(b, &Gtk::Box::hide));
+    choice2.signal_toggled().connect(sigc::mem_fun(b, &Gtk::Box::show));
 
     int response = prefs->getInt("/options/dpiupdatemethod", FILE_DPI_UNCHANGED);
     if (response != FILE_DPI_UNCHANGED) {

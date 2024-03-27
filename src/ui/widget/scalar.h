@@ -171,7 +171,7 @@ public:
     /**
      * Signal raised when the spin button's value changes.
      */
-    Glib::SignalProxy<void> signal_value_changed();
+    Glib::SignalProxy<void()> signal_value_changed();
 
     /**
      * true if the value was set by setValue, not changed by the user;
@@ -182,9 +182,8 @@ public:
     // permanently hide label part
     void hide_label();
 
-protected:
-    SpinButton const &get_spin_button() const;
-    SpinButton       &get_spin_button()      ;
+    SpinButton const &getSpinButton() const;
+    SpinButton       &getSpinButton() { return const_cast<SpinButton &>(std::as_const(*this).getSpinButton()); }
 };
 
 } // namespace Inkscape::UI::Widget

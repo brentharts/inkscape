@@ -95,7 +95,7 @@ std::string TemplatePreset::_get_icon_path(std::string const &name) const
     auto base = _mod->get_base_directory();
     if (!base.empty()) {
         auto base_icon = Glib::build_filename(base, "icons", filename);
-        if (Glib::file_test(base_icon, Glib::FILE_TEST_EXISTS)) {
+        if (Glib::file_test(base_icon, Glib::FileTest::EXISTS)) {
             return base_icon;
         }
     }
@@ -239,7 +239,7 @@ Template::Template(Inkscape::XML::Node *in_repr, ImplementationHolder implementa
 int Template::parse_visibility(const std::string &value)
 {
     int ret = 0;
-    auto values = Glib::Regex::split_simple("," , value);
+    auto values = Glib::Regex::split_simple("," , value.c_str());
     for (auto const &val : values) {
         ret |= (val == "icon") * TEMPLATE_NEW_ICON;
         ret |= (val == "list") * TEMPLATE_SIZE_LIST;

@@ -19,7 +19,7 @@
 #include <vector>
 #include <glibmm/refptr.h>
 #include <gtkmm/box.h>
-#include <gtkmm/radiobutton.h>
+#include <gtkmm/togglebutton.h>
 
 #include "style.h"
 #include "ui/widget/spinbutton.h"
@@ -29,7 +29,6 @@ class Adjustment;
 class Entry;
 class Grid;
 class Label;
-class ToggleButton;
 } // namespace Gtk
 
 class SPDocument;
@@ -60,7 +59,7 @@ public:
     void selectionModifiedCB(guint flags);
     void selectionChangedCB();
 private:
-    /** List of valid types for the stroke-style radio-button widget */
+    /** List of valid types for the stroke-style radio check-button widget */
     enum StrokeStyleButtonType {
         STROKE_STYLE_BUTTON_JOIN, ///< A button to set the line-join style
         STROKE_STYLE_BUTTON_CAP,  ///< A button to set the line-cap style
@@ -68,12 +67,12 @@ private:
     };
 
     /**
-     * A custom radio-button for setting the stroke style.  It can be configured
+     * A custom radio check-button for setting the stroke style.  It can be configured
      * to set either the join or cap style by setting the button_type field.
      */
-    class StrokeStyleButton : public Gtk::RadioButton {
+    class StrokeStyleButton : public Gtk::ToggleButton {
         public:
-            StrokeStyleButton(Gtk::RadioButtonGroup &grp,
+            StrokeStyleButton(Gtk::ToggleButton    *&grp,
                               char const            *icon,
                               StrokeStyleButtonType  button_type,
                               gchar const           *stroke_style);
@@ -105,7 +104,7 @@ private:
     void setScaledDash(SPCSSAttr *css, int ndash, const double *dash, double offset, double scale);
     bool isHairlineSelected() const;
 
-    StrokeStyleButton * makeRadioButton(Gtk::RadioButtonGroup &grp,
+    StrokeStyleButton * makeRadioButton(Gtk::ToggleButton    *&grp,
                                         char const            *icon,
                                         Gtk::Box              *hb,
                                         StrokeStyleButtonType  button_type,
@@ -141,10 +140,10 @@ private:
     StrokeStyleButton *paintOrderSMF;
     StrokeStyleButton *paintOrderMSF;
     DashSelector *dashSelector;
-    Gtk::Entry* _pattern = nullptr;
+    Gtk::Entry* _pattern_entry = nullptr;
     Gtk::Label* _pattern_label = nullptr;
-    void update_pattern(int ndash, const double* pattern);
-    bool _editing_pattern = false;
+    void update_dash_entry(const std::vector<double> &dash_pattern);
+    bool _editing_dash_pattern = false;
 
     gboolean update;
     double _last_width = 0.0;

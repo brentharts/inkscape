@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <cassert>
 #include <gtkmm/entry.h>
-#include <gtkmm/radiobutton.h>
+#include <gtkmm/checkbutton.h>
 
 #include "desktop.h"
 #include "document.h"
@@ -40,9 +40,9 @@ const struct rdf_license_t _proprietary_license =
 const struct rdf_license_t _other_license = 
   {Q_("MetadataLicence|Other"), "", nullptr};
 
-class LicenseItem final : public Gtk::RadioButton {
+class LicenseItem final : public Gtk::CheckButton {
 public:
-    LicenseItem (struct rdf_license_t const* license, EntityEntry* entity, Registry &wr, Gtk::RadioButtonGroup *group);
+    LicenseItem (struct rdf_license_t const* license, EntityEntry* entity, Registry &wr, Gtk::CheckButton *group);
     [[nodiscard]] rdf_license_t const *get_license() const { return _lic; }
 
 private:
@@ -52,8 +52,8 @@ private:
     Registry                   &_wr;
 };
 
-LicenseItem::LicenseItem (struct rdf_license_t const* license, EntityEntry* entity, Registry &wr, Gtk::RadioButtonGroup *group)
-: Gtk::RadioButton(_(license->name)), _lic(license), _eep(entity), _wr(wr)
+LicenseItem::LicenseItem (struct rdf_license_t const* license, EntityEntry* entity, Registry &wr, Gtk::CheckButton *group)
+: Gtk::CheckButton(_(license->name)), _lic(license), _eep(entity), _wr(wr)
 {
     if (group) {
         set_group (*group);
@@ -78,7 +78,7 @@ void LicenseItem::on_toggled()
 }
 
 Licensor::Licensor()
-: Gtk::Box{Gtk::ORIENTATION_VERTICAL, 4}
+: Gtk::Box{Gtk::Orientation::VERTICAL, 4}
 {
 }
 
@@ -94,30 +94,28 @@ void Licensor::init (Registry& wr)
 
     auto const item = add_item(wr, _proprietary_license, nullptr);
     item->set_active(true);
-    auto group = item->get_group();
 
     for (auto license = rdf_licenses; license && license->name; ++license) {
-        add_item(wr, *license, &group);
+        add_item(wr, *license, item);
     }
 
     // add Other at the end before the URI field for the confused ppl.
-    add_item(wr, _other_license, &group);
+    add_item(wr, _other_license, item);
 
     wr.setUpdating (false);
 
-    auto const box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);
+    auto const box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
     UI::pack_start(*this, *box, true, true, 0);
     UI::pack_start(*box, _eentry->_label, false, false, 5);
     UI::pack_start(*box, *_eentry->_packable, true, true, 0);
-    show_all_children();
 }
 
 LicenseItem *Licensor::add_item(Registry &wr, rdf_license_t const &license,
-                                Gtk::RadioButtonGroup * const group)
+                                Gtk::CheckButton * const group)
 {
     assert(_eentry);
     auto const item = Gtk::make_managed<LicenseItem>(&license, _eentry.get(), wr, group);
-    add(*item);
+    append(*item);
     _items.push_back(item);
     return item;
 }

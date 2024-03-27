@@ -30,6 +30,10 @@
 #include "preferences.h"
 #include "ui/widget/events/enums.h"
 
+namespace Gtk {
+class Widget;
+} // namespace Gtk
+
 class GrDrag;
 class SPDesktop;
 class SPObject;
@@ -199,7 +203,8 @@ public:
 
     void set_cursor(std::string filename);
     void use_cursor(Glib::RefPtr<Gdk::Cursor> cursor);
-    Glib::RefPtr<Gdk::Cursor> get_cursor(Glib::RefPtr<Gdk::Window> window, std::string const &filename) const;
+    Glib::RefPtr<Gdk::Cursor> get_cursor(Gtk::Widget &widget,
+                                         std::string const &filename) const;
     void use_tool_cursor();
 
     void enableGrDrag(bool enable = true);
@@ -226,9 +231,10 @@ private:
 
 void sp_event_context_read(ToolBase *tool, char const *key);
 
-// Todo: These functions are destined for removal, since events cannot be gobbled in GTK4.
-gint gobble_key_events(guint keyval, guint mask);
-void gobble_motion_events(guint mask);
+// Gobbling is no longer possible in GTK4. The following stubs
+// are left in place in case an alternative solution is required.
+inline int gobble_key_events(unsigned keyval, unsigned mask) { return 0; }
+inline void gobble_motion_events(unsigned mask) {}
 
 void sp_event_show_modifier_tip(MessageContext *message_context, KeyEvent const &event,
                                 char const *ctrl_tip, char const *shift_tip, char const *alt_tip);
@@ -238,7 +244,6 @@ void init_latin_keys_group();
 unsigned get_latin_keyval_impl(unsigned event_keyval, unsigned event_keycode,
                                GdkModifierType event_state, unsigned event_group,
                                unsigned *consumed_modifiers);
-unsigned get_latin_keyval(GdkEventKey const *event, unsigned *consumed_modifiers = nullptr); // Todo: Remove.
 unsigned get_latin_keyval(GtkEventControllerKey const *controller,
                           unsigned keyval, unsigned keycode, GdkModifierType state,
                           unsigned *consumed_modifiers = nullptr);

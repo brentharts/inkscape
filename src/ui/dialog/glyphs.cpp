@@ -35,7 +35,6 @@
 #include "ui/icon-names.h"
 #include "ui/pack.h"
 #include "ui/widget/font-selector.h"
-#include "ui/widget/scrollprotected.h"
 
 namespace Inkscape::UI::Dialog {
 
@@ -408,7 +407,7 @@ GlyphsPanel::GlyphsPanel()
     : DialogBase("/dialogs/glyphs", "Glyphs")
     , store(Gtk::ListStore::create(*getColumns()))
 {
-    set_orientation(Gtk::ORIENTATION_VERTICAL);
+    set_orientation(Gtk::Orientation::VERTICAL);
     auto const table = Gtk::make_managed<Gtk::Grid>();
     table->set_row_spacing(4);
     table->set_column_spacing(4);
@@ -432,7 +431,7 @@ GlyphsPanel::GlyphsPanel()
         auto const label = Gtk::make_managed<Gtk::Label>(_("Script: "));
         table->attach(*label, 0, row, 1, 1);
 
-        scriptCombo = Gtk::make_managed<Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText>>();
+        scriptCombo = Gtk::make_managed<Gtk::ComboBoxText>();
         for (auto const &it : getScriptToName()) {
             scriptCombo->append(it.second);
         }
@@ -442,8 +441,8 @@ GlyphsPanel::GlyphsPanel()
         instanceConns.emplace_back(
             scriptCombo->signal_changed().connect(sigc::mem_fun(*this, &GlyphsPanel::rebuild)));
 
-        scriptCombo->set_halign(Gtk::ALIGN_START);
-        scriptCombo->set_valign(Gtk::ALIGN_START);
+        scriptCombo->set_halign(Gtk::Align::START);
+        scriptCombo->set_valign(Gtk::Align::START);
         scriptCombo->set_hexpand();
         table->attach(*scriptCombo, 1, row, 1, 1);
     }
@@ -456,7 +455,7 @@ GlyphsPanel::GlyphsPanel()
         auto const label = Gtk::make_managed<Gtk::Label>(_("Range: "));
         table->attach(*label, 0, row, 1, 1);
 
-        rangeCombo = Gtk::make_managed<Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText>>();
+        rangeCombo = Gtk::make_managed<Gtk::ComboBoxText>();
         for (auto const &it : getRanges()) {
             rangeCombo->append(it.second);
         }
@@ -466,8 +465,8 @@ GlyphsPanel::GlyphsPanel()
         instanceConns.emplace_back(
             rangeCombo->signal_changed().connect(sigc::mem_fun(*this, &GlyphsPanel::rebuild)));
 
-        rangeCombo->set_halign(Gtk::ALIGN_START);
-        rangeCombo->set_valign(Gtk::ALIGN_START);
+        rangeCombo->set_halign(Gtk::Align::START);
+        rangeCombo->set_valign(Gtk::Align::START);
         rangeCombo->set_hexpand();
         table->attach(*rangeCombo, 1, row, 1, 1);
     }
@@ -493,8 +492,8 @@ GlyphsPanel::GlyphsPanel()
         iconView->signal_selection_changed().connect(sigc::mem_fun(*this, &GlyphsPanel::glyphSelectionChanged)));
 
     auto const scroller = Gtk::make_managed<Gtk::ScrolledWindow>();
-    scroller->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_ALWAYS);
-    scroller->add(*iconView);
+    scroller->set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::ALWAYS);
+    scroller->set_child(*iconView);
     scroller->set_hexpand();
     scroller->set_vexpand();
     table->attach(*scroller, 0, row, 3, 1);
@@ -503,7 +502,7 @@ GlyphsPanel::GlyphsPanel()
 
 // -------------------------------
 
-    auto const box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);
+    auto const box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
 
     entry = Gtk::make_managed<Gtk::Entry>();
     instanceConns.emplace_back(
@@ -523,7 +522,7 @@ GlyphsPanel::GlyphsPanel()
     insertBtn = Gtk::make_managed<Gtk::Button>(_("Append"));
     instanceConns.emplace_back(
         insertBtn->signal_clicked().connect(sigc::mem_fun(*this, &GlyphsPanel::insertText)));
-    insertBtn->set_can_default();
+    insertBtn->property_receives_default().set_value(true);
     insertBtn->set_sensitive(false);
 
     UI::pack_end(*box, *insertBtn, UI::PackOptions::shrink);
@@ -531,8 +530,6 @@ GlyphsPanel::GlyphsPanel()
     table->attach(*box, 0, row, 3, 1);
 
     row++;
-
-    show_all_children();
 }
 
 GlyphsPanel::~GlyphsPanel() = default;

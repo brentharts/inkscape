@@ -22,6 +22,7 @@
 #include <glibmm/refptr.h>
 #include <gtk/gtk.h> // GtkEventController*
 #include <gtkmm/gesture.h> // Gtk::EventSequenceState
+#include <sigc++/signal.h>
 
 #include "display/rendermode.h"
 #include "events/enums.h"
@@ -32,7 +33,7 @@ class Rectangle;
 } // namespace Gdk
 
 namespace Gtk {
-class GestureMultiPress;
+class GestureClick;
 } // namespace Gtk
 
 class SPDesktop;
@@ -139,15 +140,19 @@ public:
 
     void enable_autoscroll();
 
+    sigc::connection connectPreDraw(sigc::slot<void ()> &&slot) { return _signal_pre_draw.connect(std::move(slot)); }
+    sigc::connection connectFocusIn(sigc::slot<void ()> &&slot) { return _signal_focus_in.connect(std::move(slot)); }
+    sigc::connection connectFocusOut(sigc::slot<void ()> &&slot) { return _signal_focus_out.connect(std::move(slot)); }
+
 private:
     // EventControllerScroll
     bool on_scroll(GtkEventControllerScroll const *controller,
                    double dx, double dy);
 
-    // GtkGestureMultiPress
-    Gtk::EventSequenceState on_button_pressed (Gtk::GestureMultiPress const &controller,
+    // GtkGestureClick
+    Gtk::EventSequenceState on_button_pressed (Gtk::GestureClick const &controller,
                                                int n_press, double x, double y);
-    Gtk::EventSequenceState on_button_released(Gtk::GestureMultiPress const &controller,
+    Gtk::EventSequenceState on_button_released(Gtk::GestureClick const &controller,
                                                int n_press, double x, double y);
 
     // EventControllerMotion
@@ -155,8 +160,11 @@ private:
     void on_enter (GtkEventControllerMotion const *controller, double x, double y);
     void on_leave (GtkEventControllerMotion const *controller);
 
+    // EventControllerFocus
+    void on_focus_in();
+    void on_focus_out();
+
     // EventControllerKey
-    void on_focus_in    (GtkEventControllerKey const *controller);
     bool on_key_pressed (GtkEventControllerKey const *controller,
                          unsigned keyval, unsigned keycode, GdkModifierType state);
     bool on_key_released(GtkEventControllerKey const *controller,
@@ -164,7 +172,7 @@ private:
 
     void on_realize() final;
     void on_unrealize() final;
-    void on_size_allocate(Gdk::Rectangle &allocation) final;
+    void size_allocate_vfunc(int width, int height, int baseline) final;
 
     Glib::RefPtr<Gdk::GLContext> create_context() final;
     void paint_widget(Cairo::RefPtr<Cairo::Context> const &) final;
@@ -215,7 +223,11 @@ private:
     bool _split_dragging;
     Geom::IntPoint _split_drag_start;
 
-    void set_cursor();
+    sigc::signal<void ()> _signal_pre_draw;
+    sigc::signal<void ()> _signal_focus_in;
+    sigc::signal<void ()> _signal_focus_out;
+
+    void update_cursor();
 
     // Opaque pointer to implementation
     friend class CanvasPrivate;

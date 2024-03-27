@@ -261,21 +261,17 @@ void SatelliteParam::on_link_button_click()
 
 Gtk::Widget *SatelliteParam::param_newWidget()
 {
-    auto const _widget = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);
-    Gtk::Image *pIcon = Gtk::manage(sp_get_icon_image("edit-clone", Gtk::ICON_SIZE_BUTTON));
+    auto const _widget = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
+    Gtk::Image *pIcon = Gtk::manage(sp_get_icon_image("edit-clone", Gtk::IconSize::NORMAL));
     auto const pButton = Gtk::make_managed<Gtk::Button>();
     auto const pLabel = Gtk::make_managed<Gtk::Label>(param_label);
     UI::pack_start(*_widget, *pLabel, true, true);
     pLabel->set_tooltip_text(param_tooltip);
-    pButton->set_relief(Gtk::RELIEF_NONE);
-    pIcon->set_visible(true);
-    pButton->add(*pIcon);
-    pButton->set_visible(true);
+    pButton->set_has_frame(false);
+    pButton->set_child(*pIcon);
     pButton->signal_clicked().connect(sigc::mem_fun(*this, &SatelliteParam::on_link_button_click));
     UI::pack_start(*_widget, *pButton, true, true);
     pButton->set_tooltip_text(_("Link to item on clipboard"));
-
-    _widget->show_all_children();
 
     return _widget;
 }

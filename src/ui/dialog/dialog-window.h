@@ -43,7 +43,8 @@ public:
     DialogContainer *get_container() { return _container; }
 
 private:
-    bool on_key_press_event(GdkEventKey *key_event) final;
+    bool on_key_pressed(GtkEventControllerKey *controller,
+                        unsigned keyval, unsigned keycode, GdkModifierType state);
 
     InkscapeApplication *_app = nullptr;
 

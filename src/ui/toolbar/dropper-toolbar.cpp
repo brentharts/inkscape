@@ -69,9 +69,9 @@ DropperToolbar::DropperToolbar(SPDesktop *desktop)
 {
     _toolbar = &get_widget<Gtk::Box>(_builder, "dropper-toolbar");
 
-    add(*_toolbar);
+    set_child(*_toolbar);
 
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    auto prefs = Preferences::get();
 
     // Set initial state of widgets
     auto pickAlpha = prefs->getInt( "/tools/dropper/pick", 1 );
@@ -89,8 +89,6 @@ DropperToolbar::DropperToolbar(SPDesktop *desktop)
 
     _pick_alpha_btn.signal_toggled().connect(pick_alpha_button_toggled_cb);
     _set_alpha_btn.signal_toggled().connect(set_alpha_button_toggled_cb);
-
-    show_all();
 }
 
 DropperToolbar::~DropperToolbar() = default;

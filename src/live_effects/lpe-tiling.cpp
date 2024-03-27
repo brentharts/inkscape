@@ -28,8 +28,6 @@
 #include <gtkmm/image.h>
 #include <gtkmm/label.h>
 #include <gtkmm/object.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/radiobuttongroup.h>
 #include <gtkmm/spinbutton.h>
 
 #include "inkscape.h"
@@ -53,6 +51,7 @@
 #include "ui/knot/knot-holder.h"
 #include "ui/pack.h"
 #include "ui/util.h"
+#include "util-string/ustring-format.h"
 #include "xml/sp-css-attr.h"
 
 namespace Inkscape::LivePathEffect {
@@ -641,15 +640,18 @@ LPETiling::toItem(size_t i, bool reset, bool &write)
     return cast<SPItem>(elemref);
 }
 
-Gtk::RadioButton* create_radio_button(Gtk::RadioButtonGroup& group, const Glib::ustring& tooltip, const Glib::ustring& icon_name) {
-    auto const button = Gtk::make_managed<Gtk::RadioButton>(group, Glib::ustring());
+Gtk::ToggleButton* create_radio_button(Gtk::ToggleButton *&group, const Glib::ustring& tooltip, const Glib::ustring& icon_name) {
+    auto const button = Gtk::make_managed<Gtk::ToggleButton>();
+    if (group) {
+        button->set_group(*group);
+    } else {
+        group = button;
+    }
     button->set_tooltip_text(tooltip);
-    button->set_image_from_icon_name(icon_name, Gtk::ICON_SIZE_BUTTON);
-    button->property_draw_indicator() = false;
-    button->property_always_show_image() = true;
-    button->set_halign(Gtk::ALIGN_CENTER);
-    button->set_valign(Gtk::ALIGN_CENTER);
-    button->get_style_context()->add_class("lpe-square-button");
+    button->set_image_from_icon_name(icon_name, Gtk::IconSize::NORMAL);
+    button->set_halign(Gtk::Align::CENTER);
+    button->set_valign(Gtk::Align::CENTER);
+    button->add_css_class("lpe-square-button");
     return button;
 }
 
@@ -672,8 +674,8 @@ void align_widgets(const std::vector<Gtk::Widget*>& widgets, int spinbutton_char
     auto const get_natural_width = [](Gtk::Widget const &widget)
     {
         g_assert(widget.get_visible());
-        int minimum{}, natural{};
-        widget.get_preferred_width(minimum, natural);
+        int natural{}, ignore{};
+        widget.measure(Gtk::Orientation::HORIZONTAL, -1, ignore, natural, ignore, ignore);
         return natural;
     };
 
@@ -714,8 +716,8 @@ Gtk::Widget * LPETiling::newWidget()
 {
     // use manage here, because after deletion of Effect object, others might
     // still be pointing to this widget.
-    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
-    vbox->property_margin().set_value(5);
+    auto const vbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
+    vbox->set_margin(5);
 
     Gtk::Widget *combo = nullptr;
     Gtk::Widget *randbutton = nullptr;
@@ -739,8 +741,7 @@ Gtk::Widget * LPETiling::newWidget()
 
             auto const widgcombo = dynamic_cast<UI::Widget::RegisteredUnitMenu *>(widg);
 
-            // TODO: GTK4: Use Widget.get_first_child().
-            auto const destroy_child = UI::get_children(*widgcombo).at(0);
+            auto const destroy_child = widgcombo->get_first_child();
             widgcombo->remove(*destroy_child);
             delete destroy_child;
 
@@ -748,16 +749,16 @@ Gtk::Widget * LPETiling::newWidget()
 
             if (!usemirroricons) continue;
 
-            Gtk::RadioButton::Group group;
+            Gtk::ToggleButton *group = nullptr;
             auto const frame  = Gtk::make_managed<Gtk::Frame>(_("Mirroring mode"));
-            frame->set_halign(Gtk::ALIGN_START);
-            auto const cbox  = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
-            auto const vbox1 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL,0);
-            auto const hbox1 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
-            auto const hbox2 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
-            auto const vbox2 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL,0);
-            auto const hbox3 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
-            auto const hbox4 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
+            frame->set_halign(Gtk::Align::START);
+            auto const cbox  = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
+            auto const vbox1 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL,0);
+            auto const hbox1 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
+            auto const hbox2 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
+            auto const vbox2 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL,0);
+            auto const hbox3 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
+            auto const hbox4 = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
             vbox2->set_margin_start(5);
             vbox1->set_margin_bottom(3);
             UI::pack_start(*cbox, *vbox1, false, false);
@@ -765,10 +766,10 @@ Gtk::Widget * LPETiling::newWidget()
             cbox->set_margin_start(6);
             cbox->set_margin_end(6);
             cbox->set_margin_bottom(3);
-            cbox->set_halign(Gtk::ALIGN_START);
+            cbox->set_halign(Gtk::Align::START);
             hbox1->set_margin_bottom(3);
             hbox3->set_margin_bottom(3);
-            frame->add(*cbox);
+            frame->set_child(*cbox);
             UI::pack_start(*vbox, *frame, false, false, 1);
             UI::pack_start(*vbox1, *hbox1, false, false);
             UI::pack_start(*vbox1, *hbox2, false, false);
@@ -782,33 +783,30 @@ Gtk::Widget * LPETiling::newWidget()
             continue;
         } else if (param->param_key == "seed"){
             auto const widgrand = dynamic_cast<UI::Widget::RegisteredRandom *>(widg);
-            auto children = UI::get_children(*widgrand);
 
-            // TODO: GTK4: Use Widget.get_first_child().
-            auto const destroy_child = children.at(0);
+            auto const destroy_child = widgrand->get_first_child();
             widgrand->remove(*destroy_child);
             delete destroy_child;
-            children.erase(children.begin());
 
-            auto const first = children.at(0);
+            auto const first = widgrand->get_first_child();
             first->set_visible(false);
-            first->set_no_show_all(true);
 
-            auto const button = dynamic_cast<Gtk::Button *>(children.at(1));
+            auto const button = dynamic_cast<Gtk::Button *>(first->get_next_sibling());
             g_assert(button);
-            auto const box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 6);
-            box->add(*Gtk::manage(sp_get_icon_image(INKSCAPE_ICON("randomize"), Gtk::ICON_SIZE_BUTTON)));
-            box->add(*Gtk::make_managed<Gtk::Label>(_("Randomize")));
-            button->remove();
-            button->add(*box);
+
+            auto const box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 6);
+            box->append(*Gtk::manage(sp_get_icon_image(INKSCAPE_ICON("randomize"), Gtk::IconSize::NORMAL)));
+            box->append(*Gtk::make_managed<Gtk::Label>(_("Randomize")));
+            button->set_child(*box);
+
             button->set_tooltip_markup(_("Randomization seed for random mode for scaling, rotation and gaps"));
-            button->set_relief(Gtk::RELIEF_NORMAL);
-            button->set_valign(Gtk::ALIGN_START);
+            button->set_has_frame(true);
+            button->set_valign(Gtk::Align::START);
 
             widgrand->set_vexpand(false);
             widgrand->set_hexpand(false);
-            widgrand->set_valign(Gtk::ALIGN_START);
-            widgrand->set_halign(Gtk::ALIGN_START);
+            widgrand->set_valign(Gtk::Align::START);
+            widgrand->set_halign(Gtk::Align::START);
             randbutton = Gtk::manage(widgrand);
 
             continue;
@@ -829,8 +827,8 @@ Gtk::Widget * LPETiling::newWidget()
             continue;
         } else if (param->param_key == "offset") {
             UI::pack_start(*movestart, *widg, false, false, 2);
-            auto const container = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
-            Gtk::RadioButton::Group group;
+            auto const container = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
+            Gtk::ToggleButton *group = nullptr;
             auto rows = create_radio_button(group, _("Offset rows"), INKSCAPE_ICON("rows"));
             auto cols = create_radio_button(group, _("Offset columns"), INKSCAPE_ICON("cols"));
             rows->set_tooltip_markup(_("Offset alternate rows"));
@@ -846,8 +844,8 @@ Gtk::Widget * LPETiling::newWidget()
             rows->signal_clicked().connect(sigc::mem_fun (*this, &LPETiling::setOffsetRows));
             UI::pack_start(*moveend, *container, false, false, 2);
         } else if (param->param_key == "scale") {
-            auto const container = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
-            Gtk::RadioButton::Group group;
+            auto const container = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
+            Gtk::ToggleButton *group = nullptr;
             auto cols = create_radio_button(group, _("Interpolate X"), INKSCAPE_ICON("interpolate-scale-x"));
             auto rows = create_radio_button(group, _("Interpolate Y"), INKSCAPE_ICON("interpolate-scale-y"));
             auto both = create_radio_button(group, _("Interpolate both"), INKSCAPE_ICON("interpolate-scale-both"));
@@ -883,8 +881,8 @@ Gtk::Widget * LPETiling::newWidget()
             UI::pack_start(*moveend, *container, false, false, 2);
         } else if (param->param_key == "rotate") {
             UI::pack_start(*movestart, *widg, false, false, 2);
-            auto const container = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
-            Gtk::RadioButton::Group group;
+            auto const container = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
+            Gtk::ToggleButton *group = nullptr;
             auto cols = create_radio_button(group, _("Interpolate X"), INKSCAPE_ICON("interpolate-rotate-x"));
             auto rows = create_radio_button(group, _("Interpolate Y"), INKSCAPE_ICON("interpolate-rotate-y"));
             auto both = create_radio_button(group, _("Interpolate both"), INKSCAPE_ICON("interpolate-rotate-both"));
@@ -918,13 +916,13 @@ Gtk::Widget * LPETiling::newWidget()
             both->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &LPETiling::setRotateInterpolate), true, true));
             UI::pack_start(*moveend, *container, false, false, 2);
          } else if (param->param_key == "gapx") {
-            auto const wrapper = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
-            movestart = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL,0);
-            moveend = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL,0);
+            auto const wrapper = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
+            movestart = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL,0);
+            moveend = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL,0);
             moveend->set_homogeneous();
-            moveend->set_valign(Gtk::ALIGN_FILL);
-            auto const container = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
-            Gtk::RadioButton::Group group;
+            moveend->set_valign(Gtk::Align::FILL);
+            auto const container = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
+            Gtk::ToggleButton *group = nullptr;
             auto normal = create_radio_button(group, _("Normal"), INKSCAPE_ICON("interpolate-scale-none"));
             auto randx = create_radio_button(group, _("Random"), INKSCAPE_ICON("gap-random-x"));
             if (random_gap_x) {
@@ -945,13 +943,13 @@ Gtk::Widget * LPETiling::newWidget()
             UI::pack_start(*wrapper, *movestart, false, false);
             UI::pack_start(*wrapper, *moveend, false, false);
             //bwidg->set_hexpand(true);
-            combo->set_halign(Gtk::ALIGN_END);
-            widg->set_halign(Gtk::ALIGN_START);
+            combo->set_halign(Gtk::Align::END);
+            widg->set_halign(Gtk::Align::START);
             UI::pack_start(*vbox, *wrapper, true, true);
         } else if (param->param_key == "gapy") {
             UI::pack_start(*movestart, *widg, true, true, 2);
-            auto const container = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
-            Gtk::RadioButton::Group group;
+            auto const container = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
+            Gtk::ToggleButton *group = nullptr;
             auto normal = create_radio_button(group, _("Normal"), INKSCAPE_ICON("interpolate-scale-none"));
             auto randy = create_radio_button(group, _("Random"), INKSCAPE_ICON("gap-random-y"));
             if (random_gap_y) {
@@ -965,13 +963,13 @@ Gtk::Widget * LPETiling::newWidget()
             randy->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &LPETiling::setGapYMode), true));
             UI::pack_start(*container, *normal, false, false, 1);
             UI::pack_start(*container, *randy, false, false, 1);
-            widg->set_halign(Gtk::ALIGN_START);
+            widg->set_halign(Gtk::Align::START);
             UI::pack_start(*moveend, *container, false, false, 2);
         } else if (param->param_key == "mirrortrans"){
-            auto const container = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL,0);
-            auto const containerwraper = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
-            containerend = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL,0);
-            containerstart = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL,0);
+            auto const container = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL,0);
+            auto const containerwraper = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
+            containerend = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL,0);
+            containerstart = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL,0);
             UI::pack_start(*container, *containerwraper, false, true);
             UI::pack_start(*containerwraper, *containerstart, false, true);
             UI::pack_start(*containerwraper, *containerend, true, true);
@@ -991,10 +989,10 @@ Gtk::Widget * LPETiling::newWidget()
             UI::pack_start(*containerstart, *widg, true, true, 2);
             widg->set_vexpand(false);
             widg->set_hexpand(false);
-            widg->set_valign(Gtk::ALIGN_START);
-            widg->set_halign(Gtk::ALIGN_START);
+            widg->set_valign(Gtk::Align::START);
+            widg->set_halign(Gtk::Align::START);
         } else if (param->param_key == "num_rows") { 
-            rowcols = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL,0);
+            rowcols = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL,0);
             UI::pack_start(*rowcols, *widg, false, false);
             UI::pack_start(*vbox, *rowcols, false, true, 2);
         } else if (param->param_key == "num_cols") { 
@@ -1015,15 +1013,13 @@ Gtk::Widget * LPETiling::newWidget()
         }
     }
 
-    // must show children 1st, as align_widgets() measures them! TODO: GTK4: n/a
-    vbox->show_all();
     align_widgets(scalars, 5);
 
     return vbox;
 }
 
 void
-LPETiling::generate_buttons(Gtk::Box * const container, Gtk::RadioButton::Group &group, int const pos)
+LPETiling::generate_buttons(Gtk::Box * const container, Gtk::ToggleButton *&group, int const pos)
 {
     for (int i = 0; i < 4; i++) {
         int const position = (pos * 4) + i;
@@ -1092,10 +1088,10 @@ bool
 LPETiling::getActiveMirror(int const index)
 {
     auto const &result = getMirrorMap(index);
-    return result[0] == Glib::ustring::format(mirrorrowsx)[0] && 
-           result[1] == Glib::ustring::format(mirrorrowsy)[0] && 
-           result[2] == Glib::ustring::format(mirrorcolsx)[0] && 
-           result[3] == Glib::ustring::format(mirrorcolsy)[0];
+    return result[0] == Inkscape::ustring::format_classic(mirrorrowsx)[0] &&
+           result[1] == Inkscape::ustring::format_classic(mirrorrowsy)[0] &&
+           result[2] == Inkscape::ustring::format_classic(mirrorcolsx)[0] &&
+           result[3] == Inkscape::ustring::format_classic(mirrorcolsy)[0];
 }
 
 void 

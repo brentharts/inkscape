@@ -13,16 +13,17 @@
 
 #include <gtkmm/adjustment.h>
 #include <gtkmm/box.h>
+#include <gtkmm/label.h>
 
 #include "extension/extension.h"
 #include "preferences.h"
 #include "ui/pack.h"
 #include "ui/widget/spinbutton.h"
 #include "ui/widget/spin-scale.h"
+#include "util-string/ustring-format.h"
 #include "xml/node.h"
 
-namespace Inkscape {
-namespace Extension {
+namespace Inkscape::Extension {
 
 ParamFloat::ParamFloat(Inkscape::XML::Node *xml, Inkscape::Extension::Extension *ext)
     : InxParameter(xml, ext)
@@ -100,7 +101,7 @@ double ParamFloat::set(double in)
 
 std::string ParamFloat::value_to_string() const
 {
-    return Glib::ustring::format(std::setprecision(_precision), std::fixed, _value);
+    return Inkscape::ustring::format_classic(std::setprecision(_precision), std::fixed, _value);
 }
 
 void ParamFloat::string_to_value(const std::string &in)
@@ -154,7 +155,7 @@ Gtk::Widget *ParamFloat::get_widget(sigc::signal<void ()> *changeSignal)
         return nullptr;
     }
 
-    auto const hbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, GUI_PARAM_WIDGETS_SPACING);
+    auto const hbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, GUI_PARAM_WIDGETS_SPACING);
 
     auto pfa = new ParamFloatAdjustment(this, changeSignal);
     Glib::RefPtr<Gtk::Adjustment> fadjust(pfa);
@@ -172,7 +173,7 @@ Gtk::Widget *ParamFloat::get_widget(sigc::signal<void ()> *changeSignal)
     }
     else if (_mode == DEFAULT) {
 
-        auto const label = Gtk::make_managed<Gtk::Label>(_text, Gtk::ALIGN_START);
+        auto const label = Gtk::make_managed<Gtk::Label>(_text, Gtk::Align::START);
         label->set_visible(true);
         UI::pack_start(*hbox, *label, true, true);
 
@@ -185,5 +186,15 @@ Gtk::Widget *ParamFloat::get_widget(sigc::signal<void ()> *changeSignal)
     return hbox;
 }
 
-}  /* namespace Extension */
-}  /* namespace Inkscape */
+} // namespace Inkscape::Extension
+
+/*
+  Local Variables:
+  mode:c++
+  c-file-style:"stroustrup"
+  c-file-offsets:((innamespace . 0)(inline-open . 0)(case-label . +))
+  indent-tabs-mode:nil
+  fill-column:99
+  End:
+*/
+// vim: filetype=cpp:expandtab:shiftwidth=4:tabstop=8:softtabstop=4 :

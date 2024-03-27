@@ -18,10 +18,12 @@
 #include <gtkmm/button.h>
 #include <gtkmm/flowbox.h>
 #include <gtkmm/flowboxchild.h>
+#include <gtkmm/label.h>
 #include <gtkmm/menubutton.h>
 #include <gtkmm/popover.h>
-#include <gtkmm/radiobutton.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/scale.h>
+#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/scrollbar.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/separator.h>
@@ -37,19 +39,18 @@
 
 namespace Inkscape::UI::Widget {
 
-[[nodiscard]] static auto make_menu(Gtk::Widget &parent)
+[[nodiscard]] static auto make_menu()
 {
-    auto const separator = Gtk::make_managed<Gtk::Separator>(Gtk::ORIENTATION_HORIZONTAL);
+    auto const separator = Gtk::make_managed<Gtk::Separator>(Gtk::Orientation::HORIZONTAL);
     separator->set_margin_top   (5);
     separator->set_margin_bottom(5);
 
     auto const config = Gtk::make_managed<PopoverMenuItem>(_("Configure..."), true);
 
-    auto menu = std::make_unique<PopoverMenu>(parent, Gtk::POS_TOP);
-    menu->get_style_context()->add_class("ColorPalette");
+    auto menu = std::make_unique<PopoverMenu>(nullptr, Gtk::PositionType::TOP);
+    menu->add_css_class("ColorPalette");
     menu->append(*separator);
     menu->append(*config);
-    menu->show_all_children();
 
     return std::make_pair(std::move(menu), std::ref(*config));
 }
@@ -69,14 +70,15 @@ ColorPalette::ColorPalette():
     _normal_box.set_filter_func([](Gtk::FlowBoxChild*){ return true; });
 
     auto& box = get_widget<Gtk::Box>(_builder, "palette-box");
-    this->add(box);
+    set_child(box);
 
-    auto [menu, config] = make_menu(*this);
+    auto [menu, config] = make_menu();
     _menu = std::move(menu);
     auto& btn_menu = get_widget<Gtk::MenuButton>(_builder, "btn-menu");
     btn_menu.set_popover(*_menu);
     auto& dlg = get_settings_popover();
-    config.signal_activate().connect([=,&dlg](){
+    config.signal_activate().connect([&, this] {
+        dlg.set_parent(btn_menu);
         dlg.popup();
     });
 
@@ -85,28 +87,28 @@ ColorPalette::ColorPalette():
         _set_tile_size(static_cast<int>(size.get_value()));
         _signal_settings_changed.emit();
         return true;
-    });
+    }, true);
 
     auto& aspect = get_widget<Gtk::Scale>(_builder, "aspect-slider");
     aspect.signal_change_value().connect([=,&aspect](Gtk::ScrollType, double val) {
         _set_aspect(aspect.get_value());
         _signal_settings_changed.emit();
         return true;
-    });
+    }, true);
 
     auto& border = get_widget<Gtk::Scale>(_builder, "border-slider");
     border.signal_change_value().connect([=,&border](Gtk::ScrollType, double val) {
         _set_tile_border(static_cast<int>(border.get_value()));
         _signal_settings_changed.emit();
         return true;
-    });
+    }, true);
 
     auto& rows = get_widget<Gtk::Scale>(_builder, "row-slider");
     rows.signal_change_value().connect([=,&rows](Gtk::ScrollType, double val) {
         _set_rows(static_cast<int>(rows.get_value()));
         _signal_settings_changed.emit();
         return true;
-    });
+    }, true);
 
     auto& sb = get_widget<Gtk::CheckButton>(_builder, "use-sb");
     sb.set_active(_force_scrollbar);
@@ -150,16 +152,12 @@ ColorPalette::ColorPalette():
     set_vexpand_set(true);
     set_up_scrolling();
 
-    signal_size_allocate().connect([=](Gtk::Allocation& a){
+    connectBeforeResize([this] (int w, int h, int) {
+        auto const a = Geom::IntPoint{w, h};
         if (_allocation == a) return;
-
         _allocation = a;
-        _idle_resize = Glib::signal_idle().connect([=](){
-            // make size adjustments outside of the allocation cycle
-            set_up_scrolling();
-            return false; // disconnect
-        });
-    }, false);
+        set_up_scrolling();
+    });
 }
 
 ColorPalette::~ColorPalette() {
@@ -179,10 +177,10 @@ void ColorPalette::set_settings_visibility(bool show) {
 
 void ColorPalette::do_scroll(int dx, int dy) {
     if (auto vert = _scroll.get_vscrollbar()) {
-        vert->set_value(vert->get_value() + dy);
+        vert->get_adjustment()->set_value(vert->get_adjustment()->get_value() + dy);
     }
     if (auto horz = _scroll.get_hscrollbar()) {
-        horz->set_value(horz->get_value() + dx);
+        horz->get_adjustment()->set_value(horz->get_adjustment()->get_value() + dx);
     }
 }
 
@@ -196,15 +194,15 @@ gboolean ColorPalette::scroll_cb(gpointer self) {
     bool fire_again = false;
 
     if (auto vert = ptr->_scroll.get_vscrollbar()) {
-        auto value = vert->get_value();
+        auto value = vert->get_adjustment()->get_value();
         // is this the final adjustment step?
         if (fabs(ptr->_scroll_final - value) < fabs(ptr->_scroll_step)) {
-            vert->set_value(ptr->_scroll_final);
+            vert->get_adjustment()->set_value(ptr->_scroll_final);
             fire_again = false; // cancel timer
         }
         else {
             auto pos = value + ptr->_scroll_step;
-            vert->set_value(pos);
+            vert->get_adjustment()->set_value(pos);
             auto range = get_range(*vert);
             if (pos > range.first && pos < range.second) {
                 // not yet done
@@ -223,7 +221,7 @@ gboolean ColorPalette::scroll_cb(gpointer self) {
 void ColorPalette::scroll(int dx, int dy, double snap, bool smooth) {
     if (auto vert = _scroll.get_vscrollbar()) {
         if (smooth && dy != 0.0) {
-            _scroll_final = vert->get_value() + dy;
+            _scroll_final = vert->get_adjustment()->get_value() + dy;
             if (snap > 0) {
                 // round it to whole 'dy' increments
                 _scroll_final -= fmod(_scroll_final, snap);
@@ -236,17 +234,17 @@ void ColorPalette::scroll(int dx, int dy, double snap, bool smooth) {
                 _scroll_final = range.second;
             }
             _scroll_step = dy / 4.0;
-            if (!_active_timeout && vert->get_value() != _scroll_final) {
+            if (!_active_timeout && vert->get_adjustment()->get_value() != _scroll_final) {
                 // limit refresh to 60 fps, in practice it will be slower
                 _active_timeout = g_timeout_add(1000 / 60, &ColorPalette::scroll_cb, this);
             }
         }
         else {
-            vert->set_value(vert->get_value() + dy);
+            vert->get_adjustment()->set_value(vert->get_adjustment()->get_value() + dy);
         }
     }
     if (auto horz = _scroll.get_hscrollbar()) {
-        horz->set_value(horz->get_value() + dx);
+        horz->get_adjustment()->set_value(horz->get_adjustment()->get_value() + dx);
     }
 }
 
@@ -380,7 +378,7 @@ void ColorPalette::_enable_stretch(bool enable) {
     if (_stretch_tiles == enable) return;
 
     _stretch_tiles = enable;
-    _normal_box.set_halign(enable ? Gtk::ALIGN_FILL : Gtk::ALIGN_START);
+    _normal_box.set_halign(enable ? Gtk::Align::FILL : Gtk::Align::START);
     update_stretch();
     refresh();
 }
@@ -441,15 +439,15 @@ void ColorPalette::set_up_scrolling() {
     }
 
     if (_compact) {
-        box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+        box.set_orientation(Gtk::Orientation::HORIZONTAL);
         btn_menu.set_margin_bottom(0);
         btn_menu.set_margin_end(0);
         // in compact mode scrollbars are hidden; they take up too much space
-        set_valign(Gtk::ALIGN_START);
+        set_valign(Gtk::Align::START);
         set_vexpand(false);
 
-        _scroll.set_valign(Gtk::ALIGN_END);
-        _normal_box.set_valign(Gtk::ALIGN_END);
+        _scroll.set_valign(Gtk::Align::END);
+        _normal_box.set_valign(Gtk::Align::END);
 
         if (_rows == 1 && _force_scrollbar) {
             // horizontal scrolling with single row
@@ -468,12 +466,12 @@ void ColorPalette::set_up_scrolling() {
 
             // ideally we should be able to use POLICY_AUTOMATIC, but on some themes this leads to a scrollbar
             // that obscures color tiles (it overlaps them); thus resorting to manual scrollbar selection
-            _scroll.set_policy(_force_scrollbar ? Gtk::POLICY_ALWAYS : Gtk::POLICY_EXTERNAL, Gtk::POLICY_NEVER);
+            _scroll.set_policy(_force_scrollbar ? Gtk::PolicyType::ALWAYS : Gtk::PolicyType::EXTERNAL, Gtk::PolicyType::NEVER);
         }
         else {
             // vertical scrolling with multiple rows
             // 'external' allows scrollbar to shrink vertically
-            _scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_EXTERNAL);
+            _scroll.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::EXTERNAL);
             _scroll_left.set_visible(false);
             _scroll_right.set_visible(false);
             _scroll_btn.set_visible(true);
@@ -484,21 +482,21 @@ void ColorPalette::set_up_scrolling() {
         _pinned_box.set_margin_end(_border);
     }
     else {
-        box.set_orientation(Gtk::ORIENTATION_VERTICAL);
+        box.set_orientation(Gtk::Orientation::VERTICAL);
         btn_menu.set_margin_bottom(2);
         btn_menu.set_margin_end(2);
         // in normal mode use regular full-size scrollbars
-        set_valign(Gtk::ALIGN_FILL);
+        set_valign(Gtk::Align::FILL);
         set_vexpand(true);
 
         _scroll_left.set_visible(false);
         _scroll_right.set_visible(false);
         _scroll_btn.set_visible(false);
 
-        _normal_box.set_valign(Gtk::ALIGN_START);
-        _scroll.set_valign(Gtk::ALIGN_FILL);
+        _normal_box.set_valign(Gtk::Align::START);
+        _scroll.set_valign(Gtk::Align::FILL);
         // 'always' allocates space for scrollbar
-        _scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_ALWAYS);
+        _scroll.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::ALWAYS);
     }
 
     resize();
@@ -601,10 +599,11 @@ void ColorPalette::set_colors(std::vector<Dialog::ColorItem*> const &swatches)
             _normal_items.emplace_back(item);
         }
         item->signal_modified().connect([=] {
-            item->get_parent()->foreach([=](Gtk::Widget& w) {
+            UI::for_each_child(*item->get_parent(), [=](Gtk::Widget& w) {
                 if (auto label = dynamic_cast<Gtk::Label *>(&w)) {
                     label->set_text(item->get_description());
                 }
+                return UI::ForEachResult::_continue;
             });
         });
     }
@@ -614,14 +613,15 @@ void ColorPalette::set_colors(std::vector<Dialog::ColorItem*> const &swatches)
 
 Gtk::Widget *ColorPalette::_get_widget(Dialog::ColorItem *item) {
     if (auto parent = item->get_parent()) {
-        parent->remove(*item);
+        auto &flowbox = dynamic_cast<Gtk::FlowBox &>(*parent);
+        flowbox.remove(*item);
     }
     if (_show_labels) {
-        item->set_valign(Gtk::ALIGN_CENTER);
+        item->set_valign(Gtk::Align::CENTER);
         auto const box = Gtk::make_managed<Gtk::Box>();
         auto const label = Gtk::make_managed<Gtk::Label>(item->get_description());
-        box->add(*item);
-        box->add(*label);
+        box->append(*item);
+        box->append(*label);
         return box;
     }
     return Gtk::manage(item);
@@ -630,9 +630,7 @@ Gtk::Widget *ColorPalette::_get_widget(Dialog::ColorItem *item) {
 void ColorPalette::rebuild_widgets()
 {
     _normal_box.freeze_notify();
-    _normal_box.freeze_child_notify();
     _pinned_box.freeze_notify();
-    _pinned_box.freeze_child_notify();
 
     UI::remove_all_children(_normal_box);
     UI::remove_all_children(_pinned_box);
@@ -644,40 +642,39 @@ void ColorPalette::rebuild_widgets()
         // in a list mode with labels, do not show fillers:
         if (_show_labels && item->is_filler()) continue;
 
-        _normal_box.add(*_get_widget(item));
+        _normal_box.append(*_get_widget(item));
     }
     for (auto item : _pinned_items) {
-        _pinned_box.add(*_get_widget(item));
+        _pinned_box.append(*_get_widget(item));
     }
-
-    _normal_box.show_all();
-    _pinned_box.show_all();
 
     set_up_scrolling();
 
-    _normal_box.thaw_child_notify();
     _normal_box.thaw_notify();
-    _pinned_box.thaw_child_notify();
     _pinned_box.thaw_notify();
 }
 
 class ColorPaletteMenuItem : public PopoverMenuItem {
 public:
-    ColorPaletteMenuItem(Gtk::RadioButton::Group &group,
+    ColorPaletteMenuItem(Gtk::CheckButton *&group,
                          Glib::ustring const &label,
                          Glib::ustring id,
                          std::vector<rgb_t> colors)
         : Glib::ObjectBase{"ColorPaletteMenuItem"}
         , PopoverMenuItem{}
-        , _radio_button{Gtk::make_managed<Gtk::RadioButton>(group, label)}
+        , _radio_button{Gtk::make_managed<Gtk::CheckButton>(label)}
         , _preview{Gtk::make_managed<ColorPalettePreview>(std::move(colors))}
         , id{std::move(id)}
     {
-        auto const box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 1);
-        box->add(*_radio_button);
-        box->add(*_preview     );
-        add(*box);
-        show_all();
+        if (group) {
+            _radio_button->set_group(*group);
+        } else {
+            group = _radio_button;
+        }
+        auto const box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 1);
+        box->append(*_radio_button);
+        box->append(*_preview);
+        set_child(*box);
     }
 
     void set_active(bool const active) { _radio_button->set_active(active); }
@@ -685,17 +682,8 @@ public:
     Glib::ustring const id;
 
 private:
-    Gtk::RadioButton    *_radio_button = nullptr;
+    Gtk::CheckButton    *_radio_button = nullptr;
     ColorPalettePreview *_preview      = nullptr;
-
-    bool on_draw(Cairo::RefPtr<Cairo::Context> const &cr) final
-    {
-        // Skip height of radiobutton at side, to skip the circular radio indicator.
-        // Doing this in size_allocate_vfunc() did not work, but this one *seems* to
-        _preview->set_margin_start(_radio_button->get_height());
-
-        return PopoverMenuItem::on_draw(cr);
-    }
 };
 
 void ColorPalette::set_palettes(std::vector<palette_t> const &palettes)
@@ -707,7 +695,7 @@ void ColorPalette::set_palettes(std::vector<palette_t> const &palettes)
     _palette_menu_items.clear();
     _palette_menu_items.reserve(palettes.size());
 
-    Gtk::RadioButton::Group group;
+    Gtk::CheckButton *group = nullptr;
     // We prepend in reverse so we add the palettes above the constant separator & Configure items.
     for (auto it = palettes.crbegin(); it != palettes.crend(); ++it) {
         auto& name = it->name;

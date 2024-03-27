@@ -44,11 +44,12 @@
 #include <gtkmm/menubutton.h>
 #include <gtkmm/popover.h>
 #include <gtkmm/scale.h>
-#include <gtkmm/searchentry.h>
+#include <gtkmm/searchentry2.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treemodelfilter.h>
 #include <gtkmm/treemodelsort.h>
 #include <gtkmm/treepath.h>
+#include <gtkmm/treeiter.h>
 #include <pangomm/layout.h>
 #include <2geom/point.h>
 
@@ -76,10 +77,10 @@
 #include "ui/cache/svg_preview_cache.h"
 #include "ui/clipboard.h"
 #include "ui/dialog/messages.h"
+#include "ui/drag-and-drop.h"
 #include "ui/icon-loader.h"
 #include "ui/icon-names.h"
 #include "ui/pack.h"
-#include "ui/widget/scrollprotected.h"
 #include "xml/href-attribute-helper.h"
 
 #ifdef WITH_LIBVISIO
@@ -162,8 +163,8 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
     _builder(create_builder("dialog-symbols.glade")),
     _zoom(            get_widget<Gtk::Scale>      (_builder, "zoom")),
     _symbols_popup(   get_widget<Gtk::MenuButton> (_builder, "symbol-set-popup")),
-    _set_search(      get_widget<Gtk::SearchEntry>(_builder, "set-search")),
-    _search(          get_widget<Gtk::SearchEntry>(_builder, "search")),
+    _set_search(      get_widget<Gtk::SearchEntry2>(_builder, "set-search")),
+    _search(          get_widget<Gtk::SearchEntry2>(_builder, "search")),
     _symbol_sets_view(get_widget<Gtk::IconView>   (_builder, "symbol-sets")),
     _cur_set_name(   get_widget<Gtk::Label>       (_builder, "cur-set")),
     _store(Gtk::ListStore::create(g_columns)),
@@ -180,7 +181,7 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
     _sets._store = _symbol_sets;
     _sets._filtered = Gtk::TreeModelFilter::create(_symbol_sets);
     _sets._filtered->set_visible_func([=, this](const Gtk::TreeModel::const_iterator& it){
-        if (_set_search.get_text_length() == 0) return true;
+        if (_set_search.get_text().length() == 0) return true;
 
         Glib::ustring id = (*it)[g_set_columns.set_id];
         if (id == CURRENT_DOC_ID || id == ALL_SETS_ID) return true;
@@ -190,7 +191,9 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
         return title.lowercase().find(text) != Glib::ustring::npos;
     });
     _sets._sorted = Gtk::TreeModelSort::create(_sets._filtered);
-    _sets._sorted->set_sort_func(g_set_columns.translated_title, [=](const Gtk::TreeModel::iterator& a, const Gtk::TreeModel::iterator& b){
+    _sets._sorted->set_sort_func(g_set_columns.translated_title, [this](const Gtk::TreeModel::const_iterator& a, 
+        const Gtk::TreeModel::const_iterator& b) -> int
+    {
         Glib::ustring ida = (*a)[g_set_columns.set_id];
         Glib::ustring idb = (*b)[g_set_columns.set_id];
         // current doc and all docs up front
@@ -259,7 +262,7 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
 
     icon_view = &get_widget<Gtk::IconView>(_builder, "icon-view");
     _symbols._filtered->set_visible_func([=, this](const Gtk::TreeModel::const_iterator& it){
-        if (_search.get_text_length() == 0) return true;
+        if (_search.get_text().length() == 0) return true;
 
         auto text = _search.get_text().lowercase();
         Glib::ustring title = (*it)[g_columns.symbol_search_title];
@@ -269,7 +272,7 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
     icon_view->set_tooltip_column(g_columns.symbol_title.index());
 
     _search.signal_search_changed().connect([this](){
-        int delay = _search.get_text_length() == 0 ? 0 : 300;
+        int delay = _search.get_text().length() == 0 ? 0 : 300;
         _idle_search = Glib::signal_timeout().connect([this](){
             auto scoped(_update.block());
             _symbols.refilter();
@@ -290,11 +293,19 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
         prefs->setBool(path + "show-names", show);
     });
 
-    std::vector<Gtk::TargetEntry> targets;
-    targets.emplace_back("application/x-inkscape-paste");
-
-    icon_view->enable_model_drag_source(targets, Gdk::BUTTON1_MASK, Gdk::ACTION_COPY);
-    icon_view->signal_drag_data_get().connect(sigc::mem_fun(*this, &SymbolsDialog::iconDragDataGet));
+    auto source = Gtk::DragSource::create();
+    source->set_actions(Gdk::DragAction::COPY);
+    source->signal_prepare().connect([this, source] (double, double) -> Glib::RefPtr<Gdk::ContentProvider> {
+        auto const selected = get_selected_symbol();
+        if (!selected) {
+            return nullptr;
+        }
+        Glib::Value<DnDSymbol> value;
+        value.init(value.value_type());
+        value.set(DnDSymbol{(**selected)[g_columns.symbol_id]});
+        return Gdk::ContentProvider::create(value);
+    }, false);
+    icon_view->add_controller(source);
     icon_view->signal_selection_changed().connect(sigc::mem_fun(*this, &SymbolsDialog::iconChanged));
 
     scroller = &get_widget<Gtk::ScrolledWindow>(_builder, "scroller");
@@ -308,26 +319,26 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
 
     /*************************Overlays******************************/
     // No results
-    overlay_icon = sp_get_icon_image("searching", Gtk::ICON_SIZE_DIALOG);
+    overlay_icon = sp_get_icon_image("searching", Gtk::IconSize::LARGE);
     overlay_icon->set_pixel_size(40);
-    overlay_icon->set_halign(Gtk::ALIGN_CENTER);
-    overlay_icon->set_valign(Gtk::ALIGN_START);
+    overlay_icon->set_halign(Gtk::Align::CENTER);
+    overlay_icon->set_valign(Gtk::Align::START);
     overlay_icon->set_margin_top(90);
-    overlay_icon->set_no_show_all(true);
-
+    overlay_icon->set_visible(false);
+  
     overlay_title = Gtk::make_managed<Gtk::Label>();
-    overlay_title->set_halign(Gtk::ALIGN_CENTER );
-    overlay_title->set_valign(Gtk::ALIGN_START );
-    overlay_title->set_justify(Gtk::JUSTIFY_CENTER);
+    overlay_title->set_halign(Gtk::Align::CENTER );
+    overlay_title->set_valign(Gtk::Align::START );
+    overlay_title->set_justify(Gtk::Justification::CENTER);
     overlay_title->set_margin_top(135);
-    overlay_title->set_no_show_all(true);
-
+    overlay_title->set_visible(false);
+  
     overlay_desc = Gtk::make_managed<Gtk::Label>();
-    overlay_desc->set_halign(Gtk::ALIGN_CENTER);
-    overlay_desc->set_valign(Gtk::ALIGN_START);
+    overlay_desc->set_halign(Gtk::Align::CENTER);
+    overlay_desc->set_valign(Gtk::Align::START);
     overlay_desc->set_margin_top(160);
-    overlay_desc->set_justify(Gtk::JUSTIFY_CENTER);
-    overlay_desc->set_no_show_all(true);
+    overlay_desc->set_justify(Gtk::Justification::CENTER);
+    overlay_desc->set_visible(false);
 
     overlay->add_overlay(*overlay_icon);
     overlay->add_overlay(*overlay_title);
@@ -369,9 +380,11 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
     icon_view->set_columns(-1);
     icon_view->pack_start(_renderer);
     icon_view->add_attribute(_renderer, "surface", g_columns.symbol_image);
-    icon_view->set_cell_data_func(_renderer, [=, this](const Gtk::TreeModel::const_iterator& it){
+    icon_view->set_cell_data_func(_renderer, [=, this](Gtk::TreeModel::const_iterator const &const_it){
         Gdk::Rectangle rect;
-        Gtk::TreeModel::Path path(it);
+        // https://gitlab.gnome.org/GNOME/gtkmm/-/issues/145
+        auto it = const_cast<Gtk::TreeIter<Gtk::TreeConstRow> *>(&const_it);
+        auto const path = icon_view->get_model()->get_path(*it);
         if (icon_view->get_cell_rect(path, rect)) {
             auto height = icon_view->get_allocated_height();
             bool visible = !(rect.get_x() < 0 && rect.get_y() < 0);
@@ -379,7 +392,8 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
             if (visible && (rect.get_y() + rect.get_height() < 0 || rect.get_y() > 0 + height)) {
                 visible = false;
             }
-            get_cell_data_func(&_renderer, *it, visible);
+            Gtk::TreeModel::Row row = *(icon_view->get_model()->get_iter(path.to_string()));
+            get_cell_data_func(&_renderer, row, visible);
         }
     });
 
@@ -387,7 +401,7 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
     fit_symbol = &get_widget<Gtk::CheckButton>(_builder, "zoom-to-fit");
     auto fit = prefs->getBool(path + "zoom-to-fit", true);
     fit_symbol->set_active(fit);
-    fit_symbol->signal_clicked().connect([=, this](){
+    fit_symbol->signal_toggled().connect([=, this](){
         rebuild();
         prefs->setBool(path + "zoom-to-fit", fit_symbol->get_active());
     });
@@ -414,7 +428,8 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
     // restore set selection; check if it is still available first
     _sets._sorted->foreach_path([&](const Gtk::TreeModel::Path& path){
         auto it = _sets.path_to_child_iter(path);
-        if (current == (*it)[g_set_columns.set_id]) {
+        Glib::ustring id = (*it)[g_set_columns.set_id];
+        if (current == id) {
             select_set(path);
             return true;
         }
@@ -532,12 +547,12 @@ void SymbolsDialog::rebuild(Gtk::TreeModel::iterator current) {
             // sizable boost in layout speed at the cost of showing only part of the title...
             if (n > 1000) {
                 t->set_fixed_height_from_font(1);
-                t->property_ellipsize() = Pango::EllipsizeMode::ELLIPSIZE_END;
+                t->property_ellipsize() = Pango::EllipsizeMode::END;
             }
             else {
                 t->set_fixed_height_from_font(-1);
-                t->property_ellipsize() = Pango::EllipsizeMode::ELLIPSIZE_NONE;
-                // t->property_wrap_mode() = Pango::WrapMode::WRAP_CHAR;
+                t->property_ellipsize() = Pango::EllipsizeMode::NONE;
+                // t->property_wrap_mode() = Pango::WrapMode::CHAR;
             }
         }
     }
@@ -567,7 +582,7 @@ void SymbolsDialog::rebuild() {
 }
 
 void SymbolsDialog::showOverlay() {
-    auto search = _search.get_text_length() > 0;
+    auto search = _search.get_text().length() > 0;
     auto visible = visible_symbols();
     auto current = get_current_set_id() == CURRENT_DOC_ID;
 
@@ -657,17 +672,6 @@ void SymbolsDialog::revertSymbol() {
         }
         Inkscape::DocumentUndo::done(document, _("Group from symbol"), "");
     }
-}
-
-void SymbolsDialog::iconDragDataGet(const Glib::RefPtr<Gdk::DragContext>& /*context*/, Gtk::SelectionData& data, guint /*info*/, guint /*time*/)
-{
-    auto selected = get_selected_symbol();
-    if (!selected) {
-        return;
-    }
-    Glib::ustring symbol_id = (**selected)[g_columns.symbol_id];
-    GdkAtom dataAtom = gdk_atom_intern("application/x-inkscape-paste", false);
-    gtk_selection_data_set(data.gobj(), dataAtom, 9, (guchar*)symbol_id.c_str(), symbol_id.length());
 }
 
 void SymbolsDialog::selectionChanged(Inkscape::Selection *selection) {
@@ -894,7 +898,7 @@ SPDocument* read_vss(std::string filename, std::string name) {
   Glib::ustring title = Glib::Markup::escape_text(name);
   // prepare a valid id prefix for symbols libvisio doesn't give us a name for
   Glib::RefPtr<Glib::Regex> regex1 = Glib::Regex::create("[^a-zA-Z0-9_-]");
-  Glib::ustring id = regex1->replace(name, 0, "_", Glib::REGEX_MATCH_PARTIAL);
+  Glib::ustring id = regex1->replace(name.c_str(), 0, "_", Glib::Regex::MatchFlags::PARTIAL);
 
   Glib::ustring tmpSVGOutput;
   tmpSVGOutput += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n";
@@ -914,7 +918,7 @@ SPDocument* read_vss(std::string filename, std::string name) {
     std::stringstream ss;
     if (titles.size() == output.size() && titles[i] != "") {
       // TODO: Do we need to check for duplicated titles?
-      ss << regex1->replace(titles[i].cstr(), 0, "_", Glib::REGEX_MATCH_PARTIAL);
+      ss << regex1->replace(titles[i].cstr(), 0, "_", Glib::Regex::MatchFlags::PARTIAL);
     } else {
       ss << id << "_" << i;
     }
@@ -1095,7 +1099,7 @@ Cairo::RefPtr<Cairo::Surface> add_background(Cairo::RefPtr<Cairo::Surface> image
 {
     int total_size = size + 2 * margin;
 
-    auto surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, total_size * device_scale, total_size * device_scale);
+    auto surface = Cairo::ImageSurface::create(Cairo::Surface::Format::ARGB32, total_size * device_scale, total_size * device_scale);
     cairo_surface_set_device_scale(surface->cobj(), device_scale, device_scale);
     auto ctx = Cairo::Context::create(surface);
 
@@ -1172,7 +1176,7 @@ Cairo::RefPtr<Cairo::Surface> SymbolsDialog::draw_symbol(SPSymbol* symbol) {
     }
     else {
         unsigned psize = SYMBOL_ICON_SIZES[pack_size] * device_scale;
-        image = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, psize, psize);
+        image = Cairo::ImageSurface::create(Cairo::Surface::Format::ARGB32, psize, psize);
         cairo_surface_set_device_scale(image->cobj(), device_scale, device_scale);
     }
 
@@ -1303,7 +1307,8 @@ void SymbolsDialog::get_cell_data_func(Gtk::CellRenderer* cell_renderer, Gtk::Tr
         int device_scale = get_scale_factor();
         unsigned psize = SYMBOL_ICON_SIZES[pack_size] * device_scale;
         if (!g_dummy || g_dummy->get_width() != psize) {
-            g_dummy = g_dummy.cast_static(draw_symbol(nullptr));
+            g_dummy = std::dynamic_pointer_cast<Cairo::ImageSurface>(draw_symbol(nullptr));
+            g_assert(g_dummy);
         }
         surface = g_dummy;
     }

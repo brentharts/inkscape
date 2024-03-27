@@ -31,13 +31,14 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 #include <glibmm/i18n.h>
+#include <gtkmm/adjustment.h>
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/listbox.h>
 #include <gtkmm/menubutton.h>
-#include <gtkmm/radiobutton.h>
+#include <gtkmm/togglebutton.h>
 #include <gtkmm/separator.h>
 
 #include "desktop-style.h"
@@ -68,6 +69,7 @@
 #include "ui/widget/toolbar-menu-button.h"
 #include "ui/widget/unit-tracker.h"
 #include "util/font-collections.h"
+#include "util-string/ustring-format.h"
 #include "widgets/style-utils.h"
 
 using Inkscape::DocumentUndo;
@@ -161,7 +163,7 @@ static Glib::RefPtr<Gtk::ListStore> create_sizes_store_uncached(int unit)
     auto store = Gtk::ListStore::create(columns);
 
     for (int i : sizes) {
-        store->append()->set_value(columns.str, Glib::ustring::format(i / ratios[unit]));
+        store->append()->set_value(columns.str, Inkscape::ustring::format_classic(i / ratios[unit]));
     }
 
     return store;
@@ -186,7 +188,7 @@ static Glib::RefPtr<Gtk::ListStore> create_sizes_store(int unit)
 // TODO: possibly share with font-selector by moving most code to font-lister (passing family name)
 static void sp_text_toolbox_select_cb(Gtk::Entry const &entry)
 {
-    Glib::ustring family = entry.get_text();
+    auto const family = entry.get_buffer()->get_text();
     // std::cout << "text_toolbox_missing_font_cb: selecting: " << family << std::endl;
 
     // Get all items with matching font-family set (not inherited!).
@@ -247,7 +249,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
 {
     _toolbar = &get_widget<Gtk::Box>(_builder, "text-toolbar");
 
-    auto prefs = Inkscape::Preferences::get();
+    auto prefs = Preferences::get();
 
     // Line height unit tracker.
     auto const &unit_table = Util::UnitTable::get();
@@ -313,7 +315,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
         _font_family_item->set_warning_cb(&sp_text_toolbox_select_cb);
 
         _font_family_item->connectChanged([this](){ fontfamily_value_changed(); });
-        get_widget<Gtk::Box>(_builder, "font_list_box").add(*_font_family_item);
+        get_widget<Gtk::Box>(_builder, "font_list_box").append(*_font_family_item);
 
         _font_family_item->focus_on_click(false);
     }
@@ -337,7 +339,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
 
         _font_style_item->connectChanged([this] { fontstyle_value_changed(); });
         _font_style_item->focus_on_click(false);
-        get_widget<Gtk::Box>(_builder, "styles_list_box").add(*_font_style_item);
+        get_widget<Gtk::Box>(_builder, "styles_list_box").append(*_font_style_item);
     }
 
     // Font size
@@ -362,7 +364,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
 
         _font_size_item->connectChanged([this] { fontsize_value_changed(); });
         _font_size_item->focus_on_click(false);
-        get_widget<Gtk::Box>(_builder, "font_size_box").add(*_font_size_item);
+        get_widget<Gtk::Box>(_builder, "font_size_box").append(*_font_size_item);
     }
 
     // Font_ size units
@@ -371,7 +373,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
         _font_size_units_item->signal_changed_after().connect(
             sigc::mem_fun(*this, &TextToolbar::fontsize_unit_changed));
         _font_size_units_item->focus_on_click(false);
-        get_widget<Gtk::Box>(_builder, "unit_menu_box").add(*_font_size_units_item);
+        get_widget<Gtk::Box>(_builder, "unit_menu_box").append(*_font_size_units_item);
     }
 
     // Line height units
@@ -379,7 +381,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
         _line_height_units_item = _tracker->create_tool_item( _("Units"), (""));
         _line_height_units_item->signal_changed_after().connect(sigc::mem_fun(*this, &TextToolbar::lineheight_unit_changed));
         _line_height_units_item->focus_on_click(false);
-        get_widget<Gtk::Box>(_builder, "line_height_unit_box").add(*_line_height_units_item);
+        get_widget<Gtk::Box>(_builder, "line_height_unit_box").append(*_line_height_units_item);
     }
 
     // Superscript button.
@@ -420,7 +422,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
     // toolbar have been fetched. Otherwise, the children to be moved in the
     // popover will get mapped to a different position and it will probably
     // cause segfault.
-    auto children = _toolbar->get_children();
+    auto children = UI::get_children(*_toolbar);
 
     menu_btn1->init(1, "tag1", popover_box1, children);
     addCollapsibleButton(menu_btn1);
@@ -440,7 +442,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
     menu_btn6->init(6, "tag6", popover_box6, children);
     addCollapsibleButton(menu_btn6);
 
-    add(*_toolbar);
+    set_child(*_toolbar);
 
     // Font collections signals.
     auto *font_collections = Inkscape::FontCollections::get();
@@ -467,8 +469,6 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
 
     // We emit a selection change on tool switch to text.
     desktop->connectEventContextChanged(sigc::mem_fun(*this, &TextToolbar::watch_ec));
-
-    show_all();
 }
 
 TextToolbar::~TextToolbar() = default;
@@ -491,13 +491,13 @@ void TextToolbar::setup_derived_spin_button(UI::Widget::SpinButton &btn, Glib::u
     btn.set_defocus_widget(_desktop->getCanvas());
 }
 
-void TextToolbar::configure_mode_buttons(std::vector<Gtk::RadioButton *> &buttons, Gtk::Box &box,
+void TextToolbar::configure_mode_buttons(std::vector<Gtk::ToggleButton *> &buttons, Gtk::Box &box,
                                          Glib::ustring const &name, ModeChangedMemFun const mode_changed_mem_fun)
 {
     int btn_index = 0;
 
     for_each_child(box, [this, mode_changed_mem_fun, &btn_index, &buttons](Gtk::Widget &item) {
-        auto &btn = dynamic_cast<Gtk::RadioButton &>(item);
+        auto &btn = dynamic_cast<Gtk::ToggleButton &>(item);
         buttons.push_back(&btn);
         btn.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, mode_changed_mem_fun), btn_index++));
 
@@ -2184,7 +2184,7 @@ Inkscape::XML::Node *TextToolbar::unindent_node(Inkscape::XML::Node *repr, Inksc
 
 void TextToolbar::display_font_collections()
 {
-    UI::delete_all_children(_font_collections_list);
+    UI::remove_all_children(_font_collections_list);
 
     FontCollections *font_collections = Inkscape::FontCollections::get();
 
@@ -2199,9 +2199,8 @@ void TextToolbar::display_font_collections()
         });
 // g_message("tag: %s", tag.display_name.c_str());
         auto const row = Gtk::make_managed<Gtk::ListBoxRow>();
-        row->set_can_focus(false);
-        row->add(*btn);
-        row->show_all();
+        row->set_focusable(false);
+        row->set_child(*btn);
         _font_collections_list.append(*row);
     }
 
@@ -2209,9 +2208,8 @@ void TextToolbar::display_font_collections()
     auto const sep = Gtk::make_managed<Gtk::Separator>();
     sep->set_margin_bottom(2);
     auto const sep_row = Gtk::make_managed<Gtk::ListBoxRow>();
-    sep_row->set_can_focus(false);
-    sep_row->add(*sep);
-    sep_row->show_all();
+    sep_row->set_focusable(false);
+    sep_row->set_child(*sep);
     _font_collections_list.append(*sep_row);
 
     // Insert user collections.
@@ -2225,9 +2223,8 @@ void TextToolbar::display_font_collections()
         });
 // g_message("tag: %s", tag.display_name.c_str());
         auto const row = Gtk::make_managed<Gtk::ListBoxRow>();
-        row->set_can_focus(false);
-        row->add(*btn);
-        row->show_all();
+        row->set_focusable(false);
+        row->set_child(*btn);
         _font_collections_list.append(*row);
     }
 }

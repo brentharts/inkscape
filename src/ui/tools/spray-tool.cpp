@@ -1031,8 +1031,7 @@ static bool sp_spray_recursive(SPDesktop *desktop,
 
                     // Union
                     // only works if no groups in selection
-                    ObjectSet object_set_tmp = *desktop->getSelection();
-                    object_set_tmp.clear();
+                    auto object_set_tmp = ObjectSet{desktop};
                     object_set_tmp.add(item_copied);
                     object_set_tmp.removeLPESRecursive(true);
                     if (is<SPUse>(object_set_tmp.objects().front())) {
@@ -1047,7 +1046,6 @@ static bool sp_spray_recursive(SPDesktop *desktop,
                         auto repr = item->getRepr();
                         repr->setAttribute("inkscape:spray-origin", spray_origin);
                     }
-                    object_set_tmp.clear();
                     Inkscape::GC::release(copy);
                     did = true;
                 }
@@ -1211,7 +1209,9 @@ bool SprayTool::root_handler(CanvasEvent const &event)
                     is_dilating = true;
                     has_dilated = false;
                     is_drawing = false;
-                    object_set = *_desktop->getSelection();
+                    object_set.clear();
+                    auto const selected_objects = _desktop->getSelection()->objects();
+                    object_set.add(selected_objects.begin(), selected_objects.end());
                     if (mode == SPRAY_MODE_SINGLE_PATH) {
                         single_path_output = nullptr;
                     }
@@ -1234,7 +1234,9 @@ bool SprayTool::root_handler(CanvasEvent const &event)
             if (!has_dilated && items.empty() && mode != SPRAY_MODE_SINGLE_PATH) {
                 _desktop->getSelection()->restoreBackup();
                 update_cursor(true);
-                object_set = *_desktop->getSelection();
+                object_set.clear();
+                auto const selected_objects = _desktop->getSelection()->objects();
+                object_set.add(selected_objects.begin(), selected_objects.end());
                 if (!object_set.isEmpty()) {
                     _desktop->getSelection()->clear();
                     items.clear();
@@ -1316,7 +1318,6 @@ bool SprayTool::root_handler(CanvasEvent const &event)
         },
         [&] (ScrollEvent const &event) {
             if (event.modifiers == GDK_BUTTON1_MASK) {
-                std::cout << "SCROLL" << std::endl;
                 /* Spray with the scroll */
                 double temp ;
                 temp = population;
@@ -1324,26 +1325,16 @@ bool SprayTool::root_handler(CanvasEvent const &event)
                 _desktop->setToolboxAdjustmentValue("spray-population", population * 100);
                 Geom::Point const scroll_dt = _desktop->point();;
 
-                switch (event.direction) {
-                    case GDK_SCROLL_DOWN:
-                    case GDK_SCROLL_UP:
-                    case GDK_SCROLL_SMOOTH:
-                        if (Inkscape::have_viable_layer(_desktop, defaultMessageContext())) {
-                            last_push = _desktop->dt2doc(scroll_dt);
-                            sp_spray_extinput(this, event.extinput);
-                            if(is_dilating) {
-                                sp_spray_dilate(this, _desktop->dt2doc(scroll_dt), Geom::Point(0, 0), false);
-                            }
-                            population = temp;
-                            _desktop->setToolboxAdjustmentValue("spray-population", population * 100);
+                if (event.delta.y() != 0 && Inkscape::have_viable_layer(_desktop, defaultMessageContext())) {
+                    last_push = _desktop->dt2doc(scroll_dt);
+                    sp_spray_extinput(this, event.extinput);
+                    if(is_dilating) {
+                        sp_spray_dilate(this, _desktop->dt2doc(scroll_dt), Geom::Point(0, 0), false);
+                    }
+                    population = temp;
+                    _desktop->setToolboxAdjustmentValue("spray-population", population * 100);
 
-                            ret = true;
-                        }
-                        break;
-                    case GDK_SCROLL_RIGHT:
-                       {} break;
-                    case GDK_SCROLL_LEFT:
-                       {} break;
+                    ret = true;
                 }
             }
         },
@@ -1507,6 +1498,7 @@ bool SprayTool::root_handler(CanvasEvent const &event)
                     message_context->clear();
                     break;
                 default:
+                    // Why is this called here?
                     sp_spray_switch_mode (this, prefs->getInt("/tools/spray/mode"), mod_shift(event));
                     break;
             }

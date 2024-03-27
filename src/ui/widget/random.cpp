@@ -63,11 +63,9 @@ void Random::setStartSeed(long newseed)
 
 void Random::addReseedButton()
 {
-    auto const pIcon = Gtk::manage(sp_get_icon_image("randomize", Gtk::ICON_SIZE_BUTTON));
     auto const pButton = Gtk::make_managed<Gtk::Button>();
-    pButton->set_relief(Gtk::RELIEF_NONE);
-    pIcon->set_visible(true);
-    pButton->add(*pIcon);
+    pButton->set_has_frame(false);
+    pButton->set_image_from_icon_name("randomize", Gtk::IconSize::NORMAL);
     pButton->set_visible(true);
     pButton->signal_clicked().connect(sigc::mem_fun(*this, &Random::onReseedButtonClick));
     pButton->set_tooltip_text(_("Reseed the random number generator; this creates a different sequence of random numbers."));

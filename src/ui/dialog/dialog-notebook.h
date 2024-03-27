@@ -26,13 +26,18 @@
 #include "helper/auto-connection.h"
 #include "ui/widget/popover-menu.h"
 
+namespace Glib {
+class ValueBase;
+} // namespace Glib
+
 namespace Gdk {
-class DragContext;
+class ContentProvider;
+class Drag;
 } // namespace Gdk
 
 namespace Gtk {
 class EventController;
-class GestureMultiPress;
+class GestureClick;
 } // namespace Gtk
 
 namespace Inkscape::UI {
@@ -104,13 +109,14 @@ private:
     void remove_highlight_header();
 
     // Signal handlers - notebook
-    void on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context) override;
-    void on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context) override;
+    void on_drag_begin(Glib::RefPtr<Gdk::Drag> const &drag);
+    void on_drag_end  (Glib::RefPtr<Gdk::Drag> const &drag, bool delete_data);
     void on_page_added(Gtk::Widget *page, int page_num);
     void on_page_removed(Gtk::Widget *page, int page_num);
-    void on_size_allocate_scroll(Gtk::Allocation &allocation);
-    void on_size_allocate_notebook(Gtk::Allocation &allocation);
-    Gtk::EventSequenceState on_tab_click_event(Gtk::GestureMultiPress const &click,
+    void size_allocate_vfunc(int width, int height, int baseline) final;
+    void on_size_allocate_scroll  (int width);
+    void on_size_allocate_notebook(int width);
+    Gtk::EventSequenceState on_tab_click_event(Gtk::GestureClick const &click,
                                                int n_press, double x, double y,
                                                Gtk::Widget *page);
     void on_close_button_click_event(Gtk::Widget *page);
@@ -123,8 +129,7 @@ private:
     void toggle_tab_labels_callback(bool show);
     void add_tab_connections(Gtk::Widget *page);
     void remove_tab_connections(Gtk::Widget *page);
-    void get_preferred_height_for_width_vfunc(int width, int& minimum_height, int& natural_height) const override;
-    void get_preferred_height_vfunc(int& minimum_height, int& natural_height) const override;
+    void measure_vfunc(Gtk::Orientation orientation, int for_size, int &min, int &nat, int &min_baseline, int &nat_baseline) const override;
     int _natural_height = 0;
 };
 

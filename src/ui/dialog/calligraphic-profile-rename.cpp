@@ -40,8 +40,8 @@ CalligraphicProfileRename::CalligraphicProfileRename() :
     _profile_name_entry.set_activates_default(true);
 
     _profile_name_label.set_label(_("Profile name:"));
-    _profile_name_label.set_halign(Gtk::ALIGN_END);
-    _profile_name_label.set_valign(Gtk::ALIGN_CENTER);
+    _profile_name_label.set_halign(Gtk::Align::END);
+    _profile_name_label.set_valign(Gtk::Align::CENTER);
 
     _layout_table->attach(_profile_name_label, 0, 0, 1, 1);
 
@@ -52,16 +52,16 @@ CalligraphicProfileRename::CalligraphicProfileRename() :
     // Buttons
     _close_button.set_use_underline();
     _close_button.set_label(_("_Cancel"));
-    _close_button.set_can_default();
+    _close_button.set_receives_default();
 
     _delete_button.set_use_underline(true);
     _delete_button.set_label(_("_Delete"));
-    _delete_button.set_can_default();
+    _delete_button.set_receives_default();
     _delete_button.set_visible(false);
 
     _apply_button.set_use_underline(true);
     _apply_button.set_label(_("_Save"));
-    _apply_button.set_can_default();
+    _apply_button.set_receives_default();
 
     _close_button.signal_clicked()
             .connect(sigc::mem_fun(*this, &CalligraphicProfileRename::_close));
@@ -70,16 +70,11 @@ CalligraphicProfileRename::CalligraphicProfileRename() :
     _apply_button.signal_clicked()
             .connect(sigc::mem_fun(*this, &CalligraphicProfileRename::_apply));
 
-    signal_delete_event().connect( sigc::bind_return(
-        sigc::hide(sigc::mem_fun(*this, &CalligraphicProfileRename::_close)), true ) );
+    add_action_widget(_close_button, Gtk::ResponseType::CLOSE);
+    add_action_widget(_delete_button, Gtk::ResponseType::DELETE_EVENT);
+    add_action_widget(_apply_button, Gtk::ResponseType::APPLY);
 
-    add_action_widget(_close_button, Gtk::RESPONSE_CLOSE);
-    add_action_widget(_delete_button, Gtk::RESPONSE_DELETE_EVENT);
-    add_action_widget(_apply_button, Gtk::RESPONSE_APPLY);
-
-    _apply_button.grab_default();
-
-    show_all_children();
+    set_default_widget(_apply_button);
 }
 
 void CalligraphicProfileRename::_apply()

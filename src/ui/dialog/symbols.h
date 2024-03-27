@@ -51,7 +51,7 @@ class MenuButton;
 class Overlay;
 class Scale;
 class ScrolledWindow;
-class SearchEntry;
+class SearchEntry2;
 } // namespace Gtk
 
 class SPDesktop;
@@ -102,7 +102,6 @@ private:
     Glib::ustring getSymbolId(const std::optional<Gtk::TreeModel::iterator>& it) const;
     Geom::Point getSymbolDimensions(const std::optional<Gtk::TreeModel::iterator>& it) const;
     SPDocument* get_symbol_document(const std::optional<Gtk::TreeModel::iterator>& it) const;
-    void iconDragDataGet(const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time);
     void onDragStart();
     void addSymbol(SPSymbol* symbol, Glib::ustring doc_title, SPDocument* document);
     SPDocument* symbolsPreviewDoc();
@@ -141,10 +140,10 @@ private:
     double previous_width;
     Glib::RefPtr<Gtk::ListStore> _store;
     Gtk::MenuButton& _symbols_popup;
-    Gtk::SearchEntry& _set_search;
+    Gtk::SearchEntry2& _set_search;
     Gtk::IconView& _symbol_sets_view;
     Gtk::Label& _cur_set_name;
-    Gtk::SearchEntry& _search;
+    Gtk::SearchEntry2& _search;
     Gtk::IconView* icon_view;
     Gtk::Button* add_symbol;
     Gtk::Button* remove_symbol;

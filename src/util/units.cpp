@@ -27,6 +27,7 @@
 #include "util/units.h"
 #include "path-prefix.h"
 #include "streq.h"
+#include "util-string/ustring-format.h"
 
 using Inkscape::Util::UNIT_TYPE_DIMENSIONLESS;
 using Inkscape::Util::UNIT_TYPE_LINEAR;
@@ -397,10 +398,10 @@ bool UnitTable::load(std::string const &filename) {
         ctx.parse(unitfile);
         ctx.end_parse();
     } catch (Glib::FileError const &e) {
-        g_warning("Units file %s is missing: %s\n", filename.c_str(), e.what().c_str());
+        g_warning("Units file %s is missing: %s\n", filename.c_str(), e.what());
         return false;
     } catch (Glib::MarkupError const &e) {
-        g_warning("Problem loading units file '%s': %s\n", filename.c_str(), e.what().c_str());
+        g_warning("Problem loading units file '%s': %s\n", filename.c_str(), e.what());
         return false;
     }
     return true;
@@ -512,7 +513,7 @@ double Quantity::value(char const *u) const
 }
 
 Glib::ustring Quantity::string(Unit const *u) const {
-    return Glib::ustring::format(std::fixed, std::setprecision(2), value(u)) + " " + u->abbr;
+    return Inkscape::ustring::format_classic(std::fixed, std::setprecision(2), value(u)) + " " + u->abbr;
 }
 Glib::ustring Quantity::string(Glib::ustring const &u) const {
     return string(UnitTable::get().getUnit(u.c_str()));

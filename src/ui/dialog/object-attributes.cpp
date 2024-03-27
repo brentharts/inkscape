@@ -30,9 +30,8 @@
 #include <gtkmm/enums.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
-#include <gtkmm/object.h>
-#include <gtkmm/radiobutton.h>
 #include <gtkmm/spinbutton.h>
+#include <gtkmm/togglebutton.h>
 #include <gtkmm/treemodel.h>
 #include <2geom/rect.h>
 
@@ -73,8 +72,8 @@
 namespace Inkscape::UI::Dialog {
 
 struct SPAttrDesc {
-    gchar const *label;
-    gchar const *attribute;
+    char const *label;
+    char const *attribute;
 };
 
 static const SPAttrDesc anchor_desc[] = {
@@ -102,19 +101,17 @@ ObjectAttributes::ObjectAttributes()
     _builder(create_builder("object-attributes.glade")),
     _main_panel(get_widget<Gtk::Box>(_builder, "main-panel")),
     _obj_title(get_widget<Gtk::Label>(_builder, "main-obj-name")),
-    _style_swatch(nullptr, _("Item's fill, stroke and opacity"), Gtk::ORIENTATION_HORIZONTAL),
+    _style_swatch(nullptr, _("Item's fill, stroke and opacity"), Gtk::Orientation::HORIZONTAL),
     _obj_properties(*Gtk::make_managed<ObjectProperties>())
 {
     auto& main = get_widget<Gtk::Box>(_builder, "main-widget");
-    main.add(_obj_properties);
+    main.append(_obj_properties);
 
     _obj_title.set_text("");
     _style_swatch.set_hexpand(false);
-    _style_swatch.set_valign(Gtk::ALIGN_CENTER);
-    UI::pack_end(get_widget<Gtk::Box>(_builder, "main-header"), _style_swatch, false, true);
-    auto& box = get_widget<Gtk::Box>(_builder, "main-header");
-    box.child_property_pack_type(_style_swatch).set_value(Gtk::PACK_END);
-    add(main);
+    _style_swatch.set_valign(Gtk::Align::CENTER);
+    get_widget<Gtk::Box>(_builder, "main-header").append(_style_swatch);
+    append(main);
     create_panels();
     _style_swatch.set_visible(false);
 }
@@ -400,9 +397,8 @@ public:
         if (changed) {
             _table->change_object(anchor);
 
-            if (auto grid = dynamic_cast<Gtk::Grid*>(get_first_child(*_table))) {
+            if (auto grid = dynamic_cast<Gtk::Grid*>(_table->get_first_child())) {
                 auto button = Gtk::make_managed<Gtk::Button>();
-                button->show();
                 button->set_margin_start(4);
                 button->set_image_from_icon_name("object-pick");
                 button->signal_clicked().connect([=](){
@@ -537,9 +533,9 @@ public:
         _ry(get_derived_widget<Inkscape::UI::Widget::SpinButton>(builder, "el-ry")),
         _start(get_derived_widget<Inkscape::UI::Widget::SpinButton>(builder, "el-start")),
         _end(get_derived_widget<Inkscape::UI::Widget::SpinButton>(builder, "el-end")),
-        _slice(get_widget<Gtk::RadioButton>(builder, "el-slice")),
-        _arc(get_widget<Gtk::RadioButton>(builder, "el-arc")),
-        _chord(get_widget<Gtk::RadioButton>(builder, "el-chord")),
+        _slice(get_widget<Gtk::ToggleButton>(builder, "el-slice")),
+        _arc(get_widget<Gtk::ToggleButton>(builder, "el-arc")),
+        _chord(get_widget<Gtk::ToggleButton>(builder, "el-chord")),
         _whole(get_widget<Gtk::Button>(builder, "el-whole"))
     {
         _title = _("Ellipse");
@@ -648,11 +644,11 @@ private:
     Inkscape::UI::Widget::SpinButton& _ry;
     Inkscape::UI::Widget::SpinButton& _start;
     Inkscape::UI::Widget::SpinButton& _end;
-    Gtk::RadioButton& _slice;
-    Gtk::RadioButton& _arc;
-    Gtk::RadioButton& _chord;
+    Gtk::ToggleButton &_slice;
+    Gtk::ToggleButton &_arc;
+    Gtk::ToggleButton &_chord;
     Gtk::Button& _whole;
-    Gtk::RadioButton* _type[3];
+    Gtk::ToggleButton *_type[3];
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -665,8 +661,8 @@ public:
         _ratio(get_derived_widget<Inkscape::UI::Widget::SpinButton>(builder, "star-ratio")),
         _rounded(get_derived_widget<Inkscape::UI::Widget::SpinButton>(builder, "star-rounded")),
         _rand(get_derived_widget<Inkscape::UI::Widget::SpinButton>(builder, "star-rand")),
-        _poly(get_widget<Gtk::RadioButton>(builder, "star-poly")),
-        _star(get_widget<Gtk::RadioButton>(builder, "star-star")),
+        _poly(get_widget<Gtk::ToggleButton>(builder, "star-poly")),
+        _star(get_widget<Gtk::ToggleButton>(builder, "star-star")),
         _align(get_widget<Gtk::Button>(builder, "star-align")),
         _clear_rnd(get_widget<Gtk::Button>(builder, "star-rnd-clear")),
         _clear_round(get_widget<Gtk::Button>(builder, "star-round-clear")),
@@ -767,8 +763,8 @@ private:
     Gtk::Button& _clear_round;
     Gtk::Button& _clear_ratio;
     Gtk::Button& _align;
-    Gtk::RadioButton& _poly;
-    Gtk::RadioButton& _star;
+    Gtk::ToggleButton &_poly;
+    Gtk::ToggleButton &_star;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -817,21 +813,19 @@ public:
 
         auto theme = Inkscape::Preferences::get()->getString("/theme/syntax-color-theme", "-none-");
         _svgd_edit->setStyle(theme);
-        _data.set_wrap_mode(Gtk::WrapMode::WRAP_WORD);
+        _data.set_wrap_mode(Gtk::WrapMode::WORD);
 
         Controller::add_key<&PathPanel::on_key_pressed>(_data, *this);
         auto& wnd = get_widget<Gtk::ScrolledWindow>(builder, "path-data-wnd");
-        wnd.remove();
-        wnd.add(_data);
-        wnd.show_all();
+        wnd.set_child(_data);
 
         auto set_precision = [=](int const n) {
             _precision = n;
             auto& menu_button = get_widget<Gtk::MenuButton>(builder, "path-menu");
             auto const menu = menu_button.get_menu_model();
-            auto const section = menu->get_item_link(0, Gio::MENU_LINK_SECTION);
+            auto const section = menu->get_item_link(0, Gio::MenuModel::Link::SECTION);
             auto const type = Glib::VariantType{g_variant_type_new("s")};
-            auto const variant = section->get_item_attribute(n, Gio::MENU_ATTRIBUTE_LABEL, type);
+            auto const variant = section->get_item_attribute(n, Gio::MenuModel::Attribute::LABEL, type);
             auto const label = ' ' + static_cast<Glib::Variant<Glib::ustring> const &>(variant).get();
             get_widget<Gtk::Label>(builder, "path-precision").set_label(label);
             Inkscape::Preferences::get()->setInt(pref_path + "precision", n);
@@ -942,7 +936,7 @@ void ObjectAttributes::create_panels() {
     _panels[typeid(SPPath).name()] = std::make_unique<PathPanel>(_builder);
 }
 
-} // namespace
+} // namespace Inkscape::UI::Dialog
 
 /*
   Local Variables:

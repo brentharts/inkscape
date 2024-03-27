@@ -74,14 +74,14 @@ Gtk::Widget *WidgetBox::get_widget(sigc::signal<void ()> *changeSignal)
 
     Gtk::Orientation orientation;
     if (_orientation == HORIZONTAL) {
-        orientation = Gtk::ORIENTATION_HORIZONTAL;
+        orientation = Gtk::Orientation::HORIZONTAL;
     } else {
-        orientation = Gtk::ORIENTATION_VERTICAL;
+        orientation = Gtk::Orientation::VERTICAL;
     }
 
     auto const box = Gtk::make_managed<Gtk::Box>(orientation);
-    // box->property_margin().set_value(GUI_BOX_MARGIN); // leave at zero for now, so box is purely for layouting (not grouping)
-                                                         // revisit this later, possibly implementing GtkFrame or similar
+    // box->set_margin(GUI_BOX_MARGIN); // leave at zero for now, so box is purely for layouting (not grouping)
+                                        // revisit this later, possibly implementing GtkFrame or similar
     box->set_spacing(GUI_BOX_SPACING);
 
     if (_orientation == HORIZONTAL) {
@@ -96,7 +96,7 @@ Gtk::Widget *WidgetBox::get_widget(sigc::signal<void ()> *changeSignal)
 
         if (child_widget) {
             int indent = child->get_indent();
-            auto const expand = orientation == Gtk::ORIENTATION_HORIZONTAL
+            auto const expand = orientation == Gtk::Orientation::HORIZONTAL
                     ? child_widget->get_hexpand() : child_widget->get_vexpand();
             child_widget->set_margin_start(indent * GUI_INDENTATION);
             UI::pack_start(*box, *child_widget, expand, true);

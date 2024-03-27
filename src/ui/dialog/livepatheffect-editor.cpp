@@ -18,21 +18,23 @@
 #include <map>
 #include <tuple>
 #include <glibmm/i18n.h>
+#include <glibmm/quark.h>
+#include <glibmm/value.h>
 #include <giomm/simpleactiongroup.h>
 #include <gtkmm/box.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
-#include <gtkmm/eventbox.h>
+#include <gtkmm/dragsource.h>
+#include <gtkmm/droptarget.h>
 #include <gtkmm/expander.h>
 #include <gtkmm/image.h>
 #include <gtkmm/label.h>
 #include <gtkmm/listbox.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/menubutton.h>
-#include <gtkmm/searchentry.h>
-#include <gtkmm/selectiondata.h>
+#include <gtkmm/searchentry2.h>
 #include <gtkmm/spinbutton.h>
-#include <gtkmm/stylecontext.h>
+#include <gtkmm/widgetpaintable.h>
 #include <sigc++/adaptors/bind.h>
 #include <sigc++/adaptors/hide.h>
 #include <sigc++/functors/mem_fun.h>
@@ -58,7 +60,6 @@
 #include "ui/controller.h"
 #include "ui/icon-loader.h"
 #include "ui/icon-names.h"
-#include "ui/manage.h"
 #include "ui/menuize.h"
 #include "ui/pack.h"
 #include "ui/tools/node-tool.h"
@@ -115,6 +116,7 @@ bool sp_set_experimental(bool &_experimental)
     }
     return false;
 }
+
 /*####################
  * Callback functions
  */
@@ -156,14 +158,14 @@ LivePathEffectEditor::LivePathEffectEditor()
 {
     _LPEContainer.signal_map().connect(sigc::mem_fun(*this, &LivePathEffectEditor::map_handler) );
 
-    Controller::add_click(_LPEContainer, [this](Gtk::GestureMultiPress const &, int, double, double)
+    Controller::add_click(_LPEContainer, [this](Gtk::GestureClick const &, int, double, double)
     {
         dnd = false; // hack to fix DnD freezing expander
-        return Gtk::EVENT_SEQUENCE_NONE;
+        return Gtk::EventSequenceState::NONE;
     });
 
     setMenu();
-    add(_LPEContainer);
+    append(_LPEContainer);
     selection_info();
 
     _lpes_popup.get_entry().set_placeholder_text(_("Add Live Path Effect"));
@@ -172,8 +174,10 @@ LivePathEffectEditor::LivePathEffectEditor()
     _lpes_popup.on_button_press().connect([this]{ setMenu(); });
     _lpes_popup.on_focus().connect([this]{ setMenu(); return true; });
     UI::pack_start(_LPEAddContainer, _lpes_popup);
+
     sp_set_experimental(_experimental);
-    show_all();
+
+    set_visible(true);
 }
 
 LivePathEffectEditor::~LivePathEffectEditor()
@@ -230,7 +234,7 @@ void align(Gtk::Widget *top, int const spinbutton_width_chars)
         if (auto label = dynamic_cast<Gtk::Label*>(child)) {
             label->set_xalign(0); // left-align
             int label_width = 0, dummy = 0;
-            label->get_preferred_width(dummy, label_width);
+            label->measure(Gtk::Orientation::HORIZONTAL, -1, dummy, label_width, dummy, dummy);
             if (label_width > max_width) {
                 max_width = label_width;
             }
@@ -250,7 +254,7 @@ void align(Gtk::Widget *top, int const spinbutton_width_chars)
             // selected spinbutton size by each LPE default 7
             spin->set_width_chars(spinbutton_width_chars);
             int dummy = 0;
-            spin->get_preferred_width(dummy, button_width);
+            spin->measure(Gtk::Orientation::HORIZONTAL, -1, dummy, button_width, dummy, dummy);
         } 
     });
     // set min size for comboboxes, if any
@@ -274,7 +278,7 @@ set_visible_icon(Gtk::Button &button, bool const visible)
 {
     auto &image = dynamic_cast<Gtk::Image &>(*button.get_child());
     auto const icon_name = visible ? "object-visible-symbolic" : "object-hidden-symbolic";
-    image.set_from_icon_name(icon_name, Gtk::ICON_SIZE_SMALL_TOOLBAR);
+    image.set_from_icon_name(icon_name);
 }
 
 void
@@ -333,7 +337,7 @@ void LivePathEffectEditor::add_lpes(Inkscape::UI::Widget::CompletionPopup &popup
     auto &menu = popup.get_menu();
     menu.delete_all();
 
-    ColumnMenuBuilder<LivePathEffect::LPECategory> builder{menu, 3, Gtk::ICON_SIZE_LARGE_TOOLBAR};
+    ColumnMenuBuilder<LivePathEffect::LPECategory> builder{menu, 3, Gtk::IconSize::LARGE};
     auto const tie = [](LPEMetadata const &lpe){ return std::tie(lpe.category, lpe.label); };
     std::sort(lpes.begin(), lpes.end(), [=](auto &l, auto &r){ return tie(l) < tie(r); });
     for (auto const &lpe : lpes) {
@@ -342,10 +346,9 @@ void LivePathEffectEditor::add_lpes(Inkscape::UI::Widget::CompletionPopup &popup
         int const id = static_cast<int>(type);
         auto const menuitem = builder.add_item(lpe.label, lpe.category, lpe.tooltip, lpe.icon_name,
                                                lpe.sensitive, true, [=, this]{ onAdd(type); });
-        menuitem->property_has_tooltip() = true;
         menuitem->signal_query_tooltip().connect([=](int x, int y, bool kbd, const Glib::RefPtr<Gtk::Tooltip>& tooltipw){
-            return sp_query_custom_tooltip(x, y, kbd, tooltipw, id, lpe.tooltip, lpe.icon_name);
-        });
+            return sp_query_custom_tooltip(this, x, y, kbd, tooltipw, id, lpe.tooltip, lpe.icon_name);
+        }, false); // before
         if (builder.new_section()) {
             builder.set_section(get_category_name(lpe.category));
         }
@@ -367,7 +370,7 @@ void LivePathEffectEditor::add_lpes(Inkscape::UI::Widget::CompletionPopup &popup
     }
 
     if (symbolic) {
-        menu.get_style_context()->add_class("symbolic");
+        menu.add_css_class("symbolic");
     }
 }
 
@@ -492,11 +495,11 @@ LivePathEffectEditor::selection_info()
             UI::pack_start(*boxc, *lbl, false, false);
             type->set_margin_start(4);
             type->set_margin_end(4);
-            selectbutton->add(*boxc);
+            selectbutton->set_child(*boxc);
             selectbutton->signal_clicked().connect([=](){
                 selection->toCurves();
             });
-            _LPEParentBox.add(*selectbutton);
+            _LPEParentBox.append(*selectbutton);
 
             Glib::ustring labeltext2 = _("Clone");
             auto const selectbutton2 = Gtk::make_managed<Gtk::Button>();
@@ -507,13 +510,11 @@ LivePathEffectEditor::selection_info()
             UI::pack_start(*boxc2, *lbl2, false, false);
             type2->set_margin_start(4);
             type2->set_margin_end(4);
-            selectbutton2->add(*boxc2);
+            selectbutton2->set_child(*boxc2);
             selectbutton2->signal_clicked().connect([=](){
-                selection->clone();;
+                selection->clone();
             });
-            _LPEParentBox.add(*selectbutton2);
-
-            _LPEParentBox.show_all();
+            _LPEParentBox.append(*selectbutton2);
         } else if (!is<SPLPEItem>(selected) && !is<SPUse>(selected)) {
             _LPESelectionInfo.set_text(_("Select a path, shape, clone or group"));
             _LPESelectionInfo.set_visible(true);
@@ -522,12 +523,12 @@ LivePathEffectEditor::selection_info()
                 Glib::ustring labeltext = selected->label() ? selected->label() : selected->getId();
                 auto const boxc = Gtk::make_managed<Gtk::Box>();
                 auto const lbl = Gtk::make_managed<Gtk::Label>(labeltext);
-                lbl->set_ellipsize(Pango::ELLIPSIZE_END);
+                lbl->set_ellipsize(Pango::EllipsizeMode::END);
                 auto const type = get_shape_image(selected->typeName(), selected->highlight_color());
                 UI::pack_start(*boxc, *type, false, false);
                 UI::pack_start(*boxc, *lbl, false, false);
-                _LPECurrentItem.add(*boxc);
-                UI::get_children(_LPECurrentItem).at(0)->set_halign(Gtk::ALIGN_CENTER);
+                _LPECurrentItem.append(*boxc);
+                UI::get_children(_LPECurrentItem).at(0)->set_halign(Gtk::Align::CENTER);
                 _LPESelectionInfo.set_visible(false);
             }
             std::vector<std::pair <Glib::ustring, Glib::ustring> > newrootsatellites;
@@ -551,18 +552,17 @@ LivePathEffectEditor::selection_info()
                         UI::pack_start(*boxc, *lbl, false, false);
                         type->set_margin_start(4);
                         type->set_margin_end(4);
-                        selectbutton->add(*boxc);
+                        selectbutton->set_child(*boxc);
                         selectbutton->signal_clicked().connect([=](){
                             selection->set(lpeitem);
                         });
-                        _LPEParentBox.add(*selectbutton);
+                        _LPEParentBox.append(*selectbutton);
                     }
                 }
             }
             selected->rootsatellites = newrootsatellites;
-            _LPEParentBox.show_all();
-            _LPEParentBox.drag_dest_unset();
-            _LPECurrentItem.show_all();
+            _LPEParentBox.set_visible(true);
+            _LPECurrentItem.set_visible(true);
         }
     } else if (!selection || selection->isEmpty()) {
         _LPESelectionInfo.set_text(_("Select a path, shape, clone or group"));
@@ -619,8 +619,6 @@ LivePathEffectEditor::move_list(int const origin, int const dest)
     }
 }
 
-static const std::vector<Gtk::TargetEntry> entries = {Gtk::TargetEntry("GTK_LIST_BOX_ROW", Gtk::TARGET_SAME_APP, 0 )};
-
 void
 LivePathEffectEditor::showParams(LPEExpander const &expanderdata, bool const changed)
 {
@@ -634,15 +632,14 @@ LivePathEffectEditor::showParams(LPEExpander const &expanderdata, bool const cha
             }
 
             if (effectwidget) {
-                effectwidget->get_parent()->remove(*effectwidget);
-                delete effectwidget;
+                current_lperef.first->unset_child(); // deletes effectwidget
                 effectwidget = nullptr;
             }
 
             effectwidget = lpe->newWidget();
 
             if (UI::get_children(*effectwidget).empty()) {
-                auto const label = Gtk::make_managed<Gtk::Label>("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+                auto const label = Gtk::make_managed<Gtk::Label>("", Gtk::Align::START, Gtk::Align::CENTER);
                 label->set_markup(_("<small>Without parameters</small>"));
                 label->set_margin_top(5);
                 label->set_margin_bottom(5);
@@ -650,8 +647,7 @@ LivePathEffectEditor::showParams(LPEExpander const &expanderdata, bool const cha
                 effectwidget = label;
             }
 
-            expanderdata.first->add(*effectwidget);
-            expanderdata.first->show_all_children();
+            expanderdata.first->set_child(*effectwidget);
             align(effectwidget, lpe->spinbutton_width_chars);
 
             // fixme: add resizing of dialog
@@ -665,33 +661,24 @@ LivePathEffectEditor::showParams(LPEExpander const &expanderdata, bool const cha
     }
 }
 
-static void
-set_cursor(Gtk::Widget &widget, Glib::ustring const &name)
-{
-    auto const window = widget.get_window();
-    auto const display = window->get_display();
-    auto const cursor = Gdk::Cursor::create(display, name);
-    window->set_cursor(cursor);
-}
-
 bool
 LivePathEffectEditor::on_drop(Gtk::Widget &widget,
-                              Gtk::SelectionData const &selection_data, int pos_target)
+                              Glib::ValueBase const &value, int pos_target)
 {
     g_assert(dnd);
 
-    int const pos_source = std::atoi(reinterpret_cast<char const *>(selection_data.get_data()));
+    int const pos_source = static_cast<Glib::Value<int> const &>(value).get();
 
     if (pos_target == pos_source) {
         return false;
     }
 
     if (pos_source > pos_target) {
-        if (widget.get_style_context()->has_class("after")) {
+        if (widget.has_css_class("after")) {
             pos_target ++;
         }
     } else if (pos_source < pos_target) {
-        if (widget.get_style_context()->has_class("before")) {
+        if (widget.has_css_class("before")) {
             pos_target --;
         }
     }
@@ -714,12 +701,12 @@ LivePathEffectEditor::on_drop(Gtk::Widget &widget,
 
 static void update_before_after_classes(Gtk::Widget &widget, bool const before)
 {
-    if (auto const style_context = widget.get_style_context(); before) {
-        style_context->remove_class("after" );
-        style_context->add_class   ("before");
+    if (before) {
+        widget.remove_css_class("after" );
+        widget.add_css_class   ("before");
     } else {
-        style_context->remove_class("before");
-        style_context->add_class   ("after" );
+        widget.remove_css_class("before");
+        widget.add_css_class   ("after" );
     }
 }
 
@@ -738,27 +725,24 @@ LivePathEffectEditor::effect_list_reload(SPLPEItem *lpeitem)
     int const total = static_cast<int>(effectlist.size());
 
     if (total > 1) {
-        _LPECurrentItem.drag_dest_unset();
-        _lpes_popup.drag_dest_unset();
-        _lpes_popup.get_entry().drag_dest_unset();
-        _LPEAddContainer.drag_dest_unset();
-        _LPEContainer.drag_dest_set(entries, Gtk::DEST_DEFAULT_ALL, Gdk::ACTION_MOVE);
+        auto &target = Controller::add_drop_target(_LPEContainer,
+            { .actions = Gdk::DragAction::MOVE, .types = {G_TYPE_INT}});
 
-        _LPEContainer.signal_drag_data_received().connect([this](const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time)
+        target.signal_drop().connect([this](Glib::ValueBase const &value, double /*x*/, double const y)
         {
-            if (!dnd) return;
+            if (!dnd) return false;
 
             int pos_target = y < 90 ? 0 : UI::get_children(LPEListBox).size() - 1;
-            bool const accepted = on_drop(_LPEContainer, selection_data, pos_target);
-            gtk_drag_finish(context->gobj(), accepted, accepted, time);
+            bool const accepted = on_drop(_LPEContainer, value, pos_target);
             dnd = false;
-        });
+            return accepted;
+        }, false); // before
 
-        _LPEContainer.signal_drag_motion().connect([this](const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time)
+        target.signal_motion().connect([this](double /*x*/, double const y)
         {
             update_before_after_classes(_LPEContainer, y < 90);
-            return true;
-        }, true);
+            return Gdk::DragAction::MOVE;
+        }, false); // before
     }
 
     Gtk::Button *LPEDrag = nullptr;
@@ -779,13 +763,10 @@ LivePathEffectEditor::effect_list_reload(SPLPEItem *lpeitem)
         auto LPEExpanderBox   = &get_widget<Gtk::Box>     (builder, "LPEExpanderBox");
         auto LPEEffect        = &get_widget<Gtk::Box>     (builder, "LPEEffect");
         auto LPEExpander      = &get_widget<Gtk::Expander>(builder, "LPEExpander");
-        auto LPEActionButtons = &get_widget<Gtk::Box>     (builder, "LPEActionButtons");
-        auto LPEOpenExpander  = &get_widget<Gtk::EventBox>(builder, "LPEOpenExpander");
+        auto LPEOpenExpander  = &get_widget<Gtk::Box>     (builder, "LPEOpenExpander");
         auto LPEErase         = &get_widget<Gtk::Button>  (builder, "LPEErase");
         LPEDrag               = &get_widget<Gtk::Button>  (builder, "LPEDrag");
 
-        LPEExpander->drag_dest_unset();
-        LPEActionButtons->drag_dest_unset();
         LPEDrag->set_tooltip_text(_("Drag to change position in path effects stack"));
         if (current) {
             LPEExpanderCurrent = LPEExpander;
@@ -797,23 +778,19 @@ LivePathEffectEditor::effect_list_reload(SPLPEItem *lpeitem)
         auto const &icon = converter.get_icon(effectype);
         auto const tooltip = get_tooltip(effectype, untranslated_label);
 
-        LPEIconImage->set_from_icon_name(icon, Gtk::IconSize(Gtk::ICON_SIZE_SMALL_TOOLBAR));
+        LPEIconImage->set_from_icon_name(icon);
 
         bool const visible = g_strcmp0(lpe->getRepr()->attribute("is_visible"), "true") == 0;
         set_visible_icon(*LPEHide, visible);
 
         _LPEExpanders.emplace_back(LPEExpander, lperef);
-        LPEListBox.add(*LPEEffect);
-        
-        LPEDrag->set_name(Glib::ustring::compose("drag_%1", counter));
-        if (total > 1) {
-            LPEDrag->drag_source_set(entries, Gdk::BUTTON1_MASK, Gdk::ACTION_MOVE);
-        }
+        LPEListBox.append(*LPEEffect);
 
-        LPEExpanderBox->property_has_tooltip() = true;
+        LPEDrag->set_name(Glib::ustring::compose("drag_%1", counter));
+
         LPEExpanderBox->signal_query_tooltip().connect([=](int x, int y, bool kbd, const Glib::RefPtr<Gtk::Tooltip>& tooltipw){
-            return sp_query_custom_tooltip(x, y, kbd, tooltipw, id, tooltip, icon);
-        });
+            return sp_query_custom_tooltip(this, x, y, kbd, tooltipw, id, tooltip, icon);
+        }, false); // before
 
         // Add actions used by LPEEffectMenuButton
         add_item_actions(lperef, untranslated_label, *LPEEffect,
@@ -822,69 +799,51 @@ LivePathEffectEditor::effect_list_reload(SPLPEItem *lpeitem)
         UI::menuize_popover(*get_widget<Gtk::MenuButton>(builder, "LPEEffectMenuButton").get_popover());
 
         if (total > 1) {
-            LPEDrag->signal_drag_begin().connect([=, this](Glib::RefPtr<Gdk::DragContext> const &context){
-                cairo_surface_t *surface;
-                cairo_t *cr;
-                int x, y;
-                double sx = 1;
-                double sy = 1;
+            auto &source = Controller::add_drag_source(*LPEDrag, {.actions = Gdk::DragAction::MOVE});
+
+            // TODO: GTK4: Figure out how to replicate previous 50% transparency. CSS or Paintable?
+            LPEEffect->add_css_class("drag-icon");
+            source.set_icon(Gtk::WidgetPaintable::create(*LPEEffect), 0, 0);
+            LPEEffect->remove_css_class("drag-icon");
+
+            source.signal_drag_begin().connect([this](Glib::RefPtr<Gdk::Drag> const &){
                 dnd = true;
-                Gtk::Allocation alloc = LPEEffect->get_allocation ();
-                auto device_scale = get_scale_factor();
-                surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, alloc.get_width() * device_scale, alloc.get_height() * device_scale);
-                cairo_surface_set_device_scale(surface, device_scale, device_scale);
-
-                cr = cairo_create (surface);
-                cairo_push_group(cr);
-                LPEEffect->get_style_context()->add_class("drag-icon");
-                gtk_widget_draw (LPEEffect->Gtk::Widget::gobj(), cr);
-                LPEEffect->get_style_context()->remove_class("drag-icon");
-                cairo_pop_group_to_source(cr);
-                cairo_paint_with_alpha(cr, 0.5);
-
-                LPEDrag->translate_coordinates(*LPEEffect, dndx, dndy, x, y);
-
-#ifndef __APPLE__
-                cairo_surface_get_device_scale (surface, &sx, &sy);
-#endif
-
-                cairo_surface_set_device_offset (surface, -x * sx, -y * sy);
-                gtk_drag_set_icon_surface (context->gobj(), surface);
-
-                cairo_destroy (cr);
-                cairo_surface_destroy (surface);
             });
 
             auto row = dynamic_cast<Gtk::ListBoxRow *>(LPEEffect->get_parent());
             g_assert(row);
 
-            LPEDrag->signal_drag_data_get().connect([=](const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time)
+            source.signal_prepare().connect([=](double, double)
             {
-                selection_data.set("GTK_LIST_BOX_ROW", Glib::ustring::format(row->get_index()));
-            });
+                Glib::Value<int> value;
+                value.init(G_TYPE_INT);
+                value.set(row->get_index());
+                return Gdk::ContentProvider::create(value);
+            }, false); // before
 
-            LPEDrag->signal_drag_end().connect([this](const Glib::RefPtr<Gdk::DragContext>& context)
+            source.signal_drag_end().connect([this](Glib::RefPtr<Gdk::Drag> const &, bool)
             {
                 dnd = false;
             });
 
-            row->signal_drag_data_received().connect([=, this](const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time)
+            auto &target = Controller::add_drop_target(*row,
+                { .actions = Gdk::DragAction::MOVE, .types = {G_TYPE_INT}});
+
+            target.signal_drop().connect([=, this](Glib::ValueBase const &value, double, double)
             {
-                if (!dnd) return;
+                if (!dnd) return false;
 
-                bool const accepted = on_drop(*row, selection_data, row->get_index());
-                gtk_drag_finish(context->gobj(), accepted, accepted, time);
+                bool const accepted = on_drop(*row, value, row->get_index());
                 dnd = false;
-            });
+                return accepted;
+            }, false); // before
 
-            row->drag_dest_set(entries, Gtk::DEST_DEFAULT_ALL, Gdk::ACTION_MOVE);
-
-            row->signal_drag_motion().connect([=](const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time)
+            target.signal_motion().connect([=](double /*x*/, double const y)
             {
                 int const half = row->get_allocated_height() / 2;
                 update_before_after_classes(*row, y < half);
-                return true;
-            }, true);
+                return Gdk::DragAction::MOVE;
+            }, false); // before
         }
 
         LPEEffect->set_name("LPEEffectItem");
@@ -894,29 +853,24 @@ LivePathEffectEditor::effect_list_reload(SPLPEItem *lpeitem)
         LPEExpander->property_expanded().signal_changed().connect(sigc::bind(
                 sigc::mem_fun(*this, &LivePathEffectEditor::expanded_notify), LPEExpander));
 
-        Controller::add_click(*LPEOpenExpander, [=, this](Gtk::GestureMultiPress const &, int, double, double)
+        Controller::add_click(*LPEOpenExpander, [=, this](Gtk::GestureClick const &, int, double, double)
         {
            LPEExpander->set_expanded(!LPEExpander->get_expanded());
-           return Gtk::EVENT_SEQUENCE_CLAIMED;
+           return Gtk::EventSequenceState::CLAIMED;
         }, {}, Controller::Button::left);
 
         LPEHide->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &LivePathEffectEditor::toggleVisible), lpe, LPEHide));
         LPEErase->signal_clicked().connect([=, this](){ removeEffect(LPEExpander);});
 
-        Controller::add_click(*LPEDrag, [this](Gtk::GestureMultiPress const &, int, double const x, double const y)
+        Controller::add_click(*LPEDrag, [this](Gtk::GestureClick const &, int, double const x, double const y)
         {
             dndx = x;
             dndy = y;
-            return Gtk::EVENT_SEQUENCE_NONE;
+            return Gtk::EventSequenceState::NONE;
         });
 
         if (total > 1) {
-            // TODO: gtkmm4: Gtk::Widget.set_cursor() should suffice.
-            auto const motion = gtk_event_controller_motion_new(LPEDrag->Gtk::Widget::gobj());
-            gtk_event_controller_set_propagation_phase(motion, GTK_PHASE_TARGET);
-            g_signal_connect_swapped(motion, "enter", G_CALLBACK(+[](Gtk::Widget * const widget){ set_cursor(*widget, "grab"   ); }), LPEDrag);
-            g_signal_connect_swapped(motion, "leave", G_CALLBACK(+[](Gtk::Widget * const widget){ set_cursor(*widget, "default"); }), LPEDrag);
-            manage(Glib::wrap(motion), *LPEDrag);
+            LPEDrag->set_cursor("grab");
         }
     }
 
@@ -928,13 +882,12 @@ LivePathEffectEditor::effect_list_reload(SPLPEItem *lpeitem)
     if (LPEExpanderCurrent) {
         _LPESelectionInfo.set_visible(false);
         LPEExpanderCurrent->set_expanded(true);
-        if (auto const current_window = dynamic_cast<Gtk::Window *>(LPEExpanderCurrent->get_toplevel())) {
+        if (auto const current_window = dynamic_cast<Gtk::Window *>(LPEExpanderCurrent->get_root())) {
             current_window->set_focus(*LPEExpanderCurrent);
         }
     }
 
     selection_info();
-    LPEListBox.show_all_children();
     ensure_size();
 }
 
@@ -1012,7 +965,8 @@ LivePathEffectEditor::removeEffect(Gtk::Expander * expander) {
             _current_use = nullptr;
         } 
     }
-    if (current_lpeitem) {
+    // Check if current_lpeitem detached during clean up
+    if (current_lpeitem && current_lpeitem->getParentGroup() != nullptr) {
         if (reload) {
             current_lpeitem->setCurrentPathEffect(current_lperef_tmp.second);
         }
@@ -1093,6 +1047,7 @@ SPLPEItem * LivePathEffectEditor::clonetolpeitem()
  */
 
 static constexpr auto item_action_group_name = "lpe-item";
+static const auto item_action_group_quark = Glib::Quark{item_action_group_name};
 
 template <typename Method, typename ...Args>
 static void add_action(Glib::RefPtr<Gio::SimpleActionGroup> const &group,
@@ -1128,16 +1083,19 @@ void LivePathEffectEditor::add_item_actions(PathEffectSharedPtr const &lperef,
                untranslated_label , std::ref(item)   , true                                  );
     add_action(group, "unset-fav" ,  has_fav , *this , &Self::do_item_action_favorite, lperef,
                untranslated_label , std::ref(item)   , false                                 );
+    item.set_data(item_action_group_quark, &*group);
     item.insert_action_group(item_action_group_name, std::move(group));
 }
 
 void LivePathEffectEditor::enable_item_action(Gtk::Widget &item,
                                               Glib::ustring const &action_name, bool const enabled)
 {
-    auto const group = item.get_action_group(item_action_group_name);
-    auto const simple_group = Glib::RefPtr<Gio::SimpleActionGroup>::cast_dynamic(group);
-    auto const action = simple_group->lookup_action(action_name);
-    auto const simple_action = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(action);
+    auto const data = item.get_data(item_action_group_quark);
+    g_assert(data);
+    auto &simple_group = *static_cast<Gio::SimpleActionGroup *>(data);
+    auto const action = simple_group.lookup_action(action_name);
+    auto const simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+    g_assert(simple_action);
     simple_action->set_enabled(enabled);
 }
 

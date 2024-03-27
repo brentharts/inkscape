@@ -20,18 +20,15 @@
 namespace Inkscape::UI::Widget {
 
 void AnchorSelector::setupButton(const Glib::ustring& icon, Gtk::ToggleButton& button) {
-    auto const buttonIcon = Gtk::manage(sp_get_icon_image(icon, Gtk::ICON_SIZE_SMALL_TOOLBAR));
-    buttonIcon->set_visible(true);
-
-    button.set_relief(Gtk::RELIEF_NONE);
-    button.set_visible(true);
-    button.add(*buttonIcon);
-    button.set_can_focus(false);
+    auto const buttonIcon = Gtk::manage(sp_get_icon_image(icon, Gtk::IconSize::NORMAL));
+    button.set_has_frame(false);
+    button.set_child(*buttonIcon);
+    button.set_focusable(false);
 }
 
 AnchorSelector::AnchorSelector()
 {
-    set_halign(Gtk::ALIGN_CENTER);
+    set_halign(Gtk::Align::CENTER);
     setupButton(INKSCAPE_ICON("boundingbox_top_left"), _buttons[0]);
     setupButton(INKSCAPE_ICON("boundingbox_top"), _buttons[1]);
     setupButton(INKSCAPE_ICON("boundingbox_top_right"), _buttons[2]);
@@ -54,7 +51,7 @@ AnchorSelector::AnchorSelector()
     _selection = 4;
     _buttons[_selection].set_active();
 
-    add(_container);
+    append(_container);
 }
 
 sigc::connection AnchorSelector::connectSelectionChanged(sigc::slot<void ()> slot)
