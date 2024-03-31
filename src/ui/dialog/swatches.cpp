@@ -56,7 +56,7 @@
 #include "ui/widget/color-palette.h"
 #include "ui/widget/color-palette-preview.h"
 #include "ui/widget/popover-menu-item.h"
-#include "util/variant-visitor.h"
+
 #include "widgets/paintdef.h"
 
 namespace Inkscape::UI::Dialog {
@@ -204,15 +204,15 @@ SwatchesPanel::~SwatchesPanel()
 
 void SwatchesPanel::documentReplaced()
 {
-    if (getDocument()) {
-        if (_current_palette_id == auto_id) {
-            track_gradients();
-        }
+    const bool is_auto_palette = _current_palette_id == auto_id;
+    if (getDocument() && is_auto_palette) {
+        track_gradients();
     } else {
         untrack_gradients();
     }
 
-    if (_current_palette_id == auto_id) {
+    if (is_auto_palette) {
+        rebuild_isswatch();
         rebuild();
     }
 }
@@ -265,33 +265,31 @@ void SwatchesPanel::track_gradients()
     auto doc = getDocument();
 
     // Subscribe to the addition and removal of gradients.
-    conn_gradients.disconnect();
     conn_gradients = doc->connectResourcesChanged("gradient", [this] {
-        gradients_changed = true;
-        queue_resize();
+        assert(_current_palette_id == auto_id);
+        // We are in the "Auto" palette, and a gradient was added or removed.
+        // The list of widgets has therefore changed, and must be completely rebuilt.
+        // We must also rebuild the tracking information for each gradient's isSwatch() status.
+        rebuild_isswatch();
+        rebuild();
     });
 
     // Subscribe to child modifications of the defs section. We will use this to monitor
     // each gradient for whether its isSwatch() status changes.
-    conn_defs.disconnect();
-    conn_defs = doc->getDefs()->connectModified([this] (SPObject*, unsigned flags) {
-        if (flags & SP_OBJECT_CHILD_MODIFIED_FLAG) {
-            defs_changed = true;
-            queue_resize();
+    conn_defs = doc->getDefs()->connectModified([this](SPObject *, unsigned flags) {
+        assert(_current_palette_id == auto_id);
+        if (flags & SP_OBJECT_CHILD_MODIFIED_FLAG && update_isswatch()) {
+            // We are in the "Auto" palette, and a gradient's isSwatch() status was possibly modified.
+            // Check if it has; if so, then the list of widgets has changed, and must be rebuilt.
+            rebuild();
         }
     });
-
-    gradients_changed = false;
-    defs_changed = false;
-    rebuild_isswatch();
 }
 
 void SwatchesPanel::untrack_gradients()
 {
     conn_gradients.disconnect();
     conn_defs.disconnect();
-    gradients_changed = false;
-    defs_changed = false;
 }
 
 /*
@@ -300,49 +298,14 @@ void SwatchesPanel::untrack_gradients()
 
 void SwatchesPanel::selectionChanged(Selection*)
 {
-    selection_changed = true;
-    queue_resize();
+    update_fillstroke_indicators();
 }
 
 void SwatchesPanel::selectionModified(Selection*, guint flags)
 {
     if (flags & SP_OBJECT_STYLE_MODIFIED_FLAG) {
-        selection_changed = true;
-        queue_resize();
-    }
-}
-
-// Document updates are handled asynchronously by setting a flag and queuing a resize. This results in
-// the following function being run at the last possible moment before the widget will be repainted.
-// This ensures that multiple document updates only result in a single UI update.
-void SwatchesPanel::size_allocate_vfunc(int const width, int const height, int const baseline)
-{
-    if (gradients_changed) {
-        assert(_current_palette_id == auto_id);
-        // We are in the "Auto" palette, and a gradient was added or removed.
-        // The list of widgets has therefore changed, and must be completely rebuilt.
-        // We must also rebuild the tracking information for each gradient's isSwatch() status.
-        rebuild_isswatch();
-        rebuild();
-    } else if (defs_changed) {
-        assert(_current_palette_id == auto_id);
-        // We are in the "Auto" palette, and a gradient's isSwatch() status was possibly modified.
-        // Check if it has; if so, then the list of widgets has changed, and must be rebuilt.
-        if (update_isswatch()) {
-            rebuild();
-        }
-    }
-
-    if (selection_changed) {
         update_fillstroke_indicators();
     }
-
-    selection_changed = false;
-    gradients_changed = false;
-    defs_changed = false;
-
-    // Necessary to perform *after* the above widget modifications, so GTK can process the new layout.
-    DialogBase::size_allocate_vfunc(width, height, baseline);
 }
 
 void SwatchesPanel::rebuild_isswatch()
@@ -352,7 +315,7 @@ void SwatchesPanel::rebuild_isswatch()
     isswatch.resize(grads.size());
 
     for (int i = 0; i < grads.size(); i++) {
-        isswatch[i] = static_cast<SPGradient*>(grads[i])->isSwatch();
+        isswatch[i] = static_cast<SPGradient *>(grads[i])->isSwatch();
     }
 }
 
@@ -375,82 +338,59 @@ bool SwatchesPanel::update_isswatch()
     return modified;
 }
 
-static auto spcolor_to_rgb(SPColor const &color)
+static Widget::ColorPalette::Rgb8bit spcolor_to_rgb(SPColor const &color)
 {
     float rgbf[3];
     color.get_rgb_floatv(rgbf);
 
-    std::array<unsigned, 3> rgb;
+    Widget::ColorPalette::Rgb8bit rgb;
     for (int i = 0; i < 3; i++) {
         rgb[i] = SP_COLOR_F_TO_U(rgbf[i]);
-    };
-
+    }
     return rgb;
+}
+
+static std::optional<Widget::ColorPalette::ColorKey> compute_key_for_current_color(SPDesktop *desktop, bool is_fill) {
+    SPDocument *document = desktop->getDocument();
+    SPStyle style{document};
+
+    switch (sp_desktop_query_style(desktop, &style, is_fill ? QUERY_STYLE_PROPERTY_FILL : QUERY_STYLE_PROPERTY_STROKE))
+    {
+        case QUERY_STYLE_SINGLE:
+        case QUERY_STYLE_MULTIPLE_AVERAGED:
+        case QUERY_STYLE_MULTIPLE_SAME:
+            break;
+        default:
+            return {};
+    }
+
+    auto attr = style.getFillOrStroke(is_fill);
+    if (!attr->set) {
+        return {};
+    }
+
+    if (attr->isNone()) {
+        return Widget::ColorPalette::NoColor{};
+    } else if (attr->isColor()) {
+        return spcolor_to_rgb(attr->value.color);
+    } else if (attr->isPaintserver()) {
+        if (auto grad = cast<SPGradient>(is_fill ? style.getFillPaintServer() : style.getStrokePaintServer())) {
+            if (grad->isSwatch()) {
+                return grad;
+            } else if (grad->ref) {
+                if (auto ref = grad->ref->getObject(); ref && ref->isSwatch()) {
+                    return ref;
+                }
+            }
+        }
+    }
+    return {};
 }
 
 void SwatchesPanel::update_fillstroke_indicators()
 {
-    auto doc = getDocument();
-    auto style = SPStyle(doc);
-
-    // Get the current fill or stroke as a ColorKey.
-    auto current_color = [&, this] (bool fill) -> std::optional<ColorKey> {
-        switch (sp_desktop_query_style(getDesktop(), &style, fill ? QUERY_STYLE_PROPERTY_FILL : QUERY_STYLE_PROPERTY_STROKE))
-        {
-            case QUERY_STYLE_SINGLE:
-            case QUERY_STYLE_MULTIPLE_AVERAGED:
-            case QUERY_STYLE_MULTIPLE_SAME:
-                break;
-            default:
-                return {};
-        }
-
-        auto attr = style.getFillOrStroke(fill);
-        if (!attr->set) {
-            return {};
-        }
-
-        if (attr->isNone()) {
-            return std::monostate{};
-        } else if (attr->isColor()) {
-            return spcolor_to_rgb(attr->value.color);
-        } else if (attr->isPaintserver()) {
-            if (auto grad = cast<SPGradient>(fill ? style.getFillPaintServer() : style.getStrokePaintServer())) {
-                if (grad->isSwatch()) {
-                    return grad;
-                } else if (grad->ref) {
-                    if (auto ref = grad->ref->getObject(); ref && ref->isSwatch()) {
-                        return ref;
-                    }
-                }
-            }
-        }
-
-        return {};
-    };
-
-    for (auto w : current_fill) w->set_fill(false);
-    for (auto w : current_stroke) w->set_stroke(false);
-
-    current_fill.clear();
-    current_stroke.clear();
-
-    if (auto fill = current_color(true)) {
-        auto range = widgetmap.equal_range(*fill);
-        for (auto it = range.first; it != range.second; ++it) {
-            current_fill.emplace_back(it->second);
-        }
-    }
-
-    if (auto stroke = current_color(false)) {
-        auto range = widgetmap.equal_range(*stroke);
-        for (auto it = range.first; it != range.second; ++it) {
-            current_stroke.emplace_back(it->second);
-        }
-    }
-
-    for (auto w : current_fill) w->set_fill(true);
-    for (auto w : current_stroke) w->set_stroke(true);
+    _palette->set_fill_stroke_indicators(compute_key_for_current_color(getDesktop(), true),
+                                         compute_key_for_current_color(getDesktop(), false));
 }
 
 [[nodiscard]] static auto to_palette_t(PaletteFileData const &p)
@@ -459,14 +399,13 @@ void SwatchesPanel::update_fillstroke_indicators()
     palette.name = p.name;
     palette.id = p.id;
     for (auto const &c : p.colors) {
-        std::visit(VariantVisitor {
-            [&](const PaletteFileData::Color& c) {
-                auto [r, g, b] = c.rgb;
-                palette.colors.push_back({r / 255.0, g / 255.0, b / 255.0});
-            },
-            [](const PaletteFileData::SpacerItem&) {},
-            [](const PaletteFileData::GroupStart&) {}
-        }, c);
+        std::visit(VariantVisitor{[&](const PaletteFileData::Color &c) {
+                                      auto [r, g, b] = c.rgb;
+                                      palette.colors.push_back({r / 255.0, g / 255.0, b / 255.0});
+                                  },
+                                  [](const PaletteFileData::SpacerItem &) {},
+                                  [](const PaletteFileData::GroupStart &) {}},
+                   c);
     }
     return palette;
 }
@@ -474,26 +413,30 @@ void SwatchesPanel::update_fillstroke_indicators()
 /**
  * Process the list of available palettes and update the list in the _palette widget.
  */
-void SwatchesPanel::update_palettes(bool compact) {
+void SwatchesPanel::update_palettes(bool compact)
+{
     std::vector<UI::Widget::palette_t> palettes;
     palettes.reserve(1 + GlobalPalettes::get().palettes().size());
 
     // The first palette in the list is always the "Auto" palette. Although this
     // will contain colors when selected, the preview we show for it is empty.
-    palettes.push_back({_("Document swatches"), auto_id, {}});
+    palettes.emplace_back(UI::Widget::palette_t{
+        .name = _("Document swatches"),
+        .id = auto_id
+    });
 
     // The remaining palettes in the list are the global palettes.
-    for (auto &p : GlobalPalettes::get().palettes()) {
-        auto palette = to_palette_t(p);
-        palettes.emplace_back(std::move(palette));
+    for (auto const &palette : GlobalPalettes::get().palettes()) {
+        palettes.emplace_back(to_palette_t(palette));
     }
 
     _palette->set_palettes(palettes);
 
     _palettes.clear();
     _palettes.reserve(palettes.size());
-    std::transform(palettes.begin(), palettes.end(), std::back_inserter(_palettes),
-                   [](auto &&palette){ return PaletteLoaded{std::move(palette), false}; });
+    std::transform(palettes.begin(), palettes.end(), std::back_inserter(_palettes), [](auto &&palette) {
+        return PaletteLoaded{std::move(palette), false};
+    });
 }
 
 /**
@@ -501,54 +444,41 @@ void SwatchesPanel::update_palettes(bool compact) {
  */
 void SwatchesPanel::rebuild()
 {
-    std::vector<ColorItem*> palette;
-
-    // The pointers in widgetmap are to widgets owned by the ColorPalette. It is assumed it will not
-    // delete them unless we ask, via the call to set_colors() later in this function.
-    widgetmap.clear();
-    current_fill.clear();
-    current_stroke.clear();
+    _palette->clear();
 
     // Add the "remove-color" color.
-    auto const w = Gtk::make_managed<ColorItem>(PaintDef(), this);
-    w->set_pinned_pref(_prefs_path);
-    palette.emplace_back(w);
-    widgetmap.emplace(std::monostate{}, w);
-    _palette->set_page_size(0);
+    auto remove_color = std::make_unique<ColorItem>(PaintDef(), this);
+    remove_color->set_pinned_pref(_prefs_path);
+    _palette->add_item(std::move(remove_color), UI::Widget::ColorPalette::NoColor{});
+
     if (auto pal = get_palette(_current_palette_id)) {
         _palette->set_page_size(pal->columns);
-        palette.reserve(palette.size() + pal->colors.size());
-        for (auto &c : pal->colors) {
-            auto dialog = this;
-            auto w = std::visit(VariantVisitor {
-                [](const PaletteFileData::SpacerItem&) {
-                    return Gtk::make_managed<ColorItem>("");
-                },
-                [](const PaletteFileData::GroupStart& g) {
-                    return Gtk::make_managed<ColorItem>(g.name);
-                },
-                [=, this](const PaletteFileData::Color& c) {
-                    auto w = Gtk::make_managed<ColorItem>(PaintDef(c.rgb, c.name, c.definition), dialog);
-                    w->set_pinned_pref(_prefs_path);
-                    widgetmap.emplace(c.rgb, w);
-                    return w;
-                },
-            }, c);
-
-            palette.emplace_back(w);
+        for (auto const &color : pal->colors) {
+            std::visit(VariantVisitor{
+                           [this](PaletteFileData::SpacerItem const &) {
+                               _palette->add_item(std::make_unique<ColorItem>(""), {});
+                           },
+                           [this](PaletteFileData::GroupStart const &group) {
+                               _palette->add_item(std::make_unique<ColorItem>(group.name), {});
+                           },
+                           [this](PaletteFileData::Color const &c) {
+                               auto color_item =
+                                   std::make_unique<ColorItem>(PaintDef(c.rgb, c.name, c.definition), this);
+                               color_item->set_pinned_pref(_prefs_path);
+                               _palette->add_item(std::move(color_item), c.rgb);
+                           },
+                       },
+                       color);
         }
     } else if (_current_palette_id == auto_id && getDocument()) {
         auto grads = getDocument()->getResourceList("gradient");
         for (auto obj : grads) {
             auto grad = cast_unsafe<SPGradient>(obj);
             if (grad->isSwatch()) {
-                auto const w = Gtk::make_managed<ColorItem>(grad, this);
-                palette.emplace_back(w);
-                widgetmap.emplace(grad, w);
+                auto color_item = std::make_unique<ColorItem>(grad, this);
                 // Rebuild if the gradient gets pinned or unpinned
-                w->signal_pinned().connect([this]{
-                    rebuild();
-                });
+                color_item->signal_pinned().connect([this] { rebuild(); });
+                _palette->add_item(std::move(color_item), grad);
             }
         }
     }
@@ -557,11 +487,12 @@ void SwatchesPanel::rebuild()
         update_fillstroke_indicators();
     }
 
-    _palette->set_colors(palette);
+    _palette->rebuild();
     _palette->set_selected(_current_palette_id);
 }
 
-bool SwatchesPanel::load_swatches() {
+bool SwatchesPanel::load_swatches()
+{
     auto window = dynamic_cast<Gtk::Window *>(get_root());
     auto file = choose_palette_file(window);
     auto loaded = false;
@@ -592,7 +523,8 @@ bool SwatchesPanel::load_swatches(std::string const &path)
     return false;
 }
 
-void SwatchesPanel::update_loaded_palette_entry() {
+void SwatchesPanel::update_loaded_palette_entry()
+{
     // add or update last entry in a store to match loaded palette
     if (_palettes.empty() || !_palettes.back().second) { // last palette !loaded
         _palettes.emplace_back();
@@ -698,14 +630,16 @@ void SwatchesPanel::update_selector_label(Glib::ustring const &active_id)
     _selector_label.set_label(it->first.name);
 }
 
-void SwatchesPanel::clear_filter() {
+void SwatchesPanel::clear_filter()
+{
     if (_color_filter_text.empty()) return;
 
     _color_filter_text.erase();
     _palette->apply_filter();
 }
 
-void SwatchesPanel::filter_colors(const Glib::ustring& text) {
+void SwatchesPanel::filter_colors(const Glib::ustring& text)
+{
     auto search = text.lowercase();
     if (_color_filter_text == search) return;
 
@@ -713,7 +647,8 @@ void SwatchesPanel::filter_colors(const Glib::ustring& text) {
     _palette->apply_filter();
 }
 
-bool SwatchesPanel::filter_callback(const Dialog::ColorItem& color) const {
+bool SwatchesPanel::filter_callback(const Dialog::ColorItem& color) const
+{
     if (_color_filter_text.empty()) return true;
 
     // let's hide group headers and fillers when searching for a matching color

@@ -11,14 +11,15 @@
 #define INKSCAPE_UI_DIALOG_COLOR_ITEM_H
 
 #include <array>
-#include <string>
-#include <variant>
 #include <cairomm/refptr.h>
+#include <cstdint>
 #include <glibmm/refptr.h>
 #include <glibmm/ustring.h>
 #include <gtk/gtk.h> // GtkEventControllerMotion
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/gesture.h> // Gtk::EventSequenceState
+#include <string>
+#include <variant>
 
 #include "widgets/paintdef.h"
 
@@ -71,14 +72,16 @@ public:
     ColorItem(SPGradient*, DialogBase*);
 
     /// Update the fill indicator, showing this widget is the fill of the current selection.
-    void set_fill(bool);
+    void set_fill_indicator(bool show_indicator) { _set_indicator_impl(show_indicator, &ColorItem::_is_fill); }
 
     /// Update the stroke indicator, showing this widget is the stroke of the current selection.
-    void set_stroke(bool);
+    void set_stroke_indicator(bool show_indicator) { _set_indicator_impl(show_indicator, &ColorItem::_is_stroke); }
 
     /// Update whether this item is pinned.
     bool is_pinned() const;
     void set_pinned_pref(const std::string &path);
+
+    void refresh_label_text();
 
     const Glib::ustring &get_description() const { return description; }
 
@@ -94,6 +97,7 @@ private:
 
     // Common post-construction setup.
     void common_setup();
+    void _set_indicator_impl(bool enable, bool ColorItem::*indicator);
 
     void on_motion_enter(GtkEventControllerMotion const *motion, double x, double y);
     void on_motion_leave(GtkEventControllerMotion const *motion);
@@ -134,18 +138,22 @@ private:
     bool pinned_default = false;
 
     // The color.
-    struct Undefined {};
-    struct PaintNone {};
-    struct RGBData { std::array<unsigned, 3> rgb; };
-    struct GradientData { SPGradient *gradient; };
+    struct Undefined
+    {
+    };
+    struct PaintNone
+    {
+    };
+    using RGBData = std::array<uint8_t, 3>;
+    using GradientData = SPGradient *;
     std::variant<Undefined, PaintNone, RGBData, GradientData> data;
 
     // The dialog this widget belongs to. Used for determining what desktop to take action on.
     DialogBase *dialog = nullptr;
 
     // Whether this color is in use as the fill or stroke of the current selection.
-    bool is_fill = false;
-    bool is_stroke = false;
+    bool _is_fill = false;
+    bool _is_stroke = false;
 
     // A cache of the widget contents, if necessary.
     Cairo::RefPtr<Cairo::ImageSurface> cache;

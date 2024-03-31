@@ -84,43 +84,43 @@ ColorPalette::ColorPalette():
     });
 
     auto& size = get_widget<Gtk::Scale>(_builder, "size-slider");
-    size.signal_change_value().connect([=,&size](Gtk::ScrollType, double val) {
+    size.signal_change_value().connect([this, &size](Gtk::ScrollType, double) {
         _set_tile_size(static_cast<int>(size.get_value()));
         _signal_settings_changed.emit();
         return true;
     }, true);
 
     auto& aspect = get_widget<Gtk::Scale>(_builder, "aspect-slider");
-    aspect.signal_change_value().connect([=,&aspect](Gtk::ScrollType, double val) {
+    aspect.signal_change_value().connect([this, &aspect](Gtk::ScrollType, double) {
         _set_aspect(aspect.get_value());
         _signal_settings_changed.emit();
         return true;
     }, true);
 
     auto& border = get_widget<Gtk::Scale>(_builder, "border-slider");
-    border.signal_change_value().connect([=,&border](Gtk::ScrollType, double val) {
+    border.signal_change_value().connect([this, &border](Gtk::ScrollType, double) {
         _set_tile_border(static_cast<int>(border.get_value()));
         _signal_settings_changed.emit();
         return true;
     }, true);
 
     auto& rows = get_widget<Gtk::Scale>(_builder, "row-slider");
-    rows.signal_change_value().connect([=,&rows](Gtk::ScrollType, double val) {
+    rows.signal_change_value().connect([this, &rows](Gtk::ScrollType, double) {
         _set_rows(static_cast<int>(rows.get_value()));
         _signal_settings_changed.emit();
         return true;
     }, true);
 
-    auto& sb = get_widget<Gtk::CheckButton>(_builder, "use-sb");
-    sb.set_active(_force_scrollbar);
-    sb.signal_toggled().connect([=,&sb](){
-        _enable_scrollbar(sb.get_active());
+    auto &use_scrollbar = get_widget<Gtk::CheckButton>(_builder, "use-sb");
+    use_scrollbar.set_active(_force_scrollbar);
+    use_scrollbar.signal_toggled().connect([this, &use_scrollbar]() {
+        _enable_scrollbar(use_scrollbar.get_active());
         _signal_settings_changed.emit();
     });
 
     auto& stretch = get_widget<Gtk::CheckButton>(_builder, "stretch");
     stretch.set_active(_force_scrollbar);
-    stretch.signal_toggled().connect([=,&stretch](){
+    stretch.signal_toggled().connect([this, &stretch]() {
         _enable_stretch(stretch.get_active());
         _signal_settings_changed.emit();
     });
@@ -128,36 +128,46 @@ ColorPalette::ColorPalette():
 
     auto& large = get_widget<Gtk::CheckButton>(_builder, "enlarge");
     large.set_active(_large_pinned_panel);
-    large.signal_toggled().connect([=,&large](){
+    large.signal_toggled().connect([this, &large]() {
         _set_large_pinned_panel(large.get_active());
         _signal_settings_changed.emit();
     });
     update_checkbox();
 
-    auto& sl = get_widget<Gtk::CheckButton>(_builder, "show-labels");
-    sl.set_visible(false);
-    sl.set_active(_show_labels);
-    sl.signal_toggled().connect([=,&sl](){
-        _show_labels = sl.get_active();
+    auto &show_labels = get_widget<Gtk::CheckButton>(_builder, "show-labels");
+    show_labels.set_visible(false);
+    show_labels.set_active(_show_labels);
+    show_labels.signal_toggled().connect([this, &show_labels]() {
+        _show_labels = show_labels.get_active();
         _signal_settings_changed.emit();
-        rebuild_widgets();
+        rebuild();
     });
 
     _scroll.set_min_content_height(1);
 
-    _scroll_down.signal_clicked().connect([=](){ scroll(0, get_palette_height(), get_tile_height() + _border, true); });
-    _scroll_up.signal_clicked().connect([=](){ scroll(0, -get_palette_height(), get_tile_height() + _border, true); });
-    _scroll_left.signal_clicked().connect([=](){ scroll(-10 * (get_tile_width() + _border), 0, 0.0, false); });
-    _scroll_right.signal_clicked().connect([=](){ scroll(10 * (get_tile_width() + _border), 0, 0.0, false); });
+    _scroll_down.signal_clicked().connect([this]() {
+        scroll(0, get_palette_height(), _compute_tile_height() + _border, true);
+    });
+    _scroll_up.signal_clicked().connect([this]() {
+        scroll(0, -get_palette_height(), _compute_tile_height() + _border, true);
+    });
+    _scroll_left.signal_clicked().connect([this]() {
+        scroll(-10 * (_compute_tile_width() + _border), 0, 0.0, false);
+    });
+    _scroll_right.signal_clicked().connect([this]() {
+        scroll(10 * (_compute_tile_width() + _border), 0, 0.0, false);
+    });
 
     set_vexpand_set(true);
-    set_up_scrolling();
+    _set_up_scrolling();
 
-    connectAfterResize([this] (int w, int h, int) {
+    connectAfterResize([this](int w, int h, int) {
         auto const a = Geom::IntPoint{w, h};
-        if (_allocation == a) return;
+        if (_allocation == a) {
+            return;
+        }
         _allocation = a;
-        set_up_scrolling();
+        _set_up_scrolling();
     });
 }
 
@@ -167,16 +177,18 @@ ColorPalette::~ColorPalette() {
     }
 }
 
-Gtk::Popover& ColorPalette::get_settings_popover() {
+Gtk::Popover& ColorPalette::get_settings_popover()
+{
     return get_widget<Gtk::Popover>(_builder, "config-popup");
 }
 
-void ColorPalette::set_settings_visibility(bool show) {
-    auto& btn_menu = get_widget<Gtk::MenuButton>(_builder, "btn-menu");
-    btn_menu.set_visible(show);
+void ColorPalette::set_settings_visibility(bool show)
+{
+    get_widget<Gtk::MenuButton>(_builder, "btn-menu").set_visible(show);
 }
 
-void ColorPalette::do_scroll(int dx, int dy) {
+void ColorPalette::do_scroll(int dx, int dy)
+{
     if (auto vert = _scroll.get_vscrollbar()) {
         vert->get_adjustment()->set_value(vert->get_adjustment()->get_value() + dy);
     }
@@ -185,12 +197,8 @@ void ColorPalette::do_scroll(int dx, int dy) {
     }
 }
 
-std::pair<double, double> get_range(Gtk::Scrollbar& sb) {
-    auto adj = sb.get_adjustment();
-    return std::make_pair(adj->get_lower(), adj->get_upper() - adj->get_page_size());
-}
-
-gboolean ColorPalette::scroll_cb(gpointer self) {
+gboolean ColorPalette::scroll_callback(gpointer self)
+{
     auto ptr = static_cast<ColorPalette*>(self);
     bool fire_again = false;
 
@@ -202,12 +210,11 @@ gboolean ColorPalette::scroll_cb(gpointer self) {
             fire_again = false; // cancel timer
         }
         else {
-            auto pos = value + ptr->_scroll_step;
+            auto const pos = value + ptr->_scroll_step;
             vert->get_adjustment()->set_value(pos);
-            auto range = get_range(*vert);
-            if (pos > range.first && pos < range.second) {
-                // not yet done
-                fire_again = true; // fire this callback again
+            if (get_scrollbar_range(*vert).interiorContains(pos)) {
+                // not yet done, fire this callback again
+                fire_again = true;
             }
         }
     }
@@ -219,7 +226,8 @@ gboolean ColorPalette::scroll_cb(gpointer self) {
     return fire_again;
 }
 
-void ColorPalette::scroll(int dx, int dy, double snap, bool smooth) {
+void ColorPalette::scroll(int dx, int dy, double snap, bool smooth)
+{
     if (auto vert = _scroll.get_vscrollbar()) {
         if (smooth && dy != 0.0) {
             _scroll_final = vert->get_adjustment()->get_value() + dy;
@@ -227,17 +235,12 @@ void ColorPalette::scroll(int dx, int dy, double snap, bool smooth) {
                 // round it to whole 'dy' increments
                 _scroll_final -= fmod(_scroll_final, snap);
             }
-            auto range = get_range(*vert);
-            if (_scroll_final < range.first) {
-                _scroll_final = range.first;
-            }
-            else if (_scroll_final > range.second) {
-                _scroll_final = range.second;
-            }
+            _scroll_final = get_scrollbar_range(*vert).clamp(_scroll_final);
+
             _scroll_step = dy / 4.0;
             if (!_active_timeout && vert->get_adjustment()->get_value() != _scroll_final) {
                 // limit refresh to 60 fps, in practice it will be slower
-                _active_timeout = g_timeout_add(1000 / 60, &ColorPalette::scroll_cb, this);
+                _active_timeout = g_timeout_add(1000 / 60, &ColorPalette::scroll_callback, this);
             }
         }
         else {
@@ -249,29 +252,14 @@ void ColorPalette::scroll(int dx, int dy, double snap, bool smooth) {
     }
 }
 
-int ColorPalette::get_tile_size() const {
-    return _size;
-}
-
-int ColorPalette::get_tile_border() const {
-    return _border;
-}
-
-int ColorPalette::get_rows() const {
-    return _rows;
-}
-
-double ColorPalette::get_aspect() const {
-    return _aspect;
-}
-
-void ColorPalette::set_tile_border(int border) {
+void ColorPalette::set_tile_border(int border)
+{
     _set_tile_border(border);
-    auto& slider = get_widget<Gtk::Scale>(_builder, "border-slider");
-    slider.set_value(border);
+    get_widget<Gtk::Scale>(_builder, "border-slider").set_value(border);
 }
 
-void ColorPalette::_set_tile_border(int border) {
+void ColorPalette::_set_tile_border(int border)
+{
     if (border == _border) return;
 
     if (border < 0 || border > 100) {
@@ -280,16 +268,17 @@ void ColorPalette::_set_tile_border(int border) {
     }
 
     _border = border;
-    refresh();
+    _refresh();
 }
 
-void ColorPalette::set_tile_size(int size) {
+void ColorPalette::set_tile_size(int size)
+{
     _set_tile_size(size);
-    auto& slider = get_widget<Gtk::Scale>(_builder, "size-slider");
-    slider.set_value(size);
+    get_widget<Gtk::Scale>(_builder, "size-slider").set_value(size);
 }
 
-void ColorPalette::_set_tile_size(int size) {
+void ColorPalette::_set_tile_size(int size)
+{
     if (size == _size) return;
 
     if (size < 1 || size > 1000) {
@@ -298,13 +287,13 @@ void ColorPalette::_set_tile_size(int size) {
     }
 
     _size = size;
-    refresh();
+    _refresh();
 }
 
-void ColorPalette::set_aspect(double aspect) {
+void ColorPalette::set_aspect(double aspect)
+{
     _set_aspect(aspect);
-    auto& slider = get_widget<Gtk::Scale>(_builder, "aspect-slider");
-    slider.set_value(aspect);
+    get_widget<Gtk::Scale>(_builder, "aspect-slider").set_value(aspect);
 }
 
 void ColorPalette::_set_aspect(double aspect) {
@@ -316,21 +305,23 @@ void ColorPalette::_set_aspect(double aspect) {
     }
 
     _aspect = aspect;
-    refresh();
+    _refresh();
 }
 
-void ColorPalette::refresh() {
-    set_up_scrolling();
+void ColorPalette::_refresh()
+{
+    _set_up_scrolling();
     queue_resize();
 }
 
-void ColorPalette::set_rows(int rows) {
+void ColorPalette::set_rows(int rows)
+{
     _set_rows(rows);
-    auto& slider = get_widget<Gtk::Scale>(_builder, "row-slider");
-    slider.set_value(rows);
+    get_widget<Gtk::Scale>(_builder, "row-slider").set_value(rows);
 }
 
-void ColorPalette::_set_rows(int rows) {
+void ColorPalette::_set_rows(int rows)
+{
     if (rows == _rows) return;
 
     if (rows < 1 || rows > 1000) {
@@ -339,87 +330,84 @@ void ColorPalette::_set_rows(int rows) {
     }
     _rows = rows;
     update_checkbox();
-    refresh();
+    _refresh();
 }
 
-void ColorPalette::update_checkbox() {
-    auto& sb = get_widget<Gtk::CheckButton>(_builder, "use-sb");
+void ColorPalette::update_checkbox()
+{
+    auto &use_scrollbar = get_widget<Gtk::CheckButton>(_builder, "use-sb");
     // scrollbar can only be applied to single-row layouts
-    bool sens = _rows == 1;
-    if (sb.get_sensitive() != sens) sb.set_sensitive(sens);
+    bool const sens = _rows == 1;
+    if (use_scrollbar.get_sensitive() != sens) {
+        use_scrollbar.set_sensitive(sens);
+    }
 }
 
-void ColorPalette::set_compact(bool compact) {
+void ColorPalette::set_compact(bool compact)
+{
     if (_compact != compact) {
         _compact = compact;
-        set_up_scrolling();
+        _set_up_scrolling();
 
         get_widget<Gtk::Scale>(_builder, "row-slider").set_visible(compact);
         get_widget<Gtk::Label>(_builder, "row-label").set_visible(compact);
         get_widget<Gtk::CheckButton>(_builder, "enlarge").set_visible(compact);
-        // get_widget<Gtk::CheckButton>(_builder, "show-labels").set_visible(false);
     }
 }
 
-bool ColorPalette::is_scrollbar_enabled() const {
-    return _force_scrollbar;
-}
-
-bool ColorPalette::is_stretch_enabled() const {
-    return _stretch_tiles;
-}
-
-void ColorPalette::enable_stretch(bool enable) {
+void ColorPalette::enable_stretch(bool enable)
+{
     auto& stretch = get_widget<Gtk::CheckButton>(_builder, "stretch");
     stretch.set_active(enable);
     _enable_stretch(enable);
 }
 
-void ColorPalette::_enable_stretch(bool enable) {
+void ColorPalette::_enable_stretch(bool enable)
+{
     if (_stretch_tiles == enable) return;
 
     _stretch_tiles = enable;
     _normal_box.set_halign(enable ? Gtk::Align::FILL : Gtk::Align::START);
     update_stretch();
-    refresh();
+    _refresh();
 }
 
-void ColorPalette::enable_labels(bool labels) {
-    auto& sl = get_widget<Gtk::CheckButton>(_builder, "show-labels");
-    sl.set_active(labels);
+void ColorPalette::enable_labels(bool labels)
+{
+    get_widget<Gtk::CheckButton>(_builder, "show-labels").set_active(labels);
     if (_show_labels != labels) {
         _show_labels = labels;
-        rebuild_widgets();
-        refresh();
+        rebuild();
     }
 }
 
-void ColorPalette::update_stretch() {
-    auto& aspect = get_widget<Gtk::Scale>(_builder, "aspect-slider");
-    aspect.set_sensitive(!_stretch_tiles);
-    auto& label = get_widget<Gtk::Label>(_builder, "aspect-label");
-    label.set_sensitive(!_stretch_tiles);
+void ColorPalette::update_stretch()
+{
+    get_widget<Gtk::Scale>(_builder, "aspect-slider").set_sensitive(!_stretch_tiles);
+    get_widget<Gtk::Label>(_builder, "aspect-label").set_sensitive(!_stretch_tiles);
 }
 
-void ColorPalette::enable_scrollbar(bool show) {
-    auto& sb = get_widget<Gtk::CheckButton>(_builder, "use-sb");
-    sb.set_active(show);
+void ColorPalette::enable_scrollbar(bool show)
+{
+    get_widget<Gtk::CheckButton>(_builder, "use-sb").set_active(show);
     _enable_scrollbar(show);
 }
 
-void ColorPalette::_enable_scrollbar(bool show) {
+void ColorPalette::_enable_scrollbar(bool show)
+{
     if (_force_scrollbar == show) return;
 
     _force_scrollbar = show;
-    set_up_scrolling();
+    _set_up_scrolling();
 }
 
-void ColorPalette::set_up_scrolling() {
+void ColorPalette::_set_up_scrolling()
+{
     auto &box = get_widget<Gtk::Box>(_builder, "palette-box");
     auto &btn_menu = get_widget<Gtk::MenuButton>(_builder, "btn-menu");
-    auto const colors = UI::get_children(_normal_box);
-    auto normal_count = std::max(1, static_cast<int>(colors.size()));
-    auto pinned_count = std::max(1, static_cast<int>(UI::get_children(_pinned_box).size()));
+    unsigned const num_colors = get_child_count(_normal_box);
+    unsigned const normal_count = std::max(1U, num_colors);
+    unsigned const pinned_count = std::max(1U, get_child_count(_pinned_box));
 
     _normal_box.set_max_children_per_line(normal_count);
     _normal_box.set_min_children_per_line(1);
@@ -428,8 +416,8 @@ void ColorPalette::set_up_scrolling() {
 
     auto alloc_width = _normal_box.get_parent()->get_allocated_width();
     // if page-size is defined, align color tiles in columns
-    if (_page_size > 1 && alloc_width > 1 && !_show_labels && !colors.empty()) {
-        int width = get_tile_width();
+    if (_page_size > 1 && alloc_width > 1 && !_show_labels && num_colors) {
+        int const width = _compute_tile_width();
         if (width > 1) {
             int cols = alloc_width / (width + _border);
             cols = std::max(cols - cols % _page_size, _page_size);
@@ -480,8 +468,8 @@ void ColorPalette::set_up_scrolling() {
             _scroll_btn.set_visible(true);
         }
 
-        int div = _large_pinned_panel ? (_rows > 2 ? 2 : 1) : _rows;
-        _pinned_box.set_max_children_per_line(std::max((pinned_count + div - 1) / div, 1));
+        int const div = _large_pinned_panel ? (_rows > 2 ? 2 : 1) : _rows;
+        _pinned_box.set_max_children_per_line(std::max((pinned_count + div - 1) / div, 1U));
         _pinned_box.set_margin_end(_border);
     }
     else {
@@ -507,18 +495,19 @@ void ColorPalette::set_up_scrolling() {
     resize();
 }
 
-int ColorPalette::get_tile_size(bool horz) const {
+int ColorPalette::_compute_tile_size(bool horz) const
+{
     if (_stretch_tiles) return _size;
 
-    double aspect = horz ? _aspect : -_aspect;
-    int scale = _show_labels ? 2.0 : 1.0;
+    double const aspect = horz ? _aspect : -_aspect;
+    int const scale = _show_labels ? 2 : 1;
     int size = 0;
 
     if (aspect > 0) {
-        size = static_cast<int>(round((1.0 + aspect) * _size));
+        size = static_cast<int>(std::round((1.0 + aspect) * _size));
     }
     else if (aspect < 0) {
-        size = static_cast<int>(round((1.0 / (1.0 - aspect)) * _size));
+        size = static_cast<int>(std::round((1.0 / (1.0 - aspect)) * _size));
     }
     else {
         size = _size;
@@ -526,40 +515,30 @@ int ColorPalette::get_tile_size(bool horz) const {
     return size * scale;
 }
 
-int ColorPalette::get_tile_width() const {
-    return get_tile_size(true);
+int ColorPalette::_compute_tile_width()  const { return _compute_tile_size(true ); }
+int ColorPalette::_compute_tile_height() const { return _compute_tile_size(false); }
+
+int ColorPalette::get_palette_height() const
+{
+    return (_compute_tile_height() + _border) * _rows;
 }
 
-int ColorPalette::get_tile_height() const {
-    return get_tile_size(false);
-}
-
-int ColorPalette::get_palette_height() const {
-    return (get_tile_height() + _border) * _rows;
-}
-
-void ColorPalette::set_large_pinned_panel(bool large) {
-    auto& checkbox = get_widget<Gtk::CheckButton>(_builder, "enlarge");
-    checkbox.set_active(large);
+void ColorPalette::set_large_pinned_panel(bool large)
+{
+    get_widget<Gtk::CheckButton>(_builder, "enlarge").set_active(large);
     _set_large_pinned_panel(large);
 }
 
-void ColorPalette::_set_large_pinned_panel(bool large) {
+void ColorPalette::_set_large_pinned_panel(bool large)
+{
     if (_large_pinned_panel == large) return;
 
     _large_pinned_panel = large;
-    refresh();
+    _refresh();
 }
 
-bool ColorPalette::is_pinned_panel_large() const {
-    return _large_pinned_panel;
-}
-
-bool ColorPalette::are_labels_enabled() const {
-    return _show_labels;
-}
-
-void ColorPalette::resize() {
+void ColorPalette::resize()
+{
     if ((_rows == 1 && _force_scrollbar) || !_compact) {
         // auto size for single row to allocate space for scrollbar
         _scroll.set_size_request(-1, -1);
@@ -575,9 +554,9 @@ void ColorPalette::resize() {
     _pinned_box.set_column_spacing(_border);
     _pinned_box.set_row_spacing(_border);
 
-    int width = get_tile_width();
-    int height = get_tile_height();
-    for (auto item : _normal_items) {
+    int const width = _compute_tile_width();
+    int const height = _compute_tile_height();
+    for (auto &item : _normal_items) {
         item->set_size_request(width, height);
     }
 
@@ -587,52 +566,96 @@ void ColorPalette::resize() {
         double mult = _rows > 2 ? _rows / 2.0 : 2.0;
         pinned_width = pinned_height = static_cast<int>((height + _border) * mult - _border);
     }
-    for (auto item : _pinned_items) {
+    for (auto &item : _pinned_items) {
         item->set_size_request(pinned_width, pinned_height);
     }
 }
 
-void ColorPalette::set_colors(std::vector<Dialog::ColorItem*> const &swatches)
+void ColorPalette::set_fill_stroke_indicators(std::optional<ColorKey> fill_key, std::optional<ColorKey> stroke_key)
 {
+    // Clear fill and stroke indicators from items currently carrying them
+    if (_current_fill_key) {
+        auto const &highlighted_items = _color_to_widgets[*_current_fill_key];
+        std::for_each(highlighted_items.begin(),
+                      highlighted_items.end(),
+                      [](auto *item) { item->set_fill_indicator(false); });
+    }
+    if (_current_stroke_key) {
+        auto const &highlighted_items = _color_to_widgets[*_current_stroke_key];
+        std::for_each(highlighted_items.begin(),
+                      highlighted_items.end(),
+                      [](auto *item) { item->set_stroke_indicator(false); });
+    }
+
+    // Set new fill and stroke indicators
+    _current_fill_key = fill_key;
+    _current_stroke_key = stroke_key;
+    if (_current_fill_key) {
+        auto const &items_to_highlight = _color_to_widgets[*_current_fill_key];
+        std::for_each(items_to_highlight.begin(),
+                      items_to_highlight.end(),
+                      [](auto *item) { item->set_fill_indicator(true); });
+    }
+    if (_current_stroke_key) {
+        auto const &items_to_highlight = _color_to_widgets[*_current_stroke_key];
+        std::for_each(items_to_highlight.begin(),
+                      items_to_highlight.end(),
+                      [](auto *item) { item->set_stroke_indicator(true); });
+    }
+    queue_draw();
+}
+
+void ColorPalette::add_item(std::unique_ptr<Dialog::ColorItem> swatch, std::optional<ColorKey> key)
+{
+    if (!swatch) {
+        return;
+    }
+
+    if (key) {
+        _color_to_widgets[*key].emplace_back(swatch.get());
+    }
+    (swatch->is_pinned() ? _pinned_items : _normal_items).emplace_back(std::move(swatch));
+}
+
+void ColorPalette::clear()
+{
+    _color_to_widgets.clear();
     _normal_items.clear();
     _pinned_items.clear();
-    
-    for (auto item : swatches) {
-        if (item->is_pinned()) {
-            _pinned_items.emplace_back(item);
-        } else {
-            _normal_items.emplace_back(item);
-        }
-        item->signal_modified().connect([=] {
-            UI::for_each_child(*item->get_parent(), [=](Gtk::Widget& w) {
-                if (auto label = dynamic_cast<Gtk::Label *>(&w)) {
-                    label->set_text(item->get_description());
-                }
-                return UI::ForEachResult::_continue;
-            });
-        });
-    }
-    rebuild_widgets();
-    refresh();
+    set_page_size(0);
 }
 
-Gtk::Widget *ColorPalette::_get_widget(Dialog::ColorItem *item) {
-    if (auto parent = item->get_parent()) {
-        auto &flowbox = dynamic_cast<Gtk::FlowBox &>(*parent);
-        flowbox.remove(*item);
+/// Return either the passed color item or a widget wrapping it along with a label.
+Gtk::Widget &ColorPalette::_create_wrapper_widget(Dialog::ColorItem &item) const
+{
+    if (auto flowbox = dynamic_cast<Gtk::FlowBox *>(item.get_parent())) {
+        flowbox->remove(item);
     }
     if (_show_labels) {
-        item->set_valign(Gtk::Align::CENTER);
+        item.set_valign(Gtk::Align::CENTER);
         auto const box = Gtk::make_managed<Gtk::Box>();
-        auto const label = Gtk::make_managed<Gtk::Label>(item->get_description());
-        box->append(*item);
+        auto const label = Gtk::make_managed<Gtk::Label>(item.get_description());
+        box->append(item);
         box->append(*label);
-        return box;
+        return *box;
     }
-    return Gtk::manage(item);
+    return item;
 }
 
-void ColorPalette::rebuild_widgets()
+bool ColorPalette::_should_show_normal_item(Dialog::ColorItem const *item) const
+{
+    // in the tile mode (no labels), group headers are hidden:
+    if (!_show_labels && item->is_group()) {
+        return false;
+    }
+    // in the list mode with labels, do not show fillers:
+    if (_show_labels && item->is_filler()) {
+        return false;
+    }
+    return true;
+}
+
+void ColorPalette::rebuild()
 {
     _normal_box.freeze_notify();
     _pinned_box.freeze_notify();
@@ -640,21 +663,17 @@ void ColorPalette::rebuild_widgets()
     UI::remove_all_children(_normal_box);
     UI::remove_all_children(_pinned_box);
 
-    for (auto item : _normal_items) {
-        // in a tile mode (no labels) group headers are hidden:
-        if (!_show_labels && item->is_group()) continue;
-
-        // in a list mode with labels, do not show fillers:
-        if (_show_labels && item->is_filler()) continue;
-
-        _normal_box.append(*_get_widget(item));
+    for (auto &item : _normal_items) {
+        if (_should_show_normal_item(item.get())) {
+            _normal_box.append(_create_wrapper_widget(*item));
+        }
     }
-    for (auto item : _pinned_items) {
-        _pinned_box.append(*_get_widget(item));
+    for (auto &item : _pinned_items) {
+        _pinned_box.append(_create_wrapper_widget(*item));
     }
 
-    set_up_scrolling();
-
+    _set_up_scrolling();
+    _refresh();
     _normal_box.thaw_notify();
     _pinned_box.thaw_notify();
 }
@@ -706,7 +725,7 @@ void ColorPalette::set_palettes(std::vector<palette_t> const &palettes)
         auto& name = it->name;
         auto& id = it->id;
         auto item = std::make_unique<ColorPaletteMenuItem>(group, name, id, it->colors);
-        item->signal_activate().connect([=](){
+        item->signal_activate().connect([this, id](){
             if (!_in_update) {
                 _in_update = true;
                 _signal_palette_selected.emit(id);
@@ -719,15 +738,8 @@ void ColorPalette::set_palettes(std::vector<palette_t> const &palettes)
     }
 }
 
-sigc::signal<void (Glib::ustring)>& ColorPalette::get_palette_selected_signal() {
-    return _signal_palette_selected;
-}
-
-sigc::signal<void ()>& ColorPalette::get_settings_changed_signal() {
-    return _signal_settings_changed;
-}
-
-void ColorPalette::set_selected(const Glib::ustring& id) {
+void ColorPalette::set_selected(const Glib::ustring& id)
+{
     _in_update = true;
 
     for (auto const &item : _palette_menu_items) {
@@ -737,11 +749,13 @@ void ColorPalette::set_selected(const Glib::ustring& id) {
     _in_update = false;
 }
 
-void ColorPalette::set_page_size(int page_size) {
+void ColorPalette::set_page_size(int page_size)
+{
     _page_size = page_size;
 }
 
-void ColorPalette::set_filter(std::function<bool (const Dialog::ColorItem&)> filter) {
+void ColorPalette::set_filter(std::function<bool (const Dialog::ColorItem&)> filter)
+{
     _normal_box.set_filter_func([=](Gtk::FlowBoxChild* c){
         auto child = c->get_child();
         if (auto box = dynamic_cast<Gtk::Box*>(child)) {
@@ -754,7 +768,8 @@ void ColorPalette::set_filter(std::function<bool (const Dialog::ColorItem&)> fil
     });
 }
 
-void ColorPalette::apply_filter() {
+void ColorPalette::apply_filter()
+{
     _normal_box.invalidate_filter();
 }
 

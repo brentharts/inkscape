@@ -38,8 +38,6 @@
 #include "paintdef.h"
 
 #include <glibmm/ustring.h>
-#include <memory>
-#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
@@ -47,23 +45,17 @@
 #include <glibmm/stringutils.h>
 #include <glibmm/regex.h>
 
-PaintDef::PaintDef()
-    : description(C_("Paint", "None"))
-    , type(NONE)
-    , rgb({0, 0, 0})
-{
-}
-
-PaintDef::PaintDef(std::array<unsigned, 3> const &rgb, std::string description, Glib::ustring tooltip)
-    : description(std::move(description)), tooltip(std::move(tooltip))
-    , type(RGB)
+PaintDef::PaintDef(Rgb8bit const &rgb, std::string description, Glib::ustring tooltip)
+    : description(std::move(description))
+    , tooltip(std::move(tooltip))
+    , type(ColorType::RGB)
     , rgb(rgb)
 {
 }
 
 std::string PaintDef::get_color_id() const
 {
-    if (type == NONE) {
+    if (type == ColorType::NONE) {
         return "none";
     }
     if (!description.empty() && description[0] != '#') {
@@ -110,7 +102,7 @@ std::vector<char> PaintDef::getMIMEData(char const *mime_type) const
     } else if (std::strcmp(mime_type, mimeOSWB_COLOR) == 0) {
         std::string tmp("<paint>");
         switch (get_type()) {
-            case PaintDef::NONE:
+            case PaintDef::ColorType::NONE:
                 tmp += "<nocolor/>";
                 break;
             default:
@@ -136,7 +128,7 @@ bool PaintDef::fromMIMEData(char const *mime_type, std::span<char const> data)
     if (std::strcmp(mime_type, mimeX_COLOR) == 0) {
         if (data.size() == 8) {
             // Careful about endian issues.
-            type = PaintDef::RGB;
+            type = PaintDef::ColorType::RGB;
             auto const vals = reinterpret_cast<uint16_t const *>(data.data());
             rgb[0] = 0x0ff & (vals[0] >> 8);
             rgb[1] = 0x0ff & (vals[1] >> 8);
@@ -146,12 +138,12 @@ bool PaintDef::fromMIMEData(char const *mime_type, std::span<char const> data)
     } else if (std::strcmp(mime_type, mimeOSWB_COLOR) == 0) {
         std::string xml(data.data(), data.size());
         if (xml.find("<nocolor/>") != std::string::npos) {
-            type = PaintDef::NONE;
+            type = PaintDef::ColorType::NONE;
             rgb = {0, 0, 0};
             return true;
         } else if (auto pos = xml.find("<sRGB"); pos != std::string::npos) {
             std::string srgb = xml.substr(pos, xml.find(">", pos));
-            type = PaintDef::RGB;
+            type = PaintDef::ColorType::RGB;
             if (auto numPos = srgb.find("r="); numPos != std::string::npos) {
                 double dbl = Glib::Ascii::strtod(srgb.substr(numPos + 3));
                 rgb[0] = static_cast<int>(255 * dbl);
