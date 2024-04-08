@@ -213,6 +213,7 @@ set(ui_SRC
 	widget/fill-style.cpp
 	widget/font-button.cpp
 	widget/font-collection-selector.cpp
+	widget/font-list.cpp
 	widget/font-selector.cpp
 	widget/font-variants.cpp
 	widget/font-variations.cpp
@@ -506,6 +507,7 @@ set(ui_SRC
 	widget/filter-effect-chooser.h
 	widget/font-button.h
 	widget/font-collection-selector.h
+	widget/font-list.h
 	widget/font-selector.h
 	widget/font-variants.h
 	widget/font-variations.h

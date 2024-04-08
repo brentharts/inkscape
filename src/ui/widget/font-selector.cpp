@@ -13,10 +13,10 @@
 #include <gdkmm/contentprovider.h>
 #include <glibmm/i18n.h>
 #include <glibmm/markup.h>
-#include <gtkmm/targetentry.h>
-#include <memory>
-
-#include "font-selector.h"
+#include <glibmm/value.h>
+#include <gdkmm/contentprovider.h>
+#include <gtkmm/dragsource.h>
+#include <sigc++/functors/mem_fun.h>
 
 #include "libnrtype/font-factory.h"
 #include "libnrtype/font-instance.h"
@@ -29,15 +29,6 @@
 #include "util-string/ustring-format.h"
 
 namespace Inkscape::UI::Widget {
-
-[[nodiscard]] static auto const &get_target_entries()
-{
-    static std::vector<Gtk::TargetEntry> const target_entries{
-        Gtk::TargetEntry{"STRING"    , {}, 0},
-        Gtk::TargetEntry{"text/plain", {}, 0},
-    };
-    return target_entries;
-}
 
 std::unique_ptr<FontSelectorInterface> FontSelector::create_font_selector() {
     return std::make_unique<FontSelector>();
