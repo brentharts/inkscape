@@ -8,7 +8,11 @@
 #ifndef INKSCAPE_UI_WIDGET_FONT_LIST_H
 #define INKSCAPE_UI_WIDGET_FONT_LIST_H
 
+#include <glibmm/refptr.h>
 #include <glibmm/ustring.h>
+#include <gtkmm/boolfilter.h>
+#include <gtkmm/listview.h>
+#include <gtkmm/singleselection.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treepath.h>
 #include <gtkmm/widget.h>
@@ -32,6 +36,8 @@
 #include "font-selector-interface.h"
 
 namespace Inkscape::UI::Widget {
+
+struct FontListItem;
 
 class FontList : public Gtk::Box, public FontSelectorInterface {
 public:
@@ -79,12 +85,19 @@ private:
     void sync_font_tag(const FontTag* ftag, bool selected);
     void scroll_to_row(Gtk::TreePath path);
     Gtk::TreeModel::iterator get_selected_font() const;
+    void add_fonts_to_store();
+    bool is_item_visible(const Glib::RefPtr<Glib::ObjectBase>& item) const;
 
+    Glib::RefPtr<Gtk::Builder> _builder; // builder needs to come first, so it's initialized before other members
+
+    Glib::RefPtr<Gio::ListStore<FontListItem>> _font_store;
+    Glib::RefPtr<Gtk::BoolFilter> _bool_filter;
+    Glib::RefPtr<Gtk::SingleSelection> _selection_model;
+    auto_connection _selection_change;
+    Gtk::ListView& _font_list;
     sigc::signal<void ()> _signal_changed;
     sigc::signal<void ()> _signal_apply;
-    Glib::RefPtr<Gtk::Builder> _builder;
     Gtk::Grid& _main_grid;
-    Gtk::TreeView& _font_list;
     Gtk::TreeViewColumn _text_column;
     Gtk::IconView& _font_grid;
     Glib::RefPtr<Gtk::ListStore> _font_list_store;
@@ -96,9 +109,9 @@ private:
     Glib::ustring _filter;
     Gtk::ComboBoxText& _font_size;
     Gtk::Scale& _font_size_scale;
-    std::unique_ptr<Gtk::CellRendererText> _cell_renderer;
-    std::unique_ptr<Gtk::CellRenderer> _cell_icon_renderer;
-    std::unique_ptr<Gtk::CellRendererText> _grid_renderer;
+    // std::unique_ptr<Gtk::CellRendererText> _cell_renderer;
+    // std::unique_ptr<Gtk::CellRenderer> _cell_icon_renderer;
+    // std::unique_ptr<Gtk::CellRendererText> _grid_renderer;
     Glib::ustring _current_fspec;
     double _current_fsize = 0.0;
     OperationBlocker _update;
@@ -111,6 +124,7 @@ private:
     bool _view_mode_list = true;
     auto_connection _font_stream;
     std::size_t _initializing = 0;
+    double _ui_font_size = 0;
 };
 
 } // namespaces

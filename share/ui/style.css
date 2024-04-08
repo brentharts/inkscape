@@ -1364,6 +1364,14 @@ listview.list-view-small > row > box.item-box.separator {
     margin: 1px;
 }
 
+listview.list-view-compact > row > box.item-box {
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
+#FontList listview.list-view-compact > row > box.item-box {
+}
+
 /* About screen slide show transitions >>>>>>>>>>>>>>>>>>>>>>>>> */
 @keyframes fade_in_opacity {
     0%   { opacity: 0; }

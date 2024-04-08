@@ -153,9 +153,6 @@ FontVariationAxis::FontVariationAxis(Glib::ustring name_, OTVarAxis const &axis,
     //           << " max:  " << axis.maximum
     //           << " val:  " << axis.set_val << std::endl;
 
-    set_spacing(3)
-    set_column_spacing(3);
-
     label = Gtk::make_managed<Gtk::Label>(label_ + ":");
     label->set_tooltip_text(tooltip);
     label->set_xalign(0.0f); // left-align
@@ -163,7 +160,7 @@ FontVariationAxis::FontVariationAxis(Glib::ustring name_, OTVarAxis const &axis,
 
     edit = Gtk::make_managed<Gtk::SpinButton>();
     edit->set_max_width_chars(5);
-    edit->set_valign(Gtk::ALIGN_CENTER);
+    edit->set_valign(Gtk::Align::CENTER);
     edit->set_margin_top(2);
     edit->set_margin_bottom(2);
     edit->set_tooltip_text(tooltip);
@@ -210,9 +207,9 @@ FontVariations::FontVariations()
 {
     // std::cout << "FontVariations::FontVariations" << std::endl;
     set_name ("FontVariations");
-    _size_group = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
-    _size_group_edit = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
-    show_all_children();
+    _size_group = Gtk::SizeGroup::create(Gtk::SizeGroup::Mode::HORIZONTAL);
+    _size_group_edit = Gtk::SizeGroup::create(Gtk::SizeGroup::Mode::HORIZONTAL);
+    // show_all_children();
 }
 
 // Update GUI based on query.

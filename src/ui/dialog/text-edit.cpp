@@ -140,12 +140,14 @@ TextEdit::TextEdit()
     if (_use_browser) {
         // hide settings and filter box
         settings_and_filters_box.set_visible(false);
-        font_count_label.set_track_visited_links(false);
+        // font_count_label.set_track_visited_links(false);
         preview_label.set_visible(false);
     }
 
-    // font_list->box()->show_all();
-    font_box->insert_child_after(font_selector, font_count_label);
+    font_list->box()->show();
+    UI::pack_start(*font_box, *font_list->box(), true, true);
+    font_box->reorder_child_after(*font_list->box(), *font_box->get_first_child()->get_next_sibling());
+    // font_box->reorder_child(*font_list->box(), 2);
     UI::pack_start(*feat_box, font_features, true, true);
     feat_box->reorder_child_after(font_features, *feat_box->get_first_child());
 
@@ -195,7 +197,7 @@ TextEdit::TextEdit()
     _font_changed = font_list->signal_changed().connect([=](){ apply_changes(true); });
     _apply_font = font_list->signal_apply().connect([=](){ onChange(); onSetDefault(); });
 
-    show_all_children();
+    // show_all_children();
 
     on_page_changed(nullptr, 0);
 }
