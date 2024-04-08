@@ -13,13 +13,10 @@
 #include <gdkmm/contentprovider.h>
 #include <glibmm/i18n.h>
 #include <glibmm/markup.h>
-#include <glibmm/value.h>
-#include <gtkmm/dragsource.h>
-#include <gtkmm/grid.h>
-#include <sigc++/functors/mem_fun.h>
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include <gtkmm/targetentry.h>
+#include <memory>
+
+#include "font-selector.h"
 
 #include "libnrtype/font-factory.h"
 #include "libnrtype/font-instance.h"
@@ -33,14 +30,27 @@
 
 namespace Inkscape::UI::Widget {
 
-FontSelector::FontSelector(bool with_size, bool with_variations)
-    : Gtk::Box(Gtk::Orientation::VERTICAL)
-    , family_frame(_("Font family"))
-    , style_frame(C_("Font selector", "Style"))
-    , size_label(_("Font size"))
-    , size_combobox(true) // With entry
-    , signal_block(false)
-    , font_size(18)
+[[nodiscard]] static auto const &get_target_entries()
+{
+    static std::vector<Gtk::TargetEntry> const target_entries{
+        Gtk::TargetEntry{"STRING"    , {}, 0},
+        Gtk::TargetEntry{"text/plain", {}, 0},
+    };
+    return target_entries;
+}
+
+std::unique_ptr<FontSelectorInterface> FontSelector::create_font_selector() {
+    return std::make_unique<FontSelector>();
+}
+
+FontSelector::FontSelector (bool with_size, bool with_variations)
+    : Gtk::Grid ()
+    , family_frame (_("Font family"))
+    , style_frame (C_("Font selector", "Style"))
+    , size_label   (_("Font size"))
+    , size_combobox (true)   // With entry
+    , signal_block (false)
+    , font_size (18)
 {
     Inkscape::FontLister* font_lister = Inkscape::FontLister::get_instance();
     Glib::RefPtr<Gtk::TreeModel> model = font_lister->get_font_list();
@@ -517,7 +527,8 @@ FontSelector::on_variations_changed() {
 void
 FontSelector::changed_emit() {
     signal_block = true;
-    signal_changed.emit (get_fontspec());
+    _signal_changed.emit (get_fontspec());
+    _signal_apply.emit();
     if (initial) {
         initial = false;
         family_treecolumn.unset_cell_data_func (family_cell);
