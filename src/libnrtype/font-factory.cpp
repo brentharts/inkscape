@@ -116,7 +116,7 @@ PangoFontDescription *ink_font_description_from_style(SPStyle const *style)
         case SP_CSS_FONT_WEIGHT_LIGHTER:
         case SP_CSS_FONT_WEIGHT_BOLDER:
         default:
-            if (style->font_weight.computed > 0 && style->font_weight.computed <= 1000) {
+            if (static_cast<int>(style->font_weight.computed) > 0 && static_cast<int>(style->font_weight.computed) <= 1000) {
                 pango_font_description_set_weight(descr, static_cast<PangoWeight>(style->font_weight.computed));
             }
             else {
