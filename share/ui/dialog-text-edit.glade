@@ -169,19 +169,10 @@
           <object class="GtkNotebookPage">
             <property name="position">2</property>
             <property name="child">
-              <object class="GtkScrolledWindow">
+              <object class="GtkScrolledWindow" id="text_view_container">
                 <property name="visible">True</property>
                 <property name="focusable">1</property>
                 <property name="has-frame">1</property>
-                <property name="child">
-                  <object class="GtkTextView" id="text_view">
-                    <property name="visible">True</property>
-                    <property name="height-request">64</property>
-                    <property name="focusable">1</property>
-                    <property name="wrap-mode">word</property>
-                    <property name="buffer">text_buffer</property>
-                  </object>
-                </property>
               </object>
             </property>
             <property name="tab">

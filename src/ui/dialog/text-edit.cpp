@@ -142,6 +142,7 @@ TextEdit::TextEdit()
         settings_and_filters_box.set_visible(false);
         // font_count_label.set_track_visited_links(false);
         preview_label.set_visible(false);
+        font_count_label.set_visible(false);
     }
 
     font_list->box()->show();
@@ -175,14 +176,14 @@ TextEdit::TextEdit()
     append(*contents);
 
     /* Signal handlers */
-    Controller::add_key<&TextEdit::captureUndo, nullptr>(text_view, *this);
+    Controller::add_key<&TextEdit::captureUndo, nullptr>(*text_view, *this);
     text_buffer->signal_changed().connect([=](){ onChange(); });
     
     setasdefault_button.signal_clicked().connect([=](){ onSetDefault(); });
     apply_button.signal_clicked().connect([=](){ onApply(); });
-    fontChangedConn = font_selector.connectChanged(sigc::mem_fun(*this, &TextEdit::onFontChange));
+    // fontChangedConn = font_selector.connectChanged(sigc::mem_fun(*this, &TextEdit::onFontChange));
     fontFeaturesChangedConn = font_features.connectChanged([=](){ onChange(); });
-    notebook->signal_switch_page().connect(sigc::mem_fun(*this, &TextEdit::onFontFeatures));
+    // notebook->signal_switch_page().connect(sigc::mem_fun(*this, &TextEdit::onFontFeatures));
     search_entry.signal_search_changed().connect([=](){ on_search_entry_changed(); });
     reset_button.signal_clicked().connect([=](){ on_reset_button_pressed(); });
     collection_editor_button.signal_clicked().connect([=](){ on_fcm_button_clicked(); });

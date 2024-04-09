@@ -16,6 +16,7 @@
 #include <glibmm/value.h>
 #include <gdkmm/contentprovider.h>
 #include <gtkmm/dragsource.h>
+#include <gtkmm/grid.h>
 #include <sigc++/functors/mem_fun.h>
 
 #include "libnrtype/font-factory.h"
@@ -35,13 +36,13 @@ std::unique_ptr<FontSelectorInterface> FontSelector::create_font_selector() {
 }
 
 FontSelector::FontSelector (bool with_size, bool with_variations)
-    : Gtk::Grid ()
-    , family_frame (_("Font family"))
-    , style_frame (C_("Font selector", "Style"))
-    , size_label   (_("Font size"))
-    , size_combobox (true)   // With entry
-    , signal_block (false)
-    , font_size (18)
+    : Gtk::Box()
+    , family_frame(_("Font family"))
+    , style_frame(C_("Font selector", "Style"))
+    , size_label(_("Font size"))
+    , size_combobox(true)   // With entry
+    , signal_block(false)
+    , font_size(18)
 {
     Inkscape::FontLister* font_lister = Inkscape::FontLister::get_instance();
     Glib::RefPtr<Gtk::TreeModel> model = font_lister->get_font_list();

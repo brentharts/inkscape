@@ -245,6 +245,7 @@
             <property name="focus-on-click">0</property>
             <property name="receives-default">1</property>
             <property name="halign">center</property>
+            <property name="has-frame">False</property>
             <!-- <property name="relief">none</property> -->
             <!-- <property name="draw-indicator">True</property> -->
             <!-- <property name="popup">sort-menu</property> -->
@@ -271,6 +272,7 @@
             <property name="focus-on-click">0</property>
             <property name="receives-default">1</property>
             <property name="halign">center</property>
+            <property name="has-frame">False</property>
             <!-- <property name="relief">none</property> -->
             <property name="popover">filter-popover</property>
             <child>
@@ -295,6 +297,12 @@
             <property name="receives-default">1</property>
             <!-- <property name="image">img-gear</property> -->
             <!-- <property name="relief">none</property> -->
+            <property name="has-frame">False</property>
+            <child>
+              <object class="GtkImage">
+                <property name="icon-name">gear</property>
+              </object>
+            </child>
           </object>
         </child>
         <child>

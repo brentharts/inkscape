@@ -33,7 +33,6 @@
 
 #include <glibmm/refptr.h>
 #include <gtkmm/box.h>
-#include <gtkmm/grid.h>
 #include <gtkmm/cellrenderertext.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/frame.h>
@@ -73,7 +72,7 @@ namespace Inkscape::UI::Widget {
  *     best match to the original font style (as not all fonts have the same style options).
  *   Emit a signal when any change is made to a child widget.
  */
-class FontSelector : public Gtk::Grid, public FontSelectorInterface
+class FontSelector : public Gtk::Box, public FontSelectorInterface
 {
 public:
     static std::unique_ptr<FontSelectorInterface> create_font_selector();

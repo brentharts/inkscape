@@ -317,7 +317,7 @@ FontList::FontList(Glib::ustring preferences_path) :
         icon.set_valign(Gtk::Align::CENTER);
         hbox->append(icon);
         auto& box = *Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
-        // box.set_hexpand()
+        box.set_hexpand();
         hbox->append(box);
         auto& label = *Gtk::make_managed<Gtk::Label>();
         label.set_xalign(0);
@@ -1163,6 +1163,7 @@ void FontList::add_categories(const std::vector<FontTag>& tags) {
     auto add_row = [=](Gtk::Widget* w){
         auto row = Gtk::make_managed<Gtk::ListBoxRow>();
         row->set_can_focus(false);
+        row->set_child(*w);
         // row->add(*w);
         // row->show_all();
         row->set_sensitive(w->get_sensitive());
@@ -1172,7 +1173,9 @@ void FontList::add_categories(const std::vector<FontTag>& tags) {
     for (auto& tag : tags) {
         auto btn = Gtk::make_managed<Gtk::CheckButton>("");
         // automatic collections in italic
-        dynamic_cast<Gtk::Label*>(btn->get_child())->set_markup("<i>" + tag.display_name + "</i>");
+        auto& label = *Gtk::make_managed<Gtk::Label>();
+        label.set_markup("<i>" + tag.display_name + "</i>");
+        btn->set_child(label);
         btn->set_active(_font_tags.is_tag_selected(tag.tag));
         btn->signal_toggled().connect([=](){
             // toggle font category
