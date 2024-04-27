@@ -44,6 +44,7 @@
 #include <glibmm/ustring.h>
 #include <span>
 #include <string>
+#include <string_view>
 #include <vector>
 
 inline constexpr auto mimeOSWB_COLOR = "application/x-oswb-color";
@@ -76,8 +77,8 @@ public:
     ColorType get_type() const { return type; }
     Rgb8bit const &get_rgb() const { return rgb; }
 
-    std::vector<char> getMIMEData(char const *mime_type) const;
-    bool fromMIMEData(char const *mime_type, std::span<char const> data);
+    std::vector<char> getMIMEData(std::string_view mime_type) const;
+    bool fromMIMEData(std::string_view mime_type, std::span<char const> data);
 
 protected:
     std::string description = C_("Paint", "None");
