@@ -499,6 +499,19 @@ void MultiPathManipulator::distributeNodes(Geom::Dim2 d)
     }
 }
 
+void MultiPathManipulator::symmetricNodes(Geom::Dim2 d)
+{
+    if (_selection.empty()) {
+        _selection.selectAll();
+    }
+    _selection.makeSymmetric(d);
+    if (d == Geom::X) {
+        _done("Make nodes horizontally symmetric");
+    } else {
+        _done("Make nodes vertically symmetric");
+    }
+}
+
 void MultiPathManipulator::reverseSubpaths()
 {
     if (_selection.empty()) {

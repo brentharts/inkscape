@@ -319,6 +319,88 @@ void ControlPointSelection::distribute(Geom::Dim2 d)
     }
 }
 
+/**
+ * Pair nodes according the their symmetry and move them until they are the same.
+ */
+void ControlPointSelection::makeSymmetric(Geom::Dim2 dim)
+{
+    typedef std::pair<SelectableControlPoint*, SelectableControlPoint*> NodePair;
+
+    if (empty()) return;
+
+    static auto move_towards = [](SelectableControlPoint *ctp, Geom::Point pt) {
+        ctp->move(Geom::middle_point(ctp->position(), pt));
+    };
+
+    // Find the mirror axis for the requested dimention
+    auto mid = _bounds->midpoint()[dim];
+    auto flip = Geom::Scale(dim ? 1 : -1, dim ? -1 : 1)
+              * Geom::Translate(dim ? 0 : mid * 2, dim ? mid * 2 : 0);
+
+    std::vector<std::pair<double, NodePair>> distances;
+
+    std::vector<SelectableControlPoint *> left_bucket;
+    std::vector<SelectableControlPoint *> right_bucket;
+    for (auto point : _points) {
+        auto pos = point->position();
+        if (pos[dim] > mid) {
+            right_bucket.push_back(point);
+        } else {
+            left_bucket.push_back(point);
+        }
+        // Add distance from the point to the axis
+        auto axis_pt = dim ? Geom::Point(pos[Geom::X], mid) : Geom::Point(mid, pos[Geom::Y]);
+        distances.emplace_back(Geom::distance(pos, axis_pt), std::make_pair(point, nullptr));
+    }
+
+    // Add the distance between each left point and each flipped right point
+    for (auto left : left_bucket) {
+        for (auto right : right_bucket) {
+            distances.emplace_back(Geom::distance(left->position(), right->position() * flip), std::make_pair(left, right));
+        }
+    }
+
+    // Sort the distances, closest points first
+    std::sort(distances.begin(), distances.end());
+
+    // Move the nodes according to their sorted distances into either pairs or center_points
+    for (auto &[dist, pair] : distances) {
+        auto left_iter = std::find(left_bucket.begin(), left_bucket.end(), pair.first);
+        if (left_iter == left_bucket.end())
+            continue; // this point was already consumed previously
+
+        if (pair.second) { // This point is not being compared to the axis
+            auto right_iter = std::find(right_bucket.begin(), right_bucket.end(), pair.second);
+            if (right_iter == right_bucket.end())
+                continue; // this point was already consumed previously
+
+            // Move towards each other's flipped position
+            pair.second->move(Geom::middle_point(pair.second->position(), pair.first->position() * flip));
+            pair.first->move(Geom::middle_point(pair.first->position(), pair.second->position() * flip));
+
+            // Now remove from right side
+            right_bucket.erase(right_iter);
+        } else {
+            // Move left point to the center so we can exaust the left bucket quickly
+            // TODO: This aligns any non-paired points with the axis, but we could delete them if they are beyond a threshold.
+            auto pos = pair.first->position();
+            pair.first->move(dim ? Geom::Point(pos[Geom::X], mid) : Geom::Point(mid, pos[Geom::Y]));
+        }
+        // Remove from left side, this only happens if there was an addition
+        left_bucket.erase(left_iter);
+
+        if (left_bucket.empty())
+            break; // No more points remaining on left side, return
+    }
+
+    // Any remaining points in the right side are center points
+    for (auto point : right_bucket) {
+        // TODO: See above todo, non-paied points might need a threshold.
+        auto pos = point->position();
+        point->move(dim ? Geom::Point(pos[Geom::X], mid) : Geom::Point(mid, pos[Geom::Y]));
+    }
+}
+
 /** Get the bounds of the selection.
  * @return Smallest rectangle containing the positions of all selected points,
  *         or nothing if the selection is empty */

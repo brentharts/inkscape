@@ -416,6 +416,9 @@
                 </attributes>
               </object>
             </child>
+            <style>
+              <class name="flat"/>
+            </style>
           </object>
         </child>
         <child>
@@ -638,6 +641,9 @@
                 </attributes>
               </object>
             </child>
+            <style>
+              <class name="flat"/>
+            </style>
           </object>
         </child>
         <child>
@@ -780,74 +786,77 @@
                 </attributes>
               </object>
             </child>
+            <style>
+              <class name="flat"/>
+            </style>
           </object>
         </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkFrame">
-        <style>
-          <class name="flat"/>
-        </style>
-        <property name="child">
-          <object class="GtkBox">
-            <property name="margin-start">4</property>
-            <property name="margin-end">4</property>
-            <property name="margin-top">4</property>
-            <property name="margin-bottom">4</property>
-            <property name="spacing">4</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="label" translatable="yes" context="Abbreviation of Horizontal">H:</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSpinButton" id="remove-overlap-hgap">
-                <property name="focusable">True</property>
-                <property name="adjustment">RemoveOverlap_HGap</property>
-                <property name="numeric">True</property>
-                <property name="tooltip-text" translatable="yes">Minimum horizontal gap (in pixel units) between bounding boxes</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="margin-start">4</property>
-                <property name="label" translatable="yes">V:</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSpinButton" id="remove-overlap-vgap">
-                <property name="focusable">True</property>
-                <property name="adjustment">RemoveOverlap_VGap</property>
-                <property name="numeric">True</property>
-                <property name="tooltip-text" translatable="yes">Minimum vertical gap (in pixel units) between bounding boxes</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton" id="remove-overlap-button">
-                <property name="focusable">True</property>
-                <property name="receives-default">True</property>
-                <property name="margin-start">4</property>
-                <property name="has-frame">False</property>
-                <property name="tooltip-text" translatable="yes">Move objects as little as possible so that their bounding boxes do not overlap</property>
+        <child>
+          <object class="GtkFrame">
+            <property name="child">
+              <object class="GtkBox">
+                <property name="spacing">4</property>
                 <child>
-                  <object class="GtkImage" id="image-distribute-remove-overlaps">
-                    <property name="icon-name">distribute-remove-overlaps</property>
-                    <property name="use-fallback">True</property>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes" context="Abbreviation of Horizontal">H:</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkSpinButton" id="remove-overlap-hgap">
+                    <property name="focusable">True</property>
+                    <property name="tooltip-text" translatable="yes">Minimum horizontal gap (in pixel units) between bounding boxes</property>
+                    <property name="text" translatable="yes">0</property>
+                    <property name="adjustment">RemoveOverlap_HGap</property>
+                    <property name="numeric">True</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="margin-start">4</property>
+                    <property name="margin-start">4</property>
+                    <property name="label" translatable="yes">V:</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkSpinButton" id="remove-overlap-vgap">
+                    <property name="focusable">True</property>
+                    <property name="tooltip-text" translatable="yes">Minimum vertical gap (in pixel units) between bounding boxes</property>
+                    <property name="text" translatable="yes">0</property>
+                    <property name="adjustment">RemoveOverlap_VGap</property>
+                    <property name="numeric">True</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="remove-overlap-button">
+                    <property name="focusable">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Move objects as little as possible so that their bounding boxes do not overlap</property>
+                    <property name="margin-start">4</property>
+                    <property name="margin-start">4</property>
+                    <property name="has-frame">False</property>
+                    <child>
+                      <object class="GtkImage" id="image-distribute-remove-overlaps">
+                        <property name="icon-name">distribute-remove-overlaps</property>
+                        <property name="use-fallback">True</property>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
+            </property>
+            <child type="label">
+              <object class="GtkLabel">
+                <property name="margin-top">2</property>
+                <property name="margin-bottom">2</property>
+                <property name="label" translatable="yes">Remove overlaps</property>
+                <attributes>
+                  <attribute name="weight" value="bold"></attribute>
+                </attributes>
+              </object>
             </child>
-          </object>
-        </property>
-        <child type="label">
-          <object class="GtkLabel">
-            <property name="margin-top">2</property>
-            <property name="margin-bottom">2</property>
-            <property name="label" translatable="yes">Remove overlaps</property>
-            <attributes>
-              <attribute name="weight" value="bold"></attribute>
-            </attributes>
+            <style>
+              <class name="flat"/>
+            </style>
           </object>
         </child>
       </object>
@@ -858,152 +867,211 @@
         <property name="orientation">vertical</property>
         <property name="spacing">4</property>
         <child>
-          <object class="GtkFrame">
-            <property name="margin-bottom">4</property>
-            <style>
-              <class name="flat"/>
-            </style>
-            <property name="child">
-              <object class="GtkBox">
-                <property name="orientation">vertical</property>
+          <object class="GtkGrid">
+            <property name="margin-start">6</property>
+            <property name="margin-end">6</property>
+            <property name="margin-top">5</property>
+            <property name="margin-bottom">5</property>
+            <child>
+              <object class="GtkButton" id="align-node-horizontal">
+                <property name="focusable">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Align selected nodes to a common horizontal line</property>
+                <property name="has-frame">False</property>
                 <child>
-                  <object class="GtkBox">
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="label" translatable="yes">Relative to:</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkComboBox" id="align-relative-node">
-                        <property name="margin-start">4</property>
-                        <property name="model">RelativeToNode</property>
-                        <property name="active">0</property>
-                        <property name="id-column">1</property>
-                        <child>
-                          <object class="GtkCellRendererText"/>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                    </child>
+                  <object class="GtkImage" id="image-align-vertical-node">
+                    <property name="icon-name">align-vertical-node</property>
+                    <property name="use-fallback">True</property>
                   </object>
                 </child>
-                <child>
-                  <object class="GtkGrid">
-                    <child>
-                      <object class="GtkButton" id="align-node-horizontal">
-                        <property name="focusable">True</property>
-                        <property name="receives-default">True</property>
-                        <property name="has-frame">False</property>
-                        <property name="tooltip-text" translatable="yes">Align selected nodes to a common horizontal line</property>
-                        <child>
-                          <object class="GtkImage" id="image-align-vertical-node">
-                            <property name="icon-name">align-vertical-node</property>
-                            <property name="use-fallback">True</property>
-                          </object>
-                        </child>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="align-node-vertical">
-                        <property name="focusable">True</property>
-                        <property name="receives-default">True</property>
-                        <property name="has-frame">False</property>
-                        <property name="tooltip-text" translatable="yes">Align selected nodes to a common vertical line</property>
-                        <child>
-                          <object class="GtkImage" id="image-align-horizontal-node">
-                            <property name="icon-name">align-horizontal-node</property>
-                            <property name="use-fallback">True</property>
-                          </object>
-                        </child>
-                        <layout>
-                          <property name="column">1</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </property>
-            <child type="label">
-              <object class="GtkLabel">
-                <property name="margin-top">2</property>
-                <property name="margin-bottom">2</property>
-                <property name="label" translatable="yes">Align Nodes</property>
-                <attributes>
-                  <attribute name="weight" value="bold"></attribute>
-                </attributes>
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">0</property>
+                </layout>
               </object>
             </child>
-          </object>
-        </child>
-        <child>
-          <object class="GtkFrame">
-            <style>
-              <class name="flat"/>
-            </style>
-            <property name="child">
-              <object class="GtkBox">
-                <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkButton" id="align-node-vertical">
+                <property name="focusable">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Align selected nodes to a common vertical line</property>
+                <property name="has-frame">False</property>
                 <child>
-                  <object class="GtkGrid">
-                    <child>
-                      <object class="GtkButton">
-                        <property name="focusable">True</property>
-                        <property name="receives-default">True</property>
-                        <property name="action-name">win.node-distribute-horizontal</property>
-                        <property name="has-frame">False</property>
-                        <property name="tooltip-text" translatable="yes">Distribute selected nodes horizontally</property>
-                        <child>
-                          <object class="GtkImage" id="image-distribute-horizontal-node">
-                            <property name="icon-name">distribute-horizontal-node</property>
-                            <property name="use-fallback">True</property>
-                          </object>
-                        </child>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkButton">
-                        <property name="focusable">True</property>
-                        <property name="receives-default">True</property>
-                        <property name="action-name">win.node-distribute-vertical</property>
-                        <property name="has-frame">False</property>
-                        <property name="tooltip-text" translatable="yes">Distribute selected nodes vertically</property>
-                        <child>
-                          <object class="GtkImage" id="image-distribute-vertical-node">
-                            <property name="icon-name">distribute-vertical-node</property>
-                            <property name="use-fallback">True</property>
-                          </object>
-                        </child>
-                        <layout>
-                          <property name="column">1</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
+                  <object class="GtkImage" id="image-align-horizontal-node">
+                    <property name="icon-name">align-horizontal-node</property>
+                    <property name="use-fallback">True</property>
                   </object>
                 </child>
+                <layout>
+                  <property name="column">2</property>
+                  <property name="row">0</property>
+                </layout>
               </object>
-            </property>
-            <child type="label">
+            </child>
+            <child>
+              <object class="GtkButton" id="symmetrical-node-vertical">
+                <property name="focusable">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Attempt to make the shape symmetrical in the vertical direction.</property>
+                <property name="action-name">win.node-symmetry-vertical</property>
+                <property name="has-frame">False</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="icon-name">symmetric-vertical-node</property>
+                    <property name="use-fallback">True</property>
+                  </object>
+                </child>
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">2</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="symmetrical-node-horizontal">
+                <property name="focusable">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Attempt to make the shape symmetrical in the horizontal direction.</property>
+                <property name="action-name">win.node-symmetry-horizontal</property>
+                <property name="has-frame">False</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="icon-name">symmetric-horizontal-node</property>
+                    <property name="use-fallback">True</property>
+                  </object>
+                </child>
+                <layout>
+                  <property name="column">2</property>
+                  <property name="row">2</property>
+                </layout>
+              </object>
+            </child>
+            <child>
               <object class="GtkLabel">
+                <property name="margin-end">6</property>
                 <property name="margin-top">2</property>
                 <property name="margin-bottom">2</property>
-                <property name="label" translatable="yes">Distribute Nodes</property>
+                <property name="label" translatable="yes">Align</property>
+                <property name="xalign">0</property>
                 <attributes>
                   <attribute name="weight" value="bold"></attribute>
                 </attributes>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">0</property>
+                </layout>
               </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="focusable">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Distribute selected nodes horizontally</property>
+                <property name="action-name">win.node-distribute-horizontal</property>
+                <property name="has-frame">False</property>
+                <child>
+                  <object class="GtkImage" id="image-distribute-horizontal-node">
+                    <property name="icon-name">distribute-horizontal-node</property>
+                    <property name="use-fallback">True</property>
+                  </object>
+                </child>
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">1</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="focusable">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Distribute selected nodes vertically</property>
+                <property name="action-name">win.node-distribute-vertical</property>
+                <property name="has-frame">False</property>
+                <child>
+                  <object class="GtkImage" id="image-distribute-vertical-node">
+                    <property name="icon-name">distribute-vertical-node</property>
+                    <property name="use-fallback">True</property>
+                  </object>
+                </child>
+                <layout>
+                  <property name="column">2</property>
+                  <property name="row">1</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="margin-end">6</property>
+                <property name="margin-top">2</property>
+                <property name="margin-bottom">2</property>
+                <property name="label" translatable="yes">Distribute</property>
+                <property name="xalign">0</property>
+                <attributes>
+                  <attribute name="weight" value="bold"></attribute>
+                </attributes>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">1</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="margin-end">6</property>
+                <property name="margin-top">2</property>
+                <property name="margin-bottom">2</property>
+                <property name="label" translatable="yes">Symmetry</property>
+                <property name="xalign">0</property>
+                <attributes>
+                  <attribute name="weight" value="bold"></attribute>
+                </attributes>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">2</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">to:</property>
+                <property name="xalign">1</property>
+                <layout>
+                  <property name="column">3</property>
+                  <property name="row">0</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkComboBox" id="align-relative-node">
+                <property name="margin-start">4</property>
+                <property name="margin-start">4</property>
+                <property name="model">RelativeToNode</property>
+                <property name="active">0</property>
+                <property name="id-column">1</property>
+                <child>
+                  <object class="GtkCellRendererText"/>
+                  <attributes>
+                    <attribute name="text">0</attribute>
+                  </attributes>
+                </child>
+                <layout>
+                  <property name="column">4</property>
+                  <property name="row">0</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
         </child>
