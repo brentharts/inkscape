@@ -34,7 +34,7 @@
        id="clipPath2">
       <path
          d="M 218.516,411.055 H 343.918 V 536.321 H 218.516 Z"
-         transform="matrix(0.00797433,0,0,0.00798299,-1.742515,-3.2814372)"
+         transform="matrix(0.0079743276,0,0,0.0079829865,-1.742515,-3.2814372)"
          id="path2" />
     </clipPath>
     <clipPath
@@ -289,7 +289,7 @@
        id="clipPath51">
       <path
          d="M 47.496,595.27 H 182.605 V 699.899 H 47.496 Z"
-         transform="matrix(0.00740145,0,0,0.00955751,-0.35152717,-5.6893027)"
+         transform="matrix(0.0074014472,0,0,0.0095575107,-0.35152717,-5.6893027)"
          id="path51" />
     </clipPath>
     <clipPath
@@ -488,7 +488,7 @@
        id="clipPath144">
       <path
          d="M 351,482 H 512 V 630 H 351 Z"
-         transform="matrix(4.7873055e-4,0,0,3.7724826e-4,0.60700833,0.03793179)"
+         transform="matrix(4.7873055e-4,0,0,3.7724826e-4,0.60700833,0.037931792)"
          id="path144" />
     </clipPath>
     <linearGradient
@@ -689,7 +689,7 @@
        id="clipPath176">
       <path
          d="M 215,499 H 328 V 611 H 215 Z"
-         transform="matrix(4.7873055e-4,0,0,3.7724826e-4,0.60700833,0.03793179)"
+         transform="matrix(4.7873055e-4,0,0,3.7724826e-4,0.60700833,0.037931792)"
          id="path176" />
     </clipPath>
     <clipPath
@@ -744,7 +744,7 @@
        id="clipPath182">
       <path
          d="m 58,520 h 122 v 90 H 58 Z"
-         transform="matrix(4.7873055e-4,0,0,3.7724826e-4,0.60700833,0.03793179)"
+         transform="matrix(4.7873055e-4,0,0,3.7724826e-4,0.60700833,0.037931792)"
          id="path182" />
     </clipPath>
     <clipPath
@@ -947,7 +947,7 @@
        transform="matrix(0,3.7800227,-3.7841267,0,0,0)" />
     <path
        id="path37"
-       d="m 212.0056,-158.45007 c 6.66537,1e-5 13.33076,3e-5 19.99615,4e-5 -10e-6,6.66539 -3e-5,13.33077 -4e-5,19.99615 -6.66539,0 -13.33076,0 -19.99611,0 0,-6.6654 0,-13.3308 0,-19.99619 z"
+       d="m 212.0056,-158.45007 c 6.66537,1e-5 13.33076,3e-5 19.99615,4e-5 -1e-5,6.66539 -3e-5,13.33077 -4e-5,19.99615 -6.66539,0 -13.33076,0 -19.99611,0 0,-6.6654 0,-13.3308 0,-19.99619 z"
        style="fill:#d28080;fill-opacity:1;fill-rule:nonzero;stroke:none"
        transform="matrix(0,3.7800227,-3.7841267,0,0,0)" />
     <path
@@ -1180,7 +1180,7 @@
          transform="matrix(1.3333333,0,0,1.330884,814.66667,0)" />
       <path
          id="path93"
-         d="m 71.401,665.751 -12.012,6.942 10e-4,-13.884 z"
+         d="m 71.401,665.751 -12.012,6.942 0.001,-13.884 z"
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.85158;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          transform="matrix(1.3333333,-0.28924267,0.28977467,1.330884,814.66667,0)" />
       <path

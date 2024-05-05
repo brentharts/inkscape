@@ -768,6 +768,13 @@ add_cli_test(action_stroke-to-path_varied
                         EXPECTED_FILES stroke-to-path-variations_out.svg
                         TEST_SCRIPT match_regex_fail.sh stroke-to-path-variations_out.svg "(#mixed)|(#fillet)|(<text)|(<flow)|(<use)")
 
+# stroke-to-path, https://gitlab.com/inkscape/inkscape/-/issues/3947
+add_cli_test(actions-stroke-to-path-3947 INPUT_FILENAME actions-stroke-to-path-3947.svg
+                                         PARAMETERS --actions=select-by-id:g1$<SEMICOLON>object-stroke-to-path
+                                         OUTPUT_FILENAME actions-stroke-to-path-3947_output.svg
+                                         FUZZYREF_FILENAME actions-stroke-to-path-3947.svg
+                                         FUZZ_PERCENTAGE 3)
+
 # object-to-path
 add_cli_test(actions-object-to-path        INPUT_FILENAME areas.svg
                                            PARAMETERS --actions=select-by-id:MyRect$<SEMICOLON>object-to-path$<SEMICOLON>export-id:MyRect$<SEMICOLON>export-id-only

@@ -201,23 +201,62 @@ TEST(SvgLengthTest, testPlaces)
 {
     struct testd_t
     {
-        char const *str;
+        std::string str;
         double val;
         int prec;
         int minexp;
     };
 
     testd_t const precTests[] = {
+        {"7.6e5", 761929.18978947023, 2, -8},
+        {"76000", 76192.918978947023, 2, -8},
+        {"7600", 7619.2918978947023, 2, -8},
         {"760", 761.92918978947023, 2, -8},
         {"761.9", 761.92918978947023, 4, -8},
+        {"76.19", 76.192918978947023, 4, -8},
+        {"7.619", 7.6192918978947023, 4, -8},
+        {"0.7619", 0.76192918978947023, 4, -8},
+        {"0.07619", 0.076192918978947023, 4, -8},
+        {"0.007619", 0.0076192918978947023, 4, -8},
+        {"7.619e-4", 0.00076192918978947023, 4, -8},
+        {"7.619e-5", 0.000076192918978947023, 4, -8},
+        {"7.619e-6", 0.0000076192918978947023, 4, -8},
+        {"7.619e-7", 0.00000076192918978947023, 4, -8},
+        {"7.619e-8", 0.000000076192918978947023, 4, -8},
+
+        // Number smaller than 10^min_exp is truncated
+        {"0", 0.0000000076192918978947023, 4, -8},
+        {"0", -0.0000000076192918978947023, 4, -8},
+
+        // trailing 0s are omitted
+        {"7", 7, 4, -8},
+        {"70", 70, 4, -8},
+        {"0.7", 0.7, 4, -8},
+        {"7e10", 7e10, 4, -8},
+        {"7e-8", 7e-8, 4, -8},
+
+        // Exponent of 10 edge cases
+        {"1e-7", 1e-7, 4, -8},
+        {"1e-6", 1e-6, 4, -8},
+        {"1e-5", 1e-5, 4, -8},
+        {"1e-4", 1e-4, 4, -8},
+        {"0.001", 1e-3, 4, -8},
+        {"0.01", 1e-2, 4, -8},
+        {"0.1", 1e-1, 4, -8},
+        {"1", 1, 4, -8},
+        {"10", 10, 4, -8},
+        {"100", 100, 4, -8},
+        {"1000", 1000, 4, -8},
+        {"10000", 1e4, 4, -8},
+        {"100000", 1e5, 4, -8},
+        {"1000000", 1e6, 4, -8},
+        {"1e7", 1e7, 4, -8},
     };
 
-    for (size_t i = 0; i < G_N_ELEMENTS(precTests); i++) {
-        std::string buf;
-        buf.append(sp_svg_number_write_de(precTests[i].val, precTests[i].prec, precTests[i].minexp));
-        unsigned int retval = buf.length();
-        ASSERT_EQ( retval, strlen(precTests[i].str)) << "Number of chars written";
-        ASSERT_EQ( std::string(buf), std::string(precTests[i].str)) << "Numeric string written";
+    for (auto test : precTests) {
+        std::string res = sp_svg_number_write_de(test.val, test.prec, test.minexp);
+        EXPECT_EQ(res.length(), test.str.length()) << "Number of chars written";
+        EXPECT_EQ(res, test.str) << "Numeric string written";
     }
 }
 
