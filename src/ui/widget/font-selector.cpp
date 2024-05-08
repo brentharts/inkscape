@@ -14,12 +14,10 @@
 #include <glibmm/i18n.h>
 #include <glibmm/markup.h>
 #include <glibmm/value.h>
+#include <gdkmm/contentprovider.h>
 #include <gtkmm/dragsource.h>
 #include <gtkmm/grid.h>
 #include <sigc++/functors/mem_fun.h>
-#include <stdexcept>
-#include <string>
-#include <vector>
 
 #include "libnrtype/font-factory.h"
 #include "libnrtype/font-instance.h"
@@ -33,12 +31,16 @@
 
 namespace Inkscape::UI::Widget {
 
-FontSelector::FontSelector(bool with_size, bool with_variations)
-    : Gtk::Box(Gtk::Orientation::VERTICAL)
+std::unique_ptr<FontSelectorInterface> FontSelector::create_font_selector() {
+    return std::make_unique<FontSelector>();
+}
+
+FontSelector::FontSelector (bool with_size, bool with_variations)
+    : Gtk::Box()
     , family_frame(_("Font family"))
     , style_frame(C_("Font selector", "Style"))
     , size_label(_("Font size"))
-    , size_combobox(true) // With entry
+    , size_combobox(true)   // With entry
     , signal_block(false)
     , font_size(18)
 {
@@ -517,7 +519,8 @@ FontSelector::on_variations_changed() {
 void
 FontSelector::changed_emit() {
     signal_block = true;
-    signal_changed.emit (get_fontspec());
+    _signal_changed.emit (get_fontspec());
+    _signal_apply.emit();
     if (initial) {
         initial = false;
         family_treecolumn.unset_cell_data_func (family_cell);
