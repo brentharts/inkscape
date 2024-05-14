@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2023-06-08 13:53+0200\n"
-"PO-Revision-Date: 2024-05-14 06:30+0200\n"
+"PO-Revision-Date: 2024-05-14 06:42+0200\n"
 "Last-Translator: Imre Eilertsen <imreeil42@gmail.com>\n"
 "Language-Team: American English <kde-i18n-doc@kde.org>\n"
 "Language: nb\n"
@@ -38907,7 +38907,7 @@ msgstr ""
 
 #: ../share/ui/inkscape-about.glade:183
 msgid "List of translators"
-msgstr ""
+msgstr "Liste over oversettere"
 
 #: ../share/ui/inkscape-about.glade:185
 msgid "Translators"
@@ -38925,7 +38925,7 @@ msgstr ""
 
 #: ../share/ui/inkscape-about.glade:257
 msgid "Inkscape license"
-msgstr ""
+msgstr "Inkscape-lisens"
 
 #: ../share/ui/inkscape-about.glade:286
 msgctxt ""
@@ -38998,7 +38998,7 @@ msgstr "Systemets standard"
 
 #: ../share/ui/inkscape-start.glade:262
 msgid "Classic Inkscape"
-msgstr ""
+msgstr "Klassisk Inkscape"
 
 #: ../share/ui/inkscape-start.glade:344
 msgid ""
@@ -39051,7 +39051,7 @@ msgstr "Takk!"
 
 #: ../share/ui/inkscape-start.glade:973
 msgid "Supported by You"
-msgstr ""
+msgstr "Støttet av deg"
 
 #: ../share/ui/inkscape-start.glade:1008
 msgctxt "Welcome dialog"
@@ -39065,7 +39065,7 @@ msgstr ""
 
 #: ../share/ui/inkscape-start.glade:1082
 msgid "Show this every time"
-msgstr ""
+msgstr "Vis dette hver gang"
 
 #: ../share/ui/inkscape-start.glade:1098
 msgid "New Document"
@@ -39073,7 +39073,7 @@ msgstr "Nytt dokument"
 
 #: ../share/ui/inkscape-start.glade:1129
 msgid "Time to Draw"
-msgstr ""
+msgstr "Tid for å tegne"
 
 #. Not automatic, but will be turned into start-welcome-text.svg
 #: ../share/ui/inkscape-start.glade:1179
