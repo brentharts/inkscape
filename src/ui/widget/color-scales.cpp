@@ -24,6 +24,7 @@
 #include <gtkmm/image.h>
 #include <gtkmm/label.h>
 #include <gtkmm/spinbutton.h>
+#include <gtkmm/text.h>
 
 #include "oklab.h"
 #include "preferences.h"
@@ -281,6 +282,10 @@ void ColorScales<MODE>::_initUI(bool no_alpha)
 
         /* Spinbutton */
         _b[i] = Gtk::make_managed<Gtk::SpinButton>(_a[i], 1.0);
+        auto widget = dynamic_cast<Gtk::Text*>(_b[i]->get_first_child());
+        if (widget) {
+            widget->set_input_hints(Gtk::InputHints::NO_EMOJI);
+        }
         sp_dialog_defocus_on_enter(*_b[i]);
         _l[i]->set_mnemonic_widget(*_b[i]);
         _b[i]->set_visible(true);
