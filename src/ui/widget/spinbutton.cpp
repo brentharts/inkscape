@@ -15,6 +15,7 @@
 #include <gtkmm/object.h>
 #include <gtkmm/popovermenu.h>
 #include <gtkmm/checkbutton.h>
+#include <gtkmm/text.h>
 #include <memory>
 #include <sigc++/functors/mem_fun.h>
 
@@ -59,6 +60,11 @@ void SpinButton::_construct()
     signal_input().connect(sigc::mem_fun(*this, &SpinButton::on_input), true);
 
     signal_destroy().connect([this] { _unparentChildren(); });
+
+    auto widget = dynamic_cast<Gtk::Text*>(this->get_first_child());
+    if (widget) {
+        widget->set_input_hints(Gtk::InputHints::NO_EMOJI);
+    }
 }
 
 int SpinButton::on_input(double &newvalue)
