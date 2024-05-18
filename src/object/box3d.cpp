@@ -110,9 +110,7 @@ void SPBox3D::set(SPAttr key, const gchar* value) {
 
     switch (key) {
         case SPAttr::INKSCAPE_BOX3D_PERSPECTIVE_ID:
-            if ( value && box->persp_href && ( strcmp(value, box->persp_href) == 0 ) ) {
-                /* No change, do nothing. */
-            } else {
+            if (!(value && box->persp_href && strcmp(value, box->persp_href) == 0)) {
                 if (box->persp_href) {
                     g_free(box->persp_href);
                     box->persp_href = nullptr;
@@ -159,18 +157,12 @@ void SPBox3D::set(SPAttr key, const gchar* value) {
 /**
  * Gets called when (re)attached to another perspective.
  */
-static void
-box3d_ref_changed(SPObject *old_ref, SPObject *ref, SPBox3D *box)
+static void box3d_ref_changed(SPObject *old_ref, SPObject *ref, SPBox3D *box)
 {
-    if (old_ref) {
-        auto oldPersp = cast<Persp3D>(old_ref);
-        if (oldPersp) {
-            oldPersp->remove_box(box);
-        }
+    if (auto const oldPersp = cast<Persp3D>(old_ref); oldPersp && old_ref) {
+        oldPersp->remove_box(box);
     }
-    auto persp = cast<Persp3D>(ref);
-    if ( persp && (ref != box) ) // FIXME: Comparisons sane?
-    {
+    if (auto const persp = cast<Persp3D>(ref); persp && ref != box) { // FIXME: Comparisons sane?
         persp->add_box(box);
     }
 }
@@ -199,7 +191,6 @@ Inkscape::XML::Node* SPBox3D::write(Inkscape::XML::Document *xml_doc, Inkscape::
     }
 
     if (flags & SP_OBJECT_WRITE_EXT) {
-
         if (box->persp_href) {
             repr->setAttribute("inkscape:perspectiveID", box->persp_href);
         } else {
@@ -243,8 +234,7 @@ void SPBox3D::position_set()
     /* This draws the curve and calls requestDisplayUpdate() for each side (the latter is done in
        Box3DSide::position_set() to avoid update conflicts with the parent box) */
     for (auto& obj: this->children) {
-        auto side = cast<Box3DSide>(&obj);
-        if (side) {
+        if (auto const side = cast<Box3DSide>(&obj)) {
             side->position_set();
         }
     }
@@ -259,8 +249,7 @@ Geom::Affine SPBox3D::set_transform(Geom::Affine const &xform) {
     gdouble const sh = hypot(ret[2], ret[3]);
 
     for (auto& child: children) {
-        auto childitem = cast<SPItem>(&child);
-        if (childitem) {
+        if (auto const childitem = cast<SPItem>(&child)) {
             // Adjust stroke width
             childitem->adjust_stroke(sqrt(fabs(sw * sh)));
 
@@ -336,7 +325,7 @@ static double remember_snap_threshold = 30;
 static guint remember_snap_index = 0;
 
 // constant for sizing the array of points to be considered:
-static const int MAX_POINT_COUNT = 4;
+static constexpr int MAX_POINT_COUNT = 4;
 
 static Proj::Pt3
 box3d_snap (SPBox3D *box, int id, Proj::Pt3 const &pt_proj, Proj::Pt3 const &start_pt) {
@@ -418,11 +407,10 @@ box3d_snap (SPBox3D *box, int id, Proj::Pt3 const &pt_proj, Proj::Pt3 const &sta
 
 SPBox3D * SPBox3D::createBox3D(SPItem * parent)
 {
-    SPBox3D *box3d = nullptr;
     Inkscape::XML::Document *xml_doc = parent->document->getReprDoc();
     Inkscape::XML::Node *repr = xml_doc->createElement("svg:g");
     repr->setAttribute("sodipodi:type", "inkscape:box3d");
-    box3d = reinterpret_cast<SPBox3D *>(parent->appendChildRepr(repr));
+    SPBox3D *box3d = reinterpret_cast<SPBox3D *>(parent->appendChildRepr(repr));
     return box3d;
 }
 
@@ -603,7 +591,7 @@ box3d_half_line_crosses_joining_line (Geom::Point const &A, Geom::Point const &B
         return false;
     }
 
-    Geom::Point E = lineAB.pointAt((*inters).ta); // the point of intersection
+    Geom::Point const E = lineAB.pointAt(inters->ta); // the point of intersection
 
     if ((dot(C,n0) < d0) == (dot(D,n0) < d0)) {
         // C and D lie on the same side of the line AB
@@ -638,9 +626,7 @@ box3d_XY_axes_are_swapped (SPBox3D *box) {
 static inline void
 box3d_aux_set_z_orders (int z_orders[6], int a, int b, int c, int d, int e, int f) {
     // TODO add function argument: SPDocument *doc = box->document
-    auto doc = SP_ACTIVE_DOCUMENT;
-
-    if (doc->is_yaxisdown()) {
+    if (auto const doc = SP_ACTIVE_DOCUMENT; doc->is_yaxisdown()) {
         std::swap(a, f);
         std::swap(b, e);
         std::swap(c, d);
@@ -714,10 +700,8 @@ box3d_set_new_z_orders_case1 (SPBox3D *box, int z_orders[6], Box3D::Axis central
     // note: in some of the case distinctions below we rely upon the fact that oaxis1 and oaxis2 are ordered
     Box3D::Axis oaxis1 = Box3D::get_remaining_axes(fin_axis).first;
     Box3D::Axis oaxis2 = Box3D::get_remaining_axes(fin_axis).second;
-    int inside1 = 0;
-    int inside2 = 0;
-    inside1 = box->pt_lies_in_PL_sector (vp, 3, 3 ^ oaxis2, oaxis1);
-    inside2 = box->pt_lies_in_PL_sector (vp, 3, 3 ^ oaxis1, oaxis2);
+    int const inside1 = box->pt_lies_in_PL_sector(vp, 3, 3 ^ oaxis2, oaxis1);
+    int const inside2 = box->pt_lies_in_PL_sector(vp, 3, 3 ^ oaxis1, oaxis2);
 
     bool swapped = box3d_XY_axes_are_swapped(box);
 
@@ -794,61 +778,55 @@ box3d_set_new_z_orders_case2 (SPBox3D *box, int z_orders[6], Box3D::Axis central
         case Box3D::X:
             if (!swapped) {
                 if (insidezy == -1) {
-                    box3d_aux_set_z_orders (z_orders, 2, 4, 0, 1, 3, 5);
+                    box3d_aux_set_z_orders(z_orders, 2, 4, 0, 1, 3, 5);
                 } else if (insidexy == 1) {
-                    box3d_aux_set_z_orders (z_orders, 2, 4, 0, 5, 1, 3);
+                    box3d_aux_set_z_orders(z_orders, 2, 4, 0, 5, 1, 3);
                 } else {
-                    box3d_aux_set_z_orders (z_orders, 2, 4, 0, 1, 3, 5);
+                    box3d_aux_set_z_orders(z_orders, 2, 4, 0, 1, 3, 5);
                 }
             } else {
                 if (insideyz == -1) {
-                    box3d_aux_set_z_orders (z_orders, 3, 1, 5, 0, 2, 4);
+                    box3d_aux_set_z_orders(z_orders, 3, 1, 5, 0, 2, 4);
+                } else if (insidexy == 0) {
+                    box3d_aux_set_z_orders(z_orders, 3, 5, 1, 0, 2, 4);
                 } else {
-                    if (!swapped) {
-                        box3d_aux_set_z_orders (z_orders, 3, 1, 5, 2, 4, 0);
-                    } else {
-                        if (insidexy == 0) {
-                            box3d_aux_set_z_orders (z_orders, 3, 5, 1, 0, 2, 4);
-                        } else {
-                            box3d_aux_set_z_orders (z_orders, 3, 1, 5, 0, 2, 4);
-                        }
-                    }
+                    box3d_aux_set_z_orders(z_orders, 3, 1, 5, 0, 2, 4);
                 }
             }
             break;
         case Box3D::Y:
             if (!swapped) {
                 if (insideyz == 1) {
-                    box3d_aux_set_z_orders (z_orders, 2, 3, 1, 0, 5, 4);
+                    box3d_aux_set_z_orders(z_orders, 2, 3, 1, 0, 5, 4);
                 } else {
-                    box3d_aux_set_z_orders (z_orders, 2, 3, 1, 5, 0, 4);
+                    box3d_aux_set_z_orders(z_orders, 2, 3, 1, 5, 0, 4);
                 }
             } else {
                 if (insideyx == 1) {
-                    box3d_aux_set_z_orders (z_orders, 4, 0, 5, 1, 3, 2);
+                    box3d_aux_set_z_orders(z_orders, 4, 0, 5, 1, 3, 2);
                 } else {
-                    box3d_aux_set_z_orders (z_orders, 5, 0, 4, 1, 3, 2);
+                    box3d_aux_set_z_orders(z_orders, 5, 0, 4, 1, 3, 2);
                 }
             }
             break;
         case Box3D::Z:
             if (!swapped) {
                 if (insidezy == 1) {
-                    box3d_aux_set_z_orders (z_orders, 2, 1, 0, 4, 3, 5);
+                    box3d_aux_set_z_orders(z_orders, 2, 1, 0, 4, 3, 5);
                 } else if (insidexy == -1) {
-                    box3d_aux_set_z_orders (z_orders, 2, 1, 0, 5, 4, 3);
+                    box3d_aux_set_z_orders(z_orders, 2, 1, 0, 5, 4, 3);
                 } else {
-                    box3d_aux_set_z_orders (z_orders, 2, 0, 1, 5, 3, 4);
+                    box3d_aux_set_z_orders(z_orders, 2, 0, 1, 5, 3, 4);
                 }
             } else {
-                box3d_aux_set_z_orders (z_orders, 3, 4, 5, 1, 0, 2);
+                box3d_aux_set_z_orders(z_orders, 3, 4, 5, 1, 0, 2);
             }
             break;
         case Box3D::NONE:
             if (!swapped) {
-                box3d_aux_set_z_orders (z_orders, 2, 3, 4, 1, 0, 5);
+                box3d_aux_set_z_orders(z_orders, 2, 3, 4, 1, 0, 5);
             } else {
-                box3d_aux_set_z_orders (z_orders, 5, 0, 1, 4, 3, 2);
+                box3d_aux_set_z_orders(z_orders, 5, 0, 1, 4, 3, 2);
             }
             break;
         default:
@@ -869,11 +847,11 @@ box3d_everted_directions (SPBox3D *box) {
     box->orig_corner7.normalize();
 
     if (box->orig_corner0[Proj::X] < box->orig_corner7[Proj::X])
-        ev = (Box3D::Axis) (ev ^ Box3D::X);
+        ev = static_cast<Box3D::Axis>(ev ^ Box3D::X);
     if (box->orig_corner0[Proj::Y] < box->orig_corner7[Proj::Y])
-        ev = (Box3D::Axis) (ev ^ Box3D::Y);
+        ev = static_cast<Box3D::Axis>(ev ^ Box3D::Y);
     if (box->orig_corner0[Proj::Z] > box->orig_corner7[Proj::Z]) // FIXME: Remove the need to distinguish signs among the cases
-        ev = (Box3D::Axis) (ev ^ Box3D::Z);
+        ev = static_cast<Box3D::Axis>(ev ^ Box3D::Z);
 
     return ev;
 }
@@ -884,7 +862,7 @@ box3d_swap_sides(int z_orders[6], Box3D::Axis axis) {
     int pos2 = -1;
 
     for (int i = 0; i < 6; ++i) {
-        if (!(Box3D::int_to_face(z_orders[i]).first == axis)) {
+        if (Box3D::int_to_face(z_orders[i]).first != axis) {
             if (pos1 == -1) {
                 pos1 = i;
             } else {
@@ -952,89 +930,88 @@ SPBox3D::recompute_z_orders () {
             box3d_set_new_z_orders_case2(this, z_orders, central_axis, axis_infinite);
             break;
         default:
-        /*
-         * For each VP F, check whether the half-line from the corner3 to F crosses the line segment
-         * joining the other two VPs. If this is the case, it determines the "central" corner from
-         * which the visible sides can be deduced. Otherwise, corner3 is the central corner.
-         */
-        // FIXME: We should eliminate the use of Geom::Point altogether
-        Box3D::Axis central_axis = Box3D::NONE;
-        Geom::Point vp_x = persp->get_VP(Proj::X).affine();
-        Geom::Point vp_y = persp->get_VP(Proj::Y).affine();
-        Geom::Point vp_z = persp->get_VP(Proj::Z).affine();
-        Geom::Point vpx(vp_x[Geom::X], vp_x[Geom::Y]);
-        Geom::Point vpy(vp_y[Geom::X], vp_y[Geom::Y]);
-        Geom::Point vpz(vp_z[Geom::X], vp_z[Geom::Y]);
+            /*
+             * For each VP F, check whether the half-line from the corner3 to F crosses the line segment
+             * joining the other two VPs. If this is the case, it determines the "central" corner from
+             * which the visible sides can be deduced. Otherwise, corner3 is the central corner.
+             */
+            // FIXME: We should eliminate the use of Geom::Point altogether
+            central_axis = Box3D::NONE;
+            Geom::Point vp_x = persp->get_VP(Proj::X).affine();
+            Geom::Point vp_y = persp->get_VP(Proj::Y).affine();
+            Geom::Point vp_z = persp->get_VP(Proj::Z).affine();
+            Geom::Point vpx(vp_x[Geom::X], vp_x[Geom::Y]);
+            Geom::Point vpy(vp_y[Geom::X], vp_y[Geom::Y]);
+            Geom::Point vpz(vp_z[Geom::X], vp_z[Geom::Y]);
 
-        Geom::Point c3 = this->get_corner_screen(3, false);
-        Geom::Point corner3(c3[Geom::X], c3[Geom::Y]);
+            Geom::Point corner3(c3[Geom::X], c3[Geom::Y]);
 
-        if (box3d_half_line_crosses_joining_line (corner3, vpx, vpy, vpz)) {
-            central_axis = Box3D::X;
-        } else if (box3d_half_line_crosses_joining_line (corner3, vpy, vpz, vpx)) {
-            central_axis = Box3D::Y;
-        } else if (box3d_half_line_crosses_joining_line (corner3, vpz, vpx, vpy)) {
-            central_axis = Box3D::Z;
-        }
+            if (box3d_half_line_crosses_joining_line(corner3, vpx, vpy, vpz)) {
+                central_axis = Box3D::X;
+            } else if (box3d_half_line_crosses_joining_line(corner3, vpy, vpz, vpx)) {
+                central_axis = Box3D::Y;
+            } else if (box3d_half_line_crosses_joining_line(corner3, vpz, vpx, vpy)) {
+                central_axis = Box3D::Z;
+            }
 
-        // FIXME: At present, this is not used.  Why is it calculated?
-        /*
-        unsigned int central_corner = 3 ^ central_axis;
-        if (central_axis == Box3D::Z) {
-            central_corner = central_corner ^ Box3D::XYZ;
-        }
-        if (box3d_XY_axes_are_swapped(this)) {
-            central_corner = central_corner ^ Box3D::XYZ;
-        }
-        */
+            // FIXME: At present, this is not used.  Why is it calculated?
+            /*
+            unsigned int central_corner = 3 ^ central_axis;
+            if (central_axis == Box3D::Z) {
+                central_corner = central_corner ^ Box3D::XYZ;
+            }
+            if (box3d_XY_axes_are_swapped(this)) {
+                central_corner = central_corner ^ Box3D::XYZ;
+            }
+            */
 
-        Geom::Point c1(this->get_corner_screen(1, false));
-        Geom::Point c2(this->get_corner_screen(2, false));
-        Geom::Point c7(this->get_corner_screen(7, false));
+            Geom::Point c1(this->get_corner_screen(1, false));
+            Geom::Point c2(this->get_corner_screen(2, false));
+            Geom::Point c7(this->get_corner_screen(7, false));
 
-        Geom::Point corner1(c1[Geom::X], c1[Geom::Y]);
-        Geom::Point corner2(c2[Geom::X], c2[Geom::Y]);
-        Geom::Point corner7(c7[Geom::X], c7[Geom::Y]);
-        // FIXME: At present we don't use the information about central_corner computed above.
-        switch (central_axis) {
-            case Box3D::Y:
-                if (!box3d_half_line_crosses_joining_line(vpz, vpy, corner3, corner2)) {
-                    box3d_aux_set_z_orders (z_orders, 2, 3, 1, 5, 0, 4);
-                } else {
-                    // degenerate case
-                    box3d_aux_set_z_orders (z_orders, 2, 1, 3, 0, 5, 4);
-                }
-                break;
+            Geom::Point corner1(c1[Geom::X], c1[Geom::Y]);
+            Geom::Point corner2(c2[Geom::X], c2[Geom::Y]);
+            Geom::Point corner7(c7[Geom::X], c7[Geom::Y]);
+            // FIXME: At present we don't use the information about central_corner computed above.
+            switch (central_axis) {
+                case Box3D::Y:
+                    if (!box3d_half_line_crosses_joining_line(vpz, vpy, corner3, corner2)) {
+                        box3d_aux_set_z_orders(z_orders, 2, 3, 1, 5, 0, 4);
+                    } else {
+                        // degenerate case
+                        box3d_aux_set_z_orders(z_orders, 2, 1, 3, 0, 5, 4);
+                    }
+                    break;
 
-            case Box3D::Z:
-                if (box3d_half_line_crosses_joining_line(vpx, vpz, corner3, corner1)) {
-                    // degenerate case
-                    box3d_aux_set_z_orders (z_orders, 2, 0, 1, 4, 3, 5);
-                } else if (box3d_half_line_crosses_joining_line(vpx, vpy, corner3, corner7)) {
-                    // degenerate case
-                    box3d_aux_set_z_orders (z_orders, 2, 1, 0, 5, 3, 4);
-                } else {
-                    box3d_aux_set_z_orders (z_orders, 2, 1, 0, 3, 4, 5);
-                }
-                break;
+                case Box3D::Z:
+                    if (box3d_half_line_crosses_joining_line(vpx, vpz, corner3, corner1)) {
+                        // degenerate case
+                        box3d_aux_set_z_orders(z_orders, 2, 0, 1, 4, 3, 5);
+                    } else if (box3d_half_line_crosses_joining_line(vpx, vpy, corner3, corner7)) {
+                        // degenerate case
+                        box3d_aux_set_z_orders(z_orders, 2, 1, 0, 5, 3, 4);
+                    } else {
+                        box3d_aux_set_z_orders(z_orders, 2, 1, 0, 3, 4, 5);
+                    }
+                    break;
 
-            case Box3D::X:
-                if (box3d_half_line_crosses_joining_line(vpz, vpx, corner3, corner1)) {
-                    // degenerate case
-                    box3d_aux_set_z_orders (z_orders, 2, 1, 0, 4, 5, 3);
-                } else {
-                    box3d_aux_set_z_orders (z_orders, 2, 4, 0, 5, 1, 3);
-                }
-                break;
+                case Box3D::X:
+                    if (box3d_half_line_crosses_joining_line(vpz, vpx, corner3, corner1)) {
+                        // degenerate case
+                        box3d_aux_set_z_orders(z_orders, 2, 1, 0, 4, 5, 3);
+                    } else {
+                        box3d_aux_set_z_orders(z_orders, 2, 4, 0, 5, 1, 3);
+                    }
+                    break;
 
-            case Box3D::NONE:
-                box3d_aux_set_z_orders (z_orders, 2, 3, 4, 1, 0, 5);
-                break;
+                case Box3D::NONE:
+                    box3d_aux_set_z_orders(z_orders, 2, 3, 4, 1, 0, 5);
+                    break;
 
-            default:
-                g_assert_not_reached();
-                break;
-        } // end default case
+                default:
+                    g_assert_not_reached();
+                    break;
+            } // end default case
     }
 
     // TODO: If there are still errors in z-orders of everted boxes, we need to choose a variable corner
@@ -1062,8 +1039,7 @@ static std::map<int, Box3DSide *> box3d_get_sides(SPBox3D *box)
 {
     std::map<int, Box3DSide *> sides;
     for (auto& obj: box->children) {
-        auto side = cast<Box3DSide>(&obj);
-        if (side) {
+        if (auto const side = cast<Box3DSide>(&obj)) {
             sides[Box3D::face_to_int(side->getFaceId())] = side;
         }
     }
@@ -1082,7 +1058,7 @@ SPBox3D::set_z_orders () {
         for (int z_order : this->z_orders) {
             side = sides.find(z_order);
             if (side != sides.end()) {
-                ((*side).second)->lowerToBottom();
+                side->second->lowerToBottom();
             }
         }
     }
@@ -1170,9 +1146,9 @@ box3d_check_for_swapped_coords(SPBox3D *box, Proj::Axis axis, bool smaller) {
     box->orig_corner7.normalize();
 
     if ((box->orig_corner0[axis] < box->orig_corner7[axis]) != smaller) {
-        box->swapped = (Box3D::Axis) (box->swapped | Proj::toAffine(axis));
+        box->swapped = static_cast<Box3D::Axis>(box->swapped | Proj::toAffine(axis));
     } else {
-        box->swapped = (Box3D::Axis) (box->swapped & ~Proj::toAffine(axis));
+        box->swapped = static_cast<Box3D::Axis>(box->swapped & ~Proj::toAffine(axis));
     }
 }
 
@@ -1200,8 +1176,7 @@ SPBox3D::check_for_swapped_coords() {
 }
 
 static void box3d_extract_boxes_rec(SPObject *obj, std::list<SPBox3D *> &boxes) {
-    auto box = cast<SPBox3D>(obj);
-    if (box) {
+    if (auto const box = cast<SPBox3D>(obj)) {
         boxes.push_back(box);
     } else if (is<SPGroup>(obj)) {
         for (auto& child: obj->children) {
@@ -1267,8 +1242,7 @@ SPGroup *SPBox3D::convert_to_group()
     Inkscape::XML::Node *grepr = xml_doc->createElement("svg:g");
 
     for (auto& obj: this->children) {
-        auto side = cast<Box3DSide>(&obj);
-        if (side) {
+        if (auto const side = cast<Box3DSide>(&obj)) {
             Inkscape::XML::Node *repr = side->convert_to_path();
             grepr->appendChild(repr);
         } else {
