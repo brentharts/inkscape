@@ -19,37 +19,14 @@
     <property name="step-increment">0.5</property>
     <property name="page-increment">1</property>
   </object>
-  <object class="GtkPopover" id="popover1">
-    <property name="child">
-      <object class="GtkBox" id="popover_box1">
-        <property name="valign">center</property>
-        <property name="spacing">3</property>
-      </object>
-    </property>
-  </object>
   <object class="GtkBox" id="pencil-toolbar">
     <property name="halign">start</property>
     <property name="valign">center</property>
-    <property name="spacing">3</property>
     <property name="hexpand">True</property>
-    <child>
-      <object class="GtkMenuButton" id="menu_btn1">
-        <property name="focusable">True</property>
-        <property name="focus-on-click">False</property>
-        <property name="receives-default">True</property>
-        <property name="has-frame">False</property>
-        <property name="popover">popover1</property>
-        <property name="icon-name">go-down</property>
-      </object>
-    </child>
     <child>
       <object class="GtkLabel">
         <property name="tooltip-text" translatable="yes">Mode of new lines drawn by this tool</property>
-        <property name="margin-start">3</property>
         <property name="label" translatable="yes">Mode:</property>
-        <style>
-          <class name="tag1"/>
-        </style>
       </object>
     </child>
     <child>
@@ -57,6 +34,7 @@
         <property name="spacing">3</property>
         <child>
           <object class="GtkToggleButton" id="mode_buttons_group">
+            <property name="valign">center</property>
             <property name="focusable">True</property>
             <property name="focus-on-click">False</property>
             <property name="tooltip-text" translatable="yes">Create regular Bezier path</property>
@@ -66,6 +44,7 @@
         </child>
         <child>
           <object class="GtkToggleButton">
+            <property name="valign">center</property>
             <property name="focusable">True</property>
             <property name="focus-on-click">False</property>
             <property name="tooltip-text" translatable="yes">Create Spiro path</property>
@@ -76,6 +55,7 @@
         </child>
         <child>
           <object class="GtkToggleButton">
+            <property name="valign">center</property>
             <property name="focusable">True</property>
             <property name="focus-on-click">False</property>
             <property name="tooltip-text" translatable="yes">Create BSpline path</property>
@@ -86,6 +66,7 @@
         </child>
         <child>
           <object class="GtkToggleButton" id="zigzag_btn">
+            <property name="valign">center</property>
             <property name="focusable">True</property>
             <property name="focus-on-click">False</property>
             <property name="tooltip-text" translatable="yes">Create a sequence of straight line segments</property>
@@ -96,6 +77,7 @@
         </child>
         <child>
           <object class="GtkToggleButton" id="paraxial_btn">
+            <property name="valign">center</property>
             <property name="focusable">True</property>
             <property name="focus-on-click">False</property>
             <property name="tooltip-text" translatable="yes">Create a sequence of paraxial line segments</property>
@@ -104,9 +86,6 @@
             <property name="icon-name">path-mode-polyline-paraxial</property>
           </object>
         </child>
-        <style>
-          <class name="tag1"/>
-        </style>
       </object>
     </child>
     <child>
@@ -115,6 +94,8 @@
     </child>
     <child>
       <object class="GtkButton" id="_flatten_spiro_bspline_btn">
+        <property name="margin-end">5</property>
+        <property name="valign">center</property>
         <property name="focusable">True</property>
         <property name="focus-on-click">False</property>
         <property name="receives-default">True</property>
@@ -124,13 +105,10 @@
       </object>
     </child>
     <child>
-      <object class="GtkSeparator">
-      </object>
-    </child>
-    <child>
       <object class="GtkBox" id="pencil_only_box">
         <child>
           <object class="GtkToggleButton" id="_usepressure_btn">
+            <property name="valign">center</property>
             <property name="focusable">True</property>
             <property name="focus-on-click">False</property>
             <property name="receives-default">True</property>
@@ -144,6 +122,7 @@
             <property name="tooltip-text" translatable="yes">Min percent of pressure</property>
             <child>
               <object class="GtkLabel">
+                <property name="margin-start">5</property>
                 <property name="label" translatable="yes">Min:</property>
               </object>
             </child>
@@ -163,13 +142,14 @@
             <property name="tooltip-text" translatable="yes">Max percent of pressure</property>
             <child>
               <object class="GtkLabel">
+                <property name="margin-start">5</property>
                 <property name="label" translatable="yes">Max:</property>
               </object>
             </child>
             <child>
               <object class="GtkSpinButton" id="_maxpressure_item">
                 <property name="focusable">True</property>
-                <property name="width-chars">5</property>
+                <property name="width-chars">1</property>
                 <property name="text" translatable="yes">0</property>
                 <property name="adjustment">_maxpressure_adj</property>
                 <property name="climb-rate">1</property>
@@ -191,13 +171,14 @@
             <property name="tooltip-text" translatable="yes">How much smoothing (simplifying) is applied to the line</property>
             <child>
               <object class="GtkLabel">
+                <property name="margin-start">5</property>
                 <property name="label" translatable="yes">Smoothing:</property>
               </object>
             </child>
             <child>
               <object class="GtkSpinButton" id="_tolerance_item">
                 <property name="focusable">True</property>
-                <property name="width-chars">5</property>
+                <property name="width-chars">2</property>
                 <property name="text" translatable="yes">0</property>
                 <property name="adjustment">_tolerance_adj</property>
                 <property name="climb-rate">1</property>
@@ -208,6 +189,7 @@
         </child>
         <child>
           <object class="GtkToggleButton" id="_simplify_btn">
+            <property name="valign">center</property>
             <property name="focusable">True</property>
             <property name="focus-on-click">False</property>
             <property name="receives-default">True</property>
@@ -218,6 +200,7 @@
         </child>
         <child>
           <object class="GtkButton" id="_flatten_simplify_btn">
+            <property name="valign">center</property>
             <property name="focusable">True</property>
             <property name="focus-on-click">False</property>
             <property name="tooltip-text" translatable="yes">LPE simplify flatten</property>
@@ -236,6 +219,7 @@
     </child>
     <child>
       <object class="GtkBox" id="shape_box">
+        <property name="margin-start">5</property>
         <property name="tooltip-text" translatable="yes">Shape of new paths drawn by this tool</property>
       </object>
     </child>
@@ -244,13 +228,14 @@
         <property name="tooltip-text" translatable="yes">Scale of the width of the power stroke shape.</property>
         <child>
           <object class="GtkLabel">
+            <property name="margin-start">5</property>
             <property name="label" translatable="yes">Scale:</property>
           </object>
         </child>
         <child>
           <object class="GtkSpinButton" id="_shapescale_item">
             <property name="focusable">True</property>
-            <property name="width-chars">6</property>
+            <property name="width-chars">1</property>
             <property name="text" translatable="yes">0</property>
             <property name="adjustment">_shapescale_adj</property>
             <property name="climb-rate">1</property>
@@ -260,7 +245,7 @@
       </object>
     </child>
     <style>
-      <class name="toolbar"/>
+      <class name="inkscape-toolbar"/>
     </style>
   </object>
 </interface>

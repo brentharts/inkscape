@@ -15,6 +15,7 @@
  */
 
 #include "inkscape-preferences.h"
+#include "helper/sigc-track-obj.h"
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"  // only include where actually required!
@@ -33,6 +34,7 @@
 #include <glibmm/regex.h>
 #include <glibmm/ustring.h>
 #include <giomm/themedicon.h>
+#include <gtkmm/binlayout.h>
 #include <gdkmm/display.h>
 #include <gtkmm/accelerator.h>
 #include <gtkmm/box.h>
@@ -106,13 +108,6 @@
 #include "util/trim.h"
 #include "util-string/ustring-format.h"
 #include "widgets/spw-utilities.h"
-
-#if WITH_GSPELL
-# include "ui/dialog/spellcheck.h" // for get_available_langs
-# ifdef _WIN32
-#  include <windows.h>
-# endif
-#endif
 
 namespace Inkscape::UI::Dialog {
 
@@ -1011,6 +1006,8 @@ void InkscapePreferences::initPageTools()
     _page_node.add_line( true, "", _t_node_single_node_transform_handles, "", _("Show transform handles even when only a single node is selected"));
     _t_node_delete_preserves_shape.init(_("Deleting nodes preserves shape"), "/tools/nodes/delete_preserves_shape", true);
     _page_node.add_line( true, "", _t_node_delete_preserves_shape, "", _("Move handles next to deleted nodes to resemble original shape; hold Ctrl to get the other behavior"));
+    _t_node_delete_flat_corner.init("/tools/node/flat-cusp-angle", 0, 180, 1, 5, 135, false, false);
+    _page_node.add_line(true, _("Cusp considered flat for deletion:"), _t_node_delete_flat_corner, "degrees or more", _("Preserve shape when deleting flat nodes.\nInsert segments for sharp ones."), false);
 
     //Tweak
     this->AddNewObjectsStyle(_page_tweak, "/tools/tweak", _("Object paint style"));
@@ -1526,7 +1523,7 @@ void InkscapePreferences::symbolicThemeCheck()
 }
 
 static Cairo::RefPtr<Cairo::Surface> draw_color_preview(unsigned int rgb, unsigned int frame_rgb, int device_scale) {
-    int size = 16;
+    int size = Widget::IconComboBox::get_image_size();
     auto surface = Cairo::ImageSurface::create(Cairo::Surface::Format::ARGB32, size * device_scale, size * device_scale);
     cairo_surface_set_device_scale(surface->cobj(), device_scale, device_scale);
     auto ctx = Cairo::Context::create(surface);
@@ -1663,8 +1660,13 @@ void InkscapePreferences::initPageUI()
     {
         auto box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
         auto img = Gtk::make_managed<Gtk::Picture>();
-        img->set_paintable(to_texture(draw_handles_preview(get_scale_factor())));
+        auto scale = get_scale_factor();
+        auto surface = draw_handles_preview(scale);
+        img->set_layout_manager(Gtk::BinLayout::create());
+        img->set_size_request(surface->get_width() / scale, surface->get_height() / scale);
+        img->set_paintable(to_texture(surface));
         img->set_hexpand();
+        img->set_halign(Gtk::Align::CENTER);
         box->append(*img);
         auto cb = Gtk::make_managed<Inkscape::UI::Widget::IconComboBox>(false);
         cb->set_valign(Gtk::Align::CENTER);
@@ -1674,11 +1676,16 @@ void InkscapePreferences::initPageUI()
             unsigned int frame = theme.positive ? 0x000000 : 0xffffff; // black or white
             cb->add_row(draw_color_preview(theme.rgb_accent_color, frame, get_scale_factor()), theme.title, i++);
         }
+        cb->refilter();
         cb->set_active_by_id(mgr.get_selected_theme());
-        cb->signal_changed().connect([=,this](){
-            Handles::Manager::get().select_theme(cb->get_active_row_id());
-            img->set_paintable(to_texture(draw_handles_preview(get_scale_factor())));
+
+        // Update on auto-reload or theme change
+        mgr.connectCssUpdated(SIGC_TRACKING_ADAPTOR(
+            [=, this]() { img->set_paintable(to_texture(draw_handles_preview(get_scale_factor()))); }, *this));
+        cb->signal_changed().connect([=, this](int id) {
+            Handles::Manager::get().select_theme(id);
         });
+
         box->append(*cb);
         _handle_size = Preferences::PreferencesObserver::create("/options/grabsize/value", [=](const Preferences::Entry&){
             img->set_paintable(to_texture(draw_handles_preview(get_scale_factor())));
@@ -1988,6 +1995,7 @@ void InkscapePreferences::initPageUI()
             auto const slider = Gtk::make_managed<UI::Widget::PrefSlider>(false);
             slider->init(tbox.prefs, min, max, 1, 4, min, 0);
             slider->getSlider()->set_format_value_func(format_value);
+            slider->getSlider()->set_draw_value();
             slider->getSlider()->add_css_class("small-marks");
             for (int i = min; i <= max; i += 8) {
                 auto const markup = (i % min == 0) ? format_value(i) : Glib::ustring{};
@@ -2171,10 +2179,8 @@ void InkscapePreferences::initPageUI()
         _grids_xy.add_line( false, _("Spacing X:"), _grids_xy_spacing_x, "", _("Distance between vertical grid lines"), false);
         _grids_xy.add_line( false, _("Spacing Y:"), _grids_xy_spacing_y, "", _("Distance between horizontal grid lines"), false);
 
-        _grids_xy_color.init(_("Minor grid line color:"), "/options/grids/xy/color", GRID_DEFAULT_MINOR_COLOR);
-        _grids_xy.add_line( false, _("Minor grid line color:"), _grids_xy_color, "", _("Color used for normal grid lines"), false);
-        _grids_xy_empcolor.init(_("Major grid line color:"), "/options/grids/xy/empcolor", GRID_DEFAULT_MAJOR_COLOR);
-        _grids_xy.add_line( false, _("Major grid line color:"), _grids_xy_empcolor, "", _("Color used for major (highlighted) grid lines"), false);
+        _grids_xy_empcolor.init(_("Grid color:"), "/options/grids/xy/empcolor", GRID_DEFAULT_MAJOR_COLOR);
+        _grids_xy.add_line( false, _("Grid color:"), _grids_xy_empcolor, "", _("Color used for grid lines"), false);
         _grids_xy_empspacing.init("/options/grids/xy/empspacing", 1.0, 1000.0, 1.0, 5.0, 5.0, true, false);
         _grids_xy.add_line( false, _("Major grid line every:"), _grids_xy_empspacing, "", "", false);
         _grids_xy_dotted.init( _("Show dots instead of lines"), "/options/grids/xy/dotted", false);
@@ -2190,10 +2196,8 @@ void InkscapePreferences::initPageUI()
         _grids_axonom_angle_z.init("/options/grids/axonom/angle_z", -360.0, 360.0, 1.0, 10.0, 30.0, false, false);
         _grids_axonom.add_line( false, _("Angle X:"), _grids_axonom_angle_x, "", _("Angle of x-axis"), false);
         _grids_axonom.add_line( false, _("Angle Z:"), _grids_axonom_angle_z, "", _("Angle of z-axis"), false);
-        _grids_axonom_color.init(_("Minor grid line color:"), "/options/grids/axonom/color", GRID_DEFAULT_MINOR_COLOR);
-        _grids_axonom.add_line( false, _("Minor grid line color:"), _grids_axonom_color, "", _("Color used for normal grid lines"), false);
-        _grids_axonom_empcolor.init(_("Major grid line color:"), "/options/grids/axonom/empcolor", GRID_DEFAULT_MAJOR_COLOR);
-        _grids_axonom.add_line( false, _("Major grid line color:"), _grids_axonom_empcolor, "", _("Color used for major (highlighted) grid lines"), false);
+        _grids_axonom_empcolor.init(_("Grid color:"), "/options/grids/axonom/empcolor", GRID_DEFAULT_MAJOR_COLOR);
+        _grids_axonom.add_line( false, _("Grid color:"), _grids_axonom_empcolor, "", _("Color used for grid lines"), false);
         _grids_axonom_empspacing.init("/options/grids/axonom/empspacing", 1.0, 1000.0, 1.0, 5.0, 5.0, true, false);
         _grids_axonom.add_line( false, _("Major grid line every:"), _grids_axonom_empspacing, "", "", false);
     // Modular grid
@@ -2208,9 +2212,7 @@ void InkscapePreferences::initPageUI()
         auto const margin_x = Gtk::make_managed<UI::Widget::PrefSpinButton>();
         auto const margin_y = Gtk::make_managed<UI::Widget::PrefSpinButton>();
         auto const color_major = Gtk::make_managed<UI::Widget::PrefColorPicker>();
-        auto const color_minor = Gtk::make_managed<UI::Widget::PrefColorPicker>();
-        color_minor->init(_("Minor grid line color:"), "/options/grids/modular/color", GRID_DEFAULT_MAJOR_COLOR);
-        color_major->init(_("Major grid line color:"), "/options/grids/modular/empcolor", GRID_DEFAULT_BLOCK_COLOR);
+        color_major->init(_("Grid color:"), "/options/grids/modular/empcolor", GRID_DEFAULT_BLOCK_COLOR);
 
         grid_modular.add_line(false, _("Grid units:"), *units, "", "", false);
         grid_modular.add_line(false, _("Origin X:"), *origin_x, "", _("X coordinate of grid origin"), false);
@@ -2221,8 +2223,7 @@ void InkscapePreferences::initPageUI()
         grid_modular.add_line(false, _("Gap Y:"), *gap_y, "", _("Vertical distance between blocks"), false);
         grid_modular.add_line(false, _("Margin X:"), *margin_x, "", _("Horizontal block margin"), false);
         grid_modular.add_line(false, _("Margin Y:"), *margin_y, "", _("Vertical block margin"), false);
-        grid_modular.add_line( false, _("Minor grid line color:"), *color_minor, "", _("Color used for block margins"), false);
-        grid_modular.add_line( false, _("Major grid line color:"), *color_major, "", _("Color used for grid blocks"), false);
+        grid_modular.add_line( false, _("Grid color:"), *color_major, "", _("Color used for grid blocks"), false);
 
         for (auto [spin, path] : (std::tuple<PrefSpinButton*, const char*>[]) {
             {&_grids_xy_origin_x,  "/options/grids/xy/origin_x"},
@@ -3699,17 +3700,14 @@ void InkscapePreferences::onKBListKeyboardShortcuts()
 
 void InkscapePreferences::initPageSpellcheck()
 {
-#if WITH_GSPELL
+#if WITH_LIBSPELLING
+    _spell_ignorenumbers.init(_("Ignore words with digits"), "/dialogs/spellcheck/ignorenumbers", true);
+    _page_spellcheck.add_line(false, "", _spell_ignorenumbers, "", _("Ignore words containing digits, such as \"R2D2\""), true);
 
-    _spell_ignorenumbers.init( _("Ignore words with digits"), "/dialogs/spellcheck/ignorenumbers", true);
-    _page_spellcheck.add_line( false, "", _spell_ignorenumbers, "",
-                           _("Ignore words containing digits, such as \"R2D2\""), true);
+    _spell_ignoreallcaps.init(_("Ignore words in ALL CAPITALS"), "/dialogs/spellcheck/ignoreallcaps", false);
+    _page_spellcheck.add_line(false, "", _spell_ignoreallcaps, "", _("Ignore words in all capitals, such as \"IUPAC\""), true);
 
-    _spell_ignoreallcaps.init( _("Ignore words in ALL CAPITALS"), "/dialogs/spellcheck/ignoreallcaps", false);
-    _page_spellcheck.add_line( false, "", _spell_ignoreallcaps, "",
-                           _("Ignore words in all capitals, such as \"IUPAC\""), true);
-
-    this->AddPage(_page_spellcheck, _("Spellcheck"), PREFS_PAGE_SPELLCHECK);
+    AddPage(_page_spellcheck, _("Spellcheck"), PREFS_PAGE_SPELLCHECK);
 #endif
 }
 

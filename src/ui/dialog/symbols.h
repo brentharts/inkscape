@@ -104,7 +104,7 @@ private:
     SPDocument* get_symbol_document(const std::optional<Gtk::TreeModel::iterator>& it) const;
     void onDragStart();
     void addSymbol(SPSymbol* symbol, Glib::ustring doc_title, SPDocument* document);
-    SPDocument* symbolsPreviewDoc();
+    static std::unique_ptr<SPDocument> symbolsPreviewDoc();
     void useInDoc(SPObject *r, std::vector<SPUse*> &l);
     std::vector<SPUse*> useInDoc( SPDocument* document);
     void addSymbols();
@@ -157,7 +157,7 @@ private:
     Gtk::CheckButton* fit_symbol;
     Gtk::CellRendererPixbuf _renderer;
     Gtk::CellRendererPixbuf _renderer2;
-    SPDocument *preview_document = nullptr; /* Document to render single symbol */
+    std::unique_ptr<SPDocument> preview_document; // Document to render single symbol
     Glib::RefPtr<Gtk::ListStore> _symbol_sets;
 
     struct Store {
@@ -173,7 +173,8 @@ private:
         void refilter() {
             if (_filtered) _filtered->refilter();
         }
-    } _symbols, _sets;
+    };
+    Store _symbols, _sets;
 
     /* For rendering the template drawing */
     unsigned key;
@@ -181,6 +182,7 @@ private:
     auto_connection _defs_modified;
     auto_connection _doc_resource_changed;
     auto_connection _idle_refresh;
+    auto_connection _selection_changed;
     boost::compute::detail::lru_cache<std::string, Cairo::RefPtr<Cairo::Surface>> _image_cache;
 };
 

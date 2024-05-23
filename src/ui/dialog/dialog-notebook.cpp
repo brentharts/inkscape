@@ -25,6 +25,7 @@
 #include <gtkmm/gestureclick.h>
 #include <gtkmm/scrollbar.h>
 #include <gtkmm/separator.h>
+#include <gtkmm/eventcontrollerscroll.h>
 
 #include "dialog-notebook.h"
 #include "enums.h"
@@ -54,8 +55,8 @@ std::list<DialogNotebook *> DialogNotebook::_instances;
 DialogNotebook::DialogNotebook(DialogContainer *container)
     : Gtk::ScrolledWindow()
     , _container(container)
-    , _menu    {nullptr, Gtk::PositionType::BOTTOM}
-    , _menutabs{*this  , Gtk::PositionType::BOTTOM}
+    , _menu{Gtk::PositionType::BOTTOM}
+    , _menutabs{Gtk::PositionType::BOTTOM}
     , _labels_auto(true)
     , _detaching_duplicate(false)
     , _selected_page(nullptr)
@@ -82,6 +83,14 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
     _notebook.set_show_border(false);
     _notebook.set_group_name("InkscapeDialogGroup");
     _notebook.set_scrollable(true);
+
+    auto box = dynamic_cast<Gtk::Box*>(_notebook.get_first_child());
+    if (box) {
+        auto scroll_controller = Gtk::EventControllerScroll::create();
+        scroll_controller->set_flags(Gtk::EventControllerScroll::Flags::VERTICAL | Gtk::EventControllerScroll::Flags::DISCRETE);
+        box->add_controller(scroll_controller);
+        scroll_controller->signal_scroll().connect(sigc::mem_fun(*this, &DialogNotebook::on_scroll_event), false);
+    }
 
     UI::Widget::PopoverMenuItem *new_menu_item = nullptr;
 
@@ -145,8 +154,7 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
         return a.order < b.order;
     });
 
-    auto builder = ColumnMenuBuilder<DialogData::Category>{_menu, 2, Gtk::IconSize::NORMAL,
-                                                           row};
+    auto builder = ColumnMenuBuilder<DialogData::Category>{_menu, 2, Gtk::IconSize::NORMAL, row};
     for (auto const &data : all_dialogs) {
         auto callback = [key = data.key]{
             // get desktop's container, it may be different than current '_container'!
@@ -156,8 +164,7 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
                 }
             }
         };
-        builder.add_item(data.label, data.category, {}, data.icon_name, true, false,
-                         std::move(callback));
+        builder.add_item(data.label, data.category, {}, data.icon_name, true, false, std::move(callback));
         if (builder.new_section()) {
             builder.set_section(gettext(dialog_categories[data.category]));
         }
@@ -188,8 +195,9 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
 
     // ============= Finish setup ===============
     _reload_context = true;
-    set_child(_notebook);
-    set_visible(true);
+    _popoverbin.setChild(&_notebook);
+    _popoverbin.setPopover(&_menutabs);
+    set_child(_popoverbin);
 
     _instances.push_back(this);
 }
@@ -209,8 +217,6 @@ DialogNotebook::~DialogNotebook()
     }
 
     _instances.remove(this);
-
-    _menutabs.unparent();
 }
 
 void DialogNotebook::add_highlight_header()
@@ -589,9 +595,9 @@ void DialogNotebook::on_size_allocate_scroll(int const width)
     // magic number
     static constexpr int MIN_HEIGHT = 60;
     //  set or unset scrollbars to completely hide a notebook
-    // because we have a "blocking" scroll per tab we need to loop to aboid
+    // because we have a "blocking" scroll per tab we need to loop to avoid
     // other page stop out scroll
-    for_each_child(_notebook, [this](Gtk::Widget &page){
+    for_each_page(_notebook, [this](Gtk::Widget &page){
         if (!provide_scroll(page)) {
             auto const scrolledwindow = get_scrolledwindow(page);
             if (scrolledwindow) {
@@ -650,7 +656,7 @@ void DialogNotebook::on_size_allocate_notebook(int const alloc_width)
     }
 
     auto const initial_width = measure_min_width(_notebook);
-    for_each_child(_notebook, [this](Gtk::Widget &page){
+    for_each_page(_notebook, [this](Gtk::Widget &page){
         auto const tab = dynamic_cast<Gtk::Box *>(_notebook.get_tab_label(page));
         if (tab) tab->set_visible(true);
         return ForEachResult::_continue;
@@ -772,7 +778,7 @@ void DialogNotebook::reload_tab_menu()
 
         _connmenu.clear();
 
-        _menutabs.delete_all();
+        _menutabs.remove_all();
 
         auto prefs = Inkscape::Preferences::get();
         bool symbolic = false;
@@ -780,7 +786,7 @@ void DialogNotebook::reload_tab_menu()
             symbolic = true;
         }
 
-        for_each_child(_notebook, [=, this](Gtk::Widget &page){
+        for_each_page(_notebook, [=, this](Gtk::Widget &page){
             auto const children = get_cover_box_children(_notebook.get_tab_label(page));
             if (!children) {
                 return ForEachResult::_continue;
@@ -828,24 +834,21 @@ void DialogNotebook::toggle_tab_labels_callback(bool show)
 {
     _label_visible = show;
 
-    for_each_child(_notebook, [=, this](Gtk::Widget &page){
+    const auto current_page = _notebook.get_nth_page(_notebook.get_current_page());
+
+    for_each_page(_notebook, [=, this](Gtk::Widget &page){
         auto const children = get_cover_box_children(_notebook.get_tab_label(page));
         if (!children) {
             return ForEachResult::_continue;
         }
 
         auto const &[icon, label, close] = *children;
-        int n = _notebook.get_current_page();
         if (close && label) {
-            if (&page != _notebook.get_nth_page(n)) {
-                show ? close->set_visible(true) : close->set_visible(false);
-                show ? label->set_visible(true) : label->set_visible(false);
+            if (&page != current_page) {
+                close->set_visible(show);
+                label->set_visible(show);
             } else if (tabstatus == TabsStatus::NONE || _labels_off) {
-                if (&page != _notebook.get_nth_page(n)) {
-                    close->set_visible(false);
-                } else {
-                    close->set_visible(true);
-                }
+                close->set_visible(&page == current_page);
                 label->set_visible(false);
             } else {
                 close->set_visible(true);
@@ -867,7 +870,7 @@ void DialogNotebook::toggle_tab_labels_callback(bool show)
 
 void DialogNotebook::on_page_switch(Gtk::Widget *curr_page, guint)
 {
-    for_each_child(_notebook, [=, this](Gtk::Widget &page){
+    for_each_page(_notebook, [=, this](Gtk::Widget &page){
         if (auto const dialogbase = dynamic_cast<DialogBase *>(&page)) {
             if (auto const widgs = UI::get_children(*dialogbase); !widgs.empty()) {
                 widgs[0]->set_visible(curr_page == &page);
@@ -930,6 +933,26 @@ void DialogNotebook::on_page_switch(Gtk::Widget *curr_page, guint)
             }
         }
     }
+}
+
+bool DialogNotebook::on_scroll_event(double dx, double dy)
+{
+    if (_notebook.get_n_pages() <= 1) {
+        return false;
+    }
+
+    if (dy < 0) {
+        auto current_page = _notebook.get_current_page();
+        if (current_page > 0) {
+            _notebook.set_current_page(current_page - 1);
+        }
+    } else if (dy > 0) {
+        auto current_page = _notebook.get_current_page();
+        if (current_page < _notebook.get_n_pages() - 1) {
+            _notebook.set_current_page(current_page + 1);
+        }
+    }
+    return true;
 }
 
 /**

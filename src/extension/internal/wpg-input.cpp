@@ -40,23 +40,14 @@
  * Corel Corporation or Corel Corporation Limited."
  */
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"  // only include where actually required!
-#endif
-
-#include <cstdio>
-
-#ifdef WITH_LIBWPG
-
 #include "wpg-input.h"
 #include "extension/system.h"
 #include "extension/input.h"
 #include "document.h"
 #include "object/sp-root.h"
 #include "util/units.h"
-#include <cstring>
 
-#include "libwpg/libwpg.h"
+#include <libwpg/libwpg.h>
 #include <librevenge-stream/librevenge-stream.h>
 
 using librevenge::RVNGString;
@@ -65,55 +56,52 @@ using librevenge::RVNGInputStream;
 
 using namespace libwpg;
 
-namespace Inkscape {
-namespace Extension {
-namespace Internal {
+namespace Inkscape::Extension::Internal {
 
-
-SPDocument *WpgInput::open(Inkscape::Extension::Input * /*mod*/, const gchar * uri)
+static std::span<char const> as_span(RVNGString const &str)
 {
+    return {str.cstr(), str.size()};
+}
+
+std::unique_ptr<SPDocument> WpgInput::open(Inkscape::Extension::Input *, char const *uri)
+{
+    std::unique_ptr<RVNGInputStream> input;
+
     #ifdef _WIN32
         // RVNGFileStream uses fopen() internally which unfortunately only uses ANSI encoding on Windows
         // therefore attempt to convert uri to the system codepage
         // even if this is not possible the alternate short (8.3) file name will be used if available
-        gchar * converted_uri = g_win32_locale_filename_from_utf8(uri);
-        RVNGInputStream* input = new RVNGFileStream(converted_uri);
+        auto converted_uri = g_win32_locale_filename_from_utf8(uri);
+        input = std::make_unique<RVNGFileStream>(converted_uri);
         g_free(converted_uri);
     #else
-        RVNGInputStream* input = new RVNGFileStream(uri);
+        input = std::make_unique<RVNGFileStream>(uri);
     #endif
 
     if (input->isStructured()) {
-        RVNGInputStream* olestream = input->getSubStreamByName("PerfectOffice_MAIN");
-
-        if (olestream) {
-            delete input;
-            input = olestream;
+        if (auto olestream = input->getSubStreamByName("PerfectOffice_MAIN")) {
+            input.reset(olestream);
         }
     }
 
-    if (!WPGraphics::isSupported(input)) {
+    if (!WPGraphics::isSupported(input.get())) {
         //! \todo Dialog here
         // fprintf(stderr, "ERROR: Unsupported file format (unsupported version) or file is encrypted!\n");
         // printf("I'm giving up not supported\n");
-        delete input;
         return nullptr;
     }
 
     librevenge::RVNGStringVector vec;
     librevenge::RVNGSVGDrawingGenerator generator(vec, "");
 
-    if (!libwpg::WPGraphics::parse(input, &generator) || vec.empty() || vec[0].empty()) {
-        delete input;
+    if (!libwpg::WPGraphics::parse(input.get(), &generator) || vec.empty() || vec[0].empty()) {
         return nullptr;
     }
 
     RVNGString output("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
     output.append(vec[0]);
 
-    //printf("I've got a doc: \n%s", painter.document.c_str());
-
-    SPDocument * doc = SPDocument::createNewDocFromMem(output.cstr(), strlen(output.cstr()), TRUE);
+    auto doc = SPDocument::createNewDocFromMem(as_span(output), true);
     
     // Set viewBox if it doesn't exist
     if (doc && !doc->getRoot()->viewBox_set) {
@@ -123,7 +111,6 @@ SPDocument *WpgInput::open(Inkscape::Extension::Input * /*mod*/, const gchar * u
         doc->setViewBox(Geom::Rect::from_xywh(0, 0, doc->getWidth().value("pt"), doc->getHeight().value("pt")));
     }
     
-    delete input;
     return doc;
 }
 
@@ -143,10 +130,9 @@ void WpgInput::init() {
             "</input>\n"
         "</inkscape-extension>", std::make_unique<WpgInput>());
     // clang-format on
-} // init
+}
 
-} } }  /* namespace Inkscape, Extension, Implementation */
-#endif /* WITH_LIBWPG */
+} // namespace Inkscape::Extension::Internal
 
 /*
   Local Variables:

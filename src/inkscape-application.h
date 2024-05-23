@@ -11,6 +11,7 @@
 #define INKSCAPE_APPLICATION_H
 
 #include <map>
+#include <span>
 #include <string>
 #include <utility>
 #include <vector>
@@ -23,12 +24,13 @@
 #include "actions/actions-hint-data.h"
 #include "io/file-export-cmd.h"   // File export (non-verb)
 #include "extension/internal/pdfinput/enums.h"
+#include "util/smart_ptr_keys.h"
 
 namespace Gio {
 class File;
 } // namespace Gio
 
-typedef std::vector<std::pair<std::string, Glib::VariantBase> > action_vector_t;
+using action_vector_t = std::vector<std::pair<std::string, Glib::VariantBase>>;
 
 class InkscapeWindow;
 class SPDocument;
@@ -38,7 +40,7 @@ namespace Inkscape {
 class Selection;
 } // namespace Inkscape
 
-class InkscapeApplication final
+class InkscapeApplication
 {
     Glib::RefPtr<Gio::Application> _gio_application;
 
@@ -62,7 +64,6 @@ public:
     void print_action_list();
     void print_input_type_list() const;
 
-    void on_startup2();
     InkFileExportCmd *file_export() { return &_file_export; }
     int on_handle_local_options(const Glib::RefPtr<Glib::VariantDict> &options);
     void on_new();
@@ -93,11 +94,11 @@ public:
 
     /****** Document ******/
     /* These should not require a GUI! */
-    void                  document_add(SPDocument* document);
+    SPDocument *document_add(std::unique_ptr<SPDocument> document);
 
-    SPDocument*           document_new(const std::string &Template = "");
-    SPDocument*           document_open(const Glib::RefPtr<Gio::File>& file, bool *cancelled = nullptr);
-    SPDocument*           document_open(const std::string& data);
+    SPDocument *document_new(std::string const &template_filename = {});
+    std::pair<SPDocument *, bool /*cancelled*/> document_open(Glib::RefPtr<Gio::File> const &file);
+    SPDocument *document_open(std::span<char const> buffer);
     bool                  document_swap(InkscapeWindow* window, SPDocument* document);
     bool                  document_revert(SPDocument* document);
     void                  document_close(SPDocument* document);
@@ -122,16 +123,10 @@ public:
     InkActionExtraData&     get_action_extra_data()     { return _action_extra_data;  }
     InkActionEffectData&    get_action_effect_data()    { return _action_effect_data; }
     InkActionHintData&      get_action_hint_data()      { return _action_hint_data;   }
-    std::map<Glib::ustring, Glib::ustring>& get_menu_label_to_tooltip_map() { return _menu_label_to_tooltip_map; };
+    std::map<std::string, Glib::ustring>& get_menu_label_to_tooltip_map() { return _menu_label_to_tooltip_map; };
 
     /******* Debug ********/
     void                  dump();
-
-    // These are needed to cast Glib::RefPtr<Gtk::Application> to Glib::RefPtr<InkscapeApplication>,
-    // Presumably, Gtk/Gio::Application takes care of ref counting in ConcreteInkscapeApplication
-    // so we just provide dummies (and there is only one application in the application!).
-    // void reference()   { /*printf("reference()\n"  );*/ }
-    // void unreference() { /*printf("unreference()\n");*/ }
 
     int get_number_of_windows() const;
 
@@ -147,8 +142,15 @@ protected:
     Glib::ustring _pages;
 
     // Documents are owned by the application which is responsible for opening/saving/exporting. WIP
-    // std::vector<SPDocument*> _documents;   For a true headless version
-    std::map<SPDocument*, std::vector<InkscapeWindow*> > _documents;
+    // std::vector<std::unique_ptr<SPDocument>> _documents;   For a true headless version
+    // Not supported by Apple Clang yet:
+    // std::unordered_map<std::unique_ptr<SPDocument>,
+    //                    std::vector<std::unique_ptr<InkscapeWindow>>,
+    //                    TransparentPtrHash<SPDocument>,
+    //                    TransparentPtrEqual<SPDocument>> _documents;
+    std::map<std::unique_ptr<SPDocument>,
+             std::vector<std::unique_ptr<InkscapeWindow>>,
+             TransparentPtrLess<SPDocument>> _documents;
 
     // We keep track of these things so we don't need a window to find them (for headless operation).
     SPDocument*               _active_document   = nullptr;
@@ -168,10 +170,10 @@ protected:
     InkActionExtraData  _action_extra_data;
     InkActionEffectData  _action_effect_data;
     InkActionHintData   _action_hint_data;
-    std::map<Glib::ustring, Glib::ustring> _menu_label_to_tooltip_map; // Needed due to the
-                                                                       // inabilitiy to get the
-                                                                       // corresponding Gio::Action
-                                                                       // from a Gtk::MenuItem.
+    // Needed due to the inabilitiy to get the corresponding Gio::Action from a Gtk::MenuItem.
+    // std::string is used as key type because Glib::ustring has slow comparison and equality
+    // operators.
+    std::map<std::string, Glib::ustring> _menu_label_to_tooltip_map;
     void on_startup();
     void on_activate();
     void on_open(const Gio::Application::type_vec_files &files, const Glib::ustring &hint);

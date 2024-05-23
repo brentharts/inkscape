@@ -336,8 +336,8 @@ Canvas::Canvas()
     auto focus = Gtk::EventControllerFocus::create();
     focus->set_propagation_phase(Gtk::PropagationPhase::BUBBLE);
     add_controller(focus);
-    focus->signal_enter().connect([this] { on_focus_in(); });
-    focus->signal_leave().connect([this] { on_focus_out(); });
+    focus->signal_enter().connect(sigc::mem_fun(*this, &Canvas::on_focus_in));
+    focus->signal_leave().connect(sigc::mem_fun(*this, &Canvas::on_focus_out));
 
     // Updater
     d->updater = Updater::create(pref_to_updater(d->prefs.update_strategy));
@@ -496,6 +496,10 @@ void CanvasPrivate::deactivate_graphics()
 
 Canvas::~Canvas()
 {
+    // Handle missed unrealisation due to new GTK4 lifetimes allowing C object to persist.
+    if (d->active) d->deactivate();
+    if (d->graphics) d->deactivate_graphics();
+
     // Remove entire CanvasItem tree.
     d->canvasitem_ctx.reset();
 }
@@ -1434,7 +1438,13 @@ bool CanvasPrivate::emit_event(CanvasEvent &event)
     inspect_event(event,
         [&] (EnterEvent &event) { conv(event.pos); },
         [&] (MotionEvent &event) { conv(event.pos); },
-        [&] (ButtonEvent &event) { conv(event.pos, &event.orig_pos); },
+        [&] (ButtonPressEvent &event) {
+            // on_button_pressed() will call process_event() and therefore also emit_event() twice, on the same event
+            if (event.num_press == 1) { // Only convert the coordinates once, on the first call
+                conv(event.pos, &event.orig_pos);
+            }
+        },
+        [&] (ButtonReleaseEvent &event) { conv(event.pos); },
         [&] (KeyEvent &event) {
             if (event.pos) {
                 event.orig_pos.emplace();

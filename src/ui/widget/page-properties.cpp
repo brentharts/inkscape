@@ -41,7 +41,6 @@
 
 #include "page-size-preview.h"
 #include "ui/builder-utils.h"
-#include "ui/menuize.h"
 #include "ui/operation-blocker.h"
 #include "ui/util.h"
 #include "ui/widget/color-picker.h"
@@ -120,7 +119,7 @@ class PagePropertiesBox final : public PageProperties {
         }
         menu->append(_("Custom"), get_detailed_action(_page_sizes.size())); // sentinel
         _templates_popover.set_menu_model(std::move(menu));
-        UI::menuize_popover(_templates_popover);
+        _templates_popover.set_flags(Gtk::PopoverMenu::Flags::NESTED);
     }
 
 public:
@@ -218,15 +217,15 @@ public:
             // toggle size link
             _locked_size_ratio = !_locked_size_ratio;
             // set image
-            _link_width_height.set_image_from_icon_name(_locked_size_ratio && _size_ratio > 0 ? g_linked : g_unlinked, Gtk::IconSize::LARGE);
+            _link_width_height.set_image_from_icon_name(_locked_size_ratio && _size_ratio > 0 ? g_linked : g_unlinked, Gtk::IconSize::NORMAL);
         });
-        _link_width_height.set_image_from_icon_name(g_unlinked, Gtk::IconSize::LARGE);
+        _link_width_height.set_image_from_icon_name(g_unlinked, Gtk::IconSize::NORMAL);
 
         _link_scale_content.signal_clicked().connect([=](){
             _locked_content_scale = !_locked_content_scale;
-            _link_scale_content.set_image_from_icon_name(_locked_content_scale ? s_linked : s_unlinked, Gtk::IconSize::LARGE);
+            _link_scale_content.set_image_from_icon_name(_locked_content_scale ? s_linked : s_unlinked, Gtk::IconSize::NORMAL);
         });
-        _link_scale_content.set_image_from_icon_name(s_unlinked, Gtk::IconSize::LARGE);
+        _link_scale_content.set_image_from_icon_name(s_unlinked, Gtk::IconSize::NORMAL);
 
         // set image for linked scale
         _linked_viewbox_scale.set_from_icon_name(s_linked);

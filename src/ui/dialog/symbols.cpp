@@ -16,9 +16,10 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <locale>
 #include <regex>
 #include <sstream>
+#include "libnrtype/font-factory.h"
+using namespace std::literals;
 
 #include <2geom/point.h>
 
@@ -38,12 +39,15 @@
 #include <gtkmm/cellrenderertext.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/comboboxtext.h>
+#include <gtkmm/dragsource.h>
 #include <gtkmm/enums.h>
 #include <gtkmm/iconview.h>
 #include <gtkmm/label.h>
 #include <gtkmm/menubutton.h>
+#include <gtkmm/overlay.h>
 #include <gtkmm/popover.h>
 #include <gtkmm/scale.h>
+#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/searchentry2.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treemodelfilter.h>
@@ -61,14 +65,10 @@
 #include "document-undo.h"
 #include "desktop.h"
 #include "inkscape.h"
-#include "path-prefix.h"
 #include "preferences.h"
 #include "selection.h"
 
-#include "display/cairo-utils.h"
-#include "include/gtkmm_version.h"
 #include "io/resource.h"
-#include "io/sys.h"
 #include "object/sp-defs.h"
 #include "object/sp-root.h"
 #include "object/sp-symbol.h"
@@ -76,11 +76,10 @@
 #include "ui/builder-utils.h"
 #include "ui/cache/svg_preview_cache.h"
 #include "ui/clipboard.h"
-#include "ui/dialog/messages.h"
 #include "ui/drag-and-drop.h"
 #include "ui/icon-loader.h"
-#include "ui/icon-names.h"
 #include "ui/pack.h"
+#include "util/statics.h"
 #include "xml/href-attribute-helper.h"
 
 #ifdef WITH_LIBVISIO
@@ -96,22 +95,31 @@
 
 
 namespace Inkscape::UI::Dialog {
+namespace {
 
 constexpr int SIZES = 51;
 int SYMBOL_ICON_SIZES[SIZES];
 
-struct SymbolSet {
-    std::vector<SPSymbol*> symbols;
-    SPDocument* document = nullptr;
+struct SymbolSet
+{
+    std::unique_ptr<SPDocument> document;
+    std::vector<SPSymbol *> symbols;
     Glib::ustring title;
 };
 
-SPDocument* load_symbol_set(std::string filename);
-void scan_all_symbol_sets(std::map<std::string, SymbolSet>& symbol_sets);
+struct SymbolSetView
+{
+    SPDocument *document;
+    std::vector<SPSymbol *> symbols;
+    Glib::ustring title;
+};
 
-// key: symbol set full file name
-// value: symbol set
-static std::map<std::string, SymbolSet> symbol_sets;
+struct SymbolSets : Util::EnableSingleton<SymbolSets, Util::Depends<FontFactory>>
+{
+    // key: symbol set full file name
+    // value: symbol set
+    std::map<std::string, SymbolSet> map;
+};
 
 struct SymbolColumns : public Gtk::TreeModel::ColumnRecord {
     Gtk::TreeModelColumn<std::string> cache_key;
@@ -133,9 +141,10 @@ struct SymbolColumns : public Gtk::TreeModel::ColumnRecord {
         add(doc_dimensions);
         add(symbol_document);
     }
-} const g_columns;
+};
+SymbolColumns const g_columns;
 
-static Cairo::RefPtr<Cairo::ImageSurface> g_dummy;
+Cairo::RefPtr<Cairo::ImageSurface> g_dummy;
 
 struct SymbolSetsColumns : public Gtk::TreeModel::ColumnRecord {
     Gtk::TreeModelColumn<Glib::ustring> set_id;
@@ -151,12 +160,18 @@ struct SymbolSetsColumns : public Gtk::TreeModel::ColumnRecord {
         add(set_document);
         add(set_image);
     }
-} const g_set_columns;
+};
+SymbolSetsColumns const g_set_columns;
 
 const Glib::ustring CURRENT_DOC_ID = "{?cur-doc?}";
 const Glib::ustring ALL_SETS_ID = "{?all-sets?}";
 const char *CURRENT_DOC = N_("Current document");
 const char *ALL_SETS = N_("All symbol sets");
+
+} // namespace
+
+static SPDocument *load_symbol_set(std::string const &filename);
+static void scan_all_symbol_sets();
 
 SymbolsDialog::SymbolsDialog(const char* prefsPath)
     : DialogBase(prefsPath, "Symbols"),
@@ -240,7 +255,7 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
         return false;
     };
 
-    _symbol_sets_view.signal_selection_changed().connect([=, this](){
+    _selection_changed = _symbol_sets_view.signal_selection_changed().connect([=, this](){
         if (select_set({})) {
             get_widget<Gtk::Popover>(_builder, "set-popover").set_visible(false);
         }
@@ -406,14 +421,14 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
         prefs->setBool(path + "zoom-to-fit", fit_symbol->get_active());
     });
 
-    scan_all_symbol_sets(symbol_sets);
+    scan_all_symbol_sets();
 
-    for (auto&& it : symbol_sets) {
+    for (auto const &it : SymbolSets::get().map) {
         auto row = _symbol_sets->append();
         auto& set = it.second;
         (*row)[g_set_columns.set_id] = it.first;
         (*row)[g_set_columns.translated_title] = g_dpgettext2(nullptr, "Symbol", set.title.c_str());
-        (*row)[g_set_columns.set_document] = set.document;
+        (*row)[g_set_columns.set_document] = set.document.get();
         (*row)[g_set_columns.set_filename] = it.first;
     }
 
@@ -439,9 +454,7 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
 
 SymbolsDialog::~SymbolsDialog()
 {
-    Inkscape::GC::release(preview_document);
-    assert(preview_document->_anchored_refcount() == 0);
-    delete preview_document;
+    preview_document->getRoot()->invoke_hide(key);
 }
 
 void collect_symbols(SPObject* object, std::vector<SPSymbol*>& symbols) {
@@ -471,12 +484,13 @@ void SymbolsDialog::load_all_symbols() {
     });
 }
 
-std::map<std::string, SymbolSet> get_all_symbols(Glib::RefPtr<Gtk::ListStore>& store) {
-    std::map<std::string, SymbolSet> map;
+std::map<std::string, SymbolSetView> get_all_symbols(Glib::RefPtr<Gtk::ListStore> &store)
+{
+    std::map<std::string, SymbolSetView> map;
 
-    store->foreach_iter([&](const Gtk::TreeModel::iterator& it){
-        if (SPDocument* doc = (*it)[g_set_columns.set_document]) {
-            SymbolSet vect;
+    store->foreach_iter([&] (Gtk::TreeModel::iterator const &it) {
+        if (SPDocument *doc = (*it)[g_set_columns.set_document]) {
+            SymbolSetView vect;
             collect_symbols(doc->getRoot(), vect.symbols);
             vect.title = (*it)[g_set_columns.translated_title];
             vect.document = doc;
@@ -503,7 +517,7 @@ void SymbolsDialog::rebuild(Gtk::TreeModel::iterator current) {
 
     auto it = current;
 
-    std::map<std::string, SymbolSet> symbols;
+    std::map<std::string, SymbolSetView> symbols;
 
     SPDocument* document = (*it)[g_set_columns.set_document];
     Glib::ustring set_id = (*it)[g_set_columns.set_id];
@@ -866,15 +880,16 @@ class REVENGE_API RVNGSVGDrawingGenerator_WithTitle : public RVNGSVGDrawingGener
 };
 
 // Read Visio stencil files
-SPDocument* read_vss(std::string filename, std::string name) {
-  gchar *fullname;
+static std::unique_ptr<SPDocument> read_vss(std::string filename, std::string name)
+{
+  char *fullname;
   #ifdef _WIN32
     // RVNGFileStream uses fopen() internally which unfortunately only uses ANSI encoding on Windows
     // therefore attempt to convert uri to the system codepage
     // even if this is not possible the alternate short (8.3) file name will be used if available
     fullname = g_win32_locale_filename_from_utf8(filename.c_str());
   #else
-    fullname = strdup(filename.c_str());
+    fullname = g_strdup(filename.c_str());
   #endif
 
   RVNGFileStream input(fullname);
@@ -942,18 +957,20 @@ SPDocument* read_vss(std::string filename, std::string name) {
 
   tmpSVGOutput += "  </defs>\n";
   tmpSVGOutput += "</svg>\n";
-    return SPDocument::createNewDocFromMem(tmpSVGOutput.c_str(), tmpSVGOutput.size(), false);
+  return SPDocument::createNewDocFromMem(tmpSVGOutput.raw(), false);
 }
 #endif
 
 /* Hunts preference directories for symbol files */
-void scan_all_symbol_sets(std::map<std::string, SymbolSet>& symbol_sets) {
-
+void scan_all_symbol_sets()
+{
     using namespace Inkscape::IO::Resource;
     std::regex matchtitle(".*?<title.*?>(.*?)<(/| /)");
 
-    for (auto& filename : get_filenames(SYMBOLS, {".svg", ".vss", "vssx", "vsdx"})) {
-        if (symbol_sets.count(filename)) continue;
+    auto &symbol_sets = SymbolSets::get().map;
+
+    for (auto const &filename : get_filenames(SYMBOLS, {".svg", ".vss", "vssx", "vsdx"})) {
+        if (symbol_sets.contains(filename)) continue;
 
         if (Glib::str_has_suffix(filename, ".vss") || Glib::str_has_suffix(filename, ".vssx") || Glib::str_has_suffix(filename, ".vsdx")) {
             std::size_t found = filename.find_last_of("/\\");
@@ -990,12 +1007,15 @@ void scan_all_symbol_sets(std::map<std::string, SymbolSet>& symbol_sets) {
 }
 
 // Load SVG or VSS document and create SPDocument
-SPDocument* load_symbol_set(std::string filename)
+SPDocument *load_symbol_set(std::string const &filename)
 {
-    SPDocument* symbol_doc = nullptr;
-    if (auto doc = symbol_sets[filename].document) {
+    auto &symbol_sets = SymbolSets::get().map;
+
+    if (auto doc = symbol_sets[filename].document.get()) {
         return doc;
     }
+
+    std::unique_ptr<SPDocument> symbol_doc;
 
     using namespace Inkscape::IO::Resource;
     if (Glib::str_has_suffix(filename, ".vss") || Glib::str_has_suffix(filename, ".vssx") || Glib::str_has_suffix(filename, ".vsdx")) {
@@ -1003,13 +1023,14 @@ SPDocument* load_symbol_set(std::string filename)
         symbol_doc = read_vss(filename, symbol_sets[filename].title);
 #endif
     } else if (Glib::str_has_suffix(filename, ".svg")) {
-        symbol_doc = SPDocument::createNewDoc(filename.c_str(), FALSE);
+        symbol_doc = SPDocument::createNewDoc(filename.c_str(), false);
     }
 
-    if (symbol_doc) {
-        symbol_sets[filename].document = symbol_doc;
+    if (!symbol_doc) {
+        return nullptr;
     }
-    return symbol_doc;
+
+    return (symbol_sets[filename].document = std::move(symbol_doc)).get();
 }
 
 void SymbolsDialog::useInDoc (SPObject *r, std::vector<SPUse*> &l)
@@ -1222,8 +1243,8 @@ Cairo::RefPtr<Cairo::Surface> SymbolsDialog::drawSymbol(SPSymbol *symbol)
   
     // This is for display in Symbols dialog only
     if (style) repr->setAttribute( "style", style );
-  
-    SPDocument::install_reference_document scoped(preview_document, symbol->document);
+
+    SPDocument::install_reference_document scoped(preview_document.get(), symbol->document);
     preview_document->getDefs()->getRepr()->appendChild(repr);
     Inkscape::GC::release(repr);
   
@@ -1283,17 +1304,18 @@ Cairo::RefPtr<Cairo::Surface> SymbolsDialog::drawSymbol(SPSymbol *symbol)
  * Symbols are by default not rendered so a <use> element is
  * provided.
  */
-SPDocument* SymbolsDialog::symbolsPreviewDoc()
+std::unique_ptr<SPDocument> SymbolsDialog::symbolsPreviewDoc()
 {
-  // BUG: <symbol> must be inside <defs>
-    const char buffer[] =
-"<svg xmlns=\"http://www.w3.org/2000/svg\""
-"     xmlns:sodipodi=\"http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd\""
-"     xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\""
-"     xmlns:xlink=\"http://www.w3.org/1999/xlink\">"
-"  <use id=\"the_use\" xlink:href=\"#the_symbol\"/>"
-"</svg>";
-    return SPDocument::createNewDocFromMem(buffer, strlen(buffer), false);
+    // BUG: <symbol> must be inside <defs>
+    constexpr auto buffer = R"A(
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+     xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+  <use id="the_use" xlink:href="#the_symbol"/>
+</svg>
+)A"sv;
+    return SPDocument::createNewDocFromMem(buffer, false);
 }
 
 void SymbolsDialog::get_cell_data_func(Gtk::CellRenderer* cell_renderer, Gtk::TreeModel::Row row, bool visible)

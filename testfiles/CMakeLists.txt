@@ -71,6 +71,7 @@ set(TEST_SOURCES
     color-profile-test
     dir-util-test
     oklab-color-test
+    sp-item-test
     sp-object-test
     sp-object-tags-test
     object-links-test
@@ -102,11 +103,12 @@ set(TEST_SOURCES
     2geom-characterization-test
     xml-test
     sp-item-group-test
+    store-test
     lpe-test
     ${LPE_TESTS_64bit}
     )
 
-add_library(cpp_test_static_library SHARED unittest.cpp doc-per-case-test.cpp lpespaths-test.h test-with-svg-object-pairs.cpp)
+add_library(cpp_test_static_library SHARED unittest.cpp doc-per-case-test.cpp compare-paths-test.h lpespaths-test.h store-integrity-test.h test-with-svg-object-pairs.cpp)
 target_link_libraries(cpp_test_static_library PUBLIC ${GTEST_LIBRARIES} inkscape_base)
 
 add_custom_target(tests)

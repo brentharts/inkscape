@@ -21,9 +21,8 @@
 #include <gtkmm/dialog.h>
 #include <unordered_map>
 
-#include "../../implementation/implementation.h"
+#include "extension/implementation/implementation.h"
 #include "async/channel.h"
-#include "poppler-transition-api.h"
 #include "poppler-utils.h"
 #include "svg-builder.h"
 
@@ -78,11 +77,11 @@ class FontModelColumns;
 /**
  * PDF import using libpoppler.
  */
-class PdfImportDialog final : public Gtk::Dialog
+class PdfImportDialog : public Gtk::Dialog
 {
 public:
     PdfImportDialog(std::shared_ptr<PDFDoc> doc, const gchar *uri);
-    ~PdfImportDialog() final;
+    ~PdfImportDialog() override;
 
     bool showDialog();
     std::string getSelectedPages();
@@ -133,13 +132,12 @@ private:
 #endif
 };
 
-    
-class PdfInput final: public Inkscape::Extension::Implementation::Implementation {
+class PdfInput : public Inkscape::Extension::Implementation::Implementation
+{
 public:
-    PdfInput() = default;
-    SPDocument *open(Inkscape::Extension::Input *mod,
-                     const gchar *uri) final;
-    static void         init( );
+    std::unique_ptr<SPDocument> open(Inkscape::Extension::Input *mod, char const *uri) override;
+    static void init();
+
 private:
     void add_builder_page(
         std::shared_ptr<PDFDoc> pdf_doc,

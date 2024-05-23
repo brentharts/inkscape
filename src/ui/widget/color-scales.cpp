@@ -220,6 +220,8 @@ void ColorScales<MODE>::_initUI(bool no_alpha)
         expander_box->set_visible(true);
         UI::pack_start(*expander_box, *expander_icon);
         UI::pack_start(*expander_box, *expander_label);
+        expander_box->set_halign(Gtk::Align::START);
+        expander_box->set_valign(Gtk::Align::START);
         expander_box->set_orientation(Gtk::Orientation::HORIZONTAL);
         // Expander
         wheel_frame = Gtk::make_managed<Gtk::Expander>();
@@ -235,7 +237,7 @@ void ColorScales<MODE>::_initUI(bool no_alpha)
         wheel_frame->set_label_widget(*expander_box);
 
         // Signal
-        wheel_frame->property_expanded().signal_changed().connect([=](){
+        wheel_frame->property_expanded().signal_changed().connect([this, wheel_frame]() {
             bool visible = wheel_frame->get_expanded();
             wheel_frame->set_vexpand(visible);
 

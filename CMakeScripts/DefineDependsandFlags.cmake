@@ -131,7 +131,6 @@ pkg_check_modules(INKSCAPE_DEP REQUIRED
                   fontconfig
                   gsl
                   gmodule-2.0
-                  libsoup-2.4>=2.42
                   #double-conversion
                   bdw-gc #boehm-demers-weiser gc
                   lcms2)
@@ -314,6 +313,18 @@ if(NOT GTKMM4_FOUND)
     find_program(glslc glslc REQUIRED)
     find_program(mmcp mm-common-prepare REQUIRED)
     pkg_check_modules(TMP-gtkmm-gstreamer gstreamer-player-1.0 REQUIRED)
+endif()
+
+if(WITH_LIBSPELLING)
+    pkg_check_modules(LIBSPELLING libspelling-1)
+    if("${LIBSPELLING_FOUND}")
+        message(STATUS "Using libspelling")
+        list(APPEND INKSCAPE_INCS_SYS ${LIBSPELLING_INCLUDE_DIRS})
+        sanitize_ldflags_for_libs(LIBSPELLING_LDFLAGS)
+        list(APPEND INKSCAPE_LIBS ${LIBSPELLING_LDFLAGS})
+    else()
+        set(WITH_LIBSPELLING OFF)
+    endif()
 endif()
 
 if(WITH_GSOURCEVIEW)

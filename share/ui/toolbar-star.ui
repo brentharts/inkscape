@@ -24,26 +24,17 @@
     <property name="page-increment">0.10</property>
   </object>
   <object class="GtkToggleButton" id="flat_button_group">
+    <property name="valign">center</property>
     <property name="label" translatable="yes">radiobutton</property>
     <property name="focusable">True</property>
     <property name="active">True</property>
   </object>
-  <object class="GtkPopover" id="popover1">
-    <property name="child">
-      <object class="GtkBox" id="popover_box1">
-        <property name="valign">center</property>
-        <property name="spacing">3</property>
-      </object>
-    </property>
-  </object>
   <object class="GtkBox" id="star-toolbar">
     <property name="halign">start</property>
     <property name="valign">center</property>
-    <property name="spacing">3</property>
     <property name="hexpand">True</property>
     <child>
       <object class="GtkLabel" id="_mode_item">
-        <property name="margin-start">3</property>
         <property name="label" translatable="yes">&lt;b&gt;New:&lt;/b&gt;</property>
         <property name="use-markup">True</property>
       </object>
@@ -53,6 +44,7 @@
         <property name="spacing">3</property>
         <child>
           <object class="GtkToggleButton" id="flat_polygon_button">
+            <property name="valign">center</property>
             <property name="focusable">True</property>
             <property name="tooltip-text" translatable="yes">Regular polygon (with one handle) instead of a star</property>
             <property name="has-frame">False</property>
@@ -67,6 +59,7 @@
         </child>
         <child>
           <object class="GtkToggleButton" id="flat_star_button">
+            <property name="valign">center</property>
             <property name="focusable">True</property>
             <property name="tooltip-text" translatable="yes">Star instead of a regular polygon (with one handle)</property>
             <property name="has-frame">False</property>
@@ -87,15 +80,19 @@
     <child>
       <object class="GtkBox" id="magnitude_box">
         <property name="tooltip-text" translatable="yes">Number of corners of a polygon or star</property>
+        <style>
+            <class name="priority1"/>
+        </style>
         <child>
           <object class="GtkLabel">
+            <property name="margin-start">5</property>
             <property name="label" translatable="yes">Corners:</property>
           </object>
         </child>
         <child>
           <object class="GtkSpinButton" id="_magnitude_item">
             <property name="focusable">True</property>
-            <property name="width-chars">5</property>
+            <property name="width-chars">1</property>
             <property name="text" translatable="yes">0.000</property>
             <property name="adjustment">_magnitude_adj</property>
             <property name="climb-rate">0.10</property>
@@ -106,8 +103,12 @@
     <child>
       <object class="GtkBox" id="_spoke_box">
         <property name="tooltip-text" translatable="yes">Base radius to tip radius ratio</property>
+        <style>
+            <class name="priority1"/>
+        </style>
         <child>
           <object class="GtkLabel">
+            <property name="margin-start">2</property>
             <property name="label" translatable="yes">Spoke Ratio:</property>
           </object>
         </child>
@@ -124,74 +125,69 @@
       </object>
     </child>
     <child>
-      <object class="GtkMenuButton" id="menu_btn1">
-        <property name="focusable">True</property>
-        <property name="focus-on-click">False</property>
-        <property name="receives-default">True</property>
-        <property name="has-frame">False</property>
-        <property name="popover">popover1</property>
-        <child>
-          <object class="GtkImage" id="image1">
-            <property name="icon-name">go-down</property>
-          </object>
-        </child>
-      </object>
-    </child>
-    <child>
       <object class="GtkBox" id="roundedness_box">
         <property name="tooltip-text" translatable="yes">How rounded are the corners (0 for sharp)</property>
+        <style>
+            <class name="priority1"/>
+        </style>
         <child>
           <object class="GtkLabel">
+            <property name="margin-start">5</property>
             <property name="label" translatable="yes">Rounded:</property>
           </object>
         </child>
         <child>
           <object class="GtkSpinButton" id="_roundedness_item">
             <property name="focusable">True</property>
-            <property name="width-chars">7</property>
+            <property name="width-chars">2</property>
             <property name="adjustment">_roundedness_adj</property>
             <property name="climb-rate">0.10</property>
             <property name="digits">3</property>
           </object>
         </child>
-        <style>
-          <class name="tag1"/>
-        </style>
       </object>
     </child>
     <child>
       <object class="GtkBox" id="randomization_box">
         <property name="tooltip-text" translatable="yes">Scatter randomly the corners and angles</property>
+        <style>
+            <class name="priority1"/>
+        </style>
         <child>
           <object class="GtkLabel">
+            <property name="margin-start">5</property>
             <property name="label" translatable="yes">Randomized:</property>
           </object>
         </child>
         <child>
           <object class="GtkSpinButton" id="_randomization_item">
             <property name="focusable">True</property>
-            <property name="width-chars">7</property>
+            <property name="width-chars">2</property>
             <property name="text" translatable="yes">0.000</property>
             <property name="adjustment">_randomization_adj</property>
             <property name="climb-rate">0.10</property>
             <property name="digits">3</property>
           </object>
         </child>
-        <style>
-          <class name="tag1"/>
-        </style>
       </object>
     </child>
     <child>
       <object class="GtkSeparator">
+        <style>
+            <class name="priority1"/>
+        </style>
       </object>
     </child>
     <child>
       <object class="GtkButton" id="reset_btn">
+        <property name="valign">center</property>
         <property name="focusable">True</property>
         <property name="receives-default">True</property>
         <property name="tooltip-text" translatable="yes">Make corners sharp</property>
         <property name="has-frame">False</property>
+        <style>
+            <class name="priority1"/>
+        </style>
         <child>
           <object class="GtkImage" id="image2">
             <property name="icon-name">edit-clear</property>
@@ -200,7 +196,7 @@
       </object>
     </child>
     <style>
-      <class name="toolbar"/>
+      <class name="inkscape-toolbar"/>
     </style>
   </object>
 </interface>

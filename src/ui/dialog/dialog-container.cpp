@@ -51,7 +51,7 @@
 #include "ui/dialog/objects.h"
 #include "ui/dialog/paint-servers.h"
 #include "ui/dialog/selectorsdialog.h"
-#if WITH_GSPELL
+#if WITH_LIBSPELLING
 #include "ui/dialog/spellcheck.h"
 #endif
 #include "ui/dialog/svg-fonts-dialog.h"
@@ -142,7 +142,7 @@ std::unique_ptr<DialogBase> DialogContainer::dialog_factory(Glib::ustring const 
     else if (dialog_type == "Transform")          return std::make_unique<Transformation>();
     else if (dialog_type == "UndoHistory")        return std::make_unique<UndoHistory>();
     else if (dialog_type == "XMLEditor")          return std::make_unique<XmlTree>();
-#if WITH_GSPELL
+#if WITH_LIBSPELLING
     else if (dialog_type == "Spellcheck")         return std::make_unique<SpellCheck>();
 #endif
 #ifdef DEBUG
@@ -195,7 +195,7 @@ DialogMultipaned* get_dialog_parent(DialogBase* dialog) {
     if (!dialog) return nullptr;
 
     // dialogs are nested inside Gtk::Notebook
-    if (auto notebook = dynamic_cast<Gtk::Notebook*>(dialog->get_parent())) {
+    if (auto notebook = dynamic_cast<Gtk::Notebook*>(dialog->get_parent()->get_parent())) {
         // notebooks are inside viewport, inside scrolled window
         if (auto viewport = dynamic_cast<Gtk::Viewport*>(notebook->get_parent())) {
             if (auto scroll = dynamic_cast<Gtk::ScrolledWindow*>(viewport->get_parent())) {
@@ -812,11 +812,14 @@ void save_wnd_position(Glib::KeyFile *keyfile, const Glib::ustring &group_name, 
     auto const notebook = dialog_notebook.get_notebook();
     g_assert(notebook);
     std::vector<Glib::ustring> dialogs;
-    for (auto const child : UI::get_children(*notebook)) {
-        if (auto const dialog = dynamic_cast<DialogBase *>(child)) {
+    if (!notebook) return dialogs;
+
+    for_each_page(*notebook, [&](Gtk::Widget& page) {
+        if (auto const dialog = dynamic_cast<DialogBase *>(&page)) {
             dialogs.push_back(dialog->get_type());
         }
-    }
+        return ForEachResult::_continue;
+    });
     return dialogs;
 }
 

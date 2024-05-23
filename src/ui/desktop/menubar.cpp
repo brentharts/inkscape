@@ -86,7 +86,7 @@ build_menu()
             std::cerr << "build_menu(): Couldn't find Extensions menu entry!" << std::endl;
         }
 
-        std::map<Glib::ustring, Glib::RefPtr<Gio::Menu>> submenus;
+        std::map<std::string, Glib::RefPtr<Gio::Menu>> submenus;
 
         for (auto &&entry : app->get_action_effect_data().give_all_data()) {
             auto const &submenu_name_list = entry.submenu;
@@ -94,13 +94,13 @@ build_menu()
 
             // Effect data is used for both filters menu and extensions menu... we need to
             // add to correct menu.
-            Glib::ustring path; // Only used as index to map of submenus.
+            std::string path; // Only used as index to map of submenus.
             auto top_menu = filters_menu;
             if (!entry.is_filter) {
                 top_menu = effects_menu;
-                path += "Effects";
+                path = "Effects";
             } else {
-                path += "Filters";
+                path = "Filters";
             }
 
             if (!top_menu) { // It's possible that the menu doesn't exist (Kid's Inkscape?)
@@ -144,11 +144,10 @@ build_menu()
 
         auto recent_files = recent_manager->get_items(); // all recent files not necessarily inkscape only
         // sort by "last modified" time, which puts the most recently opened files first
-        std::sort(begin(recent_files), end(recent_files),
-            [](auto const &a, auto const &b) -> bool {
-                return a->get_modified().compare(b->get_modified()) < 0;
-            }
-        );
+        std::sort(std::begin(recent_files), std::end(recent_files), [](auto const &a, auto const &b) -> bool {
+            // a should precede b if a->get_modified() is later than b->get_modified()
+            return a->get_modified().compare(b->get_modified()) > 0;
+        });
 
         unsigned inserted_entries = 0;
         for (auto const &recent_file : recent_files) {
@@ -161,8 +160,7 @@ build_menu()
 #endif
                             ;
 
-            // this is potentially expensive: local FS access (remote files are not checked)
-            valid_file = valid_file && recent_file->exists();
+            // Note: Do not check if the file exists, to avoid long delays. See https://gitlab.com/inkscape/inkscape/-/issues/2348 .
 
             if (!valid_file) {
                 continue;

@@ -6,9 +6,9 @@
       <object class="GtkGrid">
         <property name="halign">start</property>
         <property name="valign">start</property>
-        <property name="margin-start">8</property>
-        <property name="margin-top">8</property>
-        <property name="margin-bottom">8</property>
+        <property name="margin-start">1</property>
+        <property name="margin-top">1</property>
+        <property name="margin-bottom">1</property>
         <child>
           <object class="GtkCheckButton" id="snap-toggle">
             <property name="label" translatable="yes">Enable snapping</property>
@@ -694,9 +694,9 @@
       <object class="GtkGrid">
         <property name="halign">start</property>
         <property name="valign">start</property>
-        <property name="margin-start">8</property>
-        <property name="margin-top">8</property>
-        <property name="margin-bottom">8</property>
+        <property name="margin-start">1</property>
+        <property name="margin-top">1</property>
+        <property name="margin-bottom">1</property>
         <property name="row-spacing">4</property>
         <property name="column-spacing">4</property>
         <child>
@@ -841,17 +841,21 @@
       </object>
     </child>
     <child>
-      <object class="GtkButton" id="btn-advanced">
+      <object class="GtkMenuButton" id="btn-advanced">
         <property name="focusable">True</property>
         <property name="focus-on-click">False</property>
         <property name="receives-default">True</property>
+        <property name="direction">left</property>
+        <property name="popover">advanced</property>
       </object>
     </child>
     <child>
-      <object class="GtkButton" id="btn-simple">
+      <object class="GtkMenuButton" id="btn-simple">
         <property name="focusable">True</property>
         <property name="focus-on-click">False</property>
         <property name="receives-default">True</property>
+        <property name="direction">left</property>
+        <property name="popover">simple</property>
       </object>
     </child>
     <child>

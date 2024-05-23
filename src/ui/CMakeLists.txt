@@ -11,7 +11,6 @@ set(ui_SRC
 	drag-and-drop.cpp
 	icon-loader.cpp
 	interface.cpp
-	menuize.cpp
 	monitor.cpp
 	pack.cpp
 	popup-menu.cpp
@@ -137,10 +136,9 @@ set(ui_SRC
 	dialog/filter-effects-dialog.cpp
 	dialog/find.cpp
 	dialog/font-collections-manager.cpp
-	widget/font-collection-selector.cpp
 	dialog/font-substitution.cpp
 	dialog/global-palettes.cpp
-	dialog/glyphs.cpp
+    dialog/glyphs.cpp
 	dialog/grid-arrange-tab.cpp
 	dialog/guides.cpp
 	dialog/icon-preview.cpp
@@ -200,7 +198,6 @@ set(ui_SRC
 	widget/color-palette-preview.cpp
 	widget/color-picker.cpp
 	widget/color-preview.cpp
-	icon-loader.cpp
 	widget/color-scales.cpp
 	widget/color-slider.cpp
 	widget/combo-box-entry-tool-item.cpp
@@ -208,7 +205,7 @@ set(ui_SRC
 	widget/css-name-class-init.cpp
 	widget/custom-tooltip.cpp
 	widget/dash-selector.cpp
-        widget/desktop-widget.cpp
+	widget/desktop-widget.cpp
 	widget/entity-entry.cpp
 	widget/entry.cpp
 	widget/export-lists.cpp
@@ -216,8 +213,8 @@ set(ui_SRC
 	widget/filter-effect-chooser.cpp
 	widget/fill-style.cpp
 	widget/font-button.cpp
+	widget/font-collection-selector.cpp
 	widget/font-selector.cpp
-	widget/font-selector-toolbar.cpp
 	widget/font-variants.cpp
 	widget/font-variations.cpp
 	widget/frame.cpp
@@ -248,6 +245,7 @@ set(ui_SRC
 	widget/paint-selector.cpp
 	widget/pattern-editor.cpp
 	widget/point.cpp
+	widget/popover-bin.cpp
 	widget/popover-menu.cpp
 	widget/popover-menu-item.cpp
 	widget/preferences-widget.cpp
@@ -263,18 +261,17 @@ set(ui_SRC
 	widget/shapeicon.cpp
 	widget/spin-scale.cpp
 	widget/spinbutton.cpp
-        widget/status-bar.cpp
+	widget/status-bar.cpp
 	widget/stroke-style.cpp
 	widget/style-subject.cpp
 	widget/style-swatch.cpp
 	widget/swatch-selector.cpp
 	widget/template-list.cpp
 	widget/text.cpp
-	widget/toolbar-menu-button.cpp
 	widget/unit-menu.cpp
 	widget/unit-tracker.cpp
 	widget/widget-vfuncs-class-init.cpp
-        widget/xml-treeview.cpp
+	widget/xml-treeview.cpp
 
 	view/svg-view-widget.cpp
 
@@ -284,6 +281,7 @@ set(ui_SRC
 	builder-utils.h
 	clipboard.h
 	contextmenu.h
+	containerize.h
 	controller.h
 	cursor-utils.h
 	control-types.h
@@ -295,7 +293,6 @@ set(ui_SRC
 	icon-names.h
 	icon-loader.h
 	interface.h
-	menuize.h
 	monitor.h
 	pack.h
 	popup-menu.h
@@ -303,6 +300,7 @@ set(ui_SRC
 	shape-editor.h
 	simple-pref-pusher.h
 	shortcuts.h
+	svg-renderer.h
 	syntax.h
 	themes.h
 	tool-factory.h
@@ -481,7 +479,7 @@ set(ui_SRC
 	widget/canvas/glgraphics.h
 	widget/canvas/cairographics.h
 	widget/canvas-grid.h
-        widget/canvas-notice.h
+	widget/canvas-notice.h
 	widget/completion-popup.h
 	widget/color-entry.h
 	widget/color-icc-selector.h
@@ -498,7 +496,7 @@ set(ui_SRC
 	widget/css-name-class-init.h
 	widget/custom-tooltip.h
 	widget/dash-selector.h
-        widget/desktop-widget.h
+	widget/desktop-widget.h
 	widget/entity-entry.h
 	widget/entry.h
 	widget/events/canvas-event.h
@@ -511,7 +509,6 @@ set(ui_SRC
 	widget/font-button.h
 	widget/font-collection-selector.h
 	widget/font-selector.h
-	widget/font-selector-toolbar.h
 	widget/font-variants.h
 	widget/font-variations.h
 	widget/frame.h
@@ -541,6 +538,7 @@ set(ui_SRC
 	widget/palette_t.h
 	widget/pattern-editor.h
 	widget/point.h
+	widget/popover-bin.h
 	widget/popover-menu.h
 	widget/popover-menu-item.h
 	widget/preferences-widget.h
@@ -555,9 +553,10 @@ set(ui_SRC
 	widget/scroll-utils.h
 	widget/selected-style.h
 	widget/shapeicon.h
+	widget/size-reporter.h
 	widget/spin-scale.h
 	widget/spinbutton.h
-        widget/status-bar.h
+	widget/status-bar.h
 	widget/stroke-style.h
 	widget/style-subject.h
 	widget/style-swatch.h
@@ -567,7 +566,7 @@ set(ui_SRC
 	widget/unit-menu.h
 	widget/unit-tracker.h
 	widget/widget-vfuncs-class-init.h
-        widget/xml-treeview.h
+	widget/xml-treeview.h
 
 	view/svg-view-widget.h
 )
@@ -577,8 +576,9 @@ add_inkscape_source("${ui_SRC}")
 set ( ui_spellcheck_SRC
 	dialog/spellcheck.cpp
 	dialog/spellcheck.h
+	libspelling-wrapper.h
 )
 
-if ("${WITH_GSPELL}")
+if ("${WITH_LIBSPELLING}")
 	add_inkscape_source("${ui_spellcheck_SRC}")
 endif()

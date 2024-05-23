@@ -12,18 +12,9 @@
     <property name="step-increment">1</property>
     <property name="page-increment">10</property>
   </object>
-  <object class="GtkPopover" id="popover1">
-    <property name="child">
-      <object class="GtkBox" id="popover_box1">
-        <property name="valign">center</property>
-        <property name="spacing">3</property>
-      </object>
-    </property>
-  </object>
   <object class="GtkBox" id="paintbucket-toolbar">
     <property name="halign">start</property>
     <property name="valign">center</property>
-    <property name="spacing">3</property>
     <property name="hexpand">True</property>
     <child>
       <object class="GtkBox" id="channels_box">
@@ -34,39 +25,23 @@
       </object>
     </child>
     <child>
-      <object class="GtkMenuButton" id="menu_btn1">
-        <property name="focusable">True</property>
-        <property name="focus-on-click">False</property>
-        <property name="receives-default">True</property>
-        <property name="has-frame">False</property>
-        <property name="popover">popover1</property>
-        <child>
-          <object class="GtkImage" id="image2">
-            <property name="icon-name">go-down</property>
-          </object>
-        </child>
-      </object>
-    </child>
-    <child>
       <object class="GtkBox" id="threshold_box">
         <property name="tooltip-text" translatable="yes">The maximum allowed difference between the clicked pixel and the neighboring pixels to be counted in the fill</property>
         <child>
           <object class="GtkLabel">
+            <property name="margin-start">5</property>
             <property name="label" translatable="yes">Threshold:</property>
           </object>
         </child>
         <child>
           <object class="GtkSpinButton" id="_threshold_item">
             <property name="focusable">True</property>
-            <property name="width-chars">5</property>
+            <property name="width-chars">1</property>
             <property name="text" translatable="yes">0.000</property>
             <property name="adjustment">_threshold_adj</property>
             <property name="climb-rate">0.10</property>
           </object>
         </child>
-        <style>
-          <class name="tag1"/>
-        </style>
       </object>
     </child>
     <child>
@@ -74,29 +49,24 @@
         <property name="tooltip-text" translatable="yes">The amount to grow (positive) or shrink (negative) the created fill path</property>
         <child>
           <object class="GtkLabel">
+            <property name="margin-start">5</property>
             <property name="label" translatable="yes">Grow/shrink by:</property>
           </object>
         </child>
         <child>
           <object class="GtkSpinButton" id="_offset_item">
             <property name="focusable">True</property>
-            <property name="width-chars">5</property>
+            <property name="width-chars">2</property>
             <property name="text" translatable="yes">0.000</property>
             <property name="adjustment">_offset_adj</property>
             <property name="climb-rate">1</property>
             <property name="digits">2</property>
           </object>
         </child>
-        <style>
-          <class name="tag1"/>
-        </style>
       </object>
     </child>
     <child>
       <object class="GtkBox" id="unit_menu_box">
-        <style>
-          <class name="tag1"/>
-        </style>
       </object>
     </child>
     <child>
@@ -105,18 +75,29 @@
     </child>
     <child>
       <object class="GtkBox" id="autogap_box">
+        <property name="margin-start">5</property>
+        <style>
+            <class name="priority1"/>
+        </style>
       </object>
     </child>
     <child>
       <object class="GtkSeparator">
+        <style>
+            <class name="priority1"/>
+        </style>
       </object>
     </child>
     <child>
       <object class="GtkButton" id="reset_btn">
+        <property name="valign">center</property>
         <property name="focusable">True</property>
         <property name="receives-default">True</property>
         <property name="tooltip-text" translatable="yes">Reset paint bucket parameters to defaults (use Inkscape Preferences &gt; Tools to change defaults)</property>
         <property name="has-frame">False</property>
+        <style>
+            <class name="priority1"/>
+        </style>
         <child>
           <object class="GtkImage" id="image1">
             <property name="icon-name">edit-clear</property>
@@ -125,7 +106,7 @@
       </object>
     </child>
     <style>
-      <class name="toolbar"/>
+      <class name="inkscape-toolbar"/>
     </style>
   </object>
 </interface>

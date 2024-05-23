@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /** @file
- * @brief  Spellcheck dialog
+ * @brief Spellcheck dialog
  */
 /* Authors:
  *   bulia byak <bulia@users.sf.net>
@@ -10,31 +10,29 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#ifndef SEEN_SPELLCHECK_H
-#define SEEN_SPELLCHECK_H
+#ifndef INKSCAPE_UI_DIALOG_SPELLCHECK_H
+#define INKSCAPE_UI_DIALOG_SPELLCHECK_H
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"  // only include where actually required!
-#endif
-
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/separator.h>
-#include <gtkmm/treeview.h>
 #include <set>
 #include <vector>
+
+#include <libspelling.h>
 
 #include "text-editing.h"
 #include "ui/dialog/dialog-base.h"
 #include "display/control/canvas-item-ptr.h"
+#include "util/gobjectptr.h"
+#include "helper/auto-connection.h"
 
-#if WITH_GSPELL
-#include <gspell/gspell.h>
-#endif  /* WITH_GSPELL */
+namespace Gtk {
+class Builder;
+class Button;
+class ColumnView;
+class DropDown;
+class Label;
+class SingleSelection;
+class StringList;
+} // namespace Gtk
 
 class SPObject;
 class SPItem;
@@ -43,11 +41,9 @@ class SPCanvasItem;
 namespace Inkscape {
 class Preferences;
 class CanvasItemRect;
+} // namespace Inkscape {
 
-namespace UI {
-namespace Dialog {
-
-using LanguagePair = std::pair<std::string, std::string>;
+namespace Inkscape::UI::Dialog {
 
 /**
  *
@@ -61,9 +57,9 @@ public:
     SpellCheck();
     ~SpellCheck() override;
 
-    static std::vector<LanguagePair> get_available_langs();
-
 private:
+    SpellCheck(Glib::RefPtr<Gtk::Builder> const &builder);
+
     void documentReplaced() override;
 
     /**
@@ -79,94 +75,93 @@ private:
     /**
      * Returns a list of all the text items in the SPObject
      */
-    void allTextItems (SPObject *r, std::vector<SPItem *> &l, bool hidden, bool locked);
+    void allTextItems(SPObject *r, std::vector<SPItem *> &l, bool hidden, bool locked);
 
     /**
      * Is text inside the SPOject's tree
      */
-    bool textIsValid (SPObject *root, SPItem *text);
+    bool textIsValid(SPObject *root, SPItem *text);
 
     /**
      * Compare the visual bounds of 2 SPItems referred to by a and b
      */
-    static bool compareTextBboxes(SPItem const *i1, SPItem const *i2);
-    SPItem *getText (SPObject *root);
-    void    nextText ();
+    SPItem *getText(SPObject *root);
+    void nextText();
 
     /**
      * Cleanup after spellcheck is finished
      */
-    void    finished ();
+    void finished();
 
     /**
      * Find the next word to spell check
      */
-    bool    nextWord();
-    void    deleteLastRect ();
-    void    doSpellcheck ();
+    bool nextWord();
+    void deleteLastRect();
+    void doSpellcheck();
 
     /**
      * Update speller from language combobox
      * @return true if update was successful
      */
     bool updateSpeller();
-    void deleteSpeller();
 
     /**
      * Accept button clicked
      */
-    void    onAccept ();
+    void onAccept();
 
     /**
      * Ignore button clicked
      */
-    void    onIgnore ();
+    void onIgnore();
 
     /**
      * Ignore once button clicked
      */
-    void    onIgnoreOnce ();
+    void onIgnoreOnce();
 
     /**
      * Add button clicked
      */
-    void    onAdd ();
+    void onAdd();
 
     /**
      * Stop button clicked
      */
-    void    onStop ();
+    void onStop();
 
     /**
      * Start button clicked
      */
-    void    onStart ();
+    void onStart();
 
     /**
      * Language selection changed
      */
-    void    onLanguageChanged();
+    void onLanguageChanged();
 
     /**
      * Selected object modified on canvas
      */
-    void    onObjModified (SPObject* /* blah */, unsigned int /* bleh */);
+    void onObjModified();
 
     /**
      * Selected object removed from canvas
      */
-    void    onObjReleased (SPObject* /* blah */);
+    void onObjReleased();
 
     /**
      * Selection in suggestions text view changed
      */
     void onTreeSelectionChange();
 
-    SPObject *_root;
+    Preferences &_prefs;
 
-#if WITH_GSPELL
-    GspellChecker *_checker = nullptr;
-#endif  /* WITH_GSPELL */
+    SPObject *_root = nullptr;
+
+    SpellingProvider *_provider = nullptr;
+    Util::GObjectPtr<SpellingChecker> _checker;
 
     /**
      * list of canvasitems (currently just rects) that mark misspelled things on canvas
@@ -181,18 +176,18 @@ private:
     /**
      *  the object currently being checked
      */
-    SPItem *_text;
+    SPItem *_text = nullptr;
 
     /**
      * current objects layout
      */
-    Inkscape::Text::Layout const *_layout;
+    Text::Layout const *_layout = nullptr;
 
     /**
      *  iterators for the start and end of the current word
      */
-    Inkscape::Text::Layout::iterator _begin_w;
-    Inkscape::Text::Layout::iterator _end_w;
+    Text::Layout::iterator _begin_w;
+    Text::Layout::iterator _end_w;
 
     /**
      *  the word we're checking
@@ -202,71 +197,52 @@ private:
     /**
      *  counters for the number of stops and dictionary adds
      */
-    int _stops;
-    int _adds;
+    int _stops = 0;
+    int _adds = 0;
 
     /**
      *  true if we are in the middle of a check
      */
-    bool _working;
+    bool _working = false;
 
     /**
      *  connect to the object being checked in case it is modified or deleted by user
      */
-    sigc::connection _modified_connection;
-    sigc::connection _release_connection;
+    auto_connection _modified_connection;
+    auto_connection _release_connection;
 
     /**
      *  true if the spell checker dialog has changed text, to suppress modified callback
      */
-    bool _local_change;
+    bool _local_change = false;
 
-    Inkscape::Preferences *_prefs;
+    struct LanguagePair
+    {
+        std::string name;
+        std::string code;
+    };
 
     std::vector<LanguagePair> _langs;
 
-    /*
-     *  Dialogs widgets
-     */
-    Gtk::Label          banner_label;
-    Gtk::Button         banner_hbox;
-    Gtk::ScrolledWindow scrolled_window;
-    Gtk::TreeView       tree_view;
-    Glib::RefPtr<Gtk::ListStore> model;
+    // Dialog widgets
+    Gtk::Label &banner_label;
+    Gtk::ColumnView &column_view;
+    Gtk::Button &accept_button;
+    Gtk::Button &ignoreonce_button;
+    Gtk::Button &ignore_button;
+    Gtk::Button &add_button;
+    Gtk::Button &pref_button;
+    Gtk::DropDown &dictionary_combo;
+    Gtk::Button &stop_button;
+    Gtk::Button &start_button;
 
-    Gtk::Box        suggestion_hbox;
-    Gtk::Box        changebutton_vbox;
-    Gtk::Button     accept_button;
-    Gtk::Button     ignoreonce_button;
-    Gtk::Button     ignore_button;
-
-    Gtk::Button     add_button;
-    Gtk::Button     pref_button;
-    Gtk::Label      dictionary_label;
-    Gtk::ComboBoxText dictionary_combo;
-    Gtk::Box        dictionary_hbox;
-    Gtk::Separator  action_sep;
-    Gtk::Button     stop_button;
-    Gtk::Button     start_button;
-    Gtk::Box        actionbutton_hbox;
-
-    class TreeColumns : public Gtk::TreeModel::ColumnRecord
-    {
-      public:
-        TreeColumns()
-        {
-            add(suggestions);
-        }
-        ~TreeColumns() override = default;
-        Gtk::TreeModelColumn<Glib::ustring> suggestions;
-    };
-    TreeColumns tree_columns;
+    Glib::RefPtr<Gtk::StringList> corrections;
+    Glib::RefPtr<Gtk::SingleSelection> selection_model;
 };
-}
-}
-}
 
-#endif /* !SEEN_SPELLCHECK_H */
+} // namespace Inkscape::UI::Dialog
+
+#endif // INKSCAPE_UI_DIALOG_SPELLCHECK_H
 
 /*
   Local Variables:

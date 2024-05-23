@@ -39,51 +39,31 @@
 #include "extension/output.h"
 #include "extension/print.h"
 #include "extension/system.h"
-#include "object/sp-path.h"
 #include "object/sp-root.h"
 #include "path/path-boolop.h"
 #include "print.h"
-#include "svg/css-ostringstream.h"
 #include "svg/svg.h"
 #include "util/safe-printf.h"
 #include "util/units.h"
 
 #include "emf-print.h"
 
-#define PRINT_EMF "org.inkscape.print.emf"
+constexpr auto PRINT_EMF = "org.inkscape.print.emf";
 
 #ifndef U_PS_JOIN_MASK
 #define U_PS_JOIN_MASK (U_PS_JOIN_BEVEL|U_PS_JOIN_MITER|U_PS_JOIN_ROUND)
 #endif
 
-namespace Inkscape {
-namespace Extension {
-namespace Internal {
+namespace Inkscape::Extension::Internal {
 
 static uint32_t ICMmode = 0;  // not used yet, but code to read it from EMF implemented
 static uint32_t BLTmode = 0;
-float           faraway = 10000000; // used in "exclude" clips, hopefully well outside any real drawing!
+constexpr float faraway = 10000000; // used in "exclude" clips, hopefully well outside any real drawing!
 
-Emf::Emf () // The null constructor
+bool Emf::check(Inkscape::Extension::Extension *)
 {
-    return;
+    return Inkscape::Extension::db.get(PRINT_EMF);
 }
-
-
-Emf::~Emf () //The destructor
-{
-    return;
-}
-
-
-bool
-Emf::check (Inkscape::Extension::Extension * /*module*/)
-{
-    if (nullptr == Inkscape::Extension::db.get(PRINT_EMF))
-        return FALSE;
-    return TRUE;
-}
-
 
 void
 Emf::print_document_to_file(SPDocument *doc, const gchar *filename)
@@ -3544,10 +3524,9 @@ void Emf::free_emf_strings(EMF_STRINGS name){
     name.size = 0;
 }
 
-SPDocument *
-Emf::open( Inkscape::Extension::Input * /*mod*/, const gchar *uri )
+std::unique_ptr<SPDocument> Emf::open(Inkscape::Extension::Input *, char const *uri)
 {
-    if (uri == nullptr) {
+    if (!uri) {
         return nullptr;
     }
 
@@ -3592,9 +3571,9 @@ Emf::open( Inkscape::Extension::Input * /*mod*/, const gchar *uri )
 
 //    std::cout << "SVG Output: " << std::endl << d.outsvg << std::endl;
 
-    SPDocument *doc = nullptr;
+    std::unique_ptr<SPDocument> doc;
     if (good) {
-        doc = SPDocument::createNewDocFromMem(d.outsvg.c_str(), strlen(d.outsvg.c_str()), TRUE);
+        doc = SPDocument::createNewDocFromMem(d.outsvg.raw(), true);
     }
 
     free_emf_strings(d.hatches);
@@ -3626,9 +3605,7 @@ Emf::open( Inkscape::Extension::Input * /*mod*/, const gchar *uri )
     return doc;
 }
 
-
-void
-Emf::init ()
+void Emf::init()
 {
     /* EMF in */
     // clang-format off
@@ -3670,12 +3647,9 @@ Emf::init ()
             "</output>\n"
         "</inkscape-extension>", std::make_unique<Emf>());
     // clang-format on
-
-    return;
 }
 
-
-} } }  /* namespace Inkscape, Extension, Implementation */
+} // namespace Inkscape::Extension::Internal
 
 /*
   Local Variables:

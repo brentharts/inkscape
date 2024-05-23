@@ -33,7 +33,7 @@
 #include "clear-n_.h"
 #include "document.h"
 #include "print.h"
-#include "wmf-print.h"
+#include "metafile-print.h"
 
 #include "display/drawing.h"
 #include "extension/db.h"
@@ -47,40 +47,21 @@
 #include "util/safe-printf.h"
 #include "util/units.h"
 
-#define PRINT_WMF "org.inkscape.print.wmf"
+constexpr auto PRINT_WMF = "org.inkscape.print.wmf";
 
 #ifndef U_PS_JOIN_MASK
 #define U_PS_JOIN_MASK (U_PS_JOIN_BEVEL|U_PS_JOIN_MITER|U_PS_JOIN_ROUND)
 #endif
 
-namespace Inkscape {
-namespace Extension {
-namespace Internal {
-
+namespace Inkscape::Extension::Internal {
 
 static bool clipset = false;
-static uint32_t BLTmode=0;
+static uint32_t BLTmode = 0;
 
-Wmf::Wmf () // The null constructor
+bool Wmf::check(Inkscape::Extension::Extension *)
 {
-    return;
+    return Inkscape::Extension::db.get(PRINT_WMF);
 }
-
-
-Wmf::~Wmf () //The destructor
-{
-    return;
-}
-
-
-bool
-Wmf::check (Inkscape::Extension::Extension * /*module*/)
-{
-    if (nullptr == Inkscape::Extension::db.get(PRINT_WMF))
-        return FALSE;
-    return TRUE;
-}
-
 
 void
 Wmf::print_document_to_file(SPDocument *doc, const gchar *filename)
@@ -3101,11 +3082,9 @@ void Wmf::free_wmf_strings(WMF_STRINGS name){
     name.size = 0;
 }
 
-SPDocument *
-Wmf::open( Inkscape::Extension::Input * /*mod*/, const gchar *uri )
+std::unique_ptr<SPDocument> Wmf::open(Inkscape::Extension::Input *, char const *uri)
 {
-
-    if (uri == nullptr) {
+    if (!uri) {
         return nullptr;
     }
 
@@ -3167,9 +3146,9 @@ Wmf::open( Inkscape::Extension::Input * /*mod*/, const gchar *uri )
 
 //    std::cout << "SVG Output: " << std::endl << d.outsvg << std::endl;
 
-    SPDocument *doc = nullptr;
+    std::unique_ptr<SPDocument> doc;
     if (good) {
-        doc = SPDocument::createNewDocFromMem(d.outsvg.c_str(), strlen(d.outsvg.c_str()), TRUE);
+        doc = SPDocument::createNewDocFromMem(d.outsvg.raw(), true);
     }
 
     free_wmf_strings(d.hatches);
@@ -3200,9 +3179,7 @@ Wmf::open( Inkscape::Extension::Input * /*mod*/, const gchar *uri )
     return doc;
 }
 
-
-void
-Wmf::init ()
+void Wmf::init()
 {
     // clang-format off
     /* WMF in */
@@ -3240,12 +3217,9 @@ Wmf::init ()
             "</output>\n"
         "</inkscape-extension>", std::make_unique<Wmf>());
     // clang-format on
-
-    return;
 }
 
-
-} } }  /* namespace Inkscape, Extension, Implementation */
+} // namespace Inkscape::Extension::Internal
 
 /*
   Local Variables:

@@ -14,14 +14,13 @@ if(WIN32)
     ${MINGW_BIN}/libLerc.dll
     ${MINGW_BIN}/libaom.dll
     ${MINGW_BIN}/libaspell-[0-9]*.dll
-    ${MINGW_BIN}/libatk-1.0-[0-9]*.dll
-    ${MINGW_BIN}/libatkmm-1.6-[0-9]*.dll
     ${MINGW_BIN}/libboost_filesystem-mt.dll
     ${MINGW_BIN}/libbrotlicommon.dll
     ${MINGW_BIN}/libbrotlidec.dll
     ${MINGW_BIN}/libbz2-[0-9]*.dll
     ${MINGW_BIN}/libcairo-[0-9]*.dll
     ${MINGW_BIN}/libcairo-gobject-[0-9]*.dll
+    ${MINGW_BIN}/libcairo-script-interpreter-[0-9].dll
     ${MINGW_BIN}/libcairomm-1.16-[0-9]*.dll
     ${MINGW_BIN}/libcdr-0.[0-9]*.dll
     ${MINGW_BIN}/libcrypto-1_[0-9]*.dll
@@ -54,10 +53,12 @@ if(WIN32)
     ${MINGW_BIN}/libgobject-2.0-[0-9]*.dll
     ${MINGW_BIN}/libgomp-[0-9]*.dll
     ${MINGW_BIN}/libgraphite[0-9]*.dll
+    ${MINGW_BIN}/libgraphene-1.0-[0-9].dll
     ${MINGW_BIN}/libgsl-[0-9]*.dll
     ${MINGW_BIN}/libgslcblas-[0-9]*.dll
     ${MINGW_BIN}/libgtk-4-[0-9]*.dll
     ${MINGW_BIN}/libgtkmm-4.0-[0-9]*.dll
+    ${MINGW_BIN}/libspelling-1-[0-9]*.dll
     ${MINGW_BIN}/libgtksourceview-5-[0-9]*.dll
     ${MINGW_BIN}/libharfbuzz-[0-9]*.dll
     ${MINGW_BIN}/libheif.dll
@@ -72,6 +73,7 @@ if(WIN32)
     ${MINGW_BIN}/liblcms2-[0-9]*.dll
     ${MINGW_BIN}/liblqr-1-[0-9]*.dll
     ${MINGW_BIN}/liblzma-[0-9]*.dll
+    ${MINGW_BIN}/liblzo2-[0-9].dll
     ${MINGW_BIN}/libmpdec-[0-9]*.dll
     ${MINGW_BIN}/libmpfr-[0-9]*.dll
     ${MINGW_BIN}/libncursesw6.dll
@@ -101,8 +103,7 @@ if(WIN32)
     ${MINGW_BIN}/librevenge-stream-0.[0-9]*.dll
     ${MINGW_BIN}/librsvg-2-[0-9]*.dll
     ${MINGW_BIN}/libsharpyuv-0.dll
-    ${MINGW_BIN}/libsigc-2.0-[0-9]*.dll
-    ${MINGW_BIN}/libsoup-2.4-[0-9]*.dll
+    ${MINGW_BIN}/libsigc-3.0-[0-9]*.dll
     ${MINGW_BIN}/libsqlite3-[0-9]*.dll
     ${MINGW_BIN}/libssh2-[0-9]*.dll
     ${MINGW_BIN}/libssl-1_[0-9]*.dll
@@ -192,7 +193,8 @@ if(WIN32)
       COMPONENT translations.${language_code_escaped}
       FILES_MATCHING
       PATTERN "*glib20.mo"
-      PATTERN "*gtk40.mo")
+      PATTERN "*gtk40.mo"
+      PATTERN "*libspelling-1.mo")
   endforeach()
 
   install(DIRECTORY ${MINGW_PATH}/share/poppler
@@ -236,7 +238,8 @@ if(WIN32)
     PATTERN "*.cache")
 
   install(DIRECTORY ${MINGW_PATH}/etc/gtk-4.0
-    DESTINATION etc)
+    DESTINATION etc
+    OPTIONAL)
 
   install(DIRECTORY ${MINGW_LIB}/gdk-pixbuf-2.0
     DESTINATION lib
@@ -247,7 +250,6 @@ if(WIN32)
   # Typelibs for gtk, pango, cairo -> can be used in Python extensions
   # ToDo: Automate the creation of this collection!
   install (FILES
-    ${MINGW_LIB}/girepository-1.0/Atk-1.0.typelib
     ${MINGW_LIB}/girepository-1.0/cairo-1.0.typelib
     ${MINGW_LIB}/girepository-1.0/GdkPixbuf-2.0.typelib
     ${MINGW_LIB}/girepository-1.0/Gio-2.0.typelib
@@ -258,6 +260,9 @@ if(WIN32)
     ${MINGW_LIB}/girepository-1.0/HarfBuzz-0.0.typelib
     ${MINGW_LIB}/girepository-1.0/Pango-1.0.typelib
     ${MINGW_LIB}/girepository-1.0/PangoCairo-1.0.typelib
+    ${MINGW_LIB}/girepository-1.0/fontconfig-2.0.typelib
+    ${MINGW_LIB}/girepository-1.0/PangoFc-1.0.typelib
+    ${MINGW_LIB}/girepository-1.0/PangoFT2-1.0.typelib
     ${MINGW_LIB}/girepository-1.0/freetype2-2.0.typelib
     DESTINATION lib/girepository-1.0)
 
@@ -394,5 +399,5 @@ if(WIN32)
     "packaging/win32/Run Inkscape !.bat"
     "packaging/win32/Run Inkscape with GTK Inspector.bat"
     DESTINATION .)
-  
+
 endif()

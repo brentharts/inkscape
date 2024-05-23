@@ -67,8 +67,7 @@ $ARCH-libxslt \
 $ARCH-boost \
 $ARCH-gtk4 \
 $ARCH-gtk-doc \
-$ARCH-gtkmm4 \
-$ARCH-libsoup
+$ARCH-gtkmm4
 
 # install Inkscape dependencies (optional)
 eval pacman -S $PACMAN_OPTIONS \
@@ -77,11 +76,10 @@ $ARCH-potrace \
 $ARCH-libcdr \
 $ARCH-libvisio \
 $ARCH-libwpg \
-$ARCH-aspell \
-$ARCH-aspell-en \
 $ARCH-gtksourceview5 \
 $ARCH-graphicsmagick \
-$ARCH-libjxl
+$ARCH-libjxl \
+$ARCH-enchant
 
 # install Python and modules used by Inkscape
 eval pacman -S $PACMAN_OPTIONS \
@@ -113,6 +111,10 @@ $ARCH-python-chardet \
 $ARCH-python-certifi \
 $ARCH-python-requests
 
+# install packages for testing Inkscape
+eval pacman -S $PACMAN_OPTIONS \
+$ARCH-gtest
+
 # install Python modules not provided as MSYS2/MinGW packages
 PACKAGES=""
 for arch in $(eval echo $ARCH); do
@@ -134,6 +136,5 @@ for arch in $(eval echo $ARCH); do
       ;;
   esac
 done
-
 
 echo "Done :-)"

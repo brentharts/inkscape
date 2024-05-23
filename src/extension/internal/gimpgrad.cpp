@@ -25,29 +25,15 @@
 #include "document.h"
 #include "extension/extension.h"
 
-namespace Inkscape {
-namespace Extension {
-namespace Internal {
+namespace Inkscape::Extension::Internal {
 
-/**
-    \brief  A function to allocate anything -- just an example here
-    \param  module  Unused
-    \return Whether the load was successful
-*/
-bool GimpGrad::load (Inkscape::Extension::Extension */*module*/)
+bool GimpGrad::load(Inkscape::Extension::Extension *)
 {
-    // std::cout << "Hey, I'm loading!\n" << std::endl;
-    return TRUE;
+    return true;
 }
 
-/**
-    \brief  A function to remove what was allocated
-    \param  module  Unused
-    \return None
-*/
-void GimpGrad::unload (Inkscape::Extension::Extension */*module*/)
+void GimpGrad::unload(Inkscape::Extension::Extension *)
 {
-    // std::cout << "Nooo! I'm being unloaded!" << std::endl;
     return;
 }
 
@@ -125,8 +111,7 @@ static Glib::ustring stop_svg(ColorRGBA const in_color, double const location)
     document using the \c sp_document_from_mem.  That is then returned
     to Inkscape.
 */
-SPDocument *
-GimpGrad::open (Inkscape::Extension::Input */*module*/, gchar const *filename)
+std::unique_ptr<SPDocument> GimpGrad::open(Inkscape::Extension::Input *, char const *filename)
 {
     Inkscape::IO::dump_fopen_call(filename, "I");
     FILE *gradient = Inkscape::IO::fopen_utf8name(filename, "r");
@@ -252,7 +237,7 @@ GimpGrad::open (Inkscape::Extension::Input */*module*/, gchar const *filename)
 
         fclose(gradient);
 
-        return SPDocument::createNewDocFromMem(outsvg.c_str(), outsvg.length(), TRUE);
+        return SPDocument::createNewDocFromMem(outsvg.raw(), true);
     }
 
 error:
@@ -262,7 +247,7 @@ error:
 
 #include "clear-n_.h"
 
-void GimpGrad::init ()
+void GimpGrad::init()
 {
     // clang-format off
     Inkscape::Extension::build_from_mem(
@@ -280,7 +265,7 @@ void GimpGrad::init ()
     return;
 }
 
-} } }  /* namespace Internal; Extension; Inkscape */
+} // namespace Inkscape::Extension::Internal
 
 /*
   Local Variables:

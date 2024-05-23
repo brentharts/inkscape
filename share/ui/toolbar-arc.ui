@@ -23,34 +23,17 @@
     <property name="step-increment">1</property>
     <property name="page-increment">10</property>
   </object>
-  <object class="GtkPopover" id="popover1">
-    <property name="child">
-      <object class="GtkBox" id="popover_box1">
-        <property name="valign">center</property>
-        <property name="spacing">3</property>
-      </object>
-    </property>
-  </object>
-  <object class="GtkPopover" id="popover2">
-    <property name="child">
-      <object class="GtkBox" id="popover_box2">
-        <property name="valign">center</property>
-        <property name="spacing">3</property>
-      </object>
-    </property>
-  </object>
   <object class="GtkToggleButton" id="radio_button_group">
+    <property name="valign">center</property>
     <property name="focusable">True</property>
     <property name="active">True</property>
   </object>
   <object class="GtkBox" id="arc-toolbar">
     <property name="halign">start</property>
     <property name="valign">center</property>
-    <property name="spacing">3</property>
     <property name="hexpand">True</property>
     <child>
       <object class="GtkLabel" id="_mode_item">
-        <property name="margin-start">3</property>
         <property name="label" translatable="yes">&lt;b&gt;New:&lt;/b&gt;</property>
         <property name="use-markup">True</property>
       </object>
@@ -60,13 +43,14 @@
         <property name="tooltip-text" translatable="yes">Horizontal radius of the circle, ellipse, or arc</property>
         <child>
           <object class="GtkLabel">
+            <property name="margin-start">5</property>
             <property name="label" translatable="yes">Rx:</property>
           </object>
         </child>
         <child>
           <object class="GtkSpinButton" id="_rx_item">
             <property name="focusable">True</property>
-            <property name="width-chars">10</property>
+            <property name="width-chars">6</property>
             <property name="adjustment">_rx_adj</property>
             <property name="climb-rate">0.10</property>
             <property name="digits">3</property>
@@ -79,13 +63,14 @@
         <property name="tooltip-text" translatable="yes">Vertical radius of the circle, ellipse, or arc</property>
         <child>
           <object class="GtkLabel">
+            <property name="margin-start">5</property>
             <property name="label" translatable="yes">Ry:</property>
           </object>
         </child>
         <child>
           <object class="GtkSpinButton" id="_ry_item">
             <property name="focusable">True</property>
-            <property name="width-chars">10</property>
+            <property name="width-chars">6</property>
             <property name="text" translatable="yes">0.000</property>
             <property name="adjustment">_ry_adj</property>
             <property name="climb-rate">0.10</property>
@@ -103,40 +88,24 @@
       </object>
     </child>
     <child>
-      <object class="GtkMenuButton" id="menu_btn1">
-        <property name="focusable">True</property>
-        <property name="focus-on-click">False</property>
-        <property name="receives-default">True</property>
-        <property name="has-frame">False</property>
-        <property name="popover">popover1</property>
-        <child>
-          <object class="GtkImage" id="image5">
-            <property name="icon-name">go-down</property>
-          </object>
-        </child>
-      </object>
-    </child>
-    <child>
       <object class="GtkBox" id="start_box">
         <property name="tooltip-text" translatable="yes">The angle (in degrees) from the horizontal to the arc's start point</property>
         <child>
           <object class="GtkLabel">
+            <property name="margin-start">5</property>
             <property name="label" translatable="yes">Start:</property>
           </object>
         </child>
         <child>
           <object class="GtkSpinButton" id="_start_item">
             <property name="focusable">True</property>
-            <property name="width-chars">10</property>
+            <property name="width-chars">6</property>
             <property name="text" translatable="yes">0.000</property>
             <property name="adjustment">_start_adj</property>
             <property name="climb-rate">0.10</property>
             <property name="digits">3</property>
           </object>
         </child>
-        <style>
-          <class name="tag1"/>
-        </style>
       </object>
     </child>
     <child>
@@ -144,22 +113,20 @@
         <property name="tooltip-text" translatable="yes">The angle (in degrees) from the horizontal to the arc's end point</property>
         <child>
           <object class="GtkLabel">
+            <property name="margin-start">5</property>
             <property name="label" translatable="yes">End:</property>
           </object>
         </child>
         <child>
           <object class="GtkSpinButton" id="_end_item">
             <property name="focusable">True</property>
-            <property name="width-chars">10</property>
+            <property name="width-chars">6</property>
             <property name="text" translatable="yes">0.000</property>
             <property name="adjustment">_end_adj</property>
             <property name="climb-rate">0.10</property>
             <property name="digits">3</property>
           </object>
         </child>
-        <style>
-          <class name="tag1"/>
-        </style>
       </object>
     </child>
     <child>
@@ -167,27 +134,14 @@
       </object>
     </child>
     <child>
-      <object class="GtkMenuButton" id="menu_btn2">
-        <property name="focusable">True</property>
-        <property name="focus-on-click">False</property>
-        <property name="receives-default">True</property>
-        <property name="has-frame">False</property>
-        <property name="popover">popover2</property>
-        <child>
-          <object class="GtkImage" id="image6">
-            <property name="icon-name">go-down</property>
-          </object>
-        </child>
-      </object>
-    </child>
-    <child>
       <object class="GtkToggleButton" id="slice_btn">
+        <property name="valign">center</property>
         <property name="focusable">True</property>
         <property name="tooltip-text" translatable="yes">Switch to slice (closed shape with two radii)</property>
         <property name="has-frame">False</property>
         <property name="group">radio_button_group</property>
         <style>
-          <class name="tag2"/>
+            <class name="priority1"/>
         </style>
         <child>
           <object class="GtkImage" id="image1">
@@ -198,12 +152,13 @@
     </child>
     <child>
       <object class="GtkToggleButton" id="arc_btn">
+        <property name="valign">center</property>
         <property name="focusable">True</property>
         <property name="tooltip-text" translatable="yes">Switch to arc (unclosed shape)</property>
         <property name="has-frame">False</property>
         <property name="group">radio_button_group</property>
         <style>
-          <class name="tag2"/>
+            <class name="priority1"/>
         </style>
         <child>
           <object class="GtkImage" id="image3">
@@ -214,12 +169,13 @@
     </child>
     <child>
       <object class="GtkToggleButton" id="chord_btn">
+        <property name="valign">center</property>
         <property name="focusable">True</property>
         <property name="tooltip-text" translatable="yes">Switch to chord (closed shape)</property>
         <property name="has-frame">False</property>
         <property name="group">radio_button_group</property>
         <style>
-          <class name="tag2"/>
+            <class name="priority1"/>
         </style>
         <child>
           <object class="GtkImage" id="image4">
@@ -234,6 +190,7 @@
     </child>
     <child>
       <object class="GtkButton" id="_make_whole">
+        <property name="valign">center</property>
         <property name="focusable">True</property>
         <property name="receives-default">True</property>
         <property name="tooltip-text" translatable="yes">Make the shape a whole ellipse, not arc or segment</property>
@@ -246,7 +203,7 @@
       </object>
     </child>
     <style>
-      <class name="toolbar"/>
+      <class name="inkscape-toolbar"/>
     </style>
   </object>
 </interface>

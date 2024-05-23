@@ -8,8 +8,6 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include <set>
-
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdkmm/pixbuf.h>
 #include <gdkmm/pixbufformat.h>
@@ -28,20 +26,14 @@
 #include "extension/input.h"
 #include "extension/system.h"
 
-#include "io/dir-util.h"
-
 #include "object/sp-image.h"
 #include "object/sp-root.h"
 
 #include "util/units.h"
 
-namespace Inkscape {
+namespace Inkscape::Extension::Internal {
 
-namespace Extension {
-namespace Internal {
-
-SPDocument *
-GdkpixbufInput::open(Inkscape::Extension::Input *mod, char const *uri)
+std::unique_ptr<SPDocument> GdkpixbufInput::open(Inkscape::Extension::Input *mod, char const *uri)
 {
     // Determine whether the image should be embedded
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
@@ -65,36 +57,34 @@ GdkpixbufInput::open(Inkscape::Extension::Input *mod, char const *uri)
 
     bool embed = (link == "embed");
  
-    SPDocument *doc = nullptr;
+    std::unique_ptr<SPDocument> doc;
     std::unique_ptr<Inkscape::Pixbuf> pb(Inkscape::Pixbuf::create_from_file(uri));
 
     // TODO: the pixbuf is created again from the base64-encoded attribute in SPImage.
     // Find a way to create the pixbuf only once.
 
     if (pb) {
-        doc = SPDocument::createNewDoc(nullptr, TRUE, TRUE);
-        DocumentUndo::ScopedInsensitive _no_undo(doc);
+        doc = SPDocument::createNewDoc(nullptr, true, true);
+        DocumentUndo::ScopedInsensitive _no_undo(doc.get());
 
         double width = pb->width();
         double height = pb->height();
         double defaultxdpi = prefs->getDouble("/dialogs/import/defaultxdpi/value", Inkscape::Util::Quantity::convert(1, "in", "px"));
 
-        ImageResolution *ir = nullptr;
         double xscale = 1;
         double yscale = 1;
 
-
-        if (!ir && !forcexdpi) {
-            ir = new ImageResolution(uri);
-        }
-        if (ir && ir->ok()) {
-            xscale = 960.0 / round(10.*ir->x());  // round-off to 0.1 dpi
-            yscale = 960.0 / round(10.*ir->y());
-            // prevent crash on image with too small dpi (bug 1479193)
-            if (ir->x() <= .05)
-                xscale = 960.0;
-            if (ir->y() <= .05)
-                yscale = 960.0;
+        if (!forcexdpi) {
+            auto ir = ImageResolution{uri};
+            if (ir.ok()) {
+                xscale = 960.0 / std::round(10.0 * ir.x()); // round-off to 0.1 dpi
+                yscale = 960.0 / std::round(10.0 * ir.y());
+                // prevent crash on image with too small dpi (bug 1479193)
+                if (ir.x() <= .05)
+                    xscale = 960.0;
+                if (ir.y() <= .05)
+                    yscale = 960.0;
+            }
         } else {
             xscale = 96.0 / defaultxdpi;
             yscale = 96.0 / defaultxdpi;
@@ -102,8 +92,6 @@ GdkpixbufInput::open(Inkscape::Extension::Input *mod, char const *uri)
 
         width *= xscale;
         height *= yscale;
-
-        delete ir; // deleting NULL is safe
 
         // Create image node
         Inkscape::XML::Document *xml_doc = doc->getReprDoc();
@@ -143,7 +131,7 @@ GdkpixbufInput::open(Inkscape::Extension::Input *mod, char const *uri)
         layer_node->appendChild(image_node);
         Inkscape::GC::release(image_node);
         Inkscape::GC::release(layer_node);
-        fit_canvas_to_drawing(doc);
+        fit_canvas_to_drawing(doc.get());
         
         // Set viewBox if it doesn't exist
         if (!doc->getRoot()->viewBox_set) {
@@ -239,7 +227,7 @@ GdkpixbufInput::init()
     }
 }
 
-} } }  /* namespace Inkscape, Extension, Implementation */
+} // namespace Inkscape::Extension::Internal
 
 /*
   Local Variables:

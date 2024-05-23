@@ -20,10 +20,10 @@
   <object class="GtkBox" id="connector-toolbar">
     <property name="halign">start</property>
     <property name="valign">center</property>
-    <property name="spacing">3</property>
     <property name="hexpand">True</property>
     <child>
       <object class="GtkButton" id="avoid_btn">
+        <property name="valign">center</property>
         <property name="focusable">True</property>
         <property name="receives-default">True</property>
         <property name="tooltip-text" translatable="yes">Make connectors avoid selected objects</property>
@@ -37,6 +37,7 @@
     </child>
     <child>
       <object class="GtkButton" id="ignore_btn">
+        <property name="valign">center</property>
         <property name="focusable">True</property>
         <property name="receives-default">True</property>
         <property name="tooltip-text" translatable="yes">Make connectors ignore selected objects</property>
@@ -50,6 +51,7 @@
     </child>
     <child>
       <object class="GtkToggleButton" id="_orthogonal_btn">
+        <property name="valign">center</property>
         <property name="focusable">True</property>
         <property name="receives-default">True</property>
         <property name="tooltip-text" translatable="yes">Make connector orthogonal or polyline</property>
@@ -70,6 +72,7 @@
         <property name="tooltip-text" translatable="yes">The amount of connectors curvature</property>
         <child>
           <object class="GtkLabel">
+            <property name="margin-start">5</property>
             <property name="label" translatable="yes">Curvature:</property>
           </object>
         </child>
@@ -89,6 +92,7 @@
         <property name="tooltip-text" translatable="yes">The amount of space left around objects by auto-routing connectors</property>
         <child>
           <object class="GtkLabel">
+            <property name="margin-start">5</property>
             <property name="label" translatable="yes">Spacing:</property>
           </object>
         </child>
@@ -106,10 +110,14 @@
     </child>
     <child>
       <object class="GtkButton" id="graph_btn">
+        <property name="valign">center</property>
         <property name="focusable">True</property>
         <property name="receives-default">True</property>
         <property name="tooltip-text" translatable="yes">Nicely arrange selected connector network</property>
         <property name="has-frame">False</property>
+        <style>
+            <class name="priority1"/>
+        </style>
         <child>
           <object class="GtkImage" id="image4">
             <property name="icon-name">distribute-graph</property>
@@ -120,8 +128,12 @@
     <child>
       <object class="GtkBox" id="length_box">
         <property name="tooltip-text" translatable="yes">Ideal length for connectors when layout is applied</property>
+        <style>
+            <class name="priority1"/>
+        </style>
         <child>
           <object class="GtkLabel">
+            <property name="margin-start">5</property>
             <property name="label" translatable="yes">Length:</property>
           </object>
         </child>
@@ -138,10 +150,14 @@
     </child>
     <child>
       <object class="GtkToggleButton" id="_directed_btn">
+        <property name="valign">center</property>
         <property name="focusable">True</property>
         <property name="receives-default">True</property>
         <property name="tooltip-text" translatable="yes">Make connectors with end-markers (arrows) point downwards</property>
         <property name="has-frame">False</property>
+        <style>
+            <class name="priority1"/>
+        </style>
         <child>
           <object class="GtkImage" id="image5">
             <property name="icon-name">distribute-graph-directed</property>
@@ -151,10 +167,14 @@
     </child>
     <child>
       <object class="GtkToggleButton" id="_overlap_btn">
+        <property name="valign">center</property>
         <property name="focusable">True</property>
         <property name="receives-default">True</property>
         <property name="tooltip-text" translatable="yes">Do not allow overlapping shapes</property>
         <property name="has-frame">False</property>
+        <style>
+            <class name="priority1"/>
+        </style>
         <child>
           <object class="GtkImage" id="image6">
             <property name="icon-name">distribute-remove-overlaps</property>
@@ -163,7 +183,7 @@
       </object>
     </child>
     <style>
-      <class name="toolbar"/>
+      <class name="inkscape-toolbar"/>
     </style>
   </object>
 </interface>

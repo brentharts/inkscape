@@ -51,7 +51,9 @@ set(util_SRC
 	signal-blocker.h
 	source_date_epoch.h
 	statics.h
+	static-doc.h
 	trim.h
+	smart_ptr_keys.h
 	units.h
     variant-visitor.h
 	ziptool.h

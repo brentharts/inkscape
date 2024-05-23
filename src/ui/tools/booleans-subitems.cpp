@@ -54,7 +54,7 @@ static Geom::PathVector clean_pathvector(Geom::PathVector &&pathv)
  */
 SubItem &SubItem::operator+=(SubItem const &other)
 {
-    _paths = clean_pathvector(flattened(sp_pathvector_boolop(_paths, other._paths, bool_op_union, fill_nonZero, fill_nonZero, true), fill_nonZero));
+    _paths = clean_pathvector(flattened(sp_pathvector_boolop(_paths, other._paths, bool_op_union, fill_nonZero, fill_nonZero), fill_nonZero));
     return *this;
 }
 
@@ -90,9 +90,9 @@ static void extract_pathvectors_recursive(SPItem *root, SPItem *item, Pathvector
             }
         }
     } else if (auto img = cast<SPImage>(item)) {
-        if (auto clip = img->getClipObject()) {
-            // This needs to consume the clipping region because get_curse is empty in this case
-            result.emplace_back(clip->getPathVector(transform), root, item);
+        if (auto clip = img->getClipPathVector(root)) {
+            // This needs to use the clipping region because get_curve is empty in this case
+            result.emplace_back(*clip * transform, root, item);
         } else {
             result.emplace_back(img->get_curve()->get_pathvector() * transform, root, item);
         }
@@ -103,10 +103,10 @@ static void extract_pathvectors_recursive(SPItem *root, SPItem *item, Pathvector
     } else if (auto text = cast<SPText>(item)) {
         result.emplace_back(text->getNormalizedBpath().get_pathvector() * transform, root, item);
     } else if (auto use = cast<SPUse>(item)) {
-        auto clip = use->getClipObject();
+        auto clip = use->getClipPathVector(root);
         if (clip && is<SPImage>(use->get_original())) {
             // A clipped clone of an image is consumed as a single object
-            result.emplace_back(clip->getPathVector(transform), root, item);
+            result.emplace_back(*clip * transform, root, item);
         } else if (use->child) {
             extract_pathvectors_recursive(root, use->child, result, use->child->transform * Geom::Translate(use->x.computed, use->y.computed) * transform);
         }
@@ -282,7 +282,7 @@ WorkItems SubItem::build_flatten(std::vector<SPItem*> &&items)
 
             // Flatten the remaining pathvector according to its fill rule.
             auto fillrule = subitem->style->fill_rule.computed;
-            sp_flatten(pathv, sp_to_livarot(fillrule));
+            flatten(pathv, sp_to_livarot(fillrule));
 
             // Remove the union so far from the shape, then add the shape to the union so far.
             Geom::PathVector uniq;
@@ -291,8 +291,8 @@ WorkItems SubItem::build_flatten(std::vector<SPItem*> &&items)
                 uniq = pathv;
                 unioned = std::move(pathv);
             } else {
-                uniq = sp_pathvector_boolop(unioned, pathv, bool_op_diff, fill_nonZero, fill_nonZero, true);
-                unioned = sp_pathvector_boolop(unioned, pathv, bool_op_union, fill_nonZero, fill_nonZero, true);
+                uniq = sp_pathvector_boolop(unioned, pathv, bool_op_diff, fill_nonZero, fill_nonZero);
+                unioned = sp_pathvector_boolop(unioned, pathv, bool_op_union, fill_nonZero, fill_nonZero);
             }
 
             // Add the new SubItem.

@@ -10,7 +10,6 @@
 
 #include "io/file.h"
 
-#include <initializer_list>
 #include <iostream>
 #include <memory>
 #include <unistd.h>
@@ -32,10 +31,9 @@
  * Create a blank document, remove any template data.
  * Input: Empty string or template file name.
  */
-SPDocument *
-ink_file_new(const std::string &Template)
+std::unique_ptr<SPDocument> ink_file_new(std::string const &Template)
 {
-    SPDocument *doc = SPDocument::createNewDoc ((Template.empty() ? nullptr : Template.c_str()), true, true );
+    auto doc = SPDocument::createNewDoc(Template.empty() ? nullptr : Template.c_str(), true, true);
 
     if (!doc) {
         std::cerr << "ink_file_new: Did not create new document!" << std::endl;
@@ -48,7 +46,7 @@ ink_file_new(const std::string &Template)
                            "inkscape:_templateinfo"}) // backwards-compatibility
     {
         if (auto node = std::unique_ptr<Inkscape::XML::Node>{sp_repr_lookup_name(myRoot, name)}) {
-            Inkscape::DocumentUndo::ScopedInsensitive no_undo(doc);
+            Inkscape::DocumentUndo::ScopedInsensitive no_undo(doc.get());
             sp_repr_unparent(node.get());
         }
     }
@@ -59,12 +57,11 @@ ink_file_new(const std::string &Template)
 /**
  * Open a document from memory.
  */
-SPDocument *
-ink_file_open(std::string const &data)
+std::unique_ptr<SPDocument> ink_file_open(std::span<char const> buffer)
 {
-    SPDocument *doc = SPDocument::createNewDocFromMem (data.c_str(), data.length(), true);
+    auto doc = SPDocument::createNewDocFromMem(buffer, true);
 
-    if (doc == nullptr) {
+    if (!doc) {
         std::cerr << "ink_file_open: cannot open file in memory (pipe?)" << std::endl;
         return nullptr;
     }
@@ -79,56 +76,44 @@ ink_file_open(std::string const &data)
 /**
  * Open a document.
  */
-SPDocument *
-ink_file_open(const Glib::RefPtr<Gio::File>& file, bool *cancelled_param)
+std::pair<std::unique_ptr<SPDocument>, bool> ink_file_open(Glib::RefPtr<Gio::File> const &file)
 {
-    bool cancelled = false;
-    SPDocument *doc = nullptr;
+    std::unique_ptr<SPDocument> doc;
     std::string path = file->get_path();
 
     // TODO: It's useless to catch these exceptions here (and below) unless we do something with them.
     //       If we can't properly handle them (e.g. by showing a user-visible message) don't catch them!
-    // TODO: Why do we reset `doc` to nullptr? Surely if open() throws, we will never assign to it?
     try {
         doc = Inkscape::Extension::open(nullptr, path.c_str());
-    } catch (Inkscape::Extension::Input::no_extension_found &e) {
-        doc = nullptr;
-    } catch (Inkscape::Extension::Input::open_failed &e) {
-        doc = nullptr;
-    } catch (Inkscape::Extension::Input::open_cancelled &e) {
-        cancelled = true;
-        doc = nullptr;
+    } catch (Inkscape::Extension::Input::no_extension_found const &) {
+    } catch (Inkscape::Extension::Input::open_failed const &) {
+    } catch (Inkscape::Extension::Input::open_cancelled const &) {
+        return {nullptr, true};
     }
 
     // Try to open explicitly as SVG.
     // TODO: Why is this necessary? Shouldn't this be handled by the first call already?
-    if (doc == nullptr && !cancelled) {
+    if (!doc) {
         try {
             doc = Inkscape::Extension::open(Inkscape::Extension::db.get(SP_MODULE_KEY_INPUT_SVG), path.c_str());
-        } catch (Inkscape::Extension::Input::no_extension_found &e) {
-            doc = nullptr;
-        } catch (Inkscape::Extension::Input::open_failed &e) {
-            doc = nullptr;
-        } catch (Inkscape::Extension::Input::open_cancelled &e) {
-            cancelled = true;
-            doc = nullptr;
+        } catch (Inkscape::Extension::Input::no_extension_found const &) {
+        } catch (Inkscape::Extension::Input::open_failed const &) {
+        } catch (Inkscape::Extension::Input::open_cancelled const &) {
+            return {nullptr, true};
         }
     }
 
-    if (doc != nullptr) {
-        // This is the only place original values should be set.
-        SPRoot *root = doc->getRoot();
-        root->original.inkscape = root->version.inkscape;
-        root->original.svg      = root->version.svg;
-    } else if (!cancelled) {
+    if (!doc) {
         std::cerr << "ink_file_open: '" << path << "' cannot be opened!" << std::endl;
+        return {nullptr, false};
     }
 
-    if (cancelled_param) {
-        *cancelled_param = cancelled;
-    }
+    // This is the only place original values should be set.
+    auto root = doc->getRoot();
+    root->original.inkscape = root->version.inkscape;
+    root->original.svg = root->version.svg;
 
-    return doc;
+    return {std::move(doc), false};
 }
 
 namespace Inkscape::IO {
