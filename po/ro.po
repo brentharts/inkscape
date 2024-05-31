@@ -2087,7 +2087,7 @@ msgstr "Canale de desen"
 msgid "Colorize separately the three color channels"
 msgstr "Colorizează separat cele trei canale de desen"
 
-#: ../build/share/filters/filters.svg.h:826 !@#
+#: ../build/share/filters/filters.svg.h:826 
 msgid "Posterized Light Eraser"
 msgstr "Radieră ușoară de posterizare"
 
@@ -2153,7 +2153,7 @@ msgstr "Săgeată triunghiulară"
 
 #: ../build/share/markers/markers.svg.h:6
 msgid "Stylized triangle arrow"
-msgstr ""
+msgstr "Săgeată triunghiulară stilizată"
 
 #: ../build/share/markers/markers.svg.h:7
 msgid "Colored triangle"
@@ -2173,7 +2173,7 @@ msgstr "Săgeată rotunjită"
 
 #: ../build/share/markers/markers.svg.h:11
 msgid "Sketched arrow"
-msgstr ""
+msgstr "Săgeată schițată"
 
 #: ../build/share/markers/markers.svg.h:12
 msgid "Arrow tail"
@@ -2181,11 +2181,11 @@ msgstr "Coada săgeții"
 
 #: ../build/share/markers/markers.svg.h:13
 msgid "Distance start"
-msgstr ""
+msgstr "Începutul distanței"
 
 #: ../build/share/markers/markers.svg.h:14
 msgid "Distance end"
-msgstr ""
+msgstr "Sfârșitul distanței"
 
 #: ../build/share/markers/markers.svg.h:15
 msgid "Dot"
@@ -2202,7 +2202,7 @@ msgstr "Pătrat"
 #: ../build/share/markers/markers.svg.h:17
 #: ../share/extensions/other/templates/template_shape_prefab.inx:13
 msgid "Diamond"
-msgstr ""
+msgstr "Diamant"
 
 # tip
 #: ../build/share/markers/markers.svg.h:18
@@ -2239,23 +2239,23 @@ msgstr "Semicerc umplut"
 
 #: ../build/share/markers/markers.svg.h:24
 msgid "Empty semicircle"
-msgstr ""
+msgstr "Semicerc gol"
 
 #: ../build/share/markers/markers.svg.h:25
 msgid "Curvy cross"
-msgstr ""
+msgstr "Cruce curbată"
 
 #: ../build/share/markers/markers.svg.h:26
 msgid "Scissors"
-msgstr ""
+msgstr "Foarfece"
 
 #: ../build/share/markers/markers.svg.h:27
 msgid "Club"
-msgstr ""
+msgstr "Bâtă"
 
 #: ../build/share/markers/markers.svg.h:28
 msgid "Razor wire"
-msgstr ""
+msgstr "Sărmâ cu lamele taietoare"
 
 #: ../build/share/markers/markers.svg.h:29
 msgid "Ellipsis"
@@ -2263,15 +2263,15 @@ msgstr "Elipsă"
 
 #: ../build/share/markers/markers.svg.h:30
 msgid "Torso"
-msgstr ""
+msgstr "Bust"
 
 #: ../build/share/markers/markers.svg.h:31
 msgid "Legs"
-msgstr ""
+msgstr "Picioare"
 
 #: ../build/share/markers/markers.svg.h:32
 msgid "Red pin"
-msgstr ""
+msgstr "Pioneză rosie"
 
 #: ../build/share/markers/markers.svg.h:34
 msgid "Triangle cap"
@@ -2279,11 +2279,11 @@ msgstr "Capăt triunghiular"
 
 #: ../build/share/markers/markers.svg.h:35
 msgid "Ribbon cap"
-msgstr ""
+msgstr "Capăt fundă"
 
 #: ../build/share/markers/markers.svg.h:36
 msgid "Ribbon cap, rounded"
-msgstr ""
+msgstr "Capăt fundă rotunjit"
 
 #. TRANSLATORS: Butt cap: the line shape does not extend beyond the end point
 #. of the line; the ends of the line are square
@@ -2294,7 +2294,7 @@ msgstr "Capăt retezat"
 
 #: ../build/share/markers/markers.svg.h:38
 msgid "Serif cap"
-msgstr ""
+msgstr "Capăt Serif"
 
 #: ../build/share/palettes/palettes.h:2
 msgctxt "Palette"
@@ -2411,7 +2411,7 @@ msgstr "Lămâie verde (#00FF00)"
 #: ../build/share/palettes/palettes.h:22
 msgctxt "Palette"
 msgid "Teal (#008080)"
-msgstr ""
+msgstr "Albastru verzui"
 
 #: ../build/share/palettes/palettes.h:23
 msgctxt "Palette"
@@ -2436,7 +2436,7 @@ msgstr "Violet (#800080)"
 #: ../build/share/palettes/palettes.h:27
 msgctxt "Palette"
 msgid "Fuchsia (#FF00FF)"
-msgstr ""
+msgstr "Fuhsia"
 
 #: ../build/share/palettes/palettes.h:28
 msgctxt "Palette"
@@ -2566,12 +2566,12 @@ msgstr "somon deschis (#FFA07A)"
 #: ../build/share/palettes/palettes.h:53
 msgctxt "Palette"
 msgid "sienna (#A0522D)"
-msgstr ""
+msgstr "sienna"
 
-#: ../build/share/palettes/palettes.h:54
+#: ../build/share/palettes/palettes.h:54 
 msgctxt "Palette"
 msgid "seashell (#FFF5EE)"
-msgstr ""
+msgstr "scoiciu"
 
 #: ../build/share/palettes/palettes.h:55
 msgctxt "Palette"
@@ -2601,7 +2601,7 @@ msgstr "peru (#CD853F)"
 #: ../build/share/palettes/palettes.h:60
 msgctxt "Palette"
 msgid "linen (#FAF0E6)"
-msgstr "linen (#FAF0E6)"
+msgstr "pânză (#FAF0E6)"
 
 #: ../build/share/palettes/palettes.h:61
 msgctxt "Palette"
@@ -2806,197 +2806,197 @@ msgstr "verde (#008000)"
 #: ../build/share/palettes/palettes.h:101
 msgctxt "Palette"
 msgid "lime (#00FF00)"
-msgstr ""
+msgstr "lamâie verde"
 
 #: ../build/share/palettes/palettes.h:102
 msgctxt "Palette"
 msgid "honeydew (#F0FFF0)"
-msgstr ""
+msgstr "alb verzui"
 
 #: ../build/share/palettes/palettes.h:103
 msgctxt "Palette"
 msgid "seagreen (#2E8B57)"
-msgstr ""
+msgstr "verde gălbui"
 
 #: ../build/share/palettes/palettes.h:104
 msgctxt "Palette"
 msgid "mediumseagreen (#3CB371)"
-msgstr ""
+msgstr "verde gălbui mediu"
 
 #: ../build/share/palettes/palettes.h:105
 msgctxt "Palette"
 msgid "springgreen (#00FF7F)"
-msgstr ""
+msgstr "verde crud"
 
 #: ../build/share/palettes/palettes.h:106
 msgctxt "Palette"
 msgid "mintcream (#F5FFFA)"
-msgstr ""
+msgstr "verde pal"
 
 #: ../build/share/palettes/palettes.h:107
 msgctxt "Palette"
 msgid "mediumspringgreen (#00FA9A)"
-msgstr ""
+msgstr "verde crud mediu"
 
 #: ../build/share/palettes/palettes.h:108
 msgctxt "Palette"
 msgid "mediumaquamarine (#66CDAA)"
-msgstr ""
+msgstr "bleu marin mediu"
 
 #: ../build/share/palettes/palettes.h:109
 msgctxt "Palette"
 msgid "aquamarine (#7FFFD4)"
-msgstr ""
+msgstr "bleu marin"
 
 #: ../build/share/palettes/palettes.h:110
 msgctxt "Palette"
 msgid "turquoise (#40E0D0)"
-msgstr ""
+msgstr "turcoaz"
 
-#: ../build/share/palettes/palettes.h:111
+#: ../build/share/palettes/palettes.h:111 
 msgctxt "Palette"
 msgid "lightseagreen (#20B2AA)"
-msgstr ""
+msgstr "verde gălbui deschis"
 
 #: ../build/share/palettes/palettes.h:112
 msgctxt "Palette"
 msgid "mediumturquoise (#48D1CC)"
-msgstr ""
+msgstr "turcoaz mediu"
 
 #: ../build/share/palettes/palettes.h:113
 msgctxt "Palette"
 msgid "darkslategray (#2F4F4F)"
-msgstr ""
+msgstr "gri albăstrui închis"
 
 #: ../build/share/palettes/palettes.h:114
 msgctxt "Palette"
 msgid "paleturquoise (#AFEEEE)"
-msgstr ""
+msgstr "turcoaz pal"
 
 #: ../build/share/palettes/palettes.h:115
 msgctxt "Palette"
 msgid "teal (#008080)"
-msgstr ""
+msgstr "albastru verzui"
 
 #: ../build/share/palettes/palettes.h:116
 msgctxt "Palette"
 msgid "darkcyan (#008B8B)"
-msgstr ""
+msgstr "azur închis"
 
 #: ../build/share/palettes/palettes.h:117
 msgctxt "Palette"
 msgid "cyan (#00FFFF)"
-msgstr ""
+msgstr "azur"
 
 #: ../build/share/palettes/palettes.h:118
 msgctxt "Palette"
 msgid "lightcyan (#E0FFFF)"
-msgstr ""
+msgstr "azur deschis"
 
 #: ../build/share/palettes/palettes.h:119
 msgctxt "Palette"
 msgid "azure (#F0FFFF)"
-msgstr ""
+msgstr "albastru verzui deschis"
 
 #: ../build/share/palettes/palettes.h:120
 msgctxt "Palette"
 msgid "darkturquoise (#00CED1)"
-msgstr ""
+msgstr "tucoaz închis"
 
 #: ../build/share/palettes/palettes.h:121
 msgctxt "Palette"
 msgid "cadetblue (#5F9EA0)"
-msgstr ""
+msgstr "albastru cadet"
 
 #: ../build/share/palettes/palettes.h:122
 msgctxt "Palette"
 msgid "powderblue (#B0E0E6)"
-msgstr ""
+msgstr "albastru puternic"
 
 #: ../build/share/palettes/palettes.h:123
 msgctxt "Palette"
 msgid "lightblue (#ADD8E6)"
-msgstr ""
+msgstr "albastru deschis"
 
 #: ../build/share/palettes/palettes.h:124
 msgctxt "Palette"
 msgid "deepskyblue (#00BFFF)"
-msgstr ""
+msgstr "albastru cer adânc"
 
 #: ../build/share/palettes/palettes.h:125
 msgctxt "Palette"
 msgid "skyblue (#87CEEB)"
-msgstr ""
+msgstr "albastru de cer"
 
 #: ../build/share/palettes/palettes.h:126
 msgctxt "Palette"
 msgid "lightskyblue (#87CEFA)"
-msgstr ""
+msgstr "albastru de cer deschis"
 
 #: ../build/share/palettes/palettes.h:127
 msgctxt "Palette"
 msgid "steelblue (#4682B4)"
-msgstr ""
+msgstr "albastru oțel"
 
 #: ../build/share/palettes/palettes.h:128
 msgctxt "Palette"
 msgid "aliceblue (#F0F8FF)"
-msgstr ""
+msgstr "alb albastrui"
 
 #: ../build/share/palettes/palettes.h:129
 msgctxt "Palette"
 msgid "dodgerblue (#1E90FF)"
-msgstr ""
+msgstr "albastru dodger"
 
 #: ../build/share/palettes/palettes.h:130
 msgctxt "Palette"
 msgid "slategray (#708090)"
-msgstr ""
+msgstr "gri azur"
 
 #: ../build/share/palettes/palettes.h:131
 msgctxt "Palette"
 msgid "lightslategray (#778899)"
-msgstr ""
+msgstr "gri azur deschis"
 
 #: ../build/share/palettes/palettes.h:132
 msgctxt "Palette"
 msgid "lightsteelblue (#B0C4DE)"
-msgstr ""
+msgstr "albastru oțel deschis"
 
 #: ../build/share/palettes/palettes.h:133
 msgctxt "Palette"
 msgid "cornflowerblue (#6495ED)"
-msgstr ""
+msgstr "albastru mediu cu o tentă de verde"
 
 #: ../build/share/palettes/palettes.h:134
 msgctxt "Palette"
 msgid "royalblue (#4169E1)"
-msgstr ""
+msgstr "albastru regal"
 
 #: ../build/share/palettes/palettes.h:135
 msgctxt "Palette"
 msgid "midnightblue (#191970)"
-msgstr ""
+msgstr "albastru foarte închis"
 
 #: ../build/share/palettes/palettes.h:136
 msgctxt "Palette"
 msgid "lavender (#E6E6FA)"
-msgstr ""
+msgstr "albastru levănțică"
 
 #: ../build/share/palettes/palettes.h:137
 msgctxt "Palette"
 msgid "navy (#000080)"
-msgstr ""
+msgstr "albastru închis"
 
 #: ../build/share/palettes/palettes.h:138
 msgctxt "Palette"
 msgid "darkblue (#00008B)"
-msgstr ""
+msgstr "albastru foarte închis"
 
 #: ../build/share/palettes/palettes.h:139
 msgctxt "Palette"
 msgid "mediumblue (#0000CD)"
-msgstr ""
+msgstr "albastru mediu"
 
 #: ../build/share/palettes/palettes.h:140
 msgctxt "Palette"
@@ -3006,132 +3006,132 @@ msgstr "albastru (#0000FF)"
 #: ../build/share/palettes/palettes.h:141
 msgctxt "Palette"
 msgid "ghostwhite (#F8F8FF)"
-msgstr ""
+msgstr "alb cu o tentă de gri"
 
 #: ../build/share/palettes/palettes.h:142
 msgctxt "Palette"
 msgid "slateblue (#6A5ACD)"
-msgstr ""
+msgstr "gri albăstrui"
 
 #: ../build/share/palettes/palettes.h:143
 msgctxt "Palette"
 msgid "darkslateblue (#483D8B)"
-msgstr ""
+msgstr "gri albăstrui închis"
 
 #: ../build/share/palettes/palettes.h:144
 msgctxt "Palette"
 msgid "mediumslateblue (#7B68EE)"
-msgstr ""
+msgstr "gri albăstrui mediu"
 
 #: ../build/share/palettes/palettes.h:145
 msgctxt "Palette"
 msgid "mediumpurple (#9370DB)"
-msgstr ""
+msgstr "purpuriu mediu"
 
 #: ../build/share/palettes/palettes.h:146
 msgctxt "Palette"
 msgid "blueviolet (#8A2BE2)"
-msgstr ""
+msgstr "albastru violet"
 
 #: ../build/share/palettes/palettes.h:147
 msgctxt "Palette"
 msgid "indigo (#4B0082)"
-msgstr ""
+msgstr "indigo"
 
 #: ../build/share/palettes/palettes.h:148
 msgctxt "Palette"
 msgid "darkorchid (#9932CC)"
-msgstr ""
+msgstr "purpuriu"
 
 #: ../build/share/palettes/palettes.h:149
 msgctxt "Palette"
 msgid "darkviolet (#9400D3)"
-msgstr ""
+msgstr "violet închis"
 
 #: ../build/share/palettes/palettes.h:150
 msgctxt "Palette"
 msgid "mediumorchid (#BA55D3)"
-msgstr ""
+msgstr "purpuriu mediu"
 
 #: ../build/share/palettes/palettes.h:151
 msgctxt "Palette"
 msgid "thistle (#D8BFD8)"
-msgstr ""
+msgstr "purpuriu pal"
 
 #: ../build/share/palettes/palettes.h:152
 msgctxt "Palette"
 msgid "plum (#DDA0DD)"
-msgstr ""
+msgstr "purpuriu roșiatic"
 
 #: ../build/share/palettes/palettes.h:153
 msgctxt "Palette"
 msgid "violet (#EE82EE)"
-msgstr ""
+msgstr "violet"
 
 #: ../build/share/palettes/palettes.h:154
 msgctxt "Palette"
 msgid "purple (#800080)"
-msgstr ""
+msgstr "purpuriu"
 
 #: ../build/share/palettes/palettes.h:155
 msgctxt "Palette"
 msgid "darkmagenta (#8B008B)"
-msgstr ""
+msgstr "magenta închis"
 
 #: ../build/share/palettes/palettes.h:156
 msgctxt "Palette"
 msgid "magenta (#FF00FF)"
-msgstr ""
+msgstr "magenta"
 
 #: ../build/share/palettes/palettes.h:157
 msgctxt "Palette"
 msgid "orchid (#DA70D6)"
-msgstr ""
+msgstr "orhidee"
 
 #: ../build/share/palettes/palettes.h:158
 msgctxt "Palette"
 msgid "mediumvioletred (#C71585)"
-msgstr ""
+msgstr "violet roșiatic mediu"
 
 #: ../build/share/palettes/palettes.h:159
 msgctxt "Palette"
 msgid "deeppink (#FF1493)"
-msgstr ""
+msgstr "roz purpuriu"
 
 #: ../build/share/palettes/palettes.h:160
 msgctxt "Palette"
 msgid "hotpink (#FF69B4)"
-msgstr ""
+msgstr "roz roșiatic"
 
 #: ../build/share/palettes/palettes.h:161
 msgctxt "Palette"
 msgid "lavenderblush (#FFF0F5)"
-msgstr ""
+msgstr "aproape alb"
 
 #: ../build/share/palettes/palettes.h:162
 msgctxt "Palette"
 msgid "palevioletred (#DB7093)"
-msgstr ""
+msgstr "violet roșiatic pal"
 
 #: ../build/share/palettes/palettes.h:163
 msgctxt "Palette"
 msgid "crimson (#DC143C)"
-msgstr ""
+msgstr "roșu sângeriu"
 
 #: ../build/share/palettes/palettes.h:164
 msgctxt "Palette"
 msgid "pink (#FFC0CB)"
-msgstr ""
+msgstr "roz"
 
 #: ../build/share/palettes/palettes.h:165
 msgctxt "Palette"
 msgid "lightpink (#FFB6C1)"
-msgstr ""
+msgstr "roz deschis"
 
 #: ../build/share/palettes/palettes.h:166
 msgctxt "Palette"
 msgid "rebeccapurple (#663399)"
-msgstr ""
+msgstr "mov"
 
 #: ../build/share/palettes/palettes.h:167
 msgctxt "Palette"
@@ -3181,47 +3181,47 @@ msgstr "Portocaliu 3"
 #: ../build/share/palettes/palettes.h:176
 msgctxt "Palette"
 msgid "Sky Blue 1"
-msgstr ""
+msgstr "Albastru azur 1"
 
 #: ../build/share/palettes/palettes.h:177
 msgctxt "Palette"
 msgid "Sky Blue 2"
-msgstr ""
+msgstr "Albastru azur 2"
 
 #: ../build/share/palettes/palettes.h:178
 msgctxt "Palette"
 msgid "Sky Blue 3"
-msgstr ""
+msgstr "Albastru azur 3"
 
 #: ../build/share/palettes/palettes.h:179
 msgctxt "Palette"
 msgid "Plum 1"
-msgstr ""
+msgstr "Purpuriu roșiatic 1"
 
 #: ../build/share/palettes/palettes.h:180
 msgctxt "Palette"
 msgid "Plum 2"
-msgstr ""
+msgstr "Purpuriu roșiatic 2"
 
 #: ../build/share/palettes/palettes.h:181
 msgctxt "Palette"
 msgid "Plum 3"
-msgstr ""
+msgstr "Purpuriu roșiatic 3"
 
 #: ../build/share/palettes/palettes.h:182
 msgctxt "Palette"
 msgid "Chocolate 1"
-msgstr ""
+msgstr "Ciocolatiu 1"
 
 #: ../build/share/palettes/palettes.h:183
 msgctxt "Palette"
 msgid "Chocolate 2"
-msgstr ""
+msgstr "Ciocolatiu 2"
 
 #: ../build/share/palettes/palettes.h:184
 msgctxt "Palette"
 msgid "Chocolate 3"
-msgstr ""
+msgstr "Ciocolatiu 3"
 
 #: ../build/share/palettes/palettes.h:185
 msgctxt "Palette"
@@ -3243,60 +3243,60 @@ msgctxt "Palette"
 msgid "Snowy White"
 msgstr "Alb ca zăpada"
 
-#: ../build/share/palettes/palettes.h:189
+#: ../build/share/palettes/palettes.h:189 !@#
 msgctxt "Palette"
 msgid "Aluminium 1"
-msgstr ""
+msgstr "Aluminiu"
 
 #: ../build/share/palettes/palettes.h:190
 msgctxt "Palette"
 msgid "Aluminium 2"
-msgstr ""
+msgstr "Aluminiu"
 
 #: ../build/share/palettes/palettes.h:191
 msgctxt "Palette"
 msgid "Aluminium 3"
-msgstr ""
+msgstr "Aluminiu"
 
 #: ../build/share/palettes/palettes.h:192
 msgctxt "Palette"
 msgid "Aluminium 4"
-msgstr ""
+msgstr "Aluminiu"
 
 #: ../build/share/palettes/palettes.h:193
 msgctxt "Palette"
 msgid "Aluminium 5"
-msgstr ""
+msgstr "Aluminiu"
 
 #: ../build/share/palettes/palettes.h:194
 msgctxt "Palette"
 msgid "Aluminium 6"
-msgstr ""
+msgstr "Aluminiu"
 
 #: ../build/share/palettes/palettes.h:195
 msgctxt "Palette"
 msgid "Jet Black"
-msgstr ""
+msgstr "Gri foarte închis"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Decorative Paper"
-msgstr ""
+msgstr "Hârtie decorativă"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Zig Zag"
-msgstr ""
+msgstr "Zig Zag"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Ticks"
-msgstr ""
+msgstr "Ticăit"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Triangles 3"
-msgstr ""
+msgstr "Triunghiuri 3"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Bricks"
-msgstr ""
+msgstr "Cărămizi"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Alternating chevron"
@@ -3304,11 +3304,11 @@ msgstr ""
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Inverted circle"
-msgstr ""
+msgstr "Cerc inversat"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Diamond Plate"
-msgstr ""
+msgstr "Placa diamantată"
 
 #: ../build/share/paint/patterns.svg.h:1 ../src/object/sp-ellipse.cpp:433
 #: ../share/extensions/render_barcode_qrcode.inx:81
@@ -3317,55 +3317,55 @@ msgstr "Cerc"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Hollow circle"
-msgstr ""
+msgstr "Cerc gol"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Pills"
-msgstr ""
+msgstr "Pastile"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Tiles 1"
-msgstr ""
+msgstr "Titluri 1"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Abstract 2"
-msgstr ""
+msgstr "Abstract 2"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Triangles 1"
-msgstr ""
+msgstr "Triunghiuri 1"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Triangles 2"
-msgstr ""
+msgstr "Triunghiuri 2"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Circle fill 1"
-msgstr ""
+msgstr "Umplere cu cercuri 1"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Snake 2"
-msgstr ""
+msgstr "Șarpe 2"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Circle fill 6"
-msgstr ""
+msgstr "Umplere cu cercuri 6"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Triangles 5"
-msgstr ""
+msgstr "Triunhgiuri 5"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Semicircles 2"
-msgstr ""
+msgstr "Semicercuri 2"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Triangles 4"
-msgstr ""
+msgstr "Triunghiuri 4"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Abstract fill 1"
-msgstr ""
+msgstr "Umplere abstractă 1"
 
 #: ../build/share/paint/patterns.svg.h:1
 #: ../share/extensions/patternalongpath.inx:16
@@ -3374,111 +3374,111 @@ msgstr "Șarpe"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Grid 1"
-msgstr ""
+msgstr "Grilă 1"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Abstract 4"
-msgstr ""
+msgstr "Abstract 4"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Rain drops"
-msgstr ""
+msgstr "Picături de ploaie"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Circle fill 2"
-msgstr ""
+msgstr "Umplere cu cercuri 2"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Circle fill 3"
-msgstr ""
+msgstr "Umplere cu cercuri 3"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Inverted braid"
-msgstr ""
+msgstr "Împletitură inversată"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Rain drops 2"
-msgstr ""
+msgstr "Picături de ploaie 2"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Abstract fill 2"
-msgstr ""
+msgstr "Umplere abstractă"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Abstract fill 3"
-msgstr ""
+msgstr "Umplere abstractă"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Pills 2"
-msgstr ""
+msgstr "Pastile 2"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Abstract 1"
-msgstr ""
+msgstr "Abstract 1"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Abstract 3"
-msgstr ""
+msgstr "Abstract 3"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Squares 1"
-msgstr ""
+msgstr "Păatrate 1"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Circle fill 4"
-msgstr ""
+msgstr "Umplere cu cercuri 4"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Arrow fill"
-msgstr ""
+msgstr "Umplere cu săgeti"
 
-#: ../build/share/paint/patterns.svg.h:1
+#: ../build/share/paint/patterns.svg.h:1 !@#
 msgid "Semicircles 1"
-msgstr ""
+msgstr "Semicercuri 2"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Tiles 2"
-msgstr ""
+msgstr "Plăci 2"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Tiles 3"
-msgstr ""
+msgstr "Plăci 3"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Regular grid"
-msgstr ""
+msgstr "Grilă regulată"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Floor tiles"
-msgstr ""
+msgstr "Plăci de podea"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Hexagons packing grid"
-msgstr ""
+msgstr "Grilă hexagonală"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Wire Fence"
-msgstr ""
+msgstr "Gard de sârmă"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Stripes grid"
-msgstr ""
+msgstr "Grilă din dungi"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Inverted grid"
-msgstr ""
+msgstr "Grilă inversată"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Geometric grid"
-msgstr ""
+msgstr "Grilă geometrică"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Hexagonal grid"
-msgstr ""
+msgstr "Grilă hexagonală"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Triangle grid"
-msgstr ""
+msgstr "Grilă triunghiulară"
 
 #: ../build/share/paint/patterns.svg.h:1
 #: ../share/extensions/guides_creator.inx:11
