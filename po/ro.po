@@ -3243,7 +3243,7 @@ msgctxt "Palette"
 msgid "Snowy White"
 msgstr "Alb ca zăpada"
 
-#: ../build/share/palettes/palettes.h:189 !@#
+#: ../build/share/palettes/palettes.h:189 
 msgctxt "Palette"
 msgid "Aluminium 1"
 msgstr "Aluminiu"
@@ -3432,7 +3432,7 @@ msgstr "Umplere cu cercuri 4"
 msgid "Arrow fill"
 msgstr "Umplere cu săgeti"
 
-#: ../build/share/paint/patterns.svg.h:1 !@#
+#: ../build/share/paint/patterns.svg.h:1 
 msgid "Semicircles 1"
 msgstr "Semicercuri 2"
 
@@ -3476,7 +3476,7 @@ msgstr "Grilă geometrică"
 msgid "Hexagonal grid"
 msgstr "Grilă hexagonală"
 
-#: ../build/share/paint/patterns.svg.h:1
+#: ../build/share/paint/patterns.svg.h:1 !@#
 msgid "Triangle grid"
 msgstr "Grilă triunghiulară"
 
