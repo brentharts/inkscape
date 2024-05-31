@@ -1677,15 +1677,15 @@ msgstr "Canava din pânză"
 #: ../build/share/filters/filters.svg.h:612
 #: ../build/share/filters/filters.svg.h:620
 msgid "Painting canvas emboss effect"
-msgstr ""
+msgstr "Canava cu efect de pictură"
 
 #: ../build/share/filters/filters.svg.h:614
 msgid "Plasticine"
-msgstr ""
+msgstr "Plastilină"
 
 #: ../build/share/filters/filters.svg.h:616
 msgid "Matte modeling paste emboss effect"
-msgstr ""
+msgstr "Efect mat de imprimare ca pasta de modelaj"
 
 #: ../build/share/filters/filters.svg.h:618
 msgid "Rough Canvas Painting"
