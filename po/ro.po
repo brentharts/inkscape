@@ -4,13 +4,14 @@
 # PaulS <paulspn AT gmail DOT com>, 2009
 # Valentin Ioniță <valentin DOT ionita1201 AT gmail DOT com>, 2017
 # Cristian Secară <cristi AT secarica DOT ro>, 2010-2022
+# Marius Pârvu <iamlookingforthebathroom AT yahoo DOT com> 2024
 msgid ""
 msgstr ""
 "Project-Id-Version: Inkscape 1.4\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2023-07-04 21:25+0000\n"
 "PO-Revision-Date: 2024-07-1 21:32+0300\n"
-"Last-Translator: Marius Parvu <cristi AT secarica DOT ro>\n"
+"Last-Translator: Marius Parvu <iamlookingforthebathroom AT yahoo DOT com>\n"
 "Language-Team: \n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
@@ -1587,7 +1588,7 @@ msgstr "Iluminare combinată"
 #: ../build/share/filters/filters.svg.h:572
 #: ../src/extension/internal/filter/bevels.h:237
 msgid "Basic specular bevel to use for building textures"
-msgstr "Teșitură lucioasă de bază pentru utilizare la construirea texturilor"
+msgstr "Teșitură reflectivă de bază pentru utilizare la construirea texturilor"
 
 #: ../build/share/filters/filters.svg.h:574
 msgid "Tinfoil"
@@ -1622,7 +1623,7 @@ msgstr ""
 msgid "Growing Cells"
 msgstr "Celule în creștere"
 
-#: ../build/share/filters/filters.svg.h:588 !@#
+#: ../build/share/filters/filters.svg.h:588 
 msgid "Random rounded living cells like fill"
 msgstr "Umplere cu celule vii rotunjite, dimensionate aleatoriu"
 
@@ -1656,11 +1657,11 @@ msgstr "Efect de imprimare mat"
 
 #: ../build/share/filters/filters.svg.h:602
 msgid "Basic Specular Bump"
-msgstr "Umflătură lucioasă elementară"
+msgstr "Umflătură reflectivă elementară"
 
 #: ../build/share/filters/filters.svg.h:604
 msgid "Specular emboss effect"
-msgstr "Efect de imprimare lucios"
+msgstr "Efect de imprimare reflectiv"
 
 #: ../build/share/filters/filters.svg.h:606
 msgid "Basic Two Lights Bump"
@@ -1687,33 +1688,33 @@ msgstr "Plastilină"
 msgid "Matte modeling paste emboss effect"
 msgstr "Efect mat de imprimare ca pasta de modelaj"
 
-#: ../build/share/filters/filters.svg.h:618
+#: ../build/share/filters/filters.svg.h:618 
 msgid "Rough Canvas Painting"
-msgstr ""
+msgstr "Pictura cu canava rugoasă"
 
 #: ../build/share/filters/filters.svg.h:622
 msgid "Paper Bump"
-msgstr ""
+msgstr "Umflătură de hârtie"
 
 #: ../build/share/filters/filters.svg.h:624
 msgid "Paper like emboss effect"
-msgstr ""
+msgstr "Efect de imprimare pe hârtie"
 
 #: ../build/share/filters/filters.svg.h:626
 msgid "Jelly Bump"
-msgstr ""
+msgstr "Umflătură de jeleu"
 
 #: ../build/share/filters/filters.svg.h:628
 msgid "Convert pictures to thick jelly"
-msgstr ""
+msgstr "Transformă imaginile în jeleu gros"
 
 #: ../build/share/filters/filters.svg.h:630
 msgid "Blend Opposites"
-msgstr ""
+msgstr "Amestecă opusele"
 
 #: ../build/share/filters/filters.svg.h:632
 msgid "Blend an image with its hue opposite"
-msgstr ""
+msgstr "Amestecâ o imagine cu opusul nuanței ei"
 
 #: ../build/share/filters/filters.svg.h:634
 msgid "Hue to White"
@@ -1745,11 +1746,11 @@ msgstr "Creează o transparență sensibilă HSL pointillist turbulent"
 
 #: ../build/share/filters/filters.svg.h:646
 msgid "Silhouette Marbled"
-msgstr ""
+msgstr "Siluetă marmorată"
 
 #: ../build/share/filters/filters.svg.h:648
 msgid "Basic noise transparency texture"
-msgstr ""
+msgstr "Textură cu transparență zgomotoasă"
 
 #: ../build/share/filters/filters.svg.h:650
 msgid "Fill Background"
@@ -1757,53 +1758,55 @@ msgstr "Umple fundalul"
 
 #: ../build/share/filters/filters.svg.h:652
 msgid "Adds a colorizable opaque background"
-msgstr ""
+msgstr "Adaugă un fundal opac, colorabil"
 
 #: ../build/share/filters/filters.svg.h:654
 msgid "Flatten Transparency"
-msgstr ""
+msgstr "Uniformizează transparența"
 
 #: ../build/share/filters/filters.svg.h:656
 msgid "Adds a white opaque background"
-msgstr ""
+msgstr "Adaugă un fundal opac, alb"
 
 #: ../build/share/filters/filters.svg.h:658
 msgid "Blur Double"
-msgstr ""
+msgstr "Dublă blurare"
 
 #: ../build/share/filters/filters.svg.h:660
 msgid ""
 "Overlays two copies with different blur amounts and modifiable blend and "
 "composite"
-msgstr ""
+msgstr "Suprapune două copii cu blur diferit, mixare și compunere ajustabile"
 
 #: ../build/share/filters/filters.svg.h:662
 msgid "Image Drawing Basic"
-msgstr ""
+msgstr "Desenează o imagine simplă"
 
 #: ../build/share/filters/filters.svg.h:664
 msgid "Enhance and redraw color edges in 1 bit black and white"
-msgstr ""
+msgstr "Îmbunătațește și redesenează muchiile colorate in alb"
+"sau negru"
 
 #: ../build/share/filters/filters.svg.h:666
 msgid "Poster Draw"
-msgstr ""
+msgstr "Desenează un posterizat( fără degradeuri )"
 
 #: ../build/share/filters/filters.svg.h:668
 msgid "Enhance and redraw edges around posterized areas"
-msgstr ""
+msgstr "Îmbunătațește si redesenează muchiile din jurul zonelor"
+"posterizate"
 
 #: ../build/share/filters/filters.svg.h:670
 msgid "Cross Noise Poster"
-msgstr ""
+msgstr "Adaugă zgomot pe un fundal posterizat"
 
 #: ../build/share/filters/filters.svg.h:672
 msgid "Overlay with a small scale screen like noise"
-msgstr ""
+msgstr "Suprapune cu un zgomot fin ca de ecran"
 
 #: ../build/share/filters/filters.svg.h:674
 msgid "Cross Noise Poster B"
-msgstr ""
+msgstr "Suprapune cu zgomot B"
 
 #: ../build/share/filters/filters.svg.h:676
 msgid "Adds a small scale screen like noise locally"
@@ -1812,52 +1815,52 @@ msgstr ""
 #: ../build/share/filters/filters.svg.h:678
 #: ../build/share/filters/filters.svg.h:680
 msgid "Poster Color Fun"
-msgstr ""
+msgstr "Colorează posterizarea"
 
 #: ../build/share/filters/filters.svg.h:682
 msgid "Poster Rough"
-msgstr ""
+msgstr "Posterizare rugoasă"
 
 #: ../build/share/filters/filters.svg.h:684
 msgid "Adds roughness to one of the two channels of the Poster paint filter"
-msgstr ""
+msgstr "Adaugă rugozitate unuia din cele două canale ale filtrului de posterizare"
 
 #: ../build/share/filters/filters.svg.h:686
 msgid "Alpha Monochrome Cracked"
-msgstr ""
+msgstr "Crapatură monocromatică transparentă"
 
 #: ../build/share/filters/filters.svg.h:688
 #: ../build/share/filters/filters.svg.h:692
 #: ../build/share/filters/filters.svg.h:696
 #: ../build/share/filters/filters.svg.h:708
 #: ../build/share/filters/filters.svg.h:712
-#: ../build/share/filters/filters.svg.h:716
+#: ../build/share/filters/filters.svg.h:716 
 msgid "Basic noise fill texture; adjust color in Flood"
-msgstr ""
+msgstr "Umplere cu textură zgomotoasă simplă; ajustează culoarea de umplere"
 
 #: ../build/share/filters/filters.svg.h:690
 msgid "Alpha Turbulent"
-msgstr ""
+msgstr "Transparență turbulentă"
 
 #: ../build/share/filters/filters.svg.h:694
 msgid "Colorize Turbulent"
-msgstr ""
+msgstr "Colorizare turbulentă"
 
 #: ../build/share/filters/filters.svg.h:698
 msgid "Cross Noise B"
-msgstr ""
+msgstr "Încrucișează cu tip de zgomot B"
 
 #: ../build/share/filters/filters.svg.h:700
 msgid "Adds a small scale crossy graininess"
-msgstr ""
+msgstr "Adaugă granulație fină"
 
 #: ../build/share/filters/filters.svg.h:702
 msgid "Cross Noise"
-msgstr ""
+msgstr "Zgomot încrucișat"
 
 #: ../build/share/filters/filters.svg.h:704
 msgid "Adds a small scale screen like graininess"
-msgstr ""
+msgstr "Adaugă o granulație fină ca de ecran"
 
 #: ../build/share/filters/filters.svg.h:706
 msgid "Duotone Turbulent"
@@ -1865,11 +1868,11 @@ msgstr ""
 
 #: ../build/share/filters/filters.svg.h:710
 msgid "Light Eraser Cracked"
-msgstr ""
+msgstr "Radieră usor crapată"
 
 #: ../build/share/filters/filters.svg.h:714
 msgid "Poster Turbulent"
-msgstr ""
+msgstr "Posterizare turbulentă"
 
 #: ../build/share/filters/filters.svg.h:718
 msgid "Tartan Smart"
@@ -1881,19 +1884,19 @@ msgstr "Model de tartan în carouri deosebit de configurabil"
 
 #: ../build/share/filters/filters.svg.h:722
 msgid "Light Contour"
-msgstr ""
+msgstr "Contur ușor"
 
-#: ../build/share/filters/filters.svg.h:724
+#: ../build/share/filters/filters.svg.h:724 
 msgid "Uses vertical specular light to draw lines"
-msgstr ""
+msgstr "Folosește lumină reflectivă pentru desenarea liniilor"
 
 #: ../build/share/filters/filters.svg.h:726
 msgid "Liquid"
-msgstr ""
+msgstr "Lichid"
 
 #: ../build/share/filters/filters.svg.h:728
 msgid "Colorizable filling with liquid transparency"
-msgstr ""
+msgstr "Umplutură colorabilă cu transparență lichidă"
 
 #: ../build/share/filters/filters.svg.h:730
 msgid "Aluminium"
@@ -1901,7 +1904,7 @@ msgstr "Aluminiu"
 
 #: ../build/share/filters/filters.svg.h:732
 msgid "Aluminium effect with sharp brushed reflections"
-msgstr ""
+msgstr "Efect de aluminiu cu reflexii de periaj dur"
 
 #: ../build/share/filters/filters.svg.h:734
 msgid "Comics"
@@ -1938,35 +1941,35 @@ msgstr "Efect de suprafață din metal satinat"
 
 #: ../build/share/filters/filters.svg.h:750
 msgid "Opaline"
-msgstr ""
+msgstr "Ca de opal"
 
 #: ../build/share/filters/filters.svg.h:752
 msgid "Contouring version of smooth shader"
-msgstr ""
+msgstr "Versiune de conturare a tipului de umbrire netede"
 
 #: ../build/share/filters/filters.svg.h:754
 msgid "Chrome"
-msgstr "Chrome"
+msgstr "Cromat"
 
 #: ../build/share/filters/filters.svg.h:756
 msgid "Bright chrome effect"
-msgstr ""
+msgstr "Efect de metal cromat lucios"
 
 #: ../build/share/filters/filters.svg.h:758
 msgid "Deep Chrome"
-msgstr ""
+msgstr "Cromare puternică"
 
 #: ../build/share/filters/filters.svg.h:760
 msgid "Dark chrome effect"
-msgstr ""
+msgstr "Efect de cromare întunecat"
 
 #: ../build/share/filters/filters.svg.h:762
 msgid "Emboss Shader"
-msgstr ""
+msgstr "Umbrire prin embosare"
 
 #: ../build/share/filters/filters.svg.h:764
 msgid "Combination of satiny and emboss effect"
-msgstr ""
+msgstr "Combinație de efecte satinat si embosat"
 
 #: ../build/share/filters/filters.svg.h:766
 msgid "Sharp Metal"
@@ -1974,59 +1977,59 @@ msgstr "Metal ascuțit"
 
 #: ../build/share/filters/filters.svg.h:768
 msgid "Chrome effect with darkened edges"
-msgstr ""
+msgstr "Efect de cromare cu muchii intunecate"
 
 #: ../build/share/filters/filters.svg.h:770
 msgid "Brush Draw"
-msgstr ""
+msgstr "Desen cu pensula"
 
 #: ../build/share/filters/filters.svg.h:774
 msgid "Chrome Emboss"
-msgstr ""
+msgstr "Embosare cromată"
 
 #: ../build/share/filters/filters.svg.h:776
 msgid "Embossed chrome effect"
-msgstr ""
+msgstr "Efect de embosare cromată"
 
 #: ../build/share/filters/filters.svg.h:778
 msgid "Contour Emboss"
-msgstr ""
+msgstr "Embosare de contur"
 
 #: ../build/share/filters/filters.svg.h:780
 msgid "Satiny and embossed contour effect"
-msgstr ""
+msgstr "Efect de embosare satinată a conturului"
 
 #: ../build/share/filters/filters.svg.h:782
 msgid "Sharp Deco"
 msgstr ""
 
-#: ../build/share/filters/filters.svg.h:784
+#: ../build/share/filters/filters.svg.h:784 
 msgid "Unrealistic reflections with sharp edges"
-msgstr ""
+msgstr "Reflexii suprarealiste cu muchii ascuțite"
 
 #: ../build/share/filters/filters.svg.h:786
 msgid "Deep Metal"
-msgstr ""
+msgstr "Aspect metalic puternic"
 
 #: ../build/share/filters/filters.svg.h:788
 msgid "Deep and dark metal shading"
-msgstr ""
+msgstr "Tip de umbrire cu aspect metalic puternic"
 
 #: ../build/share/filters/filters.svg.h:790
 msgid "Aluminium Emboss"
-msgstr ""
+msgstr "Aluminiu imprimat"
 
 #: ../build/share/filters/filters.svg.h:792
 msgid "Satiny aluminium effect with embossing"
-msgstr ""
+msgstr "Efect de aluminiu satinat, imprimat"
 
 #: ../build/share/filters/filters.svg.h:794
 msgid "Refractive Glass"
-msgstr ""
+msgstr "Sticlă refractară"
 
 #: ../build/share/filters/filters.svg.h:796
 msgid "Double reflection through glass with some refraction"
-msgstr ""
+msgstr "Dublă reflexie prin sticlă, cu ceva refracție"
 
 #: ../build/share/filters/filters.svg.h:798
 msgid "Frosted Glass"
@@ -2034,63 +2037,63 @@ msgstr "Sticlă înghețată"
 
 #: ../build/share/filters/filters.svg.h:800
 msgid "Satiny glass effect"
-msgstr ""
+msgstr "Efect de sticlă satinată"
 
 #: ../build/share/filters/filters.svg.h:802
 msgid "Bump Engraving"
-msgstr ""
+msgstr "Gravură cu denivelări"
 
 #: ../build/share/filters/filters.svg.h:804
 msgid "Carving emboss effect"
-msgstr ""
+msgstr "Efect de imprimare prin cioplire"
 
 #: ../build/share/filters/filters.svg.h:806
 msgid "Chromolitho Alternate"
-msgstr ""
+msgstr "Litocromare alternantă"
 
 #: ../build/share/filters/filters.svg.h:808
 msgid "Old chromolithographic effect"
-msgstr ""
+msgstr "Efect învechit de litocromare"
 
 #: ../build/share/filters/filters.svg.h:810
 msgid "Convoluted Bump"
-msgstr ""
+msgstr "Umflătură neuniformă"
 
 #: ../build/share/filters/filters.svg.h:812
 msgid "Convoluted emboss effect"
-msgstr ""
+msgstr "Efect de imprimare neuniform"
 
 #: ../build/share/filters/filters.svg.h:814
 msgid "Emergence"
-msgstr ""
+msgstr "Emergență"
 
 #: ../build/share/filters/filters.svg.h:816
 msgid "Cut out, add inner shadow and colorize some parts of an image"
-msgstr ""
+msgstr "Decupează. adaugă umbră interioară si colorează parțial imaginea"
 
 #: ../build/share/filters/filters.svg.h:818
 msgid "Litho"
-msgstr ""
+msgstr "Lito"
 
 #: ../build/share/filters/filters.svg.h:820
 msgid "Create a two colors lithographic effect"
-msgstr ""
+msgstr "Creează un efect bicolor litografic"
 
 #: ../build/share/filters/filters.svg.h:822
 msgid "Paint Channels"
-msgstr ""
+msgstr "Canale de desen"
 
 #: ../build/share/filters/filters.svg.h:824
 msgid "Colorize separately the three color channels"
-msgstr ""
+msgstr "Colorizează separat cele trei canale de desen"
 
-#: ../build/share/filters/filters.svg.h:826
+#: ../build/share/filters/filters.svg.h:826 !@#
 msgid "Posterized Light Eraser"
-msgstr ""
+msgstr "Radieră ușoară de posterizare"
 
 #: ../build/share/filters/filters.svg.h:828
 msgid "Create a semi transparent posterized image"
-msgstr ""
+msgstr "Creează o imagine posterizată, semitransparentă"
 
 #: ../build/share/filters/filters.svg.h:830
 msgid "Trichrome"
@@ -2106,7 +2109,7 @@ msgstr "Simulează CMY"
 
 #: ../build/share/filters/filters.svg.h:836
 msgid "Render Cyan, Magenta and Yellow channels with a colorizable background"
-msgstr "Randează canalele Cyan, Magenta și Galben cu un fundal colorabil"
+msgstr "Redă canalele Cyan, Magenta și Galben cu un fundal colorabil"
 
 #: ../build/share/filters/filters.svg.h:838
 msgid "Contouring Table"
@@ -2114,23 +2117,23 @@ msgstr "Tabel de conturare"
 
 #: ../build/share/filters/filters.svg.h:840
 msgid "Blurred multiple contours for objects"
-msgstr "Contururi multiple și neclare pentru obiecte"
+msgstr "Contururi multiple și blurate pentru obiecte"
 
 #: ../build/share/filters/filters.svg.h:842
 msgid "Posterized Blur"
-msgstr "Neclaritate posterizată"
+msgstr "Posterizare blurată"
 
 #: ../build/share/filters/filters.svg.h:844
 msgid "Converts blurred contour to posterized steps"
-msgstr "Convertește un contur neclar în trepte posterizate"
+msgstr "Convertește un contur blurat în trepte posterizate"
 
 #: ../build/share/filters/filters.svg.h:846
 msgid "Contouring Discrete"
 msgstr "Conturare discretă"
 
 #: ../build/share/filters/filters.svg.h:848
-msgid "Sharp multiple contour for objects"
-msgstr "Contururi multiple și clare pentru obiecte"
+msgid "Sharp multiple contour for objects" 
+msgstr "Contur multiplu și pronunțat pentru obiecte"
 
 #: ../build/share/markers/markers.svg.h:2
 msgid "Wide arrow"
