@@ -1641,11 +1641,11 @@ msgstr "Pixelează"
 
 #: ../build/share/filters/filters.svg.h:595
 msgid "Pixel Tools"
-msgstr "Instrumente de pixelare"
+msgstr "Instrumente de Pixelare"
 
 #: ../build/share/filters/filters.svg.h:596
 msgid "Reduce or remove antialiasing around shapes"
-msgstr "Reduce sau înlatură muchiile colțuroase"
+msgstr "Reduce sau înlătură muchiile colțuroase"
 
 #: ../build/share/filters/filters.svg.h:598
 msgid "Basic Diffuse Bump"
@@ -3310,7 +3310,7 @@ msgstr "Cerc inversat"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Diamond Plate"
-msgstr "Placa diamantată"
+msgstr "Placă diamantată"
 
 #: ../build/share/paint/patterns.svg.h:1 ../src/object/sp-ellipse.cpp:433
 #: ../share/extensions/render_barcode_qrcode.inx:81
@@ -3489,7 +3489,7 @@ msgstr "Proporția de aur"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Halfcircles grid"
-msgstr "Grila de semicercuri"
+msgstr "Grilă de semicercuri"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Circles in grid"
@@ -4813,7 +4813,7 @@ msgstr "Trapă de camion cu rol de ridicare a incărcăturii"
 #: ../build/share/symbols/symbols.h:386 ../build/share/symbols/symbols.h:398
 msgctxt "Symbol"
 msgid "Steps"
-msgstr "Pași"
+msgstr "Trepte"
 
 #: ../build/share/symbols/symbols.h:387 ../build/share/symbols/symbols.h:399
 msgctxt "Symbol"
@@ -6604,7 +6604,7 @@ msgstr "Comută alipirea la traseelor de decupare"
 
 #: ../src/actions/actions-canvas-snapping.cpp:278
 msgid "Simple Snap Bounding Box"
-msgstr "Alipire simple la caseta de încadrare"
+msgstr "Alipire simple la chenarul de încadrare"
 
 #: ../src/actions/actions-canvas-snapping.cpp:278
 msgid "Toggle snapping to bounding boxes"
@@ -11408,7 +11408,7 @@ msgstr "Lățimea în pixeli a haloului"
 # hm ? sau de treceri ?
 #: ../src/extension/internal/bluredge.cpp:141
 msgid "Number of steps:"
-msgstr "Număr de pași:"
+msgstr "Număr de trepte:"
 
 #: ../src/extension/internal/bluredge.cpp:141
 msgid "Number of inset/outset copies of the object to make"
@@ -11857,7 +11857,7 @@ msgstr "Estompează numai claritatea conținutului"
 
 #: ../src/extension/internal/filter/blurs.h:68
 msgid "Simple vertical and horizontal blur effect"
-msgstr "Efect simplu de blurare verticală si orizontală"
+msgstr "Efect simplu de blurare verticală și orizontală"
 
 #: ../src/extension/internal/filter/blurs.h:131
 msgid "Clean Edges"
@@ -13355,27 +13355,27 @@ msgstr "Amestec de zgomot:"
 
 #: ../src/extension/internal/filter/paint.h:730 
 msgid "Grain lightness"
-msgstr ""
+msgstr "Finețea granulației"
 
 #: ../src/extension/internal/filter/paint.h:738
 msgid "Points color"
-msgstr ""
+msgstr "Culoarea punctelor"
 
 #: ../src/extension/internal/filter/paint.h:740
 msgid "Image on points"
-msgstr ""
+msgstr "Imagine pe puncte"
 
 #: ../src/extension/internal/filter/paint.h:750
 msgid "Convert image to a transparent point engraving"
-msgstr ""
+msgstr "Transformă imaginea într-o gravură din puncte transparente"
 
 #: ../src/extension/internal/filter/paint.h:876
 msgid "Poster Paint"
-msgstr ""
+msgstr "Vopsea de poster"
 
 #: ../src/extension/internal/filter/paint.h:882
 msgid "Transfer type:"
-msgstr ""
+msgstr "Tip de transfer:"
 
 #: ../src/extension/internal/filter/paint.h:883
 msgid "Poster"
@@ -13383,7 +13383,7 @@ msgstr ""
 
 #: ../src/extension/internal/filter/paint.h:884
 msgid "Painting"
-msgstr ""
+msgstr "Pictură"
 
 #: ../src/extension/internal/filter/paint.h:894
 msgid "Simplify (primary)"
@@ -13391,7 +13391,7 @@ msgstr "Simplificare (principal)"
 
 #: ../src/extension/internal/filter/paint.h:895
 msgid "Simplify (secondary)"
-msgstr ""
+msgstr "Simplificare (secundară)"
 
 #: ../src/extension/internal/filter/paint.h:896
 msgid "Pre-saturation"
@@ -13403,31 +13403,31 @@ msgstr "Post-saturație"
 
 #: ../src/extension/internal/filter/paint.h:898
 msgid "Simulate antialiasing"
-msgstr ""
+msgstr "Simulează antialiasing-ul"
 
 #: ../src/extension/internal/filter/paint.h:906
 msgid "Poster and painting effects"
-msgstr ""
+msgstr "Efect de posterizare și pictură"
 
 #: ../src/extension/internal/filter/paint.h:1003
 msgid "Posterize Basic"
-msgstr ""
+msgstr "Posterizare elementară"
 
 #: ../src/extension/internal/filter/paint.h:1014
 msgid "Simple posterizing effect"
-msgstr ""
+msgstr "Efect simplu de posterizare"
 
 #: ../src/extension/internal/filter/protrusions.h:50
 msgid "Snow Crest"
-msgstr ""
+msgstr "Creastă înzăpezită"
 
 #: ../src/extension/internal/filter/protrusions.h:52
 msgid "Drift Size"
-msgstr ""
+msgstr "Mărimea troienii"
 
 #: ../src/extension/internal/filter/protrusions.h:60
 msgid "Snow has fallen on object"
-msgstr ""
+msgstr "Zăpada a căzut pe un obiect"
 
 #: ../src/extension/internal/filter/shadows.h:66
 msgid "Drop Shadow"
@@ -13451,11 +13451,11 @@ msgstr "Tip de umbră:"
 
 #: ../src/extension/internal/filter/shadows.h:76
 msgid "Outer cutout"
-msgstr ""
+msgstr "Decupare exterioară"
 
 #: ../src/extension/internal/filter/shadows.h:77
 msgid "Inner cutout"
-msgstr ""
+msgstr "Decupare interioară"
 
 #: ../src/extension/internal/filter/shadows.h:78
 msgid "Shadow only"
@@ -13463,7 +13463,7 @@ msgstr "Doar umbră"
 
 #: ../src/extension/internal/filter/shadows.h:81
 msgid "Blur color"
-msgstr "Culoare de neclaritate"
+msgstr "Culoare de blurare"
 
 #: ../src/extension/internal/filter/shadows.h:83
 msgid "Use object's color"
@@ -13475,7 +13475,7 @@ msgstr "Umbră detașată colorabilă"
 
 #: ../src/extension/internal/filter/textures.h:64
 msgid "Ink Blot"
-msgstr ""
+msgstr "Pată de cereneală"
 
 #: ../src/extension/internal/filter/textures.h:70
 msgid "Frequency:"
@@ -13517,7 +13517,7 @@ msgstr "Personalizat"
 
 #: ../src/extension/internal/filter/textures.h:85
 msgid "Custom stroke options"
-msgstr ""
+msgstr "Opțiuni de contur personalizate"
 
 #: ../src/extension/internal/filter/textures.h:86
 msgid "k1:"
@@ -13533,7 +13533,7 @@ msgstr "k3:"
 
 #: ../src/extension/internal/filter/textures.h:96
 msgid "Inkblot on tissue or rough paper"
-msgstr ""
+msgstr "Pată de cereneală pe șervețel sau hârtie rugoasă"
 
 #: ../src/extension/internal/filter/transparency.h:55
 #: ../src/filter-enums.cpp:23
@@ -13693,7 +13693,7 @@ msgstr "Data viitoare ascunde dialogul și aplică întotdeauna aceleași acțiu
 #: ../src/extension/internal/gdkpixbuf-input.cpp:212
 #: ../src/extension/internal/svg.h:36
 msgid "Don't ask again"
-msgstr "Nu mai întreba din nou"
+msgstr "Nu întreba din nou"
 
 #: ../src/extension/internal/gimpgrad.cpp:270
 msgid "GIMP Gradients"
@@ -13818,15 +13818,15 @@ msgstr "foarte fin"
 
 #: ../src/extension/internal/pdfinput/pdf-input.cpp:356
 msgid "Convert to paths"
-msgstr ""
+msgstr "Transformă în trasee"
 
 #: ../src/extension/internal/pdfinput/pdf-input.cpp:359
 msgid "Keep original font name"
-msgstr ""
+msgstr "Păstrează numele original al fontului"
 
 #: ../src/extension/internal/pdfinput/pdf-input.cpp:362
 msgid "Replace by closest-named installed font"
-msgstr ""
+msgstr "Înlocuiește cu cel mai apropiat ca nume font instalat"
 
 #: ../src/extension/internal/pdfinput/pdf-input.cpp:365
 #: ../src/ui/tools/text-tool.cpp:215
@@ -13916,7 +13916,7 @@ msgstr "Gri 16"
 
 #: ../src/extension/internal/png-output.cpp:68
 msgid "Compression"
-msgstr "Comprimare"
+msgstr "Compresie"
 
 #: ../src/extension/internal/png-output.cpp:69
 msgid "0 - No Compression"
@@ -14061,7 +14061,7 @@ msgstr "Format Scalable Vector Graphics comprimat cu GZip"
 
 #: ../src/extension/internal/template-from-file.cpp:65
 msgid "Custom Template"
-msgstr ""
+msgstr "Șablon personalizat"
 
 #: ../src/extension/internal/template-from-file.cpp:94
 msgid "Load from User File"
@@ -14069,12 +14069,12 @@ msgstr "Încarcă din fișierul utilizatorului"
 
 #: ../src/extension/internal/template-from-file.cpp:95
 msgid "Custom list of templates for a folder"
-msgstr ""
+msgstr "Listă de șabloane personalizată pentru un director"
 
 #: ../src/extension/internal/template-from-file.cpp:96
 msgctxt "TemplateCategory"
 msgid "Custom"
-msgstr ""
+msgstr "Personalizat"
 
 #: ../src/extension/internal/template-from-file.cpp:98
 #: ../src/ui/dialog/document-properties.cpp:840
@@ -14088,13 +14088,13 @@ msgstr "Alte dimensiuni"
 
 #: ../src/extension/internal/template-other.cpp:38
 msgid "Miscellaneous document formats"
-msgstr ""
+msgstr "Diverse formate de document"
 
 #: ../src/extension/internal/template-other.cpp:39
 #: ../share/extensions/template_seamless_pattern.inx:7
 msgctxt "TemplateCategory"
 msgid "Other"
-msgstr ""
+msgstr "Altele"
 
 #: ../src/extension/internal/template-other.cpp:41
 #: ../src/extension/internal/template-paper.cpp:49
@@ -14177,15 +14177,15 @@ msgstr "Peisaj"
 
 #: ../src/extension/internal/template-paper.cpp:58
 msgid "A4 (Portrait)"
-msgstr ""
+msgstr "A4 (Portret)"
 
 #: ../src/extension/internal/template-paper.cpp:59
 msgid "A4 (Landscape)"
-msgstr ""
+msgstr "A4 (Peisaj)"
 
 #: ../src/extension/internal/template-paper.cpp:60
 msgid "US Letter (Portrait)"
-msgstr ""
+msgstr "US Letter (Portret)"
 
 #: ../src/extension/internal/template-paper.cpp:61
 msgid "US Letter (Landscape)"
@@ -14422,12 +14422,12 @@ msgstr "Dimensiuni de ecran"
 
 #: ../src/extension/internal/template-screen.cpp:29
 msgid "Document formats using common screen resolutions"
-msgstr ""
+msgstr "FOrmate de document care folosesc rezoluții comune de ecran"
 
 #: ../src/extension/internal/template-screen.cpp:30
 msgctxt "TemplateCategory"
 msgid "Screen"
-msgstr ""
+msgstr "Ecran"
 
 #: ../src/extension/internal/template-screen.cpp:38
 msgid "Desktop 1080p"
@@ -14459,7 +14459,7 @@ msgstr ""
 
 #: ../src/extension/internal/template-screen.cpp:45
 msgid "Mobile-smallest"
-msgstr ""
+msgstr "Mobil - cel mai mic"
 
 #: ../src/extension/internal/template-screen.cpp:46
 msgid "iPad Pro"
@@ -14467,7 +14467,7 @@ msgstr ""
 
 #: ../src/extension/internal/template-screen.cpp:47
 msgid "Tablet-smallest"
-msgstr ""
+msgstr "Tabletă - cea mai mică"
 
 #: ../src/extension/internal/template-social.cpp:28
 msgid "Social Sizes"
@@ -14475,7 +14475,7 @@ msgstr "Dimensiuni sociale"
 
 #: ../src/extension/internal/template-social.cpp:29
 msgid "Document formats for social media"
-msgstr ""
+msgstr "Formate de documente pentru rețele de socializare"
 
 #: ../src/extension/internal/template-social.cpp:30
 msgctxt "TemplateCategory"
@@ -14484,23 +14484,23 @@ msgstr ""
 
 #: ../src/extension/internal/template-social.cpp:38
 msgid "Facebook cover photo"
-msgstr ""
+msgstr "Imagine de perete pentru Facebook"
 
 #: ../src/extension/internal/template-social.cpp:39
 msgid "Facebook event image"
-msgstr ""
+msgstr "Imagine de eveniment pentru Facebook"
 
 #: ../src/extension/internal/template-social.cpp:40
 msgid "Facebook image post"
-msgstr ""
+msgstr "Imagine de postare pentru Facebook"
 
 #: ../src/extension/internal/template-social.cpp:41
 msgid "Facebook link image"
-msgstr ""
+msgstr "Imagine de link pentru Facebook"
 
 #: ../src/extension/internal/template-social.cpp:42
 msgid "Facebook profile picture"
-msgstr ""
+msgstr "Imagine de profil pentr uFacebook"
 
 #: ../src/extension/internal/template-social.cpp:43
 msgid "Facebook video"
@@ -14508,43 +14508,43 @@ msgstr ""
 
 #: ../src/extension/internal/template-social.cpp:44
 msgid "Instagram landscape"
-msgstr ""
+msgstr "Instagram peisaj"
 
 #: ../src/extension/internal/template-social.cpp:45
 msgid "Instagram portrait"
-msgstr ""
+msgstr "Instagram portret"
 
 #: ../src/extension/internal/template-social.cpp:46
 msgid "Instagram square"
-msgstr ""
+msgstr "Instagram pătrat"
 
 #: ../src/extension/internal/template-social.cpp:47
 msgid "LinkedIn business banner image"
-msgstr ""
+msgstr "Imagine de perete LinkedIn pentru afaceri"
 
 #: ../src/extension/internal/template-social.cpp:48
 msgid "LinkedIn company logo"
-msgstr ""
+msgstr "Logo de companie pentru LinkedIn"
 
 #: ../src/extension/internal/template-social.cpp:49
 msgid "LinkedIn cover photo"
-msgstr ""
+msgstr "Imagine de fundal pentru LinkedIn"
 
 #: ../src/extension/internal/template-social.cpp:50
 msgid "LinkedIn dynamic ad"
-msgstr ""
+msgstr "Reclamă dinamică pentru LinkedIn"
 
 #: ../src/extension/internal/template-social.cpp:51
 msgid "LinkedIn hero image"
-msgstr ""
+msgstr "Imagine de erou pentru LinkedIn"
 
 #: ../src/extension/internal/template-social.cpp:52
 msgid "LinkedIn sponsored content image"
-msgstr ""
+msgstr "Imagine de conținut sponsorizat pentru LinkedIn"
 
 #: ../src/extension/internal/template-social.cpp:53
 msgid "Snapchat advertisement"
-msgstr ""
+msgstr "Reclamă de Snapchat"
 
 #: ../src/extension/internal/template-social.cpp:54
 msgid "Twitter card image"
@@ -14580,7 +14580,7 @@ msgstr "Dimensiuni video"
 
 #: ../src/extension/internal/template-video.cpp:29
 msgid "Document formats using common video resolutions"
-msgstr ""
+msgstr "Formate de document care folosesc rezoluții video comune"
 
 #: ../src/extension/internal/template-video.cpp:30
 msgctxt "TemplateCategory"
@@ -14693,7 +14693,7 @@ msgstr "Ieșire WMF"
 
 #: ../src/extension/internal/wmf-inout.cpp:3237
 msgid "Map all fill patterns to standard WMF hatches"
-msgstr ""
+msgstr "Corelează toate tiparele de umplere la hașuri standard WMF"
 
 #: ../src/extension/internal/wmf-inout.cpp:3241
 msgid "Windows Metafile (*.wmf)"
@@ -14705,7 +14705,7 @@ msgstr "Windows Metafile"
 
 #: ../src/extension/internal/wpg-input.cpp:136
 msgid "WPG Input"
-msgstr ""
+msgstr "Intrare WPG"
 
 #: ../src/extension/internal/wpg-input.cpp:141
 msgid "WordPerfect Graphics (*.wpg)"
@@ -14713,7 +14713,7 @@ msgstr ""
 
 #: ../src/extension/internal/wpg-input.cpp:142
 msgid "Vector graphics format used by Corel WordPerfect"
-msgstr ""
+msgstr "Formate de grafică vectoriala folosită de Corel WordPerfect"
 
 #: ../src/extension/prefdialog/parameter-path.cpp:195
 msgid "Select existing files"
@@ -14755,7 +14755,7 @@ msgstr "Previzualizare în direct"
 
 #: ../src/extension/prefdialog/prefdialog.cpp:224
 msgid "Is the effect previewed live on canvas?"
-msgstr ""
+msgstr "Este efectul previzionat în timp real pe canava?"
 
 #: ../src/extension/system.cpp:131 ../src/extension/system.cpp:133
 msgid ""
@@ -14802,12 +14802,16 @@ msgid ""
 "The appearance of elements such as clips, masks, filters, and clones\n"
 "is most important. <b>(Choose if unsure.)</b>"
 msgstr ""
+"Înfățișarea elementelor ca clipurile video, mascările, filtrele și clonele\n"
+"este deosebit de importantă. <b>(Alege dacă ai incertitudini.)</b>"
 
 #: ../src/file-update.cpp:329
 msgid ""
 "The accuracy of the physical unit size and position values of objects\n"
 "in the file is most important. (Experimental.)"
 msgstr ""
+"Acuratețea unităților de măsură și valorile de poziție ale elementelor\n"
+"în fișier este deosebit de importantă. (Experimental.)"
 
 # fără punct în mod deliberat
 #: ../src/file-update.cpp:331
@@ -14876,7 +14880,7 @@ msgstr "Actualizează documentul"
 
 #: ../src/file.cpp:176
 msgid "Document not saved yet.  Cannot revert."
-msgstr ""
+msgstr "Documentul nu s-a salvat încă. Nu se poate revoca."
 
 #: ../src/file.cpp:182
 msgid "Changes will be lost! Are you sure you want to reload document %1?"
@@ -14909,7 +14913,7 @@ msgstr[2] ""
 
 #: ../src/file.cpp:448
 msgid "No unused definitions in &lt;defs&gt;."
-msgstr ""
+msgstr "Nicio definiție nu este nefolosită în &lt;defs&gt;."
 
 #: ../src/file.cpp:481
 #, c-format
@@ -14952,6 +14956,8 @@ msgid ""
 "The following additional information was returned by the output extension:\n"
 "'%s'"
 msgstr ""
+"Următoarele informații suplimentare au fost emise de extensia rezultat:\n"
+"'%s'"
 
 #: ../src/file.cpp:554 ../src/file.cpp:556
 msgid "Document saved."
@@ -14984,7 +14990,7 @@ msgstr "Se salvează documentul..."
 
 #: ../src/file.cpp:1087
 msgid "Import Pages"
-msgstr ""
+msgstr "Importă paginile"
 
 #: ../src/file.cpp:1190 ../src/inkscape-application.cpp:887
 #, c-format
@@ -15017,7 +15023,7 @@ msgstr "Hartă de deplasament"
 
 #: ../src/filter-enums.cpp:30
 msgid "Flood"
-msgstr ""
+msgstr "Inundat"
 
 #: ../src/filter-enums.cpp:33 ../share/extensions/text_merge.inx:3
 msgid "Merge"
@@ -15081,7 +15087,7 @@ msgstr "Implicit"
 
 #: ../src/filter-enums.cpp:74
 msgid "Lighter"
-msgstr ""
+msgstr "Mai ușor"
 
 #: ../src/filter-enums.cpp:75
 msgid "Arithmetic"
@@ -15089,7 +15095,7 @@ msgstr "Aritmetic"
 
 #: ../src/filter-enums.cpp:84
 msgid "Table Lookup"
-msgstr ""
+msgstr "Căutare după intrări"
 
 #: ../src/filter-enums.cpp:85
 msgid "Discrete Values"
@@ -15097,12 +15103,12 @@ msgstr "Valori discrete"
 
 #: ../src/filter-enums.cpp:96
 msgid "Wrap"
-msgstr ""
+msgstr "Înfășoară"
 
 #: ../src/filter-enums.cpp:97
 msgctxt "Convolve matrix, edge mode"
 msgid "None"
-msgstr ""
+msgstr "Niciunul"
 
 #: ../src/filter-enums.cpp:116
 msgid "Erode"
@@ -15114,7 +15120,7 @@ msgstr "Dilată"
 
 #: ../src/filter-enums.cpp:125
 msgid "Fractal Noise"
-msgstr ""
+msgstr "Zgomot fractal"
 
 #: ../src/filter-enums.cpp:134
 msgid "Distant Light"
@@ -15122,25 +15128,25 @@ msgstr "Lumină distantă"
 
 #: ../src/filter-enums.cpp:135
 msgid "Point Light"
-msgstr ""
+msgstr "Lumina dintr-un punct"
 
 #: ../src/filter-enums.cpp:136
 msgid "Spot Light"
-msgstr ""
+msgstr "Lumină dintr-un spot"
 
 #: ../src/gradient-chemistry.cpp:774 ../src/gradient-drag.cpp:1148
 msgid "Delete gradient stop"
-msgstr ""
+msgstr "Șterge terminația degradeului"
 
 #: ../src/gradient-chemistry.cpp:863 ../src/gradient-chemistry.cpp:880
 #: ../src/ui/dialog/color-item.cpp:396 ../src/ui/tools/gradient-tool.cpp:326
 #: ../src/ui/tools/gradient-tool.cpp:413
 msgid "Add gradient stop"
-msgstr ""
+msgstr "Adaugă terminație degradeului"
 
 #: ../src/gradient-chemistry.cpp:892
 msgid "Change gradient stop color"
-msgstr ""
+msgstr "Schimbă culoarea de terminație a degradeului"
 
 #: ../src/gradient-chemistry.cpp:1821
 msgid "Invert gradient colors"
@@ -15153,7 +15159,7 @@ msgstr "Inversează degradeul"
 #: ../src/gradient-chemistry.cpp:1860 ../src/ui/dialog/color-item.cpp:322
 #: ../src/ui/widget/gradient-selector.cpp:157
 msgid "Delete swatch"
-msgstr ""
+msgstr "Șterge hașură"
 
 #: ../src/gradient-drag.cpp:86 ../src/ui/tools/gradient-tool.cpp:100
 #: ../src/ui/tools/mesh-tool.cpp:111
@@ -15273,14 +15279,14 @@ msgstr[2] ""
 
 #: ../src/gradient-drag.cpp:2716
 msgid "Move gradient handle(s)"
-msgstr ""
+msgstr "Mută mânerele degradeului"
 
 #: ../src/gradient-drag.cpp:2748
 msgid "Move gradient mid stop(s)"
-msgstr ""
+msgstr "Mută degradeul la jumate"
 
 # hm ?
-#: ../src/gradient-drag.cpp:3101
+#: ../src/gradient-drag.cpp:3101 
 msgid "Delete gradient stop(s)"
 msgstr "Șterge opritoarele de degrade"
 
@@ -15306,131 +15312,143 @@ msgstr "Extragere de imagine"
 #: ../src/inkscape-application.cpp:412
 msgid "Broken links have been changed to point to existing files."
 msgstr ""
+"Linkurile defecte au fost schimbate să indice către fișiere existente."
 
 #: ../src/inkscape-application.cpp:714
 msgid "file1 [file2 [fileN]]"
-msgstr ""
+msgstr "Fișier 1 [fișier2 [fișierN]]"
 
 #: ../src/inkscape-application.cpp:715
 msgid "Process (or open) one or more files."
-msgstr ""
+msgstr "Procesează (sau deschide) unul sau mai multe fișiere"
 
 #: ../src/inkscape-application.cpp:716
 msgid "Examples:"
 msgstr "Exemple:"
 
-#: ../src/inkscape-application.cpp:717
+#: ../src/inkscape-application.cpp:717 
 msgid "Export input SVG (%1) to PDF (%2) format:"
-msgstr ""
+msgstr "Exportă fișierul SVG introdus (%1) în format PDF (%2):"
 
 #: ../src/inkscape-application.cpp:719
 msgid "Export input files (%1) to PNG format keeping original name (%2):"
-msgstr ""
+msgstr "Exportă fișierul PNG introdus (%1) în format PDF (%2):"
 
 #: ../src/inkscape-application.cpp:721
 msgid "See %1 and %2 for more details."
-msgstr ""
+msgstr "Vezi %1 și %2 pentru mai multe detalii"
 
 #: ../src/inkscape-application.cpp:726
 msgid "Print Inkscape version"
-msgstr ""
+msgstr "Tipărește versiunea de Inkscape"
 
 #: ../src/inkscape-application.cpp:727
 msgid "Print debugging information"
-msgstr ""
+msgstr "Tipărește informațiile de depanare"
 
 #: ../src/inkscape-application.cpp:728
 msgid "Print system data directory"
-msgstr ""
+msgstr "Tipărește directorul de date de sistem"
 
 #: ../src/inkscape-application.cpp:729
 msgid "Print user data directory"
-msgstr ""
+msgstr "Tipărește directorul cu date utilizatorului"
 
 #: ../src/inkscape-application.cpp:730
 msgid ""
 "Create a unique instance of Inkscape with the application ID 'org.inkscape."
 "Inkscape.TAG'"
 msgstr ""
+"Creează o instanță unică a Inkscape cu ID-ul de aplicație 'org.inkscape.Inkscape.TAG'"
 
 #: ../src/inkscape-application.cpp:733
 msgid "File import"
-msgstr ""
+msgstr "Importare fișier"
 
 #: ../src/inkscape-application.cpp:734
 msgid "Read input file from standard input (stdin)"
-msgstr ""
+msgstr "Citește fișierul de intrare din intrarea standard (stdin)"
 
 #: ../src/inkscape-application.cpp:735
 msgid "Page numbers to import from multi-page document, i.e. PDF"
-msgstr ""
+msgstr "Numerele paginilor ce vor fi importe dintr-un document multi-pagină PDF"
 
 #: ../src/inkscape-application.cpp:735
 msgid "PAGE[,PAGE]"
-msgstr ""
+msgstr "PAGINĂ[,PAGINĂ]"
 
 #: ../src/inkscape-application.cpp:736
 msgid "Use poppler when importing via commandline"
-msgstr ""
+msgstr "Folosește poppler când imporți prin terminal"
 
-#: ../src/inkscape-application.cpp:737
+#: ../src/inkscape-application.cpp:737 
 msgid ""
 "How fonts are parsed in the internal PDF importer [draw-missing|draw-all|"
 "delete-missing|delete-all|substitute|keep]"
 msgstr ""
+"Cum sunt analizate fonturile în importatorul PDF intern [draw-missing|draw-all|"
+"delete-missing|delete-all|substitute|keep]"
 
 #: ../src/inkscape-application.cpp:737
 msgid "STRATEGY"
-msgstr ""
+msgstr "STRATEGIE"
 
 #: ../src/inkscape-application.cpp:738
 msgid ""
 "Method used to convert pre-0.92 document dpi, if needed: [none|scale-viewbox|"
 "scale-document]"
 msgstr ""
+"Metoda folosită pentru a converti DPI anterioară versiunii 0.92, la nevoie: [none|scale-viewbox|"
+"scale-document]"
 
 #: ../src/inkscape-application.cpp:738
 msgid "METHOD"
-msgstr ""
+msgstr "METODĂ"
 
 #: ../src/inkscape-application.cpp:739
 msgid "Do not fix pre-0.92 document's text baseline spacing on opening"
 msgstr ""
+"Nu repara spațierea liniei de bază a textului din documentele anterioare versiunii "
+"0.92 la deschidere "
 
 #: ../src/inkscape-application.cpp:742
 msgid "File export"
-msgstr ""
+msgstr "Exportă fișier"
 
 #: ../src/inkscape-application.cpp:743
 msgid ""
 "Output file name (defaults to input filename; file type is guessed from "
 "extension if present; use '-' to write to stdout)"
 msgstr ""
+"Numele fișierului de ieșire (prestabilit la numele celui de intrare; tipul este dedus din "
+"extensie dacă este prezentă; folosește '-' pentru a scrie în stdout)"
 
 #: ../src/inkscape-application.cpp:743 ../src/inkscape-application.cpp:795
 msgid "FILENAME"
-msgstr ""
+msgstr "NUME FIȘIER"
 
 #: ../src/inkscape-application.cpp:744
 msgid ""
 "Overwrite input file (otherwise add '_out' suffix if type doesn't change)"
 msgstr ""
+"Suprascrie fișierul de intrare (altminteri adaugă sufixul '_out' dacă "
+"tipul lui nu se schimbă)"
 
 #: ../src/inkscape-application.cpp:745
 msgid "File type(s) to export: [svg,png,ps,eps,pdf,emf,wmf,xaml]"
-msgstr ""
+msgstr "Tipul fișierului ce va fi exportat: [svg,png,ps,eps,pdf,emf,wmf,xaml]"
 
 #: ../src/inkscape-application.cpp:745
 msgid "TYPE[,TYPE]*"
-msgstr ""
+msgstr "TIP[,TIP]*"
 
 #: ../src/inkscape-application.cpp:746
 msgid "Extension ID to use for exporting"
-msgstr ""
+msgstr "ID-ul extenisei ce va fi folosit pentru export"
 
 #: ../src/inkscape-application.cpp:746
 msgid "EXTENSION-ID"
-msgstr ""
+msgstr "ID-UL-EXTENSIEI"
 
 # hm ? sau geometrie de export ?
 #: ../src/inkscape-application.cpp:749
@@ -15439,15 +15457,15 @@ msgstr "Exportă geometria"
 
 #: ../src/inkscape-application.cpp:750
 msgid "Area to export is page"
-msgstr ""
+msgstr "Zona de export este pagina"
 
 #: ../src/inkscape-application.cpp:751
 msgid "Area to export is whole drawing (ignoring page size)"
-msgstr ""
+msgstr "Zona de export este întregul desen (ignorând dimensiunile paginii)"
 
 #: ../src/inkscape-application.cpp:752
 msgid "Area to export in SVG user units"
-msgstr ""
+msgstr "Zona de export în unități de masură stabilite de utilizator SVG"
 
 #: ../src/inkscape-application.cpp:752
 msgid "x0:y0:x1:y1"
@@ -15456,10 +15474,12 @@ msgstr "x0:y0:x1:y1"
 #: ../src/inkscape-application.cpp:753
 msgid "Snap the bitmap export area outwards to the nearest integer values"
 msgstr ""
+"Alipește zona de export a imaginii către exterior și către cele mai apropiate "
+"valori de numere întregi"
 
 #: ../src/inkscape-application.cpp:754
 msgid "Resolution for bitmaps and rasterized filters; default is 96"
-msgstr ""
+msgstr "Rezolutția imaginilor și filtrelor rasterizate; prestabilite la 96"
 
 #: ../src/inkscape-application.cpp:754 ../src/ui/widget/export-lists.cpp:188
 #: ../src/ui/widget/rendering-options.cpp:34
@@ -15469,7 +15489,7 @@ msgstr "DPI"
 
 #: ../src/inkscape-application.cpp:755
 msgid "Bitmap width in pixels (overrides --export-dpi)"
-msgstr ""
+msgstr "Lățimea imaginii în pixeli (înlocuiește opțiunea --export-dpi)"
 
 #: ../src/inkscape-application.cpp:755
 msgid "WIDTH"
@@ -15477,7 +15497,7 @@ msgstr "LĂȚIME"
 
 #: ../src/inkscape-application.cpp:756
 msgid "Bitmap height in pixels (overrides --export-dpi)"
-msgstr ""
+msgstr "Înălțimea imaginii în pixeli (înlocuiește opțiunea --export-dpi)"
 
 #: ../src/inkscape-application.cpp:756
 msgid "HEIGHT"
@@ -15486,10 +15506,12 @@ msgstr "ÎNĂLȚIME"
 #: ../src/inkscape-application.cpp:757
 msgid "Margin around export area: units of page size for SVG, mm for PS/PDF"
 msgstr ""
+"Marginea din jurul ariei de export: unități de mărime a paginii "
+"pentru SVG, mm pentru PS/PDF"
 
 #: ../src/inkscape-application.cpp:757
 msgid "MARGIN"
-msgstr ""
+msgstr "MARGINE"
 
 #: ../src/inkscape-application.cpp:760
 msgid "Export options"
@@ -15501,7 +15523,7 @@ msgstr "Numărul paginii de exportat"
 
 #: ../src/inkscape-application.cpp:761
 msgid "all|n[,a-b]"
-msgstr ""
+msgstr "toate|n[,a-b]"
 
 #: ../src/inkscape-application.cpp:762
 msgid "ID(s) of object(s) to export"
@@ -15509,31 +15531,31 @@ msgstr "ID-urile obiectelor de exportat"
 
 #: ../src/inkscape-application.cpp:762
 msgid "OBJECT-ID[;OBJECT-ID]*"
-msgstr ""
+msgstr "ID-UL-OBIECTULUI[;ID-UL-OBIECTULUI]*"
 
 #: ../src/inkscape-application.cpp:763
 msgid "Hide all objects except object with ID selected by export-id"
-msgstr ""
+msgstr "Ascunde toate elementele cu excepția celor cu ID-ul selectat de export-id"
 
 #: ../src/inkscape-application.cpp:764
 msgid "Remove Inkscape-specific SVG attributes/properties"
-msgstr ""
+msgstr "Înlătură tributele/proprietățile SVG specifice Inkscape"
 
 #: ../src/inkscape-application.cpp:765
 msgid "Postscript level (2 or 3); default is 3"
-msgstr ""
+msgstr "Nivelul postscript (2 sau 3 ); prestabilit la 3"
 
 #: ../src/inkscape-application.cpp:765
 msgid "LEVEL"
-msgstr ""
+msgstr "NIVEL"
 
 #: ../src/inkscape-application.cpp:766
 msgid "PDF version (1.4 or 1.5); default is 1.5"
-msgstr ""
+msgstr "Versiunea PDF (1.4 sau 1.5); prestabilită la 1.5"
 
 #: ../src/inkscape-application.cpp:766
 msgid "VERSION"
-msgstr ""
+msgstr "VERSIUNE"
 
 #: ../src/inkscape-application.cpp:767
 msgid "Convert text to paths (PS/EPS/PDF/SVG)"
@@ -15541,11 +15563,11 @@ msgstr "Convertește textul în trasee (PS/EPS/PDF/SVG)"
 
 #: ../src/inkscape-application.cpp:768
 msgid "Export text separately to LaTeX file (PS/EPS/PDF)"
-msgstr ""
+msgstr "Exportă textul separat într-un fișier LaTeX (PS/EPS/PDF)"
 
 #: ../src/inkscape-application.cpp:769
 msgid "Render objects without filters instead of rasterizing (PS/EPS/PDF)"
-msgstr ""
+msgstr "Redă elementele fără filtre în loc de a le rasteriza (PS/EPS/PDF)"
 
 #: ../src/inkscape-application.cpp:770
 msgid ""
@@ -15582,43 +15604,43 @@ msgstr ""
 
 #: ../src/inkscape-application.cpp:774
 msgid "COLOR-MODE"
-msgstr ""
+msgstr "MOD-CULOARE"
 
 #: ../src/inkscape-application.cpp:775
 msgid "Force dithering or disables it"
-msgstr ""
+msgstr "Forțează dithering sau dezactivează-l"
 
 #: ../src/inkscape-application.cpp:778
 msgid "Query object/document geometry"
-msgstr ""
+msgstr "Chestionează geometria elementului/documentului"
 
 #: ../src/inkscape-application.cpp:779
 msgid "ID(s) of object(s) to be queried"
-msgstr ""
+msgstr "ID-urile elementelor de chestionat"
 
 #: ../src/inkscape-application.cpp:779 ../src/inkscape-application.cpp:789
 msgid "OBJECT-ID[,OBJECT-ID]*"
-msgstr ""
+msgstr "ID-UL-OBIECTULUI[,ID-UL-OBIECTULUI]*"
 
 #: ../src/inkscape-application.cpp:780
 msgid "Print bounding boxes of all objects"
 msgstr "Tipărește casetele de încadrare ale tuturor obiectelor"
 
-#: ../src/inkscape-application.cpp:781
+#: ../src/inkscape-application.cpp:781 
 msgid "X coordinate of drawing or object (if specified by --query-id)"
-msgstr ""
+msgstr "Coordonata X a desenului sau elementului (dacă se specifică de --query-id)"
 
 #: ../src/inkscape-application.cpp:782
 msgid "Y coordinate of drawing or object (if specified by --query-id)"
-msgstr ""
+msgstr "Coordonata Y a desenului sau elementului (dacă se specifică de --query-id)"
 
 #: ../src/inkscape-application.cpp:783
 msgid "Width of drawing or object (if specified by --query-id)"
-msgstr ""
+msgstr "Lățimea desenului sau elementului (dacă se specifică de --query-id)"
 
 #: ../src/inkscape-application.cpp:784
 msgid "Height of drawing or object (if specified by --query-id)"
-msgstr ""
+msgstr "Înălțimea desenului sau elementului (dacă se specifică de --query-id)"
 
 #: ../src/inkscape-application.cpp:787
 msgid "Advanced file processing"
@@ -15630,15 +15652,15 @@ msgstr "Elimină definițiile nefolosite din <defs>-urile documentului"
 
 #: ../src/inkscape-application.cpp:789
 msgid "Select objects: comma-separated list of IDs"
-msgstr ""
+msgstr "Selectează elementele: o listă de ID-uri separate de virgule"
 
 #: ../src/inkscape-application.cpp:793
 msgid "List of actions (with optional arguments) to execute"
-msgstr ""
+msgstr "O listă de acțiuni (cu argumente opționale) ce vor fi executate"
 
 #: ../src/inkscape-application.cpp:793
 msgid "ACTION(:ARG)[;ACTION(:ARG)]*"
-msgstr ""
+msgstr "ACTIUNE(:ARGUMENT)[;ACTIUNE(:ARGUMENT)]*"
 
 #: ../src/inkscape-application.cpp:794
 msgid "List all available actions"
@@ -15646,7 +15668,7 @@ msgstr "Listează toate acțiunile disponibile"
 
 #: ../src/inkscape-application.cpp:795
 msgid "Use a file to input actions list"
-msgstr ""
+msgstr "Folosește un fișier pentru a introduce o listă de acțiuni"
 
 #: ../src/inkscape-application.cpp:798
 #: ../src/ui/dialog/inkscape-preferences.cpp:1535
@@ -15655,11 +15677,11 @@ msgstr "Interfață"
 
 #: ../src/inkscape-application.cpp:799
 msgid "With graphical user interface (required by some actions)"
-msgstr ""
+msgstr "Cu interfață grafică (necesar pentru unele acțiuni)"
 
 #: ../src/inkscape-application.cpp:800
 msgid "Close GUI after executing all actions"
-msgstr ""
+msgstr "Închide interfața grafică după executarea tuturor acțiunilor"
 
 #: ../src/inkscape-application.cpp:802
 msgid "Start Inkscape in interactive shell mode"
@@ -15667,7 +15689,7 @@ msgstr "Pornește Inkscape în modul shell interactiv"
 
 #: ../src/inkscape-application.cpp:803
 msgid "Use active window from commandline"
-msgstr ""
+msgstr "Folosește fereastra activă din terminal"
 
 #: ../src/inkscape.cpp:473
 msgid "Untitled document"
@@ -15691,24 +15713,26 @@ msgstr "Inkview - un vizualizator de fișiere SVG"
 
 #: ../src/inkview-application.cpp:70
 msgid "path1 [path2 [pathN]]"
-msgstr ""
+msgstr "traseu 1 [traseu2 [traseuN]]"
 
 #: ../src/inkview-application.cpp:71
 msgid ""
 "Open one or more SVG files (or folders containing SVG files) for viewing."
 msgstr ""
+"Deschide una sau mai multe fișiere SVG (sau directoare ce conțin "
+"fișiere SVG) pentru vizionare"
 
 #: ../src/inkview-application.cpp:78
 msgid "Print Inkview version"
-msgstr ""
+msgstr "Tipărește versiunea de Iknview"
 
 #: ../src/inkview-application.cpp:79
 msgid "Launch in fullscreen mode"
-msgstr ""
+msgstr "Lansează în mod pe tot ecranul"
 
 #: ../src/inkview-application.cpp:80
 msgid "Search folders recursively"
-msgstr ""
+msgstr "Caută în fișiere recursiv"
 
 #: ../src/inkview-application.cpp:81
 msgid "Change image every NUMBER seconds"
@@ -15724,7 +15748,7 @@ msgstr "Scalează imaginea cu factorul N"
 
 #: ../src/inkview-application.cpp:83
 msgid "Preload files"
-msgstr ""
+msgstr "Preîncarcă fișiere"
 
 #: ../src/inkview-application.cpp:115
 msgid "Select Files or Folders to view"
@@ -15741,15 +15765,15 @@ msgstr "Eroare"
 
 #: ../src/inkview-application.cpp:142
 msgid "No (valid) files to open."
-msgstr ""
+msgstr "Niciun fișier valid de deschis"
 
 #: ../src/io/fix-broken-links.cpp:368
 msgid "Fixup broken links"
-msgstr ""
+msgstr "Repară link-urile nefuncționale"
 
 #: ../src/libnrtype/font-factory.cpp:616
 msgid "Ignoring font without family that will crash Pango"
-msgstr ""
+msgstr "Ignoră fonturile fără o familie de font care vor prăbuși Pango"
 
 #: ../src/libnrtype/font-lister.cpp:160
 msgid "All Fonts"
@@ -15762,7 +15786,7 @@ msgstr "Fonturi "
 #: ../src/live_effects/effect.cpp:102
 msgctxt "path effect"
 msgid "Bend"
-msgstr ""
+msgstr "Îndoaie"
 
 #: ../src/live_effects/effect.cpp:105
 msgid "Bend an object along the curvature of another path"
@@ -15771,30 +15795,30 @@ msgstr "Îndoaie un obiect de-a lungul curburii unui alt traseu"
 #: ../src/live_effects/effect.cpp:116
 msgctxt "path effect"
 msgid "Gears"
-msgstr ""
+msgstr "Roți dințate"
 
 #: ../src/live_effects/effect.cpp:119
 msgid "Create interlocking, configurable gears based on the nodes of a path"
-msgstr ""
+msgstr "Creează roți dințate interblocate și configurabile, bazat pe nodurile traseului"
 
 #: ../src/live_effects/effect.cpp:130
 msgctxt "path effect"
 msgid "Pattern Along Path"
-msgstr ""
+msgstr "Tipar de-a lungul traseului"
 
 #: ../src/live_effects/effect.cpp:133
 msgid "Place one or more copies of another path along the path"
-msgstr ""
+msgstr "Plasează una sau mai multe copii ale altui traseu de-a lungul traseului"
 
 #: ../src/live_effects/effect.cpp:144
 msgctxt "path effect"
 msgid "Stitch Sub-Paths"
-msgstr ""
+msgstr "Comută între subtrasee"
 
 #: ../src/live_effects/effect.cpp:147
 msgid ""
 "Draw perpendicular lines between subpaths of a path, like rungs of a ladder"
-msgstr ""
+msgstr "Desenează linii perpendiculare între subtraseele unui traseu, ca treptele unei scări"
 
 #: ../src/live_effects/effect.cpp:159
 msgctxt "path effect"
@@ -15808,54 +15832,56 @@ msgstr "Creează un fractal VonKoch"
 #: ../src/live_effects/effect.cpp:173
 msgctxt "path effect"
 msgid "Knot"
-msgstr ""
+msgstr "Nod"
 
 #: ../src/live_effects/effect.cpp:176
 msgid "Create gaps in self-intersections, as in Celtic knots"
-msgstr ""
+msgstr "Creează interstiții în zonele de sine intersectate, ca la nodurile Celtice"
 
 #: ../src/live_effects/effect.cpp:187
 msgctxt "path effect"
 msgid "Construct grid"
-msgstr ""
+msgstr "Construiește o grilă"
 
 #: ../src/live_effects/effect.cpp:190
 msgid "Create a (perspective) grid from a 3-node path"
-msgstr ""
+msgstr "Creează o grilă (din perspectivă) dintr-un traseu cu 3 noduri"
 
 #: ../src/live_effects/effect.cpp:201
 msgctxt "path effect"
 msgid "Spiro spline"
-msgstr ""
+msgstr "Spiro splină"
 
 #: ../src/live_effects/effect.cpp:204
 msgid ""
 "Make the path curl like wire, using Spiro B-Splines. This effect is usually "
 "used directly on the canvas with the Spiro mode of the drawing tools."
 msgstr ""
+"Fă traseul să se onduleze ca sârma, folosing Spiro BSpline. Acest efect este "
+"folosit direct pe canava cu modul Spiro al uneltei de desenat."
 
 #: ../src/live_effects/effect.cpp:215
 msgctxt "path effect"
 msgid "Envelope Deformation"
-msgstr ""
+msgstr "Deformare înconjurătoare"
 
 #: ../src/live_effects/effect.cpp:218
 msgid "Adjust the shape of an object by transforming paths on its four sides"
-msgstr ""
+msgstr "Ajustează forma unui element transformându-i traseele de pe cele patru laturi"
 
 #: ../src/live_effects/effect.cpp:229
 msgctxt "path effect"
 msgid "Interpolate Sub-Paths"
-msgstr ""
+msgstr "Interpolează subtraseele"
 
 #: ../src/live_effects/effect.cpp:232
 msgid "Create a stepwise transition between the 2 subpaths of a path"
-msgstr ""
+msgstr "Creează o tranziție treptată între cele doua subtrasee ale unui traseu"
 
 #: ../src/live_effects/effect.cpp:243
 msgctxt "path effect"
 msgid "Hatches (rough)"
-msgstr ""
+msgstr "Hașuri (dure)"
 
 #: ../src/live_effects/effect.cpp:246
 msgid "Fill the object with adjustable hatching"
@@ -15864,27 +15890,27 @@ msgstr "Umple obiectul cu hașuri ajustabile"
 #: ../src/live_effects/effect.cpp:257
 msgctxt "path effect"
 msgid "Sketch"
-msgstr ""
+msgstr "Schiță"
 
 #: ../src/live_effects/effect.cpp:260
 msgid "Draw multiple short strokes along the path, as in a pencil sketch"
-msgstr ""
+msgstr "Desenează multiple tușe scurte de-a lungul traseului, ca într-o schițp de creion"
 
 #: ../src/live_effects/effect.cpp:271
 msgctxt "path effect"
 msgid "Ruler"
-msgstr ""
+msgstr "Riglă"
 
 #: ../src/live_effects/effect.cpp:274
 msgid ""
 "Add ruler marks to the object in adjustable intervals, using the object's "
 "stroke style."
-msgstr ""
+msgstr "Adaugă marcaje de riglă elementului în intervale ajustabile, folosindu-i stilul de contur"
 
 #: ../src/live_effects/effect.cpp:286
 msgctxt "path effect"
 msgid "Power stroke"
-msgstr ""
+msgstr "Contur puternic"
 
 #: ../src/live_effects/effect.cpp:289
 msgid ""
@@ -15892,104 +15918,117 @@ msgid ""
 "This effect can also be used directly on the canvas with a pressure "
 "sensitive stylus and the Pencil tool."
 msgstr ""
+"Creează contururi caligrafice și controlează-le lățimea și curbura variabile."
+"Acest efect poate fi folosit și direct pe canava cu un stilou sensibil la presiune și "
+"unealta creion."
 
 #: ../src/live_effects/effect.cpp:300
 msgctxt "path effect"
 msgid "Clone original"
-msgstr ""
+msgstr "Clonează originalul"
 
-#: ../src/live_effects/effect.cpp:303
+#: ../src/live_effects/effect.cpp:303 
 msgid ""
 "Let an object take on the shape, fill, stroke and/or other attributes of "
 "another object."
 msgstr ""
+"Atribuie forma, umplutura și conturul unui element, altuia"
 
 #: ../src/live_effects/effect.cpp:315
 msgctxt "path effect"
 msgid "Simplify"
-msgstr ""
+msgstr "Simplifică"
 
 #: ../src/live_effects/effect.cpp:318
 msgid ""
 "Smoothen and simplify a object. This effect is also available in the Pencil "
 "tool's tool controls."
 msgstr ""
+"Netezește și simplifică un element. Acest efect este disponibil și în meniul uneltei creion"
 
 #: ../src/live_effects/effect.cpp:329
 msgctxt "path effect"
 msgid "Lattice Deformation"
-msgstr ""
+msgstr "Deformare cu zăbrele"
 
 #: ../src/live_effects/effect.cpp:332
 msgid "Warp an object's shape based on a 5x5 grid"
-msgstr ""
+msgstr "Îndoaie un forma unui element conform unei grile de 5x5"
 
-#: ../src/live_effects/effect.cpp:343
+#: ../src/live_effects/effect.cpp:343 
 msgctxt "path effect"
 msgid "Perspective/Envelope"
-msgstr ""
+msgstr "Perspectivă/Înconjurare"
 
 #: ../src/live_effects/effect.cpp:346
 msgid ""
 "Transform the object to fit into a shape with four corners, either by "
 "stretching it or creating the illusion of a 3D-perspective"
 msgstr ""
+"Transformă elementul încât să încapă într-o forma cu patru colțuri, fie "
+"prin elongare  sau crearea unei iluzii de perspectivă 3D"
 
-#: ../src/live_effects/effect.cpp:357
+#: ../src/live_effects/effect.cpp:357 
 msgctxt "path effect"
 msgid "Interpolate points"
-msgstr ""
+msgstr "Interpolează punctele"
 
 #: ../src/live_effects/effect.cpp:360
 msgid ""
 "Connect the nodes of the object (e.g. corresponding to data points) by "
 "different types of lines."
 msgstr ""
+"Conectează nodurile elementuli (ex: corespunzătoare punctelor de date) "
+"cu diferite tipuri de linii."
 
 #: ../src/live_effects/effect.cpp:371
 msgctxt "path effect"
 msgid "Transform by 2 points"
-msgstr ""
+msgstr "Transfomă prin 2 puncte"
 
 #: ../src/live_effects/effect.cpp:374
 msgid "Scale, stretch and rotate an object by two handles"
-msgstr ""
+msgstr "Dimenzionează, elonghează și rotește un element prin două mânere"
 
 #: ../src/live_effects/effect.cpp:385
 msgctxt "path effect"
 msgid "Show handles"
-msgstr ""
+msgstr "Arată mănerele"
 
 #: ../src/live_effects/effect.cpp:388
 msgid ""
 "Draw the handles and nodes of objects (replaces the original styling with a "
 "black stroke)"
 msgstr ""
+"Desenează mânerele și nodurile elementelor (înlocuiește stilul original cu un "
+"contur negru)"
 
 #: ../src/live_effects/effect.cpp:399
 msgctxt "path effect"
 msgid "Roughen"
-msgstr ""
+msgstr "Asprește"
 
 #: ../src/live_effects/effect.cpp:402
 msgid "Roughen an object by adding and randomly shifting new nodes"
-msgstr ""
+msgstr "Asprește un element prin a-i adăuga și muta aleatoriu noi noduri"
 
 #: ../src/live_effects/effect.cpp:413
 msgctxt "path effect"
 msgid "BSpline"
-msgstr ""
+msgstr "BSplină"
 
 #: ../src/live_effects/effect.cpp:416
 msgid ""
 "Create a BSpline that molds into the path's corners. This effect is usually "
 "used directly on the canvas with the BSpline mode of the drawing tools."
 msgstr ""
+"Creează o splină B care se mulează în colțurile traseului. Acest efect este "
+"folosit de obicei direct pe canava cu modul Splină B al uneltelor de desen."
 
 #: ../src/live_effects/effect.cpp:427
 msgctxt "path effect"
 msgid "Join type"
-msgstr ""
+msgstr "Tip de unificare"
 
 #: ../src/live_effects/effect.cpp:430
 msgid ""
@@ -16002,54 +16041,61 @@ msgstr ""
 #: ../src/live_effects/effect.cpp:441
 msgctxt "path effect"
 msgid "Taper stroke"
-msgstr ""
+msgstr "Conicizează conturul"
 
 #: ../src/live_effects/effect.cpp:444
 msgid "Let the path's ends narrow down to a tip"
-msgstr ""
+msgstr "Fă ca nodurile unui traseu să se îngusteze catre un vărf"
 
 #: ../src/live_effects/effect.cpp:455
 msgctxt "path effect"
 msgid "Mirror symmetry"
-msgstr ""
+msgstr "Simetrie de oglindire"
 
 #: ../src/live_effects/effect.cpp:458
 msgid ""
 "Mirror an object along a movable axis, or around the page center. The "
 "mirrored copy can be styled independently."
 msgstr ""
+"Oglindește un element de-a lungul unei axe mutabile, sau în jurul centrului paginii."
+"Copia oglindită poate fi stilizată individual"
 
 #: ../src/live_effects/effect.cpp:469
 msgctxt "path effect"
 msgid "Rotate copies"
-msgstr ""
+msgstr "Rotește copiile"
 
-#: ../src/live_effects/effect.cpp:472
+#: ../src/live_effects/effect.cpp:472 
 msgid ""
 "Create multiple rotated copies of an object, as in a kaleidoscope. The "
 "copies can be styled independently."
 msgstr ""
+"Creează multiple copii rotite ale unui element, ca într-un calidoscop. "
+"Copiile pot fi stilizate individual"
 
 #: ../src/live_effects/effect.cpp:484
 msgctxt "path effect"
 msgid "Attach path"
-msgstr ""
+msgstr "Atașează traseul"
 
 #: ../src/live_effects/effect.cpp:487
 msgid ""
 "Glue the current path's ends to a specific position on one or two other paths"
 msgstr ""
+"Lipește capetele traseului curent într-o poziție specifică pe unul sau mai multe alte trasee" 
 
 #: ../src/live_effects/effect.cpp:499
 msgctxt "path effect"
 msgid "Fill between many"
-msgstr ""
+msgstr "Umple între mai multe"
 
 #: ../src/live_effects/effect.cpp:502
 msgid ""
 "Turn the path into a fill between multiple other open paths (e.g. between "
 "paths with PowerStroke applied to them)"
 msgstr ""
+"Transformă traseul într-o umplutura dintre multiple alte trasee deschise (ex: între "
+"trasee cu ConturPuternic aplicat lor)"
 
 #: ../src/live_effects/effect.cpp:513
 msgctxt "path effect"
@@ -16069,17 +16115,20 @@ msgstr "Casetă de încadrare"
 msgid ""
 "Turn the path into a bounding box that entirely encompasses another path"
 msgstr ""
+"Transformă traseul într-o casetă curpinzătoare care cuprinde în întregime alt traseu"
 
 #: ../src/live_effects/effect.cpp:542
 msgctxt "path effect"
 msgid "Measure Segments"
-msgstr ""
+msgstr "Măsoară segmentele"
 
 #: ../src/live_effects/effect.cpp:545
 msgid ""
 "Add dimensioning for distances between nodes, optionally with projection and "
 "many other configuration options"
 msgstr ""
+"Adaugă dimensionare pentru distanțele dintre noduri, opțional cu proiecție "
+"și multe alte opțiuni de configurare"
 
 #: ../src/live_effects/effect.cpp:556
 msgctxt "path effect"
@@ -16097,54 +16146,56 @@ msgstr ""
 #: ../src/live_effects/effect.cpp:570
 msgctxt "path effect"
 msgid "Power clip"
-msgstr ""
+msgstr "Decupare puternică"
 
 #: ../src/live_effects/effect.cpp:573
 msgid "Invert, hide or flatten a clip (apply like a Boolean operation)"
-msgstr ""
+msgstr "Inversează, ascunde sau aplatizează o decupare (aplică ca pe o operațiune booleană)"
 
 #: ../src/live_effects/effect.cpp:584
 msgctxt "path effect"
 msgid "Power mask"
-msgstr ""
+msgstr "Mascare puternică"
 
 #: ../src/live_effects/effect.cpp:587
 msgid "Invert or hide a mask, or use its negative"
-msgstr ""
+msgstr "Inversează sau ascunde o mascare, sau folosește-i negativul"
 
 #: ../src/live_effects/effect.cpp:598
 msgctxt "path effect"
 msgid "Ellipse from points"
-msgstr ""
+msgstr "Elipsă din puncte"
 
 #: ../src/live_effects/effect.cpp:601
 msgid "Draw a circle, ellipse, arc or slice based on the nodes of a path"
-msgstr ""
+msgstr "Desenează un cerc, elipsă, arc sau felie așezate pe nodurile unui traseu"
 
 #: ../src/live_effects/effect.cpp:612
 msgctxt "path effect"
 msgid "Offset"
-msgstr ""
+msgstr "Decalaj"
 
 #: ../src/live_effects/effect.cpp:615
 msgid "Offset the path, optionally keeping cusp corners cusp"
-msgstr ""
+msgstr "Decalează traseul, opțional păstrându-i colțurile de tranziție"
 
 #: ../src/live_effects/effect.cpp:626
 msgctxt "path effect"
 msgid "Dashed Stroke"
-msgstr ""
+msgstr "Contur întrerupt"
 
-#: ../src/live_effects/effect.cpp:629
+#: ../src/live_effects/effect.cpp:629 
 msgid ""
 "Add a dashed stroke whose dashes end exactly on a node, optionally with the "
 "same number of dashes per path segment"
 msgstr ""
+"Adaugă un contur întrerupt ale cărui liniuțe se încheie fix pe un nod, opțional "
+"cu același număr de liniuțe pe segment de traseu" 
 
 #: ../src/live_effects/effect.cpp:641
 msgctxt "path effect"
 msgid "Boolean operation"
-msgstr ""
+msgstr "Operațiuni booleane"
 
 #: ../src/live_effects/effect.cpp:644
 msgid ""
@@ -16157,32 +16208,35 @@ msgstr ""
 #: ../src/live_effects/effect.cpp:655
 msgctxt "path effect"
 msgid "Slice"
-msgstr ""
+msgstr "Feliază"
 
 #: ../src/live_effects/effect.cpp:658
 msgid "Slices the item into parts. It can also be applied multiple times."
-msgstr ""
+msgstr "Feliază elementul în bucăți. Se poate aplica și de multiple ori."
 
 #: ../src/live_effects/effect.cpp:670
 msgctxt "path effect"
 msgid "Tiling"
-msgstr ""
+msgstr "Placare"
 
 #: ../src/live_effects/effect.cpp:673
 msgid ""
 "Create multiple copies of an object following a grid layout. Customize size, "
 "rotation, distances, style and tiling symmetry."
 msgstr ""
+"Creează multiple copii ale unui element, urmând o așezare grilă. "
+"Personalizează distanțele, stilul și simetria placării."
 
 #: ../src/live_effects/effect.cpp:685
 msgctxt "path effect"
 msgid "Angle bisector"
-msgstr ""
+msgstr "Bisectoarea unui unghi"
 
 #: ../src/live_effects/effect.cpp:688
 msgid ""
 "Draw a line that halves the angle between the first three nodes of the path"
 msgstr ""
+"Desenează o linie care înjumătățește unghiul dintre primele trei noduri ale unui traseu"
 
 #: ../src/live_effects/effect.cpp:699
 msgctxt "path effect"
@@ -16198,125 +16252,137 @@ msgstr ""
 #: ../src/live_effects/effect.cpp:713
 msgctxt "path effect"
 msgid "Circle by 3 points"
-msgstr ""
+msgstr "Cerc pe 3 puncte"
 
 #: ../src/live_effects/effect.cpp:716
 msgid ""
 "Draw a circle whose circumference passes through the first three nodes of "
 "the path"
 msgstr ""
+"Desenează un cerc al cărui circumferință trece prin primele trei noduri ale traseului"
 
 #: ../src/live_effects/effect.cpp:727
 msgctxt "path effect"
 msgid "Extrude"
-msgstr ""
+msgstr "Extrudează"
 
 #: ../src/live_effects/effect.cpp:730
 msgid "Extrude the path, creating a face for each path segment"
-msgstr ""
+msgstr "Extrudează traseul, creând o fațetă pentru fiecare segment de traseu"
 
 #: ../src/live_effects/effect.cpp:741
 msgctxt "path effect"
 msgid "Line Segment"
-msgstr ""
+msgstr "Segment de linie"
 
-#: ../src/live_effects/effect.cpp:744
+#: ../src/live_effects/effect.cpp:744 
 msgid "Draw a straight line that connects the first and last node of a path"
 msgstr ""
+"Desenează o linie dreaptă care conectează primul și ultimul nod al unui traseu" 
 
 #: ../src/live_effects/effect.cpp:755
 msgctxt "path effect"
 msgid "Parallel"
-msgstr ""
+msgstr "Paralel"
 
 #: ../src/live_effects/effect.cpp:758
 msgid "Create a draggable line that will always be parallel to a two-node path"
 msgstr ""
+"Creează o linie de care se poate trage și care va fi mereu paralelă cu un "
+"traseu de două noduri"
 
 #: ../src/live_effects/effect.cpp:769
 msgctxt "path effect"
 msgid "Perpendicular bisector"
-msgstr ""
+msgstr "Bisectoare perpendiculară"
 
 #: ../src/live_effects/effect.cpp:772
 msgid ""
 "Draw a perpendicular line in the middle of the (imaginary) line that "
 "connects the start and end nodes"
 msgstr ""
+"Desenează o linie perpendiculară în mijlocul liniei (imaginare) care conectează "
+"nodurile de început și sfârșit" 
 
 #: ../src/live_effects/effect.cpp:783
 msgctxt "path effect"
 msgid "Tangent to curve"
-msgstr ""
+msgstr "Tangenta la o curbă"
 
 #: ../src/live_effects/effect.cpp:786
 msgid ""
 "Draw a tangent with variable length and additional angle that can be moved "
 "along the path"
 msgstr ""
+"Desenează o linie tangentă cu lungime variabilă și unghi adițional care poate "
+"fi mutat de-a lungul traseului"
 
 #: ../src/live_effects/effect.cpp:798
 msgctxt "path effect"
 msgid "Fill between strokes"
-msgstr ""
+msgstr "Umple între contururi"
 
 #: ../src/live_effects/effect.cpp:801
 msgid ""
 "Turn the path into a fill between two other open paths (e.g. between two "
 "paths with PowerStroke applied to them)"
 msgstr ""
+"Transformă traseul într-o umplere între două alte trasee (ex: între "
+"treaseele cu ConturPuternic aplicat lor)"
 
 #: ../src/live_effects/effect.cpp:813
 msgctxt "path effect"
 msgid "doEffect stack test"
-msgstr ""
+msgstr "făEffect test de stivă"
 
 #: ../src/live_effects/effect.cpp:816
 msgid "Test LPE"
-msgstr ""
+msgstr "Test LPE"
 
 #: ../src/live_effects/effect.cpp:827
 msgctxt "path effect"
 msgid "Dynamic stroke"
-msgstr ""
+msgstr "Contur dinamic"
 
 #: ../src/live_effects/effect.cpp:830
 msgid ""
 "Create calligraphic strokes with variably shaped ends, making use of a "
 "parameter for the brush angle"
 msgstr ""
+"Creează contururi caligrafice cu capete de diferite forme, folosind "
+"un parametru pentru unghiul pensulei"
 
 #: ../src/live_effects/effect.cpp:841
 msgctxt "path effect"
 msgid "Lattice Deformation Legacy"
-msgstr ""
+msgstr "Deformare cu zăbrele Învechită"
 
 #: ../src/live_effects/effect.cpp:844
 msgid "Deform an object using a 4x4 grid"
-msgstr ""
+msgstr "Deformează un element folosind o grilă 4x4"
 
 #: ../src/live_effects/effect.cpp:855
 msgctxt "path effect"
 msgid "Path length"
-msgstr ""
+msgstr "Lungimea traseului"
 
 #: ../src/live_effects/effect.cpp:858
 msgid "Display the total length of a (curved) path"
-msgstr ""
+msgstr "Afișează lungimea totală a traseului (curbat)"
 
 #: ../src/live_effects/effect.cpp:869
 msgctxt "path effect"
 msgid "Recursive skeleton"
-msgstr ""
+msgstr "Schelet recursiv"
 
 #: ../src/live_effects/effect.cpp:872
 msgid "Draw a path recursively"
-msgstr ""
+msgstr "Desenează un traseu recursiv"
 
 #: ../src/live_effects/effect.cpp:883
 msgctxt "path effect"
 msgid "Text label"
-msgstr ""
+msgstr "Etichetă text"
 
 #: ../src/live_effects/effect.cpp:886
 msgid "Add a label for the object"
@@ -16325,11 +16391,11 @@ msgstr "Adaugă o etichetă pentru obiect"
 #: ../src/live_effects/effect.cpp:897
 msgctxt "path effect"
 msgid "Embroidery stitch"
-msgstr ""
+msgstr "Cusătură de broderie"
 
 #: ../src/live_effects/effect.cpp:900
 msgid "Embroidery stitch"
-msgstr ""
+msgstr "Cusătură de broderie"
 
 #: ../src/live_effects/effect.cpp:1143
 msgid "Is visible?"
@@ -16345,124 +16411,125 @@ msgstr ""
 
 #: ../src/live_effects/effect.cpp:1144
 msgid "Version"
-msgstr ""
+msgstr "Versiune"
 
 #: ../src/live_effects/effect.cpp:1144
 msgid "LPE version"
-msgstr ""
+msgstr "Versiune LPE"
 
 #: ../src/live_effects/effect.cpp:1177
 msgid "No effect"
 msgstr "Fără efect"
 
-#: ../src/live_effects/effect.cpp:2047
+#: ../src/live_effects/effect.cpp:2047 
 #, c-format
 msgid "Editing parameter <b>%s</b>."
-msgstr ""
+msgstr "Parametru de editare <b>%2</b>."
 
 #: ../src/live_effects/effect.cpp:2052
 msgid "None of the applied path effect's parameters can be edited on-canvas."
 msgstr ""
+"Niciunul din parametrii aplicați efectului traseului pot fi editați pe canva."
 
 #: ../src/live_effects/lpe-angle_bisector.cpp:44
 #: ../src/live_effects/lpe-parallel.cpp:52
 #: ../src/live_effects/lpe-perp_bisector.cpp:97
 #: ../src/live_effects/lpe-tangent_to_curve.cpp:62
 msgid "Length left:"
-msgstr ""
+msgstr "Lungime în stânga:"
 
 #: ../src/live_effects/lpe-angle_bisector.cpp:44
 #: ../src/live_effects/lpe-perp_bisector.cpp:97
 msgid "Specifies the left end of the bisector"
-msgstr ""
+msgstr "Specifică capătul stâng al bisectoarei"
 
 #: ../src/live_effects/lpe-angle_bisector.cpp:45
 #: ../src/live_effects/lpe-parallel.cpp:53
 #: ../src/live_effects/lpe-perp_bisector.cpp:98
 #: ../src/live_effects/lpe-tangent_to_curve.cpp:63
 msgid "Length right:"
-msgstr ""
+msgstr "Lungime în dreapta"
 
 #: ../src/live_effects/lpe-angle_bisector.cpp:45
 #: ../src/live_effects/lpe-perp_bisector.cpp:98
 msgid "Specifies the right end of the bisector"
-msgstr ""
+msgstr "Specifică capătul din dreapta al bisectoarei"
 
 #: ../src/live_effects/lpe-angle_bisector.cpp:83
 #: ../src/live_effects/lpe-perp_bisector.cpp:157
 msgid "Adjust the \"left\" end of the bisector"
-msgstr ""
+msgstr "Ajustează capătul din \"stânga\" al bisectoarei"
 
 #: ../src/live_effects/lpe-angle_bisector.cpp:89
 #: ../src/live_effects/lpe-perp_bisector.cpp:163
 msgid "Adjust the \"right\" end of the bisector"
-msgstr ""
+msgstr "Ajustează capătul din \"dreapta\" al bisectoarei"
 
 #: ../src/live_effects/lpe-attach-path.cpp:20
 msgid "Start path:"
-msgstr ""
+msgstr "Începutul traseului:"
 
 #: ../src/live_effects/lpe-attach-path.cpp:20
 msgid "Path to attach to the start of this path"
-msgstr ""
+msgstr "Traseul de atașat la începutul acestui traseu"
 
 #: ../src/live_effects/lpe-attach-path.cpp:21
 msgid "Start path position:"
-msgstr ""
+msgstr "Poziția de început a traseului:"
 
 #: ../src/live_effects/lpe-attach-path.cpp:21
 msgid "Position to attach path start to"
-msgstr ""
+msgstr "Poziția de atașare a începutului traseului"
 
 #: ../src/live_effects/lpe-attach-path.cpp:22
 msgid "Start path curve start:"
-msgstr ""
+msgstr "Începutul primului traseu curb"
 
 #: ../src/live_effects/lpe-attach-path.cpp:22
 #: ../src/live_effects/lpe-attach-path.cpp:26
 msgid "Starting curve"
-msgstr ""
+msgstr "Curba de început"
 
 #: ../src/live_effects/lpe-attach-path.cpp:23
 msgid "Start path curve end:"
-msgstr ""
+msgstr "Sfârșitul primului traseu curb"
 
 #: ../src/live_effects/lpe-attach-path.cpp:23
 #: ../src/live_effects/lpe-attach-path.cpp:27
 msgid "Ending curve"
-msgstr ""
+msgstr "Curba de sfârșit"
 
 #: ../src/live_effects/lpe-attach-path.cpp:24
 msgid "End path:"
-msgstr ""
+msgstr "Traseul de sfârșit"
 
 #: ../src/live_effects/lpe-attach-path.cpp:24
 msgid "Path to attach to the end of this path"
-msgstr ""
+msgstr "Traseul de atașat la sfârșitul acestui traseu"
 
 #: ../src/live_effects/lpe-attach-path.cpp:25
 msgid "End path position:"
-msgstr ""
+msgstr "Poziția sfârșitului traseului"
 
 #: ../src/live_effects/lpe-attach-path.cpp:25
 msgid "Position to attach path end to"
-msgstr ""
+msgstr "Poziția de atașat sfârșitul traseului"
 
 #: ../src/live_effects/lpe-attach-path.cpp:26
 msgid "End path curve start:"
-msgstr ""
+msgstr "Începutul curbei traseului de sfârșit"
 
 #: ../src/live_effects/lpe-attach-path.cpp:27
 msgid "End path curve end:"
-msgstr ""
+msgstr "Sfârșitul curbei traseului de sfârșit"
 
 #: ../src/live_effects/lpe-bendpath.cpp:59
 msgid "Bend path:"
-msgstr ""
+msgstr "Îndoaie traseul"
 
 #: ../src/live_effects/lpe-bendpath.cpp:59
 msgid "Path along which to bend the original path"
-msgstr ""
+msgstr "Traseul de-a lungul căruia se va indoi traseul original"
 
 #: ../src/live_effects/lpe-bendpath.cpp:61
 #: ../src/live_effects/lpe-patternalongpath.cpp:80
@@ -16472,7 +16539,7 @@ msgstr "_Lățime:"
 
 #: ../src/live_effects/lpe-bendpath.cpp:61
 msgid "Width of the path"
-msgstr ""
+msgstr "Lățimea traseului"
 
 #: ../src/live_effects/lpe-bendpath.cpp:62
 msgid "W_idth in units of length"
@@ -16480,25 +16547,26 @@ msgstr "Lățimea în unități de lung_ime"
 
 #: ../src/live_effects/lpe-bendpath.cpp:62
 msgid "Scale the width of the path in units of its length"
-msgstr ""
+msgstr "Dimensionează lățtimea traseului în unități ale lungimii lui"
 
 #: ../src/live_effects/lpe-bendpath.cpp:63
 msgid "_Original path is vertical"
-msgstr ""
+msgstr "_Traseul original este vertical"
 
 #: ../src/live_effects/lpe-bendpath.cpp:63
 msgid "Rotates the original 90 degrees, before bending it along the bend path"
 msgstr ""
+"Rotește originalul cu 90 de grade, înainte de a-l îndoi de-a lungul traseului îndoit"
 
 #: ../src/live_effects/lpe-bendpath.cpp:64
 #: ../src/live_effects/lpe-patternalongpath.cpp:97
 msgid "Hide width knot"
-msgstr ""
+msgstr "Ascunde lățimea nodului"
 
 #: ../src/live_effects/lpe-bendpath.cpp:220
 #: ../src/live_effects/lpe-patternalongpath.cpp:304
 msgid "Change the width"
-msgstr ""
+msgstr "Modifică lățimea"
 
 #: ../src/live_effects/lpe-bool.cpp:48
 msgid "union"
@@ -16522,11 +16590,11 @@ msgstr "diviziune"
 
 #: ../src/live_effects/lpe-bool.cpp:53
 msgid "division both"
-msgstr ""
+msgstr "divide ambele"
 
 #: ../src/live_effects/lpe-bool.cpp:67
 msgid "even-odd"
-msgstr ""
+msgstr "divide-imparele"
 
 #: ../src/live_effects/lpe-bool.cpp:68
 msgid "non-zero"
@@ -16542,53 +16610,55 @@ msgstr "preia din obiect"
 
 #: ../src/live_effects/lpe-bool.cpp:77
 msgid "Operand path:"
-msgstr ""
+msgstr "Traseu de operațiune"
 
 #: ../src/live_effects/lpe-bool.cpp:77
 msgid "Operand for the boolean operation"
-msgstr ""
+msgstr "Traseu pentru operațiunea booleană"
 
 #: ../src/live_effects/lpe-bool.cpp:78
 msgid "Operation:"
-msgstr "Operație:"
+msgstr "Operațiune:"
 
 #: ../src/live_effects/lpe-bool.cpp:78
 msgid "Boolean Operation"
-msgstr ""
+msgstr "Operațiune booleană"
 
 #: ../src/live_effects/lpe-bool.cpp:79
 msgid "Swap operands"
-msgstr ""
+msgstr "Operanzi de schimb"
 
 #: ../src/live_effects/lpe-bool.cpp:79
 msgid "Swap operands (useful e.g. for difference)"
-msgstr ""
+msgstr "Schimbă operanzii între ei (folositor de ex: pentru diferență)"
 
 #: ../src/live_effects/lpe-bool.cpp:81
 msgid "Remove inner"
-msgstr ""
+msgstr "Elimină interiorul"
 
 #: ../src/live_effects/lpe-bool.cpp:82
 msgid ""
 "For cut operations: remove inner (non-contour) lines of cutting path to "
 "avoid invisible extra points"
 msgstr ""
+"Pentru operațiuni de tăiere: elimină liniile din interior (fără contur) "
+"ale traseului de tăiere pentru a evita apariția de extra puncte invizibile"
 
 #: ../src/live_effects/lpe-bool.cpp:84
 msgid "Fill type this:"
-msgstr ""
+msgstr "Umple tipul acestuia:"
 
-#: ../src/live_effects/lpe-bool.cpp:84
+#: ../src/live_effects/lpe-bool.cpp:84 
 msgid "Fill type (winding mode) for this path"
-msgstr ""
+msgstr "Umple tipul pentru acest traseu"
 
 #: ../src/live_effects/lpe-bool.cpp:86
 msgid "Fill type operand:"
-msgstr ""
+msgstr "Operandul de tip de umplere"
 
 #: ../src/live_effects/lpe-bool.cpp:86
 msgid "Fill type (winding mode) for operand path"
-msgstr ""
+msgstr "Tipul de umplere (mod înfășurare) pentru traseul operand"
 
 #: ../src/live_effects/lpe-bounding-box.cpp:20
 #: ../src/live_effects/lpe-fill-between-many.cpp:36
@@ -16599,46 +16669,46 @@ msgstr "Traseu legat:"
 #: ../src/live_effects/lpe-bounding-box.cpp:20
 #: ../src/live_effects/lpe-fill-between-strokes.cpp:21
 msgid "Path from which to take the original path data"
-msgstr ""
+msgstr "Traseul de la care luam datele traseului original"
 
 #: ../src/live_effects/lpe-bounding-box.cpp:21
 msgid "Visual Bounds"
-msgstr ""
+msgstr "Margini de conținut vizuale"
 
 #: ../src/live_effects/lpe-bounding-box.cpp:21
 msgid "Uses the visual bounding box"
-msgstr ""
+msgstr "Folosește chenarul de încadrare vizual"
 
 #: ../src/live_effects/lpe-bspline.cpp:31
 msgid "Steps with CTRL:"
-msgstr ""
+msgstr "Trepte cu CTRL:"
 
 #: ../src/live_effects/lpe-bspline.cpp:31
 msgid "Change number of steps with CTRL pressed"
-msgstr ""
+msgstr "Schimbă numărul de trepte ținând apăsat CTRL"
 
 #: ../src/live_effects/lpe-bspline.cpp:32
 #: ../src/live_effects/lpe-transform_2pts.cpp:45
 msgid "Helper size:"
-msgstr ""
+msgstr "Dimensiune ajutătoare:"
 
 #: ../src/live_effects/lpe-bspline.cpp:32
 msgid "Helper size"
-msgstr ""
+msgstr "Dimensiune ajutătoare:"
 
 #: ../src/live_effects/lpe-bspline.cpp:33
 msgid "Apply changes if weight = 0%"
-msgstr ""
+msgstr "Aplică modificările dacă ponderea = 0%"
 
 #: ../src/live_effects/lpe-bspline.cpp:34
 msgid "Apply changes if weight > 0%"
-msgstr ""
+msgstr "Aplică modificările dacă ponderea > 0%"
 
 #: ../src/live_effects/lpe-bspline.cpp:35
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:54
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:55
 msgid "Change only selected nodes"
-msgstr ""
+msgstr "Modifică dolar nodurile din selecție"
 
 #: ../src/live_effects/lpe-bspline.cpp:36
 msgid "Uniform BSpline"
@@ -16650,33 +16720,33 @@ msgstr "BSpline uniformă"
 
 #: ../src/live_effects/lpe-bspline.cpp:37
 msgid "Change weight %:"
-msgstr ""
+msgstr "Modifică ponderea %"
 
 #: ../src/live_effects/lpe-bspline.cpp:37
 msgid "Change weight percent of the effect"
-msgstr ""
+msgstr "Modifică procentul de pondere al efectului"
 
 #: ../src/live_effects/lpe-bspline.cpp:101
 msgid "Default weight"
-msgstr ""
+msgstr "Pondere predefinită"
 
 #: ../src/live_effects/lpe-bspline.cpp:106
 msgid "Make cusp"
-msgstr ""
+msgstr "Creează vârf"
 
 #: ../src/live_effects/lpe-bspline.cpp:150
 msgid "Change to default weight"
-msgstr ""
+msgstr "Modifică la ponderea predefinită"
 
 #: ../src/live_effects/lpe-bspline.cpp:156
 msgid "Change to 0 weight"
-msgstr ""
+msgstr "Modifică la pondere 0"
 
 #: ../src/live_effects/lpe-bspline.cpp:162
 #: ../src/live_effects/parameter/parameter.cpp:347
 #: ../src/live_effects/parameter/scalararray.cpp:59
 msgid "Change scalar parameter"
-msgstr ""
+msgstr "Modifică paramentrul scalar"
 
 #: ../src/live_effects/lpe-clone-original.cpp:37
 msgid "No Shape"
@@ -16684,15 +16754,15 @@ msgstr "Fără formă"
 
 #: ../src/live_effects/lpe-clone-original.cpp:38
 msgid "With LPE's"
-msgstr ""
+msgstr "Cu LPE-uri"
 
 #: ../src/live_effects/lpe-clone-original.cpp:39
 msgid "Without LPE's"
-msgstr ""
+msgstr "Fără LPE-uri"
 
-#: ../src/live_effects/lpe-clone-original.cpp:40
+#: ../src/live_effects/lpe-clone-original.cpp:40 
 msgid "Spiro or BSpline Only"
-msgstr ""
+msgstr "Spiro și Spline B numai"
 
 #: ../src/live_effects/lpe-clone-original.cpp:46
 msgid "Linked Item:"
@@ -16700,7 +16770,7 @@ msgstr "Element legat:"
 
 #: ../src/live_effects/lpe-clone-original.cpp:46
 msgid "Item from which to take the original data"
-msgstr ""
+msgstr "Elementul de la care luăm datele originale"
 
 #: ../src/live_effects/lpe-clone-original.cpp:47
 #: ../src/ui/toolbar/pencil-toolbar.cpp:421
@@ -16724,13 +16794,15 @@ msgstr ""
 
 #: ../src/live_effects/lpe-clone-original.cpp:50
 msgid "CSS Properties"
-msgstr ""
+msgstr "Proprietăți CSS"
 
-#: ../src/live_effects/lpe-clone-original.cpp:51
+#: ../src/live_effects/lpe-clone-original.cpp:51 
 msgid ""
 "CSS properties of the original that the clone should copy, written as a "
 "comma-separated list; e.g. 'fill, filter, opacity'."
 msgstr ""
+"Proprietățile CSS ale originialului pe care clona ar trebui să-l copieze, "
+"scrise ca o listă de valori separate de virgulă; ex: 'umplere, filtru, opacitate'."
 
 #: ../src/live_effects/lpe-clone-original.cpp:53
 #: ../src/live_effects/lpe-slice.cpp:54
@@ -16744,7 +16816,7 @@ msgstr "Permite transformări"
 
 #: ../src/live_effects/lpe-clone-original.cpp:133
 msgid "No Shape Sync to Current"
-msgstr ""
+msgstr "Nicio dimensiune sincronizată la selecția curentă"
 
 #: ../src/live_effects/lpe-constructgrid.cpp:25
 msgid "Size _X:"
@@ -16764,7 +16836,7 @@ msgstr "Dimensiunea grilei pe direcția Y."
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:46
 msgid "Kaleidoscope"
-msgstr ""
+msgstr "Calidoscop"
 
 # hm ?
 #: ../src/live_effects/lpe-copy_rotate.cpp:47
@@ -16776,19 +16848,19 @@ msgstr "Lipește traseele"
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:60
 #: ../src/live_effects/lpe-slice.cpp:53 ../src/live_effects/lpe-tiling.cpp:78
 msgid "lpesatellites"
-msgstr ""
+msgstr "satelițilpe"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:55
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:60
 #: ../src/live_effects/lpe-slice.cpp:53 ../src/live_effects/lpe-tiling.cpp:78
 msgid "Items satellites"
-msgstr ""
+msgstr "Elemente satelit"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:56
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:44
 #: ../src/live_effects/lpe-pts2ellipse.cpp:53
 msgid "Method:"
-msgstr ""
+msgstr "Metdă:"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:56
 msgid "Rotate methods"
@@ -16809,7 +16881,7 @@ msgstr "Punct de plecare"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:58
 msgid "Starting point to define start angle"
-msgstr ""
+msgstr "Punct de început pentru a defini unghiul de pornire"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:58
 msgid "Adjust starting point to define start angle"
@@ -16821,7 +16893,7 @@ msgstr "Unghi de pornire"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:59
 msgid "Angle of the first copy"
-msgstr ""
+msgstr "Unghiul primei copii"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:60
 msgid "Rotation angle"
@@ -16837,35 +16909,35 @@ msgstr "Număr de copii"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:61
 msgid "Number of copies of the original path"
-msgstr "Numărul de cópii ale traseului original"
+msgstr "Numărul de copii ale traseului original"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:62
 msgid "Gap"
-msgstr ""
+msgstr "Interstiție"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:62
 msgid "Gap space between copies, use small negative gaps to fix some joins"
-msgstr ""
+msgstr "Spațiu interstițial între copii, folosește mici goluri negative pentru a repara unele îmbinari"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:63
 msgid "Distribute evenly"
 msgstr "Distribuie uniform"
 
-#: ../src/live_effects/lpe-copy_rotate.cpp:63
+#: ../src/live_effects/lpe-copy_rotate.cpp:63 
 msgid ""
 "Angle between copies is 360°/number of copies (ignores rotation angle "
 "setting)"
 msgstr ""
-"Unghiul între cópii este de 360°/numărul de cópii (ignoră setarea unghiului "
+"Unghiul între copii este de 360°/numărul de copii (ignoră setarea unghiului "
 "de rotație)"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:64
 msgid "Mirror copies"
-msgstr ""
+msgstr "Copii în onglindă"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:64
 msgid "Mirror between copies"
-msgstr ""
+msgstr "Oglindește între copii"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:65
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:65
@@ -16875,26 +16947,26 @@ msgstr "Divizează elementele"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:65
 msgid "Split elements, so each can have its own style"
-msgstr ""
+msgstr "Separă elementele, astfel încât fiecare să aibă stilul lui"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:66
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:70
 #: ../src/live_effects/lpe-tiling.cpp:98
 msgid "Link styles"
-msgstr ""
+msgstr "Stiluri de legături"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:66
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:70
 msgid "Link styles on split mode"
-msgstr ""
+msgstr "Stiluri de legături la modul de separare"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:37
 msgid "Stitch path:"
-msgstr ""
+msgstr "Coase traseul:"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:37
 msgid "The path that will be used as stitch."
-msgstr ""
+msgstr "Traseul care va fi folosit drept cusătură"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:38
 msgid "N_umber of paths:"
@@ -16902,63 +16974,73 @@ msgstr "N_umărul de trasee:"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:38
 msgid "The number of paths that will be generated."
-msgstr ""
+msgstr "Numărul de trasee care va fi generat"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:39
 msgid "Sta_rt edge variance:"
-msgstr ""
+msgstr "Înce_pe variația muchiei"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:39
 msgid ""
 "The amount of random jitter to move the start points of the stitches inside "
 "& outside the guide path"
 msgstr ""
+"Cantitatea de tulburare aleatorie pentru a muta începutul punctelor de cusătură "
+"înauntru & în afara traseului de ghidaj"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:40
 msgid "Sta_rt spacing variance:"
-msgstr ""
+msgstr "Începe variația spațierii"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:40
 msgid ""
 "The amount of random shifting to move the start points of the stitches back "
 "& forth along the guide path"
 msgstr ""
+"Cantitatea de decalare aleatorie pentru a muta începutul punctelor de cusătură "
+"înapoi & înaine de-a lungul traseului de ghidaj"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:41
 msgid "End ed_ge variance:"
-msgstr ""
+msgstr "Încheie variația muchiil_or:"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:41
 msgid ""
 "The amount of randomness that moves the end points of the stitches inside & "
 "outside the guide path"
 msgstr ""
+"Cantitatea de aleatorizare pentru a muta punctele de sfârșit ale cusăturilor înauntru & "
+"în afara traseului de ghidaj"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:42
 msgid "End spa_cing variance:"
-msgstr ""
+msgstr "Încheie spațierea variații_lor"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:42
 msgid ""
 "The amount of random shifting to move the end points of the stitches back & "
 "forth along the guide path"
 msgstr ""
+"Cantitatea de decalare aleatorie pentru a muta punctele de sfârșit ale cusăturilor "
+"înapoi & înainte de-a lungul traseului"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:43
 msgid "Scale _width:"
-msgstr ""
+msgstr "Dimensionează _lățimea"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:43
 msgid "Scale the width of the stitch path"
-msgstr ""
+msgstr "Dimensionează lățimea traseului de cusătură"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:44
 msgid "Scale _width relative to length"
-msgstr ""
+msgstr "Dimensionează _lățimea relativ cu lungimea"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:44
 msgid "Scale the width of the stitch path relative to its length"
 msgstr ""
+"Dimensionează lățimea traseului de cusătură relativ cu "
+"lungimea lui"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:18
 msgid "Number of dashes"
@@ -16966,7 +17048,7 @@ msgstr "Număr de liniuțe"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:19
 msgid "Hole factor"
-msgstr ""
+msgstr "Factor de gaură"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:20
 msgid "Use segments"
@@ -16974,25 +17056,27 @@ msgstr "Folosește segmente"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:21
 msgid "Half start/end"
-msgstr ""
+msgstr "Jumătate de început/sfârșit"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:21
 msgid "Start and end of each segment has half size"
-msgstr ""
+msgstr "Începutul și sfârșitul fiecărui segment are jumătate din mărime"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:22
 msgid "Equalize dashes"
-msgstr ""
+msgstr "Egalizează liniuțelor"
 
-#: ../src/live_effects/lpe-dashed-stroke.cpp:22
+#: ../src/live_effects/lpe-dashed-stroke.cpp:22 
 msgid ""
 "Global dash length is approximately the length of the dashes in the shortest "
 "path segment"
 msgstr ""
+"Lungimea globală a liniuțelor este aproximativă cu lungimea celor din cel mai "
+"scurt segment"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:24
 msgid "Note"
-msgstr ""
+msgstr "Notă"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:24
 #: ../src/live_effects/lpe-powerclip.cpp:33
@@ -17000,17 +17084,17 @@ msgstr ""
 msgid "Important messages"
 msgstr "Mesaje importante"
 
-#: ../src/live_effects/lpe-dashed-stroke.cpp:25
+#: ../src/live_effects/lpe-dashed-stroke.cpp:25 
 msgid "Add <b>\"Fill Between Many LPE\"</b> to add fill."
-msgstr ""
+msgstr "Adaugă <b>\"Umple Între Multe LPE\"</b> pentru a adăuga umplutură."
 
 #: ../src/live_effects/lpe-ellipse_5pts.cpp:67
 msgid "Five points required for constructing an ellipse"
-msgstr ""
+msgstr "Cinci puncte necesare pentru construcția unei elipse"
 
 #: ../src/live_effects/lpe-ellipse_5pts.cpp:85
 msgid "No unique ellipse passing through these points"
-msgstr ""
+msgstr "Nicio elipsă unică nu trece prin aceste puncte"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:31
 msgid "no reordering"
@@ -17034,19 +17118,19 @@ msgstr "cel mai apropiat, mai întâi invers"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:36
 msgid "traveling salesman 2-opt (fast, bad)"
-msgstr ""
+msgstr "vânzătorul voiajor 2-opt (fast, bad)"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:37
 msgid "traveling salesman 3-opt (fast, ok)"
-msgstr ""
+msgstr "vânzătorul voiajor 3-opt (fast, ok)"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:38
 msgid "traveling salesman 4-opt (seconds)"
-msgstr ""
+msgstr "vânzătorul voiajor 4-opt (seconds)"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:39
 msgid "traveling salesman 5-opt (minutes)"
-msgstr ""
+msgstr "vânzătorul voiajor 5-opt (minutes)"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:47
 msgid "straight line"
@@ -17080,104 +17164,109 @@ msgstr "Metodă de conectare"
 msgid "Method to connect end points of sub paths"
 msgstr "Metoda folosită pentru a conecta punctul de sfârșit al sub-traseelor"
 
-#: ../src/live_effects/lpe-embrodery-stitch.cpp:60
+#: ../src/live_effects/lpe-embrodery-stitch.cpp:60 
 msgid "Stitch length"
-msgstr ""
+msgstr "Lungimea cusăturii"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:60
 msgid "Divide path into straight segments of given length (in user units)"
 msgstr ""
+"Divide traseul în segmente drepte de o lungime dată (în unități de măsură "
+"stabilite de utilizator)"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:61
 msgid "Minimum stitch length [%]"
-msgstr ""
+msgstr "Distanță minimă de cusătură [%]"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:61
 msgid ""
 "Merge stitches that are shorter than this percentage of the stitch length"
 msgstr ""
+"Unește cusăturile mai scurte ca procentul de lungime al acestei cusături"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:62
 msgid "Stitch pattern"
-msgstr ""
+msgstr "Tipar de cusătură"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:62
 msgid "Select between different stitch patterns"
-msgstr ""
+msgstr "Selectează între diferite tipare de cusătură"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:63
 msgid "Show stitches"
-msgstr ""
+msgstr "Arată cusăturile"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:63
 msgid ""
 "Creates gaps between stitches (use only for preview, deactivate for use with "
 "embroidery machines)"
 msgstr ""
+"Creează goluri între cusături (folosește doar pentru previzionare, deactivează "
+"pentru uz cu mașina de cusut)"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:64
 msgid "Show stitch gap"
-msgstr ""
+msgstr "Arată golul de cusătură"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:64
 msgid "Length of the gap between stitches when showing stitches"
-msgstr ""
+msgstr "Lungimea spațiului dintre copci când cusăturile sunt vizibile"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:65
 msgid "Jump if longer"
-msgstr ""
+msgstr "Sari dacă este mai lung"
 
-#: ../src/live_effects/lpe-embrodery-stitch.cpp:65
+#: ../src/live_effects/lpe-embrodery-stitch.cpp:65 
 msgid "Jump connection if longer than"
-msgstr ""
+msgstr "Sari conexiunea dacă este mai lungă decât"
 
 #: ../src/live_effects/lpe-envelope.cpp:18
 msgid "Top bend path:"
-msgstr ""
+msgstr "Îndoitura superioară a traseului"
 
 #: ../src/live_effects/lpe-envelope.cpp:18
 msgid "Top path along which to bend the original path"
-msgstr ""
+msgstr "Traseul superiora de-a lungul căruia se îndoaie traseul original"
 
 #: ../src/live_effects/lpe-envelope.cpp:19
 msgid "Right bend path:"
-msgstr ""
+msgstr "Îndoitura din dreapta a traseului"
 
 #: ../src/live_effects/lpe-envelope.cpp:19
 msgid "Right path along which to bend the original path"
-msgstr ""
+msgstr "Traseul din dreapta de-a lungul căruia se îndoaie traseul original "
 
 #: ../src/live_effects/lpe-envelope.cpp:20
 msgid "Bottom bend path:"
-msgstr ""
+msgstr "Înoditura de la fundul traseului"
 
 #: ../src/live_effects/lpe-envelope.cpp:20
 msgid "Bottom path along which to bend the original path"
-msgstr ""
+msgstr "Traseul de la fund de-a lungul căruia se îndoaie traseul original "
 
 #: ../src/live_effects/lpe-envelope.cpp:21
 msgid "Left bend path:"
-msgstr ""
+msgstr "Îndoitura din stânga a traseului"
 
 #: ../src/live_effects/lpe-envelope.cpp:21
 msgid "Left path along which to bend the original path"
-msgstr ""
+msgstr "Traseul din stânga de-a lungul căruia se îndoaie traseul original "
 
 #: ../src/live_effects/lpe-envelope.cpp:22
 msgid "_Enable left &amp; right paths"
-msgstr ""
+msgstr "_Activează stâng &amp; drept"
 
 #: ../src/live_effects/lpe-envelope.cpp:22
 msgid "Enable the left and right deformation paths"
-msgstr ""
+msgstr "Activează traseele de deformare stâng și drept"
 
 #: ../src/live_effects/lpe-envelope.cpp:23
 msgid "_Enable top &amp; bottom paths"
-msgstr ""
+msgstr "_Activează top &amp; fund"
 
 #: ../src/live_effects/lpe-envelope.cpp:23
 msgid "Enable the top and bottom deformation paths"
-msgstr ""
+msgstr "Activează traseele de deformare de la top și fund"
 
 #: ../src/live_effects/lpe-extrude.cpp:26
 #: ../src/live_effects/lpe-roughen.cpp:51 ../share/extensions/restack.inx:10
@@ -17186,36 +17275,36 @@ msgstr "Direcție"
 
 #: ../src/live_effects/lpe-extrude.cpp:26
 msgid "Defines the direction and magnitude of the extrusion"
-msgstr ""
+msgstr "Definește direcția și magnitudinea extruziunii"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:28
 msgid "Without LPEs"
-msgstr ""
+msgstr "Fără LPE-uri"
 
-#: ../src/live_effects/lpe-fill-between-many.cpp:29
+#: ../src/live_effects/lpe-fill-between-many.cpp:29 
 msgid "With Spiro or BSpline"
-msgstr ""
+msgstr "Cu Spiro sau B-Spline"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:30
 msgid "With all LPEs"
-msgstr ""
+msgstr "Cu toate LPE-urile"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:36
 msgid "Paths from which to take the original path data"
-msgstr ""
+msgstr "Trasee cu date ale traseului originalb"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:37
 msgid "LPEs:"
-msgstr ""
+msgstr "LPE-uri:"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:37
 msgid "Which LPEs of the linked paths should be considered"
-msgstr ""
+msgstr "Care din LPE-urile legate de traseu trebuie considerate"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:38
 #: ../src/live_effects/lpe-fill-between-strokes.cpp:24
 msgid "Join subpaths"
-msgstr ""
+msgstr "Unește subtraseele"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:39
 #: ../src/live_effects/lpe-fill-between-strokes.cpp:25
@@ -17232,7 +17321,7 @@ msgstr "Traseul secundar:"
 
 #: ../src/live_effects/lpe-fill-between-strokes.cpp:22
 msgid "Second path from which to take the original path data"
-msgstr ""
+msgstr "Traseul secund cu date despre traseul original"
 
 #: ../src/live_effects/lpe-fill-between-strokes.cpp:23
 msgid "Reverse Second"
@@ -17251,11 +17340,11 @@ msgstr "Automat"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:34
 msgid "Force arc"
-msgstr ""
+msgstr "Forțează arc"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:35
 msgid "Force bezier"
-msgstr ""
+msgstr "Forțează bezier"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:41
 #: ../src/live_effects/lpe-ruler.cpp:40 ../src/live_effects/lpe-tiling.cpp:77
@@ -17263,27 +17352,27 @@ msgstr ""
 #: ../share/extensions/interp_att_g.inx:34 ../share/extensions/layout_nup.inx:7
 #: ../share/extensions/printing_marks.inx:20
 msgid "Unit:"
-msgstr "Unități:"
+msgstr "Unitate de măsură:"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:44
 msgid "Method to calculate the fillet or chamfer"
-msgstr ""
+msgstr "Metoda de calcul a filetului sau teșirii"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:46
 msgid "Mode, e.g. fillet or chamfer"
-msgstr ""
+msgstr "Mod, ex: filet sau teșire"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:48
 msgid "Radius, in unit or %"
-msgstr ""
+msgstr "Rază, în unități de măsură sau %"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:50
 msgid "Chamfer steps:"
-msgstr ""
+msgstr "Trepte de teșire"
 
-#: ../src/live_effects/lpe-fillet-chamfer.cpp:50
+#: ../src/live_effects/lpe-fillet-chamfer.cpp:50 
 msgid "Chamfer steps"
-msgstr ""
+msgstr "Trepte de teșire"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:52
 msgid "Radius in %"
@@ -17291,44 +17380,44 @@ msgstr "Rază în %"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:52
 msgid "Flexible radius size (%)"
-msgstr ""
+msgstr "Dimensiune rază flexibilă (%)"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:57
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:58
 msgid "Use knots distance instead radius"
-msgstr ""
+msgstr "Folosește noduri de distanță în loc de rază"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:60
 msgid "Hide knots"
-msgstr ""
+msgstr "Ascunde noduri"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:62
 msgid "Apply changes if radius = 0"
-msgstr ""
+msgstr "Aplică schimbările dacă raza = 0"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:63
 msgid "Apply changes if radius > 0"
-msgstr ""
+msgstr "Aplică schimbările dacă raza > 0"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:257
 #: ../src/ui/dialog/lpe-fillet-chamfer-properties.cpp:59
 msgid "Fillet"
-msgstr ""
+msgstr "Filet"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:262
 #: ../src/ui/dialog/lpe-fillet-chamfer-properties.cpp:61
 msgid "Inverse fillet"
-msgstr ""
+msgstr "Filet invers"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:268
 #: ../src/ui/dialog/lpe-fillet-chamfer-properties.cpp:63
 msgid "Chamfer"
-msgstr ""
+msgstr "Teșitură"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:273
 #: ../src/ui/dialog/lpe-fillet-chamfer-properties.cpp:65
 msgid "Inverse chamfer"
-msgstr ""
+msgstr "Teșitură inversă"
 
 #: ../src/live_effects/lpe-gears.cpp:206
 msgid "_Teeth:"
@@ -17354,7 +17443,7 @@ msgstr "Rază minimă:"
 
 #: ../src/live_effects/lpe-gears.cpp:208
 msgid "Minimum radius, low values can be slow"
-msgstr ""
+msgstr "Rază minimă, valorile mici pot incetini aplicația"
 
 #: ../src/live_effects/lpe-interpolate.cpp:27
 msgid "Trajectory:"
@@ -17362,15 +17451,15 @@ msgstr "Traiectorie:"
 
 #: ../src/live_effects/lpe-interpolate.cpp:27
 msgid "Path along which intermediate steps are created."
-msgstr ""
+msgstr "Traseu de-a lungul căruia sunt creați pașii intermediari"
 
 #: ../src/live_effects/lpe-interpolate.cpp:29
 msgid "Steps_:"
-msgstr "Pași_:"
+msgstr "Trepte_:"
 
 #: ../src/live_effects/lpe-interpolate.cpp:29
 msgid "Determines the number of steps from start to end path."
-msgstr ""
+msgstr "Determină numărul de trepte de la începutul la sfârșitul traseului"
 
 #: ../src/live_effects/lpe-interpolate.cpp:30
 msgid "E_quidistant spacing"
@@ -17382,8 +17471,10 @@ msgid ""
 "the path. If false, the distance depends on the location of the nodes of the "
 "trajectory path."
 msgstr ""
+"Dacă > 0, spațierea între intermediare este constantă de-a lungul lungimii traseului."
+"Daca = 0, distanța depinde de locația nodurilor traseului de traiectorie"
 
-#: ../src/live_effects/lpe-interpolate_points.cpp:26
+#: ../src/live_effects/lpe-interpolate_points.cpp:26 
 #: ../src/live_effects/lpe-powerstroke.cpp:135
 msgid "CubicBezierFit"
 msgstr ""
@@ -17415,7 +17506,7 @@ msgid ""
 "stroke width along the path"
 msgstr ""
 "Determină ce tip de interpolator să fie folosit pentru interpolare între "
-"lățimea conturului în lungul traseului"
+"lățimea conturului de-a lungul traseului"
 
 #: ../src/live_effects/lpe-jointype.cpp:38
 #: ../src/live_effects/lpe-offset.cpp:65
@@ -17430,26 +17521,26 @@ msgstr "Teșit"
 #: ../src/live_effects/lpe-powerstroke.cpp:152
 #: ../src/live_effects/lpe-taperstroke.cpp:84
 msgid "Rounded"
-msgstr ""
+msgstr "Rotunjit"
 
 #: ../src/live_effects/lpe-jointype.cpp:40
 #: ../src/live_effects/lpe-offset.cpp:67
 #: ../src/live_effects/lpe-powerstroke.cpp:155
 #: ../src/live_effects/lpe-taperstroke.cpp:85
 msgid "Miter"
-msgstr "Unghi ascuțit"
+msgstr "Racord în Unghi"
 
 # hm ? cumva invers ?
 #: ../src/live_effects/lpe-jointype.cpp:41
 #: ../src/live_effects/lpe-offset.cpp:68
 msgid "Miter Clip"
-msgstr "Unghi ascuțit tăiat"
+msgstr "Decupare racord în unghi"
 
 #: ../src/live_effects/lpe-jointype.cpp:42
 #: ../src/live_effects/lpe-offset.cpp:69
 #: ../src/live_effects/lpe-powerstroke.cpp:154
 msgid "Extrapolated arc"
-msgstr ""
+msgstr "Arc etrapolat"
 
 #: ../src/live_effects/lpe-jointype.cpp:43
 #: ../src/live_effects/lpe-offset.cpp:70
@@ -17500,13 +17591,13 @@ msgstr "Îmbinare:"
 #: ../src/live_effects/lpe-offset.cpp:83
 #: ../src/live_effects/lpe-powerstroke.cpp:169
 msgid "Determines the shape of the path's corners"
-msgstr ""
+msgstr "Determină forma de la colțurile traseului"
 
 #: ../src/live_effects/lpe-jointype.cpp:67
 #: ../src/live_effects/lpe-offset.cpp:84
 #: ../src/live_effects/lpe-taperstroke.cpp:117
 msgid "Miter limit:"
-msgstr "Limita unghiului ascuțit:"
+msgstr "Limita racordului în unghi:"
 
 #: ../src/live_effects/lpe-jointype.cpp:67
 #: ../src/live_effects/lpe-offset.cpp:84
@@ -17518,72 +17609,77 @@ msgstr ""
 #: ../src/live_effects/lpe-jointype.cpp:68
 #: ../src/live_effects/lpe-offset.cpp:85
 msgid "Force miter"
-msgstr "Forțează un unghi ascuțit"
+msgstr "Forțează o îmbinare în unghi"
 
 #: ../src/live_effects/lpe-jointype.cpp:68
 #: ../src/live_effects/lpe-offset.cpp:85
 msgid "Overrides the miter limit and forces a join."
-msgstr "Ignoră limita unghiului ascuțit și forțează o îmbinare."
+msgstr "Ignoră limita racordului în unghi și forțează o îmbinare."
 
 #: ../src/live_effects/lpe-knot.cpp:359
 msgid "_Gap length:"
-msgstr ""
+msgstr "Lungimea _golului:"
 
 #: ../src/live_effects/lpe-knot.cpp:359
 msgid "Size of hidden region of lower string"
-msgstr ""
+msgstr "Mărimea regiunii ascunse a șirului de jos"
 
 #: ../src/live_effects/lpe-knot.cpp:362
 msgid "_In units of stroke width"
-msgstr ""
+msgstr "_În unități de lățime a conturului"
 
 #: ../src/live_effects/lpe-knot.cpp:363
 msgid ""
 "Gap width is given in multiples of stroke width. When unchecked, document "
 "units are used."
 msgstr ""
+"Lățimea găurii este dată în multiplii ai lățimii conturului. "
+"Nebifat, unitatea de măsura a documentului va fi folosită"
 
 #: ../src/live_effects/lpe-knot.cpp:365
 msgid "_Gaps in both"
-msgstr ""
+msgstr "_Găuri în ambele"
 
 #: ../src/live_effects/lpe-knot.cpp:365
 msgid "At path intersections, both parts will have a gap"
-msgstr ""
+msgstr "La intersecțiile traseului, ambele părți vor avea o gaură"
 
 #: ../src/live_effects/lpe-knot.cpp:366
 msgid "_Groups: Inverse"
-msgstr ""
+msgstr "_Grupuri: Inversează"
 
 #: ../src/live_effects/lpe-knot.cpp:366
 msgid "Use other stroke width, useful in groups with different stroke widths"
-msgstr ""
+msgstr "Folosește altă lățime de contur, folositor în grupuri cu diferite lățimi de contur"
 
 #: ../src/live_effects/lpe-knot.cpp:372
 msgid "S_witcher size:"
-msgstr ""
+msgstr "Mărimea c_omutatorului"
 
 #: ../src/live_effects/lpe-knot.cpp:372
 msgid "Orientation indicator/switcher size"
-msgstr ""
+msgstr "Mărimea orientării indicatorului/comutatorului"
 
 #: ../src/live_effects/lpe-knot.cpp:373
 msgid "Crossing Signs"
-msgstr ""
+msgstr "Semne de încrucișare"
 
 #: ../src/live_effects/lpe-knot.cpp:373
 msgid "Crossing signs"
-msgstr ""
+msgstr "Semne de încrucișare"
 
 #: ../src/live_effects/lpe-knot.cpp:669
 msgid ""
 "Drag to select a crossing, click to flip it, Shift + click to change all "
 "crossings, Ctrl + click to reset and change all crossings"
 msgstr ""
+"Trage pentru a folosi o încrucișare, clic pentru a o întoarce, Shift + clic "
+"pentru a schimba toate încrucișările. Ctrl + clic pentru a reseta și modifica "
+"toate încrucișările"
 
 #: ../src/live_effects/lpe-knot.cpp:715
 msgid "Change knot crossing"
-msgstr ""
+msgstr "Schimbă încrucișarea nodului"
 
 #: ../src/live_effects/lpe-lattice2.cpp:37
 #: ../src/live_effects/lpe-perspective-envelope.cpp:46
@@ -17597,11 +17693,11 @@ msgstr "Oglindește mișcările pe verticală"
 
 #: ../src/live_effects/lpe-lattice2.cpp:39
 msgid "Use only perimeter"
-msgstr ""
+msgstr "Folosește doar perimetrul"
 
 #: ../src/live_effects/lpe-lattice2.cpp:40
 msgid "Update while moving knots (maybe slow)"
-msgstr ""
+msgstr "Actualizează în timp ce muți nodurile (probabil încet)"
 
 #: ../src/live_effects/lpe-lattice2.cpp:41
 msgid "Control 0:"
@@ -17609,7 +17705,7 @@ msgstr "Control 0:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:41
 msgid "Control 0 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 0 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:42
 msgid "Control 1:"
@@ -17617,7 +17713,7 @@ msgstr "Control 1:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:42
 msgid "Control 1 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 1 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:43
 msgid "Control 2:"
@@ -17625,7 +17721,7 @@ msgstr "Control 2:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:43
 msgid "Control 2 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 2 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:44
 msgid "Control 3:"
@@ -17633,7 +17729,7 @@ msgstr "Control 3:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:44
 msgid "Control 3 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 3 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:45
 msgid "Control 4:"
@@ -17641,7 +17737,7 @@ msgstr "Control 4:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:45
 msgid "Control 4 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 4 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:46
 msgid "Control 5:"
@@ -17649,7 +17745,7 @@ msgstr "Control 5:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:46
 msgid "Control 5 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 5 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:47
 msgid "Control 6:"
@@ -17657,7 +17753,7 @@ msgstr "Control 6:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:47
 msgid "Control 6 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 6 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:48
 msgid "Control 7:"
@@ -17665,7 +17761,7 @@ msgstr "Control 7:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:48
 msgid "Control 7 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 7 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:49
 msgid "Control 8x9:"
@@ -17675,6 +17771,7 @@ msgstr "Control 8x9:"
 msgid ""
 "Control 8x9 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
+"Control 8x9 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:50
 msgid "Control 10x11:"
@@ -17684,6 +17781,7 @@ msgstr "Control 10x11:"
 msgid ""
 "Control 10x11 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
+"Control 10x11 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:51
 msgid "Control 12:"
@@ -17691,7 +17789,7 @@ msgstr "Control 12:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:51
 msgid "Control 12 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 12 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:52
 msgid "Control 13:"
@@ -17699,7 +17797,7 @@ msgstr "Control 13:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:52
 msgid "Control 13 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 13 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:53
 msgid "Control 14:"
@@ -17707,7 +17805,7 @@ msgstr "Control 14:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:53
 msgid "Control 14 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 14 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:54
 msgid "Control 15:"
@@ -17715,7 +17813,7 @@ msgstr "Control 15:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:54
 msgid "Control 15 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 15 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:55
 msgid "Control 16:"
@@ -17723,7 +17821,7 @@ msgstr "Control 16:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:55
 msgid "Control 16 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 16 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:56
 msgid "Control 17:"
@@ -17731,7 +17829,7 @@ msgstr "Control 17:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:56
 msgid "Control 17 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 17 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:57
 msgid "Control 18:"
@@ -17739,7 +17837,7 @@ msgstr "Control 18:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:57
 msgid "Control 18 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 18 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:58
 msgid "Control 19:"
@@ -17747,7 +17845,7 @@ msgstr "Control 19:"
 
 #: ../src/live_effects/lpe-lattice2.cpp:58
 msgid "Control 19 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 19 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:59
 msgid "Control 20x21:"
@@ -17756,7 +17854,7 @@ msgstr "Control 20x21:"
 #: ../src/live_effects/lpe-lattice2.cpp:59
 msgid ""
 "Control 20x21 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 20x21 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:60
 msgid "Control 22x23:"
@@ -17765,7 +17863,7 @@ msgstr "Control 22x23:"
 #: ../src/live_effects/lpe-lattice2.cpp:60
 msgid ""
 "Control 22x23 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 22x23 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:61
 msgid "Control 24x26:"
@@ -17774,7 +17872,7 @@ msgstr "Control 24x26:"
 #: ../src/live_effects/lpe-lattice2.cpp:61
 msgid ""
 "Control 24x26 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 24x26 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:62
 msgid "Control 25x27:"
@@ -17783,7 +17881,7 @@ msgstr "Control 25x27:"
 #: ../src/live_effects/lpe-lattice2.cpp:62
 msgid ""
 "Control 25x27 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 25z27 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:63
 msgid "Control 28x30:"
@@ -17792,7 +17890,7 @@ msgstr "Control 28x30:"
 #: ../src/live_effects/lpe-lattice2.cpp:63
 msgid ""
 "Control 28x30 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 28x30 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:64
 msgid "Control 29x31:"
@@ -17801,7 +17899,7 @@ msgstr "Control 29x31:"
 #: ../src/live_effects/lpe-lattice2.cpp:64
 msgid ""
 "Control 29x31 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Control 20x31 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:65
 msgid "Control 32x33x34x35:"
@@ -17811,11 +17909,11 @@ msgstr "Control 32x33x34x35:"
 msgid ""
 "Control 32x33x34x35 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along "
 "axes"
-msgstr ""
+msgstr "Control 32x33x34x35 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mișcă de-a lungul axelor"
 
 #: ../src/live_effects/lpe-lattice2.cpp:232
 msgid "Reset grid"
-msgstr "Restabilește grila"
+msgstr "Resetează grila"
 
 #: ../src/live_effects/lpe-lattice2.cpp:268
 #: ../src/live_effects/lpe-lattice2.cpp:283
@@ -17834,17 +17932,17 @@ msgstr "Închis"
 #: ../src/live_effects/lpe-line_segment.cpp:25
 #: ../src/ui/toolbar/lpe-toolbar.cpp:128
 msgid "Open start"
-msgstr ""
+msgstr "Deschide începutul"
 
 #: ../src/live_effects/lpe-line_segment.cpp:26
 #: ../src/ui/toolbar/lpe-toolbar.cpp:129
 msgid "Open end"
-msgstr ""
+msgstr "Deschide sfârșitul"
 
 #: ../src/live_effects/lpe-line_segment.cpp:27
 #: ../src/ui/toolbar/lpe-toolbar.cpp:130
 msgid "Open both"
-msgstr ""
+msgstr "Deschide ambele"
 
 #: ../src/live_effects/lpe-line_segment.cpp:33
 msgid "End type:"
@@ -17852,10 +17950,10 @@ msgstr "Tip de sfârșit:"
 
 #: ../src/live_effects/lpe-line_segment.cpp:33
 msgid "Determines on which side the line or line segment is infinite."
-msgstr ""
+msgstr "Determină pe care parte linia sau segmentul de linie este infinit."
 
 #: ../src/live_effects/lpe-measure-segments.cpp:62
-#: ../src/live_effects/lpe-slice.cpp:111 ../src/ui/toolbar/text-toolbar.cpp:624
+#: ../src/live_effects/lpe-slice.cpp:111 ../src/ui/toolbar/text-toolbar.cpp:624 
 msgid "Horizontal"
 msgstr "Orizontal"
 
@@ -17876,7 +17974,7 @@ msgstr "Unitate de măsură"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:71
 msgid "Orientation of the line and labels"
-msgstr ""
+msgstr "Orientarea liniei și eticheteleor"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:72
 msgid "Color and opacity"
@@ -17884,14 +17982,14 @@ msgstr "Culoare și opacitate"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:72
 msgid "Set color and opacity of the dimensions"
-msgstr ""
+msgstr "Atribuie culoarea și opacitatea dimensiunilor"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:73
 #: ../src/ui/dialog/document-resources.cpp:863
 msgid "Font"
 msgstr "Font"
 
-#: ../src/live_effects/lpe-measure-segments.cpp:73
+#: ../src/live_effects/lpe-measure-segments.cpp:73 
 msgid "Select font for labels"
 msgstr "Selectează fontul pentru etichete"
 
@@ -17901,13 +17999,15 @@ msgstr "Numărul de cifre după separatorul zecimal"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:75
 msgid "Merge overlaps °"
-msgstr ""
+msgstr "Unește suprapunerile °"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:75
 msgid ""
 "Minimum angle at which overlapping dimension lines are merged into one, use "
 "180° to disable merging"
 msgstr ""
+"Unghiul minim la care liniile de dimensiune suprapuse se unesc în una singură, "
+"folosește 180 de grade pentru a dezactiva uniunea"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:76
 msgid "Position"
@@ -17915,7 +18015,7 @@ msgstr "Poziție"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:76
 msgid "Distance of dimension line from the path"
-msgstr ""
+msgstr "Distanța de la linia de dimensionare la traseu"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:77
 msgid "Label position"
@@ -17923,7 +18023,7 @@ msgstr "Poziție etichetă"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:77
 msgid "Distance of the labels from the dimension line"
-msgstr ""
+msgstr "Distanța de la etichete la linia de dimensionare"
 
 # hm ? sau distanța liniei ?
 #: ../src/live_effects/lpe-measure-segments.cpp:78
@@ -17932,7 +18032,7 @@ msgstr "Distanță linie de ajutor"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:78
 msgid "Distance of the perpendicular lines from the path"
-msgstr ""
+msgstr "Distanța de la liniile perpendiculare la traseu"
 
 # hm ? sau elongația liniei ?
 #: ../src/live_effects/lpe-measure-segments.cpp:79
@@ -17941,11 +18041,11 @@ msgstr "Elongație linie de ajutor"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:79
 msgid "Distance of the perpendicular lines' ends from the dimension line"
-msgstr ""
+msgstr "Distanța de la linia de dimensionare la capetele liniilor perpendiculare"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:80
 msgid "Dimension line width. DIN standard: 0.25 or 0.35 mm"
-msgstr ""
+msgstr "Dimensiunea lățimii liniei. standard DIN: 0.25 sau 0.35 mm"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:81
 msgid "Scaling factor"
@@ -17958,71 +18058,78 @@ msgstr "Format de etichetă"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:84
 msgid "Label text format, available variables: {measure}, {unit}"
-msgstr ""
+msgstr "Format de etichetă a textului, variabile disponibile: {measure}, {unit}"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:85
 msgid "Blacklist segments"
-msgstr ""
+msgstr "Adaugă segmente la lista neagră"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:85
 msgid ""
 "Comma-separated list of indices of segments that should not be measured. You "
 "can use another LPE with different parameters to measure these."
 msgstr ""
+"Listă de indici ce segmente, separați de virgule, care nu trebuie măsurați. "
+"Poți folosi alt LPE cu parametri diferiți pentru a le măsura"
 
-#: ../src/live_effects/lpe-measure-segments.cpp:86
+#: ../src/live_effects/lpe-measure-segments.cpp:86 
 msgid "Invert blacklist"
-msgstr ""
+msgstr "Inversează lista neagră"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:86
 msgid "Use the blacklist as whitelist"
-msgstr ""
+msgstr "Folosește lista neagră ca listă albă"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:87
 msgid "Show segment index"
 msgstr "Arată indexul segmentului"
 
-#: ../src/live_effects/lpe-measure-segments.cpp:87
+#: ../src/live_effects/lpe-measure-segments.cpp:87 
 msgid ""
 "Display the index of the segments in the text label for easier blacklisting"
 msgstr ""
+"Afișează indexul segmentelor în ultima etichetă pentru o mai simplă "
+"adăugare la lista neagră"
 
-# hm ?
 #: ../src/live_effects/lpe-measure-segments.cpp:88
 msgid "Arrows outside"
-msgstr "Săgeți în afară"
+msgstr "Săgeți în exterior"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:88
 msgid ""
 "Draw arrows pointing in the opposite direction outside the dimension line"
 msgstr ""
+"Desenează săgețile indicând în direcția opusă, în exteriorul liniei de dimensionare"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:89
 msgid "Flip side"
-msgstr ""
+msgstr "Întoarce latura"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:89
 msgid "Draw dimension lines and labels on the other side of the path"
-msgstr ""
+msgstr "Desenează linii de dimensionare si etichete pe toate laturile traseului"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:90
 msgid "Scale sensitive"
-msgstr ""
+msgstr "Dimensionează sensibil"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:90
 msgid ""
 "When the path is grouped and the group is then scaled, adjust the dimensions."
 msgstr ""
+"Când traseul este grupat, iar grupul este apoi dimensionat, ajustează dimensiunile."
 
 #: ../src/live_effects/lpe-measure-segments.cpp:91
 msgid "Localize number format"
-msgstr ""
+msgstr "Localizează formatul numărului"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:91
 msgid ""
 "Use localized number formatting, e.g. '1,0' instead of '1.0' with German "
 "locale"
 msgstr ""
+"Folosește formatul localizat al numărului, ex: '1,0' în loc de '1.0' "
+"cu locale Germane"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:92
 msgid "Rotate labels"
@@ -18031,15 +18138,15 @@ msgstr "Rotește etichetele"
 #: ../src/live_effects/lpe-measure-segments.cpp:92
 msgid "Labels are parallel to the dimension line"
 msgstr ""
+"Etichetele sunt paralele liniei de dimensionare"
 
-# hm ? sau de sub etichetă ?
 #: ../src/live_effects/lpe-measure-segments.cpp:93
 msgid "Hide line under label"
-msgstr "Ascunde linia sub etichetă"
+msgstr "Ascunde linia de sub etichetă"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:93
 msgid "Hide the dimension line where the label overlaps it"
-msgstr ""
+msgstr "Ascunde linia de dimensionare unde eticheta i se suprapune"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:94
 msgid "Hide arrows"
@@ -18051,11 +18158,12 @@ msgstr "Nu arăta nicio săgeată"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:96
 msgid "Multiply values &lt; 1"
-msgstr ""
+msgstr "Multiplică valorile &lt; 1"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:96
 msgid "Multiply values smaller than 1 by 100 and leave out the unit"
 msgstr ""
+"Înmulțește valorile mai mici ca 1 cu 100 îi ignoră unitatea de măsură"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:97
 msgid "Linked objects:"
@@ -18065,6 +18173,7 @@ msgstr "Obiecte legate:"
 msgid ""
 "Objects whose nodes are projected onto the path and generate new measurements"
 msgstr ""
+"Elemente ale căror noduri sunt proiectate pe traseu și generează măsurători"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:98
 msgid "Distance"
@@ -18073,6 +18182,7 @@ msgstr "Distanță"
 #: ../src/live_effects/lpe-measure-segments.cpp:98
 msgid "Distance of the dimension lines from the outermost node"
 msgstr ""
+"Distanța liniei de dimensionare de la cel mai exterior nod"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:99
 msgid "Angle of projection"
@@ -18080,7 +18190,7 @@ msgstr "Unghiul proiecției"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:99
 msgid "Angle of projection in 90° steps"
-msgstr ""
+msgstr "Unghiul de proiecție în trepte de 90°"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:100
 msgid "Activate projection"
@@ -18088,31 +18198,31 @@ msgstr "Activează proiecția"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:100
 msgid "Activate projection mode"
-msgstr ""
+msgstr "Activează modul de proiecție"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:101
 msgid "Avoid label overlap"
-msgstr ""
+msgstr "Evită suprapunerea etichetelor"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:101
 msgid "Rotate labels if the segment is shorter than the label"
-msgstr ""
+msgstr "Rotește etichetele dacă segmentul este mai scurt decât eticheta"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:102
 msgid "Measure bounding box"
-msgstr "Măsoară caseta de încadrare"
+msgstr "Măsoară chenarul de încadrare"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:102
 msgid "Add measurements for the geometrical bounding box"
-msgstr "Adaugă măsurători pentru caseta de încadrare geometrică"
+msgstr "Adaugă măsurători pentru chenarul de încadrare geometrică"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:103
 msgid "Only bounding box"
-msgstr "Numai caseta de încadrare"
+msgstr "Numai chenarul de încadrare"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:103
 msgid "Measure only the geometrical bounding box"
-msgstr "Măsoară numai caseta de încadrare geometrică"
+msgstr "Măsoară numai chenarul de încadrare geometrică"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:104
 msgid "Add object center"
@@ -18128,7 +18238,7 @@ msgstr "Numai maxim și minim"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:105
 msgid "Compute only max/min projection values"
-msgstr ""
+msgstr "Calculează doar valorile minime/maxime de proiecție"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:106
 #: ../src/live_effects/lpe-measure-segments.cpp:288
@@ -18181,7 +18291,7 @@ msgstr "Ajutor"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:106
 msgid "Measure segments help"
-msgstr ""
+msgstr "Ajutor pentru măsurarea segmentelor"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:194
 msgid ""
@@ -18205,6 +18315,25 @@ msgid ""
 "<b><i>Set Defaults:</i></b> For every LPE, default values can be set at the "
 "bottom."
 msgstr ""
+"<b><big>General</big></b>\n"
+"Afișează și poziționează liniile de dimensionare și etichetele\n"
+"\n"
+"<b><big>Proiecție</big></b>\n"
+"Arată o linie cu măsurători bazate pe elementele din selecție\m"
+"\n"
+"<b><big>Opțiuni</big></b>\n"
+"Opțiuni pentru culoare, precizie, formatare și afișare etichetă\n"
+"\n"
+"<b><big>Ponturi</big></b>\n"
+"<b><i>Stilizare personalizată:</i></b> Pentru a stiliza și mai mult stilurile, "
+"folosește editorul XML pentru a găsi clasa sau ID-ul, apoi folosește fereastra de "
+"dialog pentru a aplica un nou stil\n"
+"<b><i>Liste negre:</i></b> Permite ascunderea unor segmente sau trepte de proiecți.\n"
+"<b><i>Măsurări multiple LPE::</i></b> În același element, în conjuncție cu "
+"listele negre, acesta permite etichetele și măsurătorile cu diferite orientații "
+"sau proiecții adiționale.\n"
+"<b><i>Atribuie predefiniri:</i></b> Pentru toate LPE-urile, valorile predefinite pot "
+" fi setate la fund"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:285
 #: ../src/ui/dialog/find.cpp:80 ../src/ui/dialog/inkscape-preferences.cpp:2783
@@ -18217,7 +18346,7 @@ msgstr "Proiecție"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:497
 msgid "Non Uniform Scale"
-msgstr ""
+msgstr "Scară non uniformă"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:47
 msgid "Vertical page center"
@@ -18229,7 +18358,7 @@ msgstr "Centrul orizontal al paginii"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:49
 msgid "Freely defined mirror line"
-msgstr ""
+msgstr "Linie de oglindire definită liber"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:50
 msgid "X coordinate of mirror line midpoint"
@@ -18251,73 +18380,75 @@ msgstr ""
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:62
 msgid "Discard original path"
-msgstr ""
+msgstr "Renunță la traseul original"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:62
 msgid "Only keep mirrored part of the path, remove the original."
-msgstr ""
+msgstr "Păstrează doar partea oglindită a traseului, înlătură originalul."
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:63
 msgid "Fuse original path and mirror image into a single path"
-msgstr ""
+msgstr "Fuzionează traseul original și oglindește imaginea într-un singur traseu"
 
-#: ../src/live_effects/lpe-mirror_symmetry.cpp:64
+#: ../src/live_effects/lpe-mirror_symmetry.cpp:64 
 msgid "Fuse opposite sides"
-msgstr ""
+msgstr "Fuzionează laturile opuse"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:64
 msgid "Picks the part on the other side of the mirror line as the original."
-msgstr ""
+msgstr "Alege partea de pe latura opusă liniei de oglindire ca original."
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:65
 msgid ""
 "Split original and mirror image into separate paths, so each can have its "
 "own style."
 msgstr ""
+"Separă imaginea originală și oglindită în trasee separate, așa încât "
+"fiecare să aibă stilul propriu"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:66
 msgid "Keep open paths on split"
-msgstr ""
+msgstr "Păstrează traseele deschise pe separare"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:66
 msgid "Do not automatically close paths along the split line."
-msgstr ""
+msgstr "Nu închide automat traseele de-a lungul liniei de separare."
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:67
 msgid "Mirror line start"
-msgstr ""
+msgstr "Începutul liniei de oglindire"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:67
 msgid "Start point of mirror line"
-msgstr ""
+msgstr "Începutul liniei de oglindire"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:67
 msgid "Adjust start point of mirror line"
-msgstr ""
+msgstr "Ajustează punctul de început al liniei de oglindire"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:68
 msgid "Mirror line end"
-msgstr ""
+msgstr "Sfârșitul liniei de oglindire"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:68
 msgid "End point of mirror line"
-msgstr ""
+msgstr "Punctul de sfârșit al liniei de oglindire"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:68
 msgid "Adjust end point of mirror line"
-msgstr ""
+msgstr "Ajustează punctul de sfârșit al liniei de oglindire"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:69
 msgid "Mirror line mid"
-msgstr ""
+msgstr "Mijlocul liniei de oglindire"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:69
 msgid "Center point of mirror line"
-msgstr ""
+msgstr "Punctul central al liniei de oglindire"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:69
 msgid "Adjust center point of mirror line"
-msgstr ""
+msgstr "Ajustează punctul central al liniei de oglindire"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:182
 msgid "Vertical center"
@@ -18358,7 +18489,7 @@ msgstr "Punct de decalaj"
 #: ../src/live_effects/parameter/vector.cpp:212
 #: ../src/ui/knot/knot-holder-entity.cpp:153 ../src/ui/knot/knot-holder.cpp:344
 msgid "Move handle"
-msgstr ""
+msgstr "Mută mânerul"
 
 #: ../src/live_effects/lpe-parallel.cpp:51
 msgid "Adjust the offset"
@@ -18366,19 +18497,19 @@ msgstr "Ajustează decalajul"
 
 #: ../src/live_effects/lpe-parallel.cpp:52
 msgid "Specifies the left end of the parallel"
-msgstr ""
+msgstr "Specifică capătul stâng al paralelei"
 
 #: ../src/live_effects/lpe-parallel.cpp:53
 msgid "Specifies the right end of the parallel"
-msgstr ""
+msgstr "Specifică capătul drept al paralelei"
 
 #: ../src/live_effects/lpe-parallel.cpp:108
 msgid "Adjust the \"left\" end of the parallel"
-msgstr ""
+msgstr "Specifică capătul \"stâng\" al paralelei"
 
 #: ../src/live_effects/lpe-parallel.cpp:114
 msgid "Adjust the \"right\" end of the parallel"
-msgstr ""
+msgstr "Specifică capătul \"drept\" al paralelei"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:68
 #: ../share/extensions/patternalongpath.inx:9
@@ -18402,31 +18533,31 @@ msgstr "Repetat, alungit"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:78
 msgid "Pattern source:"
-msgstr ""
+msgstr "Sursă tipar"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:78
 msgid "Path to put along the skeleton path"
-msgstr ""
+msgstr "Traseu de pus de-a lungul traseului schelet"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:80
 msgid "Width of the pattern"
-msgstr ""
+msgstr "Lățimea tiparului"
 
-#: ../src/live_effects/lpe-patternalongpath.cpp:81
+#: ../src/live_effects/lpe-patternalongpath.cpp:81 
 msgid "Pattern copies:"
-msgstr ""
+msgstr "Copiile tiparului:"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:81
 msgid "How many pattern copies to place along the skeleton path"
-msgstr ""
+msgstr "Câte copii de tipar să plasezi de-a lungul traseului schelet"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:83
 msgid "Wid_th in units of length"
-msgstr ""
+msgstr "Lățim_ea în unități de lungime"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:84
 msgid "Scale the width of the pattern in units of its length"
-msgstr ""
+msgstr "Dimenzionează lățimea tiparului în unități ale lungimii lui"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:86
 msgid "Spa_cing:"
@@ -18438,6 +18569,8 @@ msgid ""
 "Space between copies of the pattern. Negative values allowed, but are "
 "limited to -90% of pattern width."
 msgstr ""
+"Spațiul dintre copiile tiparului. Valorile negative sunt admise, dar "
+"limitate la -90% din lățimea tiparului"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:90
 msgid "No_rmal offset:"
@@ -18455,7 +18588,8 @@ msgstr "Decalaj în _unitățile dimensiunii de model"
 msgid ""
 "Spacing, tangential and normal offset are expressed as a ratio of width/"
 "height"
-msgstr ""
+msgstr "Decalajul de spațiere, tangențial și normal sunt exprimate ca un raport "
+"lățime/înălțime"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:95
 msgid "Pattern is _vertical"
@@ -18463,15 +18597,15 @@ msgstr "Modelul este _vertical"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:95
 msgid "Rotate pattern 90 deg before applying"
-msgstr ""
+msgstr "Rotește tiparul 90 de grade înainte de aplicare"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:98
 msgid "_Fuse nearby ends:"
-msgstr ""
+msgstr "_Fuzionează capetele vecine:"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:98
 msgid "Fuse ends closer than this number. 0 means don't fuse."
-msgstr ""
+msgstr "Fuzionează capetele mai apropiate decât acest număr. 0 inseamnă nu fuziona."
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:38
 #: ../share/extensions/perspective.inx:3
@@ -18484,7 +18618,7 @@ msgstr "Deformare de anvelopă"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:48
 msgid "Overflow perspective"
-msgstr ""
+msgstr "Revărsare de perspectivă"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:49
 msgid "Type"
@@ -18500,23 +18634,23 @@ msgstr "Sus stânga"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:50
 msgid "Top Left - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Stânga sus- <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mută de-a lungul axelor"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:51
 msgid "Top Right"
-msgstr "Sus dreapta"
+msgstr "Dreapta sus"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:51
 msgid "Top Right - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Dreapta sus- <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mută de-a lungul axelor"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:52
 msgid "Down Left"
-msgstr "Jos stânga"
+msgstr "Jos pe stânga"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:52
 msgid "Down Left - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Jos în stânga - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mută de-a lungul axelor"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:53
 msgid "Down Right"
@@ -18524,7 +18658,7 @@ msgstr "Jos dreapta"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:53
 msgid "Down Right - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
-msgstr ""
+msgstr "Jos în dreapta- <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: mută de-a lungul axelor"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:287
 msgid "Handles:"
@@ -18537,9 +18671,9 @@ msgstr "_Golește"
 
 #: ../src/live_effects/lpe-powerclip.cpp:29
 msgid "Hide clip"
-msgstr ""
+msgstr "Ascunde decupajul"
 
-#: ../src/live_effects/lpe-powerclip.cpp:30
+#: ../src/live_effects/lpe-powerclip.cpp:30 
 msgid "Inverse clip"
 msgstr "Inversează tăierea"
 
@@ -18549,29 +18683,31 @@ msgstr "Aplatizează tăierea"
 
 #: ../src/live_effects/lpe-powerclip.cpp:31
 msgid "Flatten clip, see fill rule once convert to paths"
-msgstr ""
+msgstr "Aplatizează decupajul, vezi regula de umplere odată ce ai convertit la traseu"
 
-#: ../src/live_effects/lpe-powerclip.cpp:33
+#: ../src/live_effects/lpe-powerclip.cpp:33 
 msgid "Info Box"
-msgstr ""
+msgstr "Chenarul de informații"
 
 #: ../src/live_effects/lpe-powerclip.cpp:34
 msgid ""
 "Use fill-rule evenodd on <b>fill and stroke</b> dialog if no flatten result "
 "after convert clip to paths."
 msgstr ""
+"Folosește regula de umplere impar/par pe fereastra de <b>umplutură și contur</b> "
+"dacă aplatizarea nu a avut rezultat"
 
 #: ../src/live_effects/lpe-powermask.cpp:36
 msgid "Invert mask"
-msgstr "Inversează masca"
+msgstr "Inversează mascarea"
 
 #: ../src/live_effects/lpe-powermask.cpp:38
 msgid "Hide mask"
-msgstr "Ascunde masca"
+msgstr "Ascunde mascarea"
 
 #: ../src/live_effects/lpe-powermask.cpp:39
 msgid "Add background to mask"
-msgstr "Adaugă un fundal la mască"
+msgstr "Adaugă un fundal la mascare"
 
 #: ../src/live_effects/lpe-powermask.cpp:40
 msgid "Background color and opacity"
@@ -18579,7 +18715,7 @@ msgstr "Culoare și opacitate de fundal"
 
 #: ../src/live_effects/lpe-powermask.cpp:40
 msgid "Set color and opacity of the background"
-msgstr ""
+msgstr "Atribuie culoarea și opacitatea fundalului"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:133
 msgid "CubicBezierSmooth"
@@ -18596,13 +18732,15 @@ msgstr "Puncte de decalaj"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:163
 msgid "No jumping handles"
-msgstr ""
+msgstr "Niciun mâner săritor"
 
-#: ../src/live_effects/lpe-powerstroke.cpp:163
+#: ../src/live_effects/lpe-powerstroke.cpp:163 
 msgid ""
 "Allow to move handles along the path without them automatically attaching to "
 "the nearest path segment"
 msgstr ""
+"Permite mutarea mânerelor de-a lungul traseului fără ca ele să se atașeze "
+"automat la cel mai aproiat segment"
 
 # chekbox
 #: ../src/live_effects/lpe-powerstroke.cpp:164
@@ -18612,10 +18750,11 @@ msgstr "Sortează punctele"
 #: ../src/live_effects/lpe-powerstroke.cpp:164
 msgid "Sort offset points according to their time value along the curve"
 msgstr ""
+"Sortează punctele de decalaj conform valorii lor de timp de-a lungul curbei"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:165
 msgid "Smoothing type"
-msgstr ""
+msgstr "Tipul de netezire"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:166
 #: ../share/extensions/fractalize.inx:6
@@ -18627,14 +18766,16 @@ msgid ""
 "Sets the smoothness for the CubicBezierJohan interpolator; 0 = linear "
 "interpolation, 1 = smooth"
 msgstr ""
+"Atribuie netezimea pentru interpolatorul CubicBezierJohan; 0 = interpolare "
+"liniară, 1 = netedă"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:167
 msgid "Width multiplier"
-msgstr ""
+msgstr "Multiplul de lățime"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:167
 msgid "Scale the stroke's width uniformly along the whole path"
-msgstr ""
+msgstr "Dimensionează lățimea conturului uniform de-a lungul întregului traseu"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:168
 msgid "Start cap:"
@@ -18642,37 +18783,37 @@ msgstr "Începutul capătului:"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:168
 msgid "Determines the shape of the path's start"
-msgstr ""
+msgstr "Determină forma începutului traseului"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:169
 msgid "Join"
-msgstr ""
+msgstr "Unește"
 
-#: ../src/live_effects/lpe-powerstroke.cpp:170
+#: ../src/live_effects/lpe-powerstroke.cpp:170 
 msgid "Miter limit"
-msgstr ""
+msgstr "Limita racordului în unghi"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:170
 #: ../src/ui/widget/stroke-style.cpp:309
 msgid "Maximum length of the miter (in units of stroke width)"
 msgstr ""
-"Lungimea maximă a unghiului ascuțit (în unități de lățime a liniei de contur)"
+"Lungimea maximă a racordului în unghi (în unități de lățime a liniei de contur)"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:171
 msgid "End cap"
-msgstr ""
+msgstr "Capătul de sfârșit"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:171
 msgid "Determines the shape of the path's end"
-msgstr ""
+msgstr "Determină forma capătului sfârșitului traseului"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:172
 msgid "Add new thickness control point"
-msgstr ""
+msgstr "Adaugă o nouă grosime punctului de control"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:172
 msgid "<b>Ctrl + click</b> on existing node and move it"
-msgstr ""
+msgstr "<b>Ctrl + clic</b> pe un nod existent pentru a-l muta"
 
 #: ../src/live_effects/lpe-powerstroke.h:30
 #: ../src/ui/toolbar/pencil-toolbar.cpp:488
@@ -18695,7 +18836,7 @@ msgstr "Forțează un cerc"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:38
 msgid "Isometric circle"
-msgstr ""
+msgstr "Cerc izometric"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:40
 msgid "Perspective circle"
@@ -18703,11 +18844,11 @@ msgstr "Cerc de perspectivă"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:43
 msgid "Steiner ellipse"
-msgstr ""
+msgstr "Elipsă Steiner"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:45
-msgid "Steiner inellipse"
-msgstr ""
+msgid "Steiner inelipsă"
+msgstr "Elipsă Steiner înscrisă unui triunghi"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:54
 msgid ""
@@ -18720,24 +18861,34 @@ msgid ""
 "- Steiner ellipse: (3 nodes) ellipse on a triangle\n"
 "- Steiner inellipse: (3 nodes) ellipse inside a triangle"
 msgstr ""
+"Metode de generare de elipse\n"
+"- Auto ellipsă: incape într-un cerc (2, 3 sau 4 noduri în traseu) sau într-o elipsa "
+"(cel puțin 5 noduri)\n"
+"- Force circle: (at least 2 nodes) always create a circle\n"
+"- Cerc izometric: (3 noduri) folosește primele două segmente ca muchii\n"
+"- Perspective circle: (4 nodes) circle in a square in perspective view\n"
+"- Elipsă Steiner: (3 noduri) elipsă pe un triunghi\n"
+"- Inelipsă Steiner: (3 noduri) elipsă înauntrul unui triunghi"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:59
 msgid "_Frame (isometric rectangle)"
-msgstr ""
+msgstr "_Cadru (dreptunghi izometric)"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:59
 msgid "Draw parallelogram around the ellipse"
 msgstr "Desenează un paralelogram în jurul elipsei"
 
-#: ../src/live_effects/lpe-pts2ellipse.cpp:62
+#: ../src/live_effects/lpe-pts2ellipse.cpp:62 
 msgid "_Perspective square"
-msgstr ""
+msgstr "Pătrat _perspectivă"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:63
 msgid ""
 "Draw square surrounding the circle in perspective view\n"
 "(only in method \"Perspective circle\")"
 msgstr ""
+"Desenează un pătrat înconjurând cercul în vedere în perspectivă\n"
+"(doar în metoda \"Cerc perspectivă\")"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:65
 msgid "_Arc"
@@ -18748,30 +18899,32 @@ msgid ""
 "Generate open arc (open ellipse) based on first and last node\n"
 "(only for methods \"Auto ellipse\" and \"Force circle\")"
 msgstr ""
+"Generează un arc deschis (elipsă deschisă) bazat pe primul și ultimul nod\n"
+"(doar pentru metodele \"Auto elipsă\" și \"Forțează cerc\")"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:69
 msgid "_Other arc side"
-msgstr ""
+msgstr "Altă latu_ră de arc"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:69
 msgid "Switch sides of the arc"
-msgstr ""
+msgstr "Interschimbă laturile arcului"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:70
 msgid "_Slice arc"
-msgstr ""
+msgstr "_Feliază arcul"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:70
 msgid "Create a circle / ellipse segment"
-msgstr ""
+msgstr "Creează un segment de cerc / elipsă"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:71
 msgid "A_xes"
-msgstr ""
+msgstr "A_xe"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:71
 msgid "Draw both semi-major and semi-minor axes"
-msgstr ""
+msgstr "Desenează axe semi-majore și semi-minore"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:72
 msgid "Perspective axes"
@@ -18782,10 +18935,12 @@ msgid ""
 "Draw the axes in perspective view\n"
 "(only in method \"Perspective circle\")"
 msgstr ""
+"Desenează axele în vedere în perspectivă\n"
+"(doar în metoda \"Cerc în perspectivă\")"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:75
 msgid "Axes rotation"
-msgstr "Rotire de axe"
+msgstr "Rotirea axelor"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:75
 msgid "Axes rotation angle [deg]"
@@ -18801,11 +18956,11 @@ msgstr "Arată traseul sursă original"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:219
 msgid "Randomness"
-msgstr ""
+msgstr "Aleatorizare"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:219
 msgid "Global variation of distance between hatches, in %."
-msgstr ""
+msgstr "Variația globală a distanței dintre hașuri, în %."
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:220
 msgid "Growth"
@@ -18813,168 +18968,181 @@ msgstr "Creștere"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:220
 msgid "Growth of distance between hatches."
-msgstr ""
+msgstr "Creștere a distanței între hașuri."
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:223
 msgid "Smooth: Bottom ←"
-msgstr ""
+msgstr "Neted: Fund ←"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:223
 msgid ""
 "Set smoothness/sharpness of path when reaching a 'bottom' half-turn. "
 "0=sharp, 1=default"
 msgstr ""
+"Atribuie netezime/ascuțime unui traseu la atingerea unei jumătăți de rotație de 'fund'. "
+"0 = ascuțit, 1 = predefinit"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:224
 msgid "Smooth: Bottom →"
-msgstr ""
+msgstr "Neted: Fund →"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:224
 msgid ""
 "Set smoothness/sharpness of path when leaving a 'bottom' half-turn. 0=sharp, "
 "1=default"
 msgstr ""
+"Atribuie netezime/ascuțime unui traseu la părăsirea unei jumătăți de rotație de 'fund'. "
+"0 = ascuțit, 1 = predefinit"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:225
 msgid "Smooth: Top ←"
-msgstr ""
+msgstr "Neted: Top ←"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:225
 msgid ""
 "Set smoothness/sharpness of path when reaching a 'top' half-turn. 0=sharp, "
 "1=default"
 msgstr ""
+"Atribuie netezime/ascuțime unui traseu la atingerea unei jumătăți de rotație de 'top'. "
+"0 = ascuțit, 1 = predefinit"
 
-#: ../src/live_effects/lpe-rough-hatches.cpp:226
+#: ../src/live_effects/lpe-rough-hatches.cpp:226 
 msgid "Smooth: Top →"
-msgstr ""
+msgstr "Neted: Top →"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:226
 msgid ""
 "Set smoothness/sharpness of path when leaving a 'top' half-turn. 0=sharp, "
 "1=default"
 msgstr ""
+"Atribuie netezime/ascuțime unui traseu la părăsirea unei jumătăți de rotație de 'top'. "
+"0 = ascuțit, 1 = predefinit"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:227
 msgid "↑↓ Random: Bottom"
-msgstr ""
+msgstr "↑↓ Aleatorizare: Fund"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:227
 msgid ""
 "Randomly moves 'bottom' half-turns up and down to produce magnitude "
 "variations."
 msgstr ""
+"Mută aleatoriu jumătățile de tur de la 'fund' în sus sau jos pentru a produce variații de magnitudine."
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:228
 msgid "↑↓ Random: Top"
-msgstr ""
+msgstr "↑↓ Aleatorizare: Top"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:228
 msgid ""
 "Randomly moves 'top' half-turns up and down to produce magnitude variations."
 msgstr ""
+"Mută aleatoriu jumătățile de tur din 'top' în sus sau jos pentru a produce variații de magnitudine."
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:229
 msgid "←→ Random: Bottom"
-msgstr ""
+msgstr "←→ Aleatorizare: Fund"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:229
 msgid ""
 "Add direction randomness by moving 'bottom' half-turns tangentially to the "
 "boundary."
 msgstr ""
+"Adaugă aleatorizare de direcție prin mutarea jumătăților de tur de la 'fund', tangențial către hotar" 
 
-#: ../src/live_effects/lpe-rough-hatches.cpp:230
+#: ../src/live_effects/lpe-rough-hatches.cpp:230 
 msgid "←→ Random: Top"
-msgstr ""
+msgstr "←→ Aleatorizare: Top"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:230
 msgid ""
 "Add direction randomness by randomly moving 'top' half-turns tangentially to "
 "the boundary."
 msgstr ""
+"Adaugă aleatorizare de direcție prin mutarea jumătăților de tur de la 'top', tangențial către hotar" 
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:231
 msgid "Rand. Smooth: Bottom"
-msgstr ""
+msgstr "Aleatorizare Fină: Fund"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:231
 msgid "Randomness of 'bottom' half-turns' smoothness"
-msgstr ""
+msgstr "Aleatorizare a netezimii jumătăților de tur de la 'fund'"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:232
 msgid "Rand. Smooth: Top"
-msgstr ""
+msgstr "Aleatorizare Fină: Top"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:232
 msgid "Randomness of 'top' half-turns' smoothness"
-msgstr ""
+msgstr "Aleatorizare a netezimii jumătăților de tur de la 'fund'"
 
-#: ../src/live_effects/lpe-rough-hatches.cpp:234
+#: ../src/live_effects/lpe-rough-hatches.cpp:234 @!#
 msgid "Vary stroke width"
-msgstr ""
+msgstr "Variază lățimea conturului"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:234
 msgid "Simulate a stroke of varying width"
-msgstr ""
+msgstr "Simulează un contur cu lățime variabilă"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:235
 msgid "Bend hatches"
-msgstr ""
+msgstr "Îndoaie hașurile"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:235
 msgid "Add a global bending to the hatches (slower)"
-msgstr ""
+msgstr "Adaugă o îndoire globală hașurilor (mai încet)"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:236
 msgid "↓ Width"
-msgstr ""
+msgstr "↓ Lățime"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:236
 msgid "Width at 'bottom' half-turns"
-msgstr ""
+msgstr "Lațimea la jumătățile de tur de la 'fund'"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:237
 msgid "↑ Width"
-msgstr ""
+msgstr "↑ Lățime"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:237
 msgid "Width at 'top' half-turns"
-msgstr ""
+msgstr "Lațimea la jumătățile de tur din 'top'"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:239
 msgid "← Width"
-msgstr ""
+msgstr "← Lățime"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:239
 msgid "Width of line from 'top' to 'bottom'"
-msgstr ""
+msgstr "Lațimea liniei de la 'top' la 'fund'"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:240
 msgid "→ Width"
-msgstr ""
+msgstr "→ Lățime"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:240
 msgid "Width of line from 'bottom' to 'top'"
-msgstr ""
+msgstr "Lațimea liniei de la 'fund' la 'top'"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:242
 msgid "Hatches width and dir"
-msgstr ""
+msgstr "Lâțimea și direcția hașurilor"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:242
 msgid "Defines hatches frequency and direction"
-msgstr ""
+msgstr "Definește frecvența și direcția hașurilor"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:244
 msgid "Global bending"
-msgstr ""
+msgstr "Îndoire globală"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:244
 msgid ""
 "Relative position to a reference point defines global bending direction and "
 "amount"
-msgstr ""
+msgstr "Poziția relativă până la un punct de referință definește îndoirea, direcția și "
+"cantiatea globală"
 
 #: ../src/live_effects/lpe-roughen.cpp:30
 #: ../src/live_effects/lpe-roughen.cpp:47
@@ -18994,57 +19162,63 @@ msgstr "În lungul nodurilor"
 #: ../src/live_effects/lpe-tiling.cpp:891
 #: ../src/live_effects/lpe-tiling.cpp:918
 msgid "Random"
-msgstr ""
+msgstr "Aleatoriu"
 
 #: ../src/live_effects/lpe-roughen.cpp:38
 msgid "Retract"
-msgstr ""
+msgstr "Retrage"
 
 #: ../src/live_effects/lpe-roughen.cpp:45
 msgid "Method"
-msgstr ""
+msgstr "Metodă"
 
 #: ../src/live_effects/lpe-roughen.cpp:45
 msgid ""
 "<b>Segment size:</b> add nodes to path evenly; <b>Number of segments:</b> "
 "add nodes between existing nodes"
 msgstr ""
+"<b>Dimensiunea segmentului:</b> adaugă noduri uniform traseului; <b>Numărul de segmente:</b> "
+"adaugă noduri între nodurile existente"
 
 #: ../src/live_effects/lpe-roughen.cpp:46
 msgid ""
 "Add nodes to path evenly. Choose <b>Segment size</b> method from the "
 "dropdown to use this subdivision method."
 msgstr ""
+"Adaugă uniform noduri traseului. Alege <b>Dimensiunea segmentului</b> metoda din"
+"meniu derulant pentru a folosi această metodă de subdiviziune."
 
 #: ../src/live_effects/lpe-roughen.cpp:47
 msgid ""
 "Add nodes between existing nodes. Choose <b>Number of segments</b> method "
 "from the dropdown to use this subdivision method."
 msgstr ""
+"Adaugă noduri între nodurile existente. Alege<b>Număr de segmente</b> metoda "
+"din meniul rulant pentru a folosi această metodă de subdiviziune"
 
-#: ../src/live_effects/lpe-roughen.cpp:48
+#: ../src/live_effects/lpe-roughen.cpp:48 
 msgid "Displace ←→"
-msgstr ""
+msgstr "Deplasează ←→"
 
 #: ../src/live_effects/lpe-roughen.cpp:48
 msgid "Maximal displacement in x direction"
-msgstr ""
+msgstr "Deplasare maximală în direcția x"
 
 #: ../src/live_effects/lpe-roughen.cpp:49
 msgid "Displace ↑↓"
-msgstr ""
+msgstr "Deplasează ↑↓"
 
 #: ../src/live_effects/lpe-roughen.cpp:49
 msgid "Maximal displacement in y direction"
-msgstr ""
+msgstr "Deplasare maximală în direcția y"
 
 #: ../src/live_effects/lpe-roughen.cpp:50
 msgid "Global randomize"
-msgstr "Randomizare globală"
+msgstr "Aleatorizare globală"
 
 #: ../src/live_effects/lpe-roughen.cpp:50
 msgid "Global displacement in all directions"
-msgstr "Deplasament global în toate direcțiile"
+msgstr "Deplasare global în toate direcțiile"
 
 #: ../src/live_effects/lpe-roughen.cpp:51
 msgid "Options for handle direction"
@@ -19052,29 +19226,31 @@ msgstr "Opțiuni pentru manevrarea direcției"
 
 #: ../src/live_effects/lpe-roughen.cpp:52
 msgid "Apply displacement"
-msgstr ""
+msgstr "Aplică deplasarea"
 
 #: ../src/live_effects/lpe-roughen.cpp:52
 msgid ""
 "Uncheck to use this LPE for just adding nodes, without roughening; useful "
 "for further interactive processing."
 msgstr ""
+"Debifează pentru a folosi acest LPE doar pentru a separa noduri, fără rugozare; "
+"folositor pentru procesare interactivă ulterioară"
 
 #: ../src/live_effects/lpe-roughen.cpp:53
 msgid "Fixed displacement"
-msgstr "Deplasament fix"
+msgstr "Deplasare fixă"
 
 #: ../src/live_effects/lpe-roughen.cpp:53
 msgid "Fixed displacement, 1/3 of segment length"
-msgstr "Deplasament fix, 1/3 din lungimea segmentului"
+msgstr "Deplasare fixă, 1/3 din lungimea segmentului"
 
 #: ../src/live_effects/lpe-roughen.cpp:55
 msgid "Spray Tool friendly"
-msgstr ""
+msgstr "unealtă de pulverizare prietenoasă"
 
 #: ../src/live_effects/lpe-roughen.cpp:55
 msgid "For use with Spray Tool in copy mode"
-msgstr ""
+msgstr "Pentru a fi folosit cu Unealta de Pulverizare în mod copiere"
 
 #: ../src/live_effects/lpe-roughen.cpp:151
 #| msgid "<b>Creation</b>"
@@ -19112,7 +19288,7 @@ msgstr "Fără"
 
 #: ../src/live_effects/lpe-ruler.cpp:31
 #: ../src/live_effects/lpe-transform_2pts.cpp:39
-#: ../src/ui/tools/measure-tool.cpp:674
+#: ../src/ui/tools/measure-tool.cpp:674 
 msgid "Start"
 msgstr "Început"
 
@@ -19148,11 +19324,11 @@ msgstr "Lungimea marcajelor minore ale riglei"
 
 #: ../src/live_effects/lpe-ruler.cpp:43
 msgid "Major steps_:"
-msgstr "Pași majori_:"
+msgstr "Trepte majore_:"
 
 #: ../src/live_effects/lpe-ruler.cpp:43
 msgid "Draw a major mark every ... steps"
-msgstr "Desenează un marcaj major la fiecare ... pas"
+msgstr "Desenează un marcaj major la fiecare ... treaptă"
 
 #: ../src/live_effects/lpe-ruler.cpp:44
 msgid "Shift marks _by:"
@@ -19223,10 +19399,10 @@ msgstr ""
 "obiectul asupra căruia îl aplicați. Dacă nu aceasta era intenția, dați clic "
 "pe Anulează."
 
-#: ../src/live_effects/lpe-simplify.cpp:27
+#: ../src/live_effects/lpe-simplify.cpp:27 !@#
 #: ../src/ui/toolbar/gradient-toolbar.cpp:461
 msgid "Repeat"
-msgstr ""
+msgstr "Repetă"
 
 #: ../src/live_effects/lpe-simplify.cpp:27
 msgid ""
@@ -20703,13 +20879,13 @@ msgstr ""
 #: ../src/path/path-boolop.cpp:424
 msgid "Select <b>at least 2 paths</b> to perform a boolean operation."
 msgstr ""
-"Selectați <b>cel puțin două trasee</b> pentru a efectua o operație booleană."
+"Selectați <b>cel puțin două trasee</b> pentru a efectua o operațiune booleană."
 
 #: ../src/path/path-boolop.cpp:430
 msgid ""
 "One of the objects is <b>not a path</b>, cannot perform boolean operation."
 msgstr ""
-"Unul dintre obiecte <b>nu este un traseu</b>, nu se poate efectua operația "
+"Unul dintre obiecte <b>nu este un traseu</b>, nu se poate efectua operațiune "
 "booleană."
 
 #: ../src/path/path-boolop.cpp:436
@@ -22288,7 +22464,7 @@ msgstr "Deplasare orizontală per coloană (în % din lățimea dalei)"
 
 #: ../src/ui/dialog/clonetiler.cpp:213
 msgid "Randomize the horizontal shift by this percentage"
-msgstr "Randomizează deplasarea orizontală cu acest procentaj"
+msgstr "Aleatorizează deplasarea orizontală cu acest procentaj"
 
 #. TRANSLATORS: "shift" means: the tiles will be shifted (offset) vertically by this amount
 #: ../src/ui/dialog/clonetiler.cpp:223
@@ -22308,7 +22484,7 @@ msgstr "Deplasare verticală per coloană (în % din lățimea dalei)"
 
 #: ../src/ui/dialog/clonetiler.cpp:247
 msgid "Randomize the vertical shift by this percentage"
-msgstr "Randomizează deplasarea verticală cu acest procentaj"
+msgstr "Aleatorizează deplasarea verticală cu acest procentaj"
 
 #: ../src/ui/dialog/clonetiler.cpp:255 ../src/ui/dialog/clonetiler.cpp:407
 msgid "<b>Exponent:</b>"
@@ -22831,7 +23007,7 @@ msgid ""
 "to zero"
 msgstr ""
 "Restabilește la zero toate deplasările, scalările, rotațiile, opacitățile\n"
-"și modificările de culoare din caseta de dialog"
+"și modificările de culoare din fereastra de dialog"
 
 #: ../src/ui/dialog/clonetiler.cpp:1238
 msgid "<small>Nothing selected.</small>"
@@ -25949,7 +26125,7 @@ msgstr "Aliniere:"
 
 #: ../src/ui/dialog/grid-arrange-tab.cpp:579
 msgid "_Fit into selection box"
-msgstr "_Potrivește în caseta de selecție"
+msgstr "_Potrivește în chenarul de selecție"
 
 #: ../src/ui/dialog/grid-arrange-tab.cpp:586
 msgid "_Set spacing:"
@@ -26156,7 +26332,7 @@ msgstr "Forme"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:915
 msgid "Bounding box to use"
-msgstr "Caseta de încadrare de folosit"
+msgstr "Chenarul de selecție de folosit"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:916
 msgid "Visual bounding box"
@@ -26269,7 +26445,7 @@ msgstr "Chenar"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:957
 msgid "Each selected object displays its bounding box"
-msgstr "Fiecare obiect selectat își afișează caseta de încadrare"
+msgstr "Fiecare obiect selectat își afișează chenarul de încadrare"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:962
 msgid "Path outline"
@@ -28689,7 +28865,7 @@ msgstr "Rotește canavaua cu această valoare în sens orar și antiorar."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2674
 msgid "Steps"
-msgstr "Pași"
+msgstr "Trepte"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2677
 msgid "Move in parallel"
@@ -29393,7 +29569,7 @@ msgstr "Rezoluția pentru crearea _copiei bitmap:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3000
 msgid "Resolution used by the Create Bitmap Copy command"
-msgstr "Rezoluția folosită pentru comanda de creare a unei cópii bitmap"
+msgstr "Rezoluția folosită pentru comanda de creare a unei copii bitmap"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3003
 msgid "Ask about linking and scaling when importing bitmap images"
@@ -31523,7 +31699,7 @@ msgstr "Ignoră grupurile la selectarea elementelor"
 msgid "Select with touch-path"
 msgstr "Selectare cu atingerea traseului"
 
-# hm ? poate ar trebui uniformizat cu caseta de încadrare de la șirul următor
+# hm ? poate ar trebui uniformizat cu chenarul de încadrare de la șirul următor
 #: ../src/ui/modifiers.cpp:40
 msgid "Draw a band around items to select them"
 msgstr "Desenează o bandă în jurul elementelor pentru a le selecta"
@@ -32070,7 +32246,7 @@ msgstr ""
 msgctxt "Path handle tip"
 msgid "<b>Ctrl</b>: Snap handle to steps defined in BSpline Live Path Effect"
 msgstr ""
-"<b>Ctrl</b>: acroșează mânerul la pașii definiți în BSpline Live Path Effect"
+"<b>Ctrl</b>: acroșează mânerul la treptele definite în BSpline Live Path Effect"
 
 #: ../src/ui/tool/node.cpp:650
 #, c-format
@@ -34151,11 +34327,11 @@ msgstr "Modificare spirală"
 
 #: ../src/ui/toolbar/spray-toolbar.cpp:78 ../src/ui/tools/spray-tool.cpp:1356
 msgid "Spray with copies"
-msgstr "Pulverizează cu cópii"
+msgstr "Pulverizează cu copii"
 
 #: ../src/ui/toolbar/spray-toolbar.cpp:79
 msgid "Spray copies of the initial selection"
-msgstr "Pulverizează cópii ale selecției inițiale"
+msgstr "Pulverizează copii ale selecției inițiale"
 
 #: ../src/ui/toolbar/spray-toolbar.cpp:83 ../src/ui/tools/spray-tool.cpp:1359
 msgid "Spray with clones"
@@ -46349,7 +46525,7 @@ msgstr ""
 
 #: ../share/extensions/path_number_nodes.inx:14
 msgid "Step:"
-msgstr "Pași:"
+msgstr "Trepte:"
 
 #: ../share/extensions/path_number_nodes.inx:14
 msgid "Numbering increment between two nodes"
@@ -50835,7 +51011,7 @@ msgstr "Jumătate din înălțimea fontului"
 #~ "selectate au același număr de noduri.\n"
 #~ "\n"
 #~ "Se poate alege dacă aceste regiuni sunt umplute și dacă umplerea\n"
-#~ "folosește dreptunghiuri sau cópii ale segmentelor de traseu.\n"
+#~ "folosește dreptunghiuri sau copii ale segmentelor de traseu.\n"
 #~ "\n"
 #~ "Liniile vor fi inserate deasupra părții de jos a celor două elemente.\n"
 #~ "            "
