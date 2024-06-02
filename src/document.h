@@ -192,9 +192,8 @@ public:
 
     // Document structure -----------------
     Inkscape::ProfileManager &getProfileManager() const { return *_profileManager; }
-    Avoid::Router* getRouter() const { return _router.get(); }
+    Avoid::Router *getRouter();
 
-    
     /** Returns our SPRoot */
     SPRoot *getRoot() { return root; }
     SPRoot const *getRoot() const { return root; }
@@ -378,7 +377,6 @@ private:
     bool modified_since_save = false;
     bool modified_since_autosave = false;
     sigc::connection modified_connection;
-    sigc::connection rerouting_connection;
 
     // Document structure --------------------
     Inkscape::XML::Document *rdoc; ///< Our Inkscape::XML::Document

@@ -45,6 +45,7 @@
 #include "ui/tools/rect-tool.h"
 #include "ui/tools/spiral-tool.h"
 #include "ui/tools/tweak-tool.h"
+#include "ui/widget/events/canvas-event.h"
 
 
 using Inkscape::DocumentUndo;
@@ -204,6 +205,34 @@ KnotHolder::knot_clicked_handler(SPKnot *knot, guint state)
     } else {
         std::terminate();
     }
+}
+
+void
+KnotHolder::knot_enter_handler(SPKnot *knot, guint state)
+{
+    for(auto e : this->entity) {
+        if (e->knot == knot)
+            e->knot_enter(state);
+    }
+}
+
+void
+KnotHolder::knot_leave_handler(SPKnot *knot, guint state)
+{
+    for(auto e : this->entity) {
+        if (e->knot == knot)
+            e->knot_leave(state);
+    }
+}
+
+bool
+KnotHolder::knot_event_handler(SPKnot *knot, Inkscape::CanvasEvent const &event)
+{
+    for(auto e : this->entity) {
+        if (e->knot == knot)
+            return e->knot_event(event);
+    }
+    return false;
 }
 
 void
