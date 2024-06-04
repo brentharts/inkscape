@@ -19649,11 +19649,11 @@ msgstr "Ajustează punctul de atașare al tangentei"
 
 #: ../src/live_effects/lpe-tangent_to_curve.cpp:108
 msgid "Adjust the <b>left</b> end of the tangent"
-msgstr "Ajusteaîă capătul <b>stâng</b> al tangentei"
+msgstr "Ajustează capătul <b>stâng</b> al tangentei"
 
 #: ../src/live_effects/lpe-tangent_to_curve.cpp:114
 msgid "Adjust the <b>right</b> end of the tangent"
-msgstr "Ajusteaîă capătul <b>drept</b> al tangentei"
+msgstr "Ajustează capătul <b>drept</b> al tangentei"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:86
 msgid "Extrapolated"
@@ -19726,7 +19726,7 @@ msgstr "Direcția de început:"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:115
 msgid "Direction of the taper at the path start"
-msgstr "Direcția coniciîării la începutul traseului"
+msgstr "Direcția conicizării la începutul traseului"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:116
 msgid "End direction:"
@@ -19798,7 +19798,7 @@ msgstr "Dimensiune %"
 
 #: ../src/live_effects/lpe-tiling.cpp:83
 msgid "Scale tiles by this percentage"
-msgstr "Dimensioneaîă plăcile cu acest procentaj"
+msgstr "Dimensionează plăcile cu acest procentaj"
 
 #: ../src/live_effects/lpe-tiling.cpp:84 
 msgid "Rotate °"
@@ -20334,7 +20334,7 @@ msgstr "Selectează traseul original"
 #: ../src/live_effects/parameter/originalsatellite.cpp:55
 #: ../src/live_effects/parameter/satellitearray.cpp:350
 msgid "Link to item"
-msgstr "Conecteaîă la element"
+msgstr "Conectează la element"
 
 #: ../src/live_effects/parameter/path.cpp:277
 msgid "Edit on-canvas"
@@ -20355,7 +20355,7 @@ msgstr "Lipește parametrul traseului"
 #: ../src/live_effects/parameter/path.cpp:637
 #: ../src/live_effects/parameter/patharray.cpp:142
 msgid "Link path parameter to path"
-msgstr "Conecteaîă paramentrul traseului la traseu"
+msgstr "Conectează paramentrul traseului la traseu"
 
 #: ../src/live_effects/parameter/patharray.cpp:110
 msgid "Visible"
@@ -20427,7 +20427,7 @@ msgstr "Modifică parametrul aleatoriu"
 
 #: ../src/live_effects/parameter/satellite.cpp:164
 msgid "Link item parameter to path"
-msgstr "Conecteaîă paramentrul elementului la traseu"
+msgstr "Conectează paramentrul elementului la traseu"
 
 #: ../src/live_effects/parameter/satellite.cpp:284
 msgid "Link to item on clipboard"
@@ -21519,7 +21519,7 @@ msgstr "Selectează <b>clonele</b> pentru reconectare."
 
 #: ../src/selection-chemistry.cpp:2717
 msgid "Copy an <b>object</b> to clipboard to relink clones to."
-msgstr "Copiaîă o <b>clonă</b> pentru a reconecta alte clone la ea."
+msgstr "Copiază o <b>clonă</b> pentru a reconecta alte clone la ea."
 
 #: ../src/selection-chemistry.cpp:2776
 msgid "<b>No clones to relink</b> in the selection."
@@ -21527,7 +21527,7 @@ msgstr "<b>Nicio clonă de reconectat</b> în selecție."
 
 #: ../src/selection-chemistry.cpp:2778
 msgid "Relink clone"
-msgstr "Reconecteaîă clone"
+msgstr "Reconectează clone"
 
 #: ../src/selection-chemistry.cpp:2787 ../src/selection-chemistry.cpp:2879
 msgid "Select <b>clones</b> to unlink."
@@ -21551,7 +21551,7 @@ msgstr ""
 
 #: ../src/selection-chemistry.cpp:2908
 msgid "Unlink clone recursively"
-msgstr "Deconecteaîă clonele recursiv"
+msgstr "Deconectează clonele recursiv"
 
 # hm ? sau text încadrat ? (așa este la fr)
 #: ../src/selection-chemistry.cpp:2952
@@ -21682,7 +21682,7 @@ msgstr "Selectați <b>obiectele</b> cărora să li se potrivească canavaua."
 
 #: ../src/selection-chemistry.cpp:4234
 msgid "Select <b>path(s)</b> to create fill between."
-msgstr "Selecteaîă <b>traseele</b> între care sa se creeze umplutură"
+msgstr "Selectează <b>traseele</b> între care sa se creeze umplutură"
 
 #: ../src/selection-chemistry.cpp:4288 
 msgid "Create linked fill object between paths"
