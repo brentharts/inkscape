@@ -19655,10 +19655,6 @@ msgstr "Ajusteaîă capătul <b>stâng</b> al tangentei"
 msgid "Adjust the <b>right</b> end of the tangent"
 msgstr "Ajusteaîă capătul <b>drept</b> al tangentei"
 
-#: ../src/live_effects/lpe-tangent_to_curve.cpp:114
-msgid "Adjust the <b>right</b> end of the tangent"
-msgstr "Ajusteaîă capătul <b>drept</b> al tangentei"
-
 #: ../src/live_effects/lpe-taperstroke.cpp:86
 msgid "Extrapolated"
 msgstr "Extrapolat"
@@ -20094,7 +20090,7 @@ msgstr "Toate golurile orizontale au aceeași lățime"
 #: ../src/live_effects/lpe-tiling.cpp:898
 msgid "Random horizontal gaps (hit <b>Randomize</b> button to shuffle)"
 msgstr ""
-msgstr "Goluri orizontale aleatorii (apasă butonul <b>Aleatorizează</b> pentru amestec)"
+"Goluri orizontale aleatorii (apasă butonul <b>Aleatorizează</b> pentru amestec)"
 
 #: ../src/live_effects/lpe-tiling.cpp:924
 msgid "All vertical gaps have the same height"
@@ -20103,7 +20099,7 @@ msgstr "Toate golurile verticale au aceeași înălțime"
 #: ../src/live_effects/lpe-tiling.cpp:925
 msgid "Random vertical gaps (hit <b>Randomize</b> button to shuffle)"
 msgstr ""
-msgstr "Goluri verticale aleatorii (apasă butonul <b>Aleatorizează</b> pentru amestec)"
+"Goluri verticale aleatorii (apasă butonul <b>Aleatorizează</b> pentru amestec)"
 
 #: ../src/live_effects/lpe-tiling.cpp:1571
 msgid ""
@@ -24445,7 +24441,7 @@ msgid ""
 msgstr ""
 "Manipulează componentele culorilor conform unor funcții particulare de transfer. "
 "Folositor pentru ajustarea contrastului și luminozității, balansului de culoare "
-"și segmentării în  praguri.
+"și segmentării în  praguri."
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2715
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2717
@@ -26737,7 +26733,7 @@ msgid ""
 "selection)"
 msgstr ""
 "Dacă este activat, noul element creat va fi selectat (deselectând selectția "
-"anterioară)"k
+"anterioară)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1045 
 msgid "Show font samples in the drop-down list"
