@@ -45,10 +45,9 @@ using Inkscape::Util::delete_with;
 namespace {
 
 Glib::ustring get_extension(Glib::ustring const &name) {
-    auto extpos = name.rfind('.');
+    auto const extpos = name.rfind('.');
     if (extpos != Glib::ustring::npos) {
-        auto ext = name.substr(extpos).casefold();
-        return ext;
+        return name.substr(extpos).casefold();
     }
     return {};
 }
@@ -110,6 +109,14 @@ void skip(const Glib::RefPtr<Gio::InputStream>& s, size_t bytes) {
 
 using namespace Inkscape::UI::Dialog;
 
+namespace ColorBook {
+// Color space codes in ACB color book palettes
+constexpr uint16_t RgbColorspace = 0;
+constexpr uint16_t CmykColorspace = 2;
+constexpr uint16_t LabColorspace = 7;
+constexpr uint16_t GrayscaleColorspace = 8;
+} // namespace ColorBook
+
 // Load Adobe ACB color book
 void load_acb_palette(PaletteFileData& palette, std::string const &fname) {
     auto file = Gio::File::create_for_path(fname);
@@ -147,24 +154,24 @@ void load_acb_palette(PaletteFileData& palette, std::string const &fname) {
     PaletteFileData::ColorSpace color_space;
 
 	switch (cs) {
-    case 0: // RGB
-        components = 3;
-        color_space = PaletteFileData::Rgb255;
-        break;
-    case 2: // CMYK
-        components = 4;
-        color_space = PaletteFileData::Cmyk100;
-        break;
-    case 7: // LAB
-        components = 3;
-        color_space = PaletteFileData::Lab100;
-        break;
-    case 8: // Grayscale
-        components = 1;
-        color_space = PaletteFileData::Rgb255; // using RGB for grayscale
-        break;
-    default:
-        throw std::runtime_error(_("ACB file color space not supported."));
+        case ColorBook::RgbColorspace:
+            components = 3;
+            color_space = PaletteFileData::ColorSpace::Rgb8bit;
+            break;
+        case ColorBook::CmykColorspace:
+            components = 4;
+            color_space = PaletteFileData::ColorSpace::Cmyk100;
+            break;
+        case ColorBook::LabColorspace:
+            components = 3;
+            color_space = PaletteFileData::ColorSpace::Lab100;
+            break;
+        case ColorBook::GrayscaleColorspace:
+            components = 1;
+            color_space = PaletteFileData::ColorSpace::Rgb8bit; // using RGB for grayscale
+            break;
+        default:
+            throw std::runtime_error(_("ACB file color space not supported."));
     }
 
     auto ext = get_extension(ttl);
@@ -197,20 +204,19 @@ void load_acb_palette(PaletteFileData& palette, std::string const &fname) {
         ost.precision(3);
 
         switch (color_space) {
-            case PaletteFileData::Lab100: {
+            case PaletteFileData::ColorSpace::Lab100: {
                 auto l = std::floor(channels[0] / 2.55f + 0.5f);
                 auto a = channels[1] - 128.0f;
                 auto b = channels[2] - 128.0f;
                 auto rgb = Hsluv::lab_to_rgb(l, a, b);
-                unsigned ur = rgb[0] * 255;
-                unsigned ug = rgb[1] * 255;
-                unsigned ub = rgb[2] * 255;
+                uint8_t const ur = rgb[0] * 255;
+                uint8_t const ug = rgb[1] * 255;
+                uint8_t const ub = rgb[2] * 255;
                 color = {{l, a, b, 0}, color_space, {ur, ug, ub}};
                 ost << "L: " << l << " a: " << a << " b: " << b;
-            }
-            break;
+            } break;
 
-            case PaletteFileData::Cmyk100: {
+            case PaletteFileData::ColorSpace::Cmyk100: {
                 // 0% - 100%
                 auto c = std::floor((255 - channels[0]) / 2.55f + 0.5f);
                 auto m = std::floor((255 - channels[1]) / 2.55f + 0.5f);
@@ -219,16 +225,15 @@ void load_acb_palette(PaletteFileData& palette, std::string const &fname) {
                 auto [r, g, b] = convert.cmyk_to_rgb(c, m, y, k);
                 color = {{c, m, y, k}, color_space, {r, g, b}};
                 ost << "C: " << c << "% M: " << m << "% Y: " << y << "% K: " << k << '%';
-            }
-            break;
+            } break;
 
-            case PaletteFileData::Rgb255: {
+            case PaletteFileData::ColorSpace::Rgb8bit: {
                 float r = channels[0];
                 float g = cs == 1 ? r : channels[1];
                 float b = cs == 1 ? r : channels[2];
-                unsigned ur = r;
-                unsigned ug = g;
-                unsigned ub = b;
+                uint8_t const ur = r;
+                uint8_t const ug = g;
+                uint8_t const ub = b;
                 color = {{r, g, b, 0}, color_space, {ur, ug, ub}};
                 if (cs == 1) {
                     // grayscale
@@ -237,8 +242,7 @@ void load_acb_palette(PaletteFileData& palette, std::string const &fname) {
                 else {
                     ost << "R: " << ur << " G: " << ug << " B: " << ub;
                 }
-            }
-            break;
+            } break;
 
             default:
                 throw std::runtime_error(_("Palette color space unexpected."));
@@ -299,9 +303,12 @@ void load_ase_swatches(PaletteFileData& palette, std::string const &fname) {
                 auto mode = to_mode(type);
                 auto [r, g, b] = convert.cmyk_to_rgb(c, m, y, k);
                 ost << "C: " << c << "% M: " << m << "% Y: " << y << "% K: " << k << '%';
-                palette.colors.emplace_back(
-                    PaletteFileData::Color {{c, m, y, k}, PaletteFileData::Cmyk100, {r, g, b}, color_name, ost.str(), mode}
-                );
+                palette.colors.emplace_back(PaletteFileData::Color{{c, m, y, k},
+                                                                   PaletteFileData::ColorSpace::Cmyk100,
+                                                                   {r, g, b},
+                                                                   color_name,
+                                                                   ost.str(),
+                                                                   mode});
             }
             else if (mode == "RGB ") {
                 auto r = read_float(stream) * 255;
@@ -309,9 +316,12 @@ void load_ase_swatches(PaletteFileData& palette, std::string const &fname) {
                 auto b = read_float(stream) * 255;
                 auto type = read_value<uint16_t>(stream);
                 auto mode = to_mode(type);
-                palette.colors.emplace_back(
-                    PaletteFileData::Color {{r, g, b, 0}, PaletteFileData::Rgb255, {(unsigned)r, (unsigned)g, (unsigned)b}, color_name, "", mode}
-                );
+                palette.colors.emplace_back(PaletteFileData::Color{{r, g, b, 0},
+                                                                   PaletteFileData::ColorSpace::Rgb8bit,
+                                                                   {(uint8_t)r, (uint8_t)g, (uint8_t)b},
+                                                                   color_name,
+                                                                   "",
+                                                                   mode});
             }
             else if (mode == "LAB ") {
                 //TODO - verify scale
@@ -321,21 +331,27 @@ void load_ase_swatches(PaletteFileData& palette, std::string const &fname) {
                 auto type = read_value<uint16_t>(stream);
                 auto mode = to_mode(type);
                 auto rgb = Hsluv::lab_to_rgb(l, a, b);
-                unsigned ur = rgb[0] * 255;
-                unsigned ug = rgb[1] * 255;
-                unsigned ub = rgb[2] * 255;
+                uint8_t const red = rgb[0] * 255;
+                uint8_t const green = rgb[1] * 255;
+                uint8_t const blue = rgb[2] * 255;
                 ost << "L: " << l << " a: " << a << " b: " << b;
-                palette.colors.emplace_back(
-                    PaletteFileData::Color {{l, a, b, 0}, PaletteFileData::Lab100, {ur, ug, ub}, color_name, ost.str(), mode}
-                );
+                palette.colors.emplace_back(PaletteFileData::Color{{l, a, b, 0},
+                                                                   PaletteFileData::ColorSpace::Lab100,
+                                                                   {red, green, blue},
+                                                                   color_name,
+                                                                   ost.str(),
+                                                                   mode});
             }
             else if (mode == "Gray") {
                 auto g = read_float(stream) * 255;
                 auto type = read_value<uint16_t>(stream);
                 auto mode = to_mode(type);
-                palette.colors.emplace_back(
-                    PaletteFileData::Color {{g, g, g, 0}, PaletteFileData::Rgb255, {(unsigned)g, (unsigned)g, (unsigned)g}, color_name, "", mode}
-                );
+                palette.colors.emplace_back(PaletteFileData::Color{{g, g, g, 0},
+                                                                   PaletteFileData::ColorSpace::Rgb8bit,
+                                                                   {(uint8_t)g, (uint8_t)g, (uint8_t)g},
+                                                                   color_name,
+                                                                   "",
+                                                                   mode});
             }
             else {
                 std::ostringstream ost;
@@ -379,14 +395,14 @@ void load_gimp_palette(PaletteFileData& palette, std::string const &path)
         auto line = Glib::ustring(buf); // Unnecessary copy required until using a glibmm with support for string views. TODO: Fix when possible.
         Glib::MatchInfo match;
         if (regex_rgb->match(line, match)) { // ::regex_match(line, match, boost::regex(), boost::regex_constants::match_continuous)) {
-            // RGB color, followed by an optional name.
+            // 8-bit RGB color, followed by an optional name.
             PaletteFileData::Color color;
             for (int i = 0; i < 3; i++) {
-                color.rgb[i] = std::clamp(std::stoi(match.fetch(i + 1)), 0, 255);
+                color.rgb[i] = std::clamp(std::stoul(match.fetch(i + 1)), 0UL, 255UL);
                 color.channels[i] = color.rgb[i];
             }
             color.channels[3] = 0;
-            color.space = PaletteFileData::Rgb255;
+            color.space = PaletteFileData::ColorSpace::Rgb8bit;
             color.name = match.fetch(4);
 
             if (!color.name.empty()) {
@@ -394,11 +410,13 @@ void load_gimp_palette(PaletteFileData& palette, std::string const &path)
                 color.name = g_dpgettext2(nullptr, "Palette", color.name.c_str());
             } else {
                 // Otherwise, set the name to be the hex value.
-                color.name = Glib::ustring::compose("#%1%2%3",
-                                 Inkscape::ustring::format_classic(std::hex, std::setw(2), std::setfill('0'), color.rgb[0]),
-                                 Inkscape::ustring::format_classic(std::hex, std::setw(2), std::setfill('0'), color.rgb[1]),
-                                 Inkscape::ustring::format_classic(std::hex, std::setw(2), std::setfill('0'), color.rgb[2])
-                             ).uppercase();
+                auto const format_hex_byte = [](uint8_t byte) {
+                    return Inkscape::ustring::format_classic(std::hex, std::setw(2), std::setfill('0'),
+                                                             static_cast<unsigned>(byte));
+                };
+                color.name = Glib::ustring::compose("#%1%2%3", format_hex_byte(color.rgb[0]),
+                                                    format_hex_byte(color.rgb[1]), format_hex_byte(color.rgb[2]))
+                                 .uppercase();
             }
 
             palette.colors.emplace_back(std::move(color));

@@ -28,6 +28,7 @@
 #include <2geom/affine.h>
 #include <2geom/point.h>
 #include <2geom/rect.h>
+#include <2geom/interval.h>
 
 /*
  * Use these errors when building from glade files for graceful
@@ -48,6 +49,7 @@ class ustring;
 
 namespace Gtk {
 class Label;
+class Scrollbar;
 class TextBuffer;
 class Widget;
 } // namespace Gtk
@@ -76,6 +78,8 @@ enum class ForEachResult {
     _skip      // do not recurse into current widget, go to the next one
 };
 
+/// Get the number of the widget's children, from get_first_child() through each get_next_sibling().
+unsigned get_child_count(Gtk::Widget const &widget);
 /// Get a vector of the widgetʼs children, from get_first_child() through each get_next_sibling().
 std::vector<Gtk::Widget *> get_children(Gtk::Widget &widget);
 /// Get the widgetʼs child at the given position. Throws std::out_of_range if the index is invalid.
@@ -87,6 +91,9 @@ template <typename Widget> void remove_all_children(Widget &widget)
         widget.remove(*child);
     }
 }
+
+/// Return the current scrolling range of a scrollbar.
+Geom::Interval get_scrollbar_range(Gtk::Scrollbar const &scrollbar);
 
 /// Call Func with a reference to each child of parent, until it returns _break.
 /// Accessing children changes between GTK3 & GTK4, so best consolidate it here.

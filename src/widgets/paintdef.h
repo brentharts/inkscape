@@ -38,12 +38,14 @@
 #ifndef INKSCAPE_WIDGETS_PAINTDEF_H
 #define INKSCAPE_WIDGETS_PAINTDEF_H
 
+#include <array>
+#include <cstdint>
+#include <glibmm/i18n.h>
+#include <glibmm/ustring.h>
 #include <span>
 #include <string>
+#include <string_view>
 #include <vector>
-#include <array>
-#include <utility>
-#include <glibmm/ustring.h>
 
 inline constexpr auto mimeOSWB_COLOR = "application/x-oswb-color";
 inline constexpr auto mimeX_COLOR = "application/x-color";
@@ -55,33 +57,34 @@ inline constexpr auto mimeTEXT = "text/plain";
 class PaintDef
 {
 public:
-    enum ColorType
+    enum class ColorType
     {
         NONE,
         RGB
     };
+    using Rgb8bit = std::array<uint8_t, 3>;
 
     /// Create a color of type NONE
-    PaintDef();
+    PaintDef() = default;
 
     /// Create a color of type RGB
-    PaintDef(std::array<unsigned, 3> const &rgb, std::string description, Glib::ustring tooltip);
+    PaintDef(Rgb8bit const &rgb, std::string description, Glib::ustring tooltip);
 
     std::string get_color_id() const;
     const Glib::ustring& get_tooltip() const;
 
     std::string const &get_description() const { return description; }
     ColorType get_type() const { return type; }
-    std::array<unsigned, 3> const &get_rgb() const { return rgb; }
+    Rgb8bit const &get_rgb() const { return rgb; }
 
-    std::vector<char> getMIMEData(char const *mime_type) const;
-    bool fromMIMEData(char const *mime_type, std::span<char const> data);
+    std::vector<char> getMIMEData(std::string_view mime_type) const;
+    bool fromMIMEData(std::string_view mime_type, std::span<char const> data);
 
 protected:
-    std::string description;
+    std::string description = C_("Paint", "None");
     Glib::ustring tooltip;
-    ColorType type;
-    std::array<unsigned, 3> rgb;
+    ColorType type = ColorType::NONE;
+    Rgb8bit rgb = {0, 0, 0};
 };
 
 #endif // INKSCAPE_WIDGETS_PAINTDEF_H

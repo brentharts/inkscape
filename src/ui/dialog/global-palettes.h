@@ -44,14 +44,16 @@ struct PaletteFileData
 
     /// Color space of all colors in this palette. Original definitions are kept in "Color.channels"
     /// for use with ICC profiles. Preview sRGB colors are inside "Color.rgb"
-    enum ColorSpace {
+    enum class ColorSpace
+    {
         Undefined, // not a valid color definition
-        Rgb255, // RGB 0..255
-        Lab100, // Cie*Lab, L 0..100, a, b -128..127
-        Cmyk100 // CMYK 0%..100%
+        Rgb8bit,   // RGB 0..255
+        Lab100,    // Cie*Lab, L 0..100, a, b -128..127
+        Cmyk100    // CMYK 0%..100%
     };
 
-    enum ColorMode: uint8_t {
+    enum ColorMode : uint8_t
+    {
         Normal,
         Global,
         Spot,
@@ -63,10 +65,10 @@ struct PaletteFileData
         std::array<float, 4> channels;
 
         /// Color space of this color.
-        ColorSpace space = Undefined;
+        ColorSpace space = ColorSpace::Undefined;
 
-        /// RGB color.
-        std::array<unsigned, 3> rgb;
+        /// 8-bit RGB color.
+        std::array<uint8_t, 3> rgb;
 
         /// Name of the color, either specified in the file or generated from the rgb.
         Glib::ustring name;

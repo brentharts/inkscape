@@ -23,6 +23,7 @@
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/revealer.h>
 #include <gtkmm/spinbutton.h>
+#include <gtkmm/scrollbar.h>
 #include <gtkmm/textview.h>
 #include <gtkmm/tooltip.h>
 #include <gtkmm/widget.h>
@@ -143,6 +144,15 @@ void resize_widget_children(Gtk::Widget *widget) {
     */
 }
 
+unsigned get_child_count(Gtk::Widget const &widget)
+{
+    unsigned count = 0;
+    for (auto child = widget.get_first_child(); child; child = child->get_next_sibling()) {
+        count++;
+    }
+    return count;
+}
+
 std::vector<Gtk::Widget *> get_children(Gtk::Widget &widget)
 {
     auto children = std::vector<Gtk::Widget *>{};
@@ -161,6 +171,12 @@ Gtk::Widget &get_nth_child(Gtk::Widget &widget, std::size_t const index)
         child = child->get_next_sibling();
     }
     return *child;
+}
+
+Geom::Interval get_scrollbar_range(Gtk::Scrollbar const &scrollbar)
+{
+    auto const adj = scrollbar.get_adjustment();
+    return {adj->get_lower(), adj->get_upper() - adj->get_page_size()};
 }
 
 /**

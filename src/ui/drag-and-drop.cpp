@@ -274,7 +274,7 @@ bool on_drop(Glib::ValueBase const &value, double x, double y, SPDesktopWidget *
         };
 
         std::string colorspec;
-        if (paintdef->get_type() == PaintDef::NONE) {
+        if (paintdef->get_type() == PaintDef::ColorType::NONE) {
             colorspec = "none";
         } else {
             if (auto const grad = find_gradient()) {

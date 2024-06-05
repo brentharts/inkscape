@@ -431,5 +431,5 @@ ${_build_dir}/share/templates/templates.h
 ../src/util/font-collections.h
 ../src/util/paper.cpp
 ../src/vanishing-point.cpp
-../src/widgets/paintdef.cpp
+../src/widgets/paintdef.h
 ../src/widgets/sp-attribute-widget.cpp

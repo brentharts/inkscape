@@ -13,17 +13,14 @@
 #ifndef UI_DIALOG_SWATCHES_H
 #define UI_DIALOG_SWATCHES_H
 
-#include <array>
-#include <utility>
-#include <variant>
-#include <vector>
-#include <boost/unordered_map.hpp>
-
 #include <glibmm/refptr.h>
 #include <glibmm/ustring.h>
 #include <gtkmm/widget.h>
+#include <utility>
+#include <vector>
 
-#include "preferences.h"  // PrefObserver
+#include "helper/auto-connection.h"
+#include "preferences.h" // PrefObserver
 #include "ui/dialog/dialog-base.h"
 #include "ui/dialog/global-palettes.h"
 #include "ui/widget/palette_t.h"
@@ -35,8 +32,6 @@ class Label;
 class MenuButton;
 class ToggleButton;
 } // namespace Gtk
-
-class SPGradient;
 
 namespace Inkscape::UI {
 
@@ -69,8 +64,6 @@ private:
     void selectionChanged(Selection *selection) final;
     void selectionModified(Selection *selection, guint flags) final;
 
-    void size_allocate_vfunc(int width, int height, int baseline) final;
-
     void update_palettes(bool compact);
     void rebuild();
     bool load_swatches();
@@ -93,11 +86,8 @@ private:
     const PaletteFileData* get_palette(const Glib::ustring& id);
 
     // Asynchronous update mechanism.
-    sigc::connection conn_gradients;
-    sigc::connection conn_defs;
-    bool gradients_changed = false;
-    bool defs_changed = false;
-    bool selection_changed = false;
+    auto_connection conn_gradients;
+    auto_connection conn_defs;
     void track_gradients();
     void untrack_gradients();
 
@@ -105,13 +95,6 @@ private:
     std::vector<bool> isswatch;
     void rebuild_isswatch();
     bool update_isswatch();
-
-    // A map from colors to their respective widgets. Used to quickly find the widgets corresponding
-    // to the current fill/stroke color, in order to update their fill/stroke indicators.
-    using ColorKey = std::variant<std::monostate, std::array<unsigned, 3>, SPGradient *>;
-    boost::unordered_multimap<ColorKey, ColorItem*> widgetmap; // need boost for array hash
-    std::vector<ColorItem*> current_fill;
-    std::vector<ColorItem*> current_stroke;
     void update_fillstroke_indicators();
 
     Inkscape::PrefObserver _pinned_observer;

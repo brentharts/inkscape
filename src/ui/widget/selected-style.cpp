@@ -182,7 +182,7 @@ SelectedStyle::SelectedStyle()
 
             // copied from drag-and-drop.cpp, case PaintDef
             std::string colorspec;
-            if (paintdef.get_type() == PaintDef::NONE) {
+            if (paintdef.get_type() == PaintDef::ColorType::NONE) {
                 colorspec = "none";
             } else {
                 auto const [r, g, b] = paintdef.get_rgb();

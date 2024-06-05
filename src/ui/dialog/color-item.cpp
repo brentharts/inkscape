@@ -13,21 +13,23 @@
 #include <cassert>
 #include <cstdint>
 #include <utility>
+#include <variant>
 #include <vector>
+//
 #include <cairomm/context.h>
 #include <cairomm/pattern.h>
 #include <cairomm/surface.h>
-#include <glibmm/bytes.h>
-#include <glibmm/convert.h>
-#include <glibmm/i18n.h>
-#include <giomm/menu.h>
-#include <giomm/menuitem.h>
-#include <giomm/simpleaction.h>
-#include <giomm/simpleactiongroup.h>
 #include <gdkmm/contentprovider.h>
 #include <gdkmm/general.h>
 #include <gdkmm/pixbuf.h>
 #include <gdkmm/texture.h>
+#include <giomm/menu.h>
+#include <giomm/menuitem.h>
+#include <giomm/simpleaction.h>
+#include <giomm/simpleactiongroup.h>
+#include <glibmm/bytes.h>
+#include <glibmm/convert.h>
+#include <glibmm/i18n.h>
 #include <gtkmm/binlayout.h>
 #include <gtkmm/dragsource.h>
 #include <gtkmm/gestureclick.h>
@@ -35,19 +37,19 @@
 #include <gtkmm/popovermenu.h>
 #include <sigc++/functors/mem_fun.h>
 
-#include "desktop-style.h"
-#include "document.h"
-#include "document-undo.h"
-#include "hsluv.h"
-#include "message-context.h"
-#include "preferences.h"
-#include "selection.h"
 #include "actions/actions-tools.h"
+#include "desktop-style.h"
 #include "display/cairo-utils.h"
+#include "document-undo.h"
+#include "document.h"
 #include "helper/sigc-track-obj.h"
+#include "hsluv.h"
 #include "io/resource.h"
+#include "message-context.h"
 #include "object/sp-gradient.h"
 #include "object/tags.h"
+#include "preferences.h"
+#include "selection.h"
 #include "svg/svg-color.h"
 #include "ui/containerize.h"
 #include "ui/controller.h"
@@ -55,39 +57,33 @@
 #include "ui/dialog/dialog-container.h"
 #include "ui/icon-names.h"
 #include "ui/util.h"
+#include "util/variant-visitor.h"
 
 namespace Inkscape::UI::Dialog {
 namespace {
 
-// Return the result of executing a lambda, and cache the result for future calls.
-template <typename F>
-auto &staticify(F &&f)
-{
-    static auto result = std::forward<F>(f)();
-    return result;
-}
-
-// Get the "remove-color" image.
+/// Get the "remove-color" image.
 Glib::RefPtr<Gdk::Pixbuf> get_removecolor()
 {
-    return staticify([] {
+    // Paint the pixbuf only once
+    static const Glib::RefPtr<Gdk::Pixbuf> remove_color = [] {
         auto path = IO::Resource::get_path(IO::Resource::SYSTEM, IO::Resource::UIS, "resources", "remove-color.png");
         auto pixbuf = Gdk::Pixbuf::create_from_file(path.pointer());
         if (!pixbuf) {
             std::cerr << "Null pixbuf for " << Glib::filename_to_utf8(path.pointer()) << std::endl;
         }
         return pixbuf;
-    });
+    }();
+    return remove_color;
 }
-
 } // namespace
 
 ColorItem::ColorItem(PaintDef const &paintdef, DialogBase *dialog)
     : dialog(dialog)
 {
-    if (paintdef.get_type() == PaintDef::RGB) {
+    if (paintdef.get_type() == PaintDef::ColorType::RGB) {
         pinned_default = false;
-        data = RGBData{paintdef.get_rgb()};
+        data = paintdef.get_rgb();
     } else {
         pinned_default = true;
         data = PaintNone{};
@@ -107,9 +103,7 @@ ColorItem::ColorItem(SPGradient *gradient, DialogBase *dialog)
     description = gradient->defaultLabel();
     color_id = gradient->getId();
 
-    gradient->connectRelease(SIGC_TRACKING_ADAPTOR([this] (SPObject*) {
-        std::get<GradientData>(data).gradient = nullptr;
-    }, *this));
+    gradient->connectRelease(SIGC_TRACKING_ADAPTOR([this](SPObject *) { data = (GradientData) nullptr; }, *this));
 
     gradient->connectModified(SIGC_TRACKING_ADAPTOR([this] (SPObject *obj, unsigned flags) {
         if (flags & SP_OBJECT_STYLE_MODIFIED_FLAG) {
@@ -181,51 +175,59 @@ void ColorItem::set_pinned_pref(const std::string &path)
 
 void ColorItem::draw_color(Cairo::RefPtr<Cairo::Context> const &cr, int w, int h) const
 {
-    if (std::holds_alternative<Undefined>(data)) {
-        // there's no color to paint; indicate clearly that there is nothing to select:
-        auto y = h / 2 + 0.5;
-        auto width = w / 4;
-        auto x = (w - width) / 2 - 0.5;
-        cr->move_to(x, y);
-        cr->line_to(x + width, y);
-        auto const fg = get_color();
-        cr->set_source_rgba(fg.get_red(), fg.get_green(), fg.get_blue(), 0.5);
-        cr->set_line_width(1);
-        cr->stroke();
-    }
-    else if (is_paint_none()) {
-        if (auto const pixbuf = get_removecolor()) {
-            const auto device_scale = get_scale_factor();
-            cr->save();
-            cr->scale((double)w / pixbuf->get_width() / device_scale, (double)h / pixbuf->get_height() / device_scale);
-            Gdk::Cairo::set_source_pixbuf(cr, pixbuf, 0, 0);
-            cr->paint();
-            cr->restore();
-        }
-    } else if (auto const rgbdata = std::get_if<RGBData>(&data)) {
-        auto [r, g, b] = rgbdata->rgb;
-        cr->set_source_rgb(r / 255.0, g / 255.0, b / 255.0);
-        cr->paint();
-        // there's no way to query background color to check if color item stands out,
-        // so we apply faint outline to let users make out color shapes blending with background
-        auto const fg = get_color();
-        cr->rectangle(0.5, 0.5, w - 1, h - 1);
-        cr->set_source_rgba(fg.get_red(), fg.get_green(), fg.get_blue(), 0.07);
-        cr->set_line_width(1);
-        cr->stroke();
-    } else if (auto const graddata = std::get_if<GradientData>(&data)) {
-        // Gradient pointer may be null if the gradient was destroyed.
-        auto grad = graddata->gradient;
-        if (!grad) return;
+    std::visit(VariantVisitor{[this, w, h, &cr](Undefined) {
+                                  // there's no color to paint;
+                                  // indicate clearly that there is nothing to select:
+                                  auto y = h / 2 + 0.5;
+                                  auto width = w / 4;
+                                  auto x = (w - width) / 2 - 0.5;
+                                  cr->move_to(x, y);
+                                  cr->line_to(x + width, y);
+                                  auto const fg = get_color();
+                                  cr->set_source_rgba(fg.get_red(), fg.get_green(), fg.get_blue(), 0.5);
+                                  cr->set_line_width(1);
+                                  cr->stroke();
+                              },
+                              [this, w, h, &cr](PaintNone) {
+                                  if (auto const pixbuf = get_removecolor()) {
+                                      const auto device_scale = get_scale_factor();
+                                      cr->save();
+                                      cr->scale((double)w / pixbuf->get_width() / device_scale,
+                                                (double)h / pixbuf->get_height() / device_scale);
+                                      Gdk::Cairo::set_source_pixbuf(cr, pixbuf, 0, 0);
+                                      cr->paint();
+                                      cr->restore();
+                                  }
+                              },
+                              [this, w, h, &cr](const RGBData &rgbdata) {
+                                  auto [r, g, b] = rgbdata;
+                                  cr->set_source_rgb(r / 255.0, g / 255.0, b / 255.0);
+                                  cr->paint();
+                                  // there's no way to query background color to check if color item stands
+                                  // out, so we apply faint outline to let users make out color shapes
+                                  // blending with background
+                                  auto const fg = get_color();
+                                  cr->rectangle(0.5, 0.5, w - 1, h - 1);
+                                  cr->set_source_rgba(fg.get_red(), fg.get_green(), fg.get_blue(), 0.07);
+                                  cr->set_line_width(1);
+                                  cr->stroke();
+                              },
+                              [w, &cr](GradientData grad) {
+                                  // Gradient pointer may be null if the gradient was destroyed.
+                                  if (!grad)
+                                      return;
 
-        auto pat_checkerboard = Cairo::RefPtr<Cairo::Pattern>(new Cairo::Pattern(ink_cairo_pattern_create_checkerboard(), true));
-        auto pat_gradient     = Cairo::RefPtr<Cairo::Pattern>(new Cairo::Pattern(grad->create_preview_pattern(w),         true));
+                                  auto pat_checkerboard = Cairo::RefPtr<Cairo::Pattern>(
+                                      new Cairo::Pattern(ink_cairo_pattern_create_checkerboard(), true));
+                                  auto pat_gradient = Cairo::RefPtr<Cairo::Pattern>(
+                                      new Cairo::Pattern(grad->create_preview_pattern(w), true));
 
-        cr->set_source(pat_checkerboard);
-        cr->paint();
-        cr->set_source(pat_gradient);
-        cr->paint();
-    }
+                                  cr->set_source(pat_checkerboard);
+                                  cr->paint();
+                                  cr->set_source(pat_gradient);
+                                  cr->paint();
+                              }},
+               data);
 }
 
 void ColorItem::draw_func(Cairo::RefPtr<Cairo::Context> const &cr, int const w, int const h)
@@ -255,7 +257,7 @@ void ColorItem::draw_func(Cairo::RefPtr<Cairo::Context> const &cr, int const w, 
     }
 
     // Draw fill/stroke indicators.
-    if (is_fill || is_stroke) {
+    if (_is_fill || _is_stroke) {
         double const lightness = Hsluv::rgb_to_perceptual_lightness(average_color());
         auto [gray, alpha] = Hsluv::get_contrasting_color(lightness);
         cr->set_source_rgba(gray, gray, gray, alpha);
@@ -266,12 +268,12 @@ void ColorItem::draw_func(Cairo::RefPtr<Cairo::Context> const &cr, int const w, 
         cr->scale(minwh / 2.0, minwh / 2.0);
         cr->translate(1.0, 1.0);
 
-        if (is_fill) {
+        if (_is_fill) {
             cr->arc(0.0, 0.0, 0.35, 0.0, 2 * M_PI);
             cr->fill();
         }
 
-        if (is_stroke) {
+        if (_is_stroke) {
             cr->set_fill_rule(Cairo::Context::FillRule::EVEN_ODD);
             cr->arc(0.0, 0.0, 0.65, 0.0, 2 * M_PI);
             cr->arc(0.0, 0.0, 0.5, 0.0, 2 * M_PI);
@@ -352,16 +354,17 @@ void ColorItem::on_click(bool stroke)
         sp_repr_css_set_property(css.get(), attr_name, "none");
         descr = stroke ? _("Set stroke color to none") : _("Set fill color to none");
     } else if (auto const rgbdata = std::get_if<RGBData>(&data)) {
-        auto [r, g, b] = rgbdata->rgb;
+        auto [r, g, b] = *rgbdata;
         std::uint32_t rgba = (r << 24) | (g << 16) | (b << 8) | 0xff;
         char buf[64];
         sp_svg_write_color(buf, sizeof(buf), rgba);
         sp_repr_css_set_property(css.get(), attr_name, buf);
         descr = stroke ? _("Set stroke color from swatch") : _("Set fill color from swatch");
-    } else if (auto const graddata = std::get_if<GradientData>(&data)) {
-        auto grad = graddata->gradient;
-        if (!grad) return;
-        auto colorspec = "url(#" + Glib::ustring(grad->getId()) + ")";
+    } else if (auto const grad = std::get_if<GradientData>(&data)) {
+        if (!*grad) {
+            return;
+        }
+        auto colorspec = "url(#" + Glib::ustring((*grad)->getId()) + ")";
         sp_repr_css_set_property(css.get(), attr_name, colorspec.c_str());
         descr = stroke ? _("Set stroke color from swatch") : _("Set fill color from swatch");
     }
@@ -449,7 +452,7 @@ void ColorItem::action_set_stroke()
 
 void ColorItem::action_delete()
 {
-    auto const grad = std::get<GradientData>(data).gradient;
+    auto const grad = std::get<GradientData>(data);
     if (!grad) return;
 
     grad->setSwatch(false);
@@ -458,7 +461,7 @@ void ColorItem::action_delete()
 
 void ColorItem::action_edit()
 {
-    auto const grad = std::get<GradientData>(data).gradient;
+    auto const grad = std::get<GradientData>(data);
     if (!grad) return;
 
     auto desktop = dialog->getDesktop();
@@ -485,7 +488,7 @@ void ColorItem::action_edit()
 void ColorItem::action_toggle_pin()
 {
     if (auto const graddata = std::get_if<GradientData>(&data)) {
-        auto const grad = graddata->gradient;
+        auto const grad = *graddata;
         if (!grad) return;
 
         grad->setPinned(!is_pinned());
@@ -513,19 +516,19 @@ void ColorItem::action_convert(Glib::ustring const &name)
 
 PaintDef ColorItem::to_paintdef() const
 {
-    if (is_paint_none()) {
-        return PaintDef();
-    } else if (auto const rgbdata = std::get_if<RGBData>(&data)) {
-        return PaintDef(rgbdata->rgb, description, "");
-    } else if (auto const graddata = std::get_if<GradientData>(&data)) {
-        auto const grad = graddata->gradient;
-        assert(grad != nullptr);
-        return PaintDef({0, 0, 0}, grad->getId(), "");
-    }
-
-    // unreachable
-    assert(false);
-    return {};
+    return std::visit(VariantVisitor{[](Undefined) -> PaintDef {
+                                         assert(false);
+                                         return {};
+                                     },
+                                     [](PaintNone) -> PaintDef { return {}; },
+                                     [this](RGBData const &rgb) -> PaintDef {
+                                         return {rgb, description, ""};
+                                     },
+                                     [this](GradientData gradient_data) -> PaintDef {
+                                         g_assert(gradient_data);
+                                         return {{0, 0, 0}, gradient_data->getId(), ""};
+                                     }},
+                      data);
 }
 
 Glib::RefPtr<Gdk::ContentProvider> ColorItem::on_drag_prepare(Gtk::DragSource const &, double, double)
@@ -550,22 +553,32 @@ void ColorItem::on_drag_begin(Gtk::DragSource &source, Glib::RefPtr<Gdk::Drag> c
     source.set_icon(texture, 0, 0);
 }
 
-void ColorItem::set_fill(bool b)
+void ColorItem::_set_indicator_impl(bool enable, bool ColorItem::*indicator)
 {
-    is_fill = b;
-    queue_draw();
+    if (this->*indicator != enable) {
+        this->*indicator = enable;
+        queue_draw();
+    }
 }
 
-void ColorItem::set_stroke(bool b)
+void ColorItem::refresh_label_text()
 {
-    is_stroke = b;
-    queue_draw();
+    auto *parent = get_parent();
+    if (!parent) {
+        return;
+    }
+    UI::for_each_child(*parent, [this](Gtk::Widget &sibling) {
+        if (auto label = dynamic_cast<Gtk::Label *>(&sibling)) {
+            label->set_text(description);
+        }
+        return UI::ForEachResult::_continue;
+    });
 }
 
 bool ColorItem::is_pinned() const
 {
     if (auto const graddata = std::get_if<GradientData>(&data)) {
-        auto const grad = graddata->gradient;
+        auto const grad = *graddata;
         return grad && grad->isPinned();
     } else {
         return Inkscape::Preferences::get()->getBool(pinned_pref, pinned_default);
@@ -574,33 +587,36 @@ bool ColorItem::is_pinned() const
 
 std::array<double, 3> ColorItem::average_color() const
 {
-    if (is_paint_none()) {
-        return {1.0, 1.0, 1.0};
-    } else if (auto const rgbdata = std::get_if<RGBData>(&data)) {
-        auto [r, g, b] = rgbdata->rgb;
-        return {r / 255.0, g / 255.0, b / 255.0};
-    } else if (auto const graddata = std::get_if<GradientData>(&data)) {
-        auto grad = graddata->gradient;
-        auto pat = Cairo::RefPtr<Cairo::Pattern>(new Cairo::Pattern(grad->create_preview_pattern(1), true));
-        auto img = Cairo::ImageSurface::create(Cairo::Surface::Format::ARGB32, 1, 1);
-        auto cr = Cairo::Context::create(img);
-        cr->set_source_rgb(196.0 / 255.0, 196.0 / 255.0, 196.0 / 255.0);
-        cr->paint();
-        cr->set_source(pat);
-        cr->paint();
-        auto rgb = img->get_data();
-        return {rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0};
-    }
+    using Ret = std::array<double, 3>;
+    return std::visit(VariantVisitor{[](Undefined) -> Ret {
+                                         assert(false);
+                                         return {1.0, 1.0, 1.0};
+                                     },
+                                     [](PaintNone) -> Ret {
+                                         return {1.0, 1.0, 1.0};
+                                     },
 
-    // unreachable
-    assert(false);
-    return {1.0, 1.0, 1.0};
+                                     [](const RGBData &rgb) -> Ret {
+                                         return {rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0};
+                                     },
+                                     [](GradientData grad) -> Ret {
+                                         auto pat = Cairo::RefPtr<Cairo::Pattern>(
+                                             new Cairo::Pattern(grad->create_preview_pattern(1), true));
+                                         auto img = Cairo::ImageSurface::create(Cairo::Surface::Format::ARGB32, 1, 1);
+                                         auto cr = Cairo::Context::create(img);
+                                         cr->set_source_rgb(196.0 / 255.0, 196.0 / 255.0, 196.0 / 255.0);
+                                         cr->paint();
+                                         cr->set_source(pat);
+                                         cr->paint();
+                                         auto rgb = img->get_data();
+                                         return {rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0};
+                                     }},
+                      data);
 }
 
 bool ColorItem::is_paint_none() const {
     return std::holds_alternative<PaintNone>(data);
 }
-
 
 } // namespace Inkscape::UI::Dialog
 
