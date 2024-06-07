@@ -300,6 +300,8 @@ void SPTextPath::set(SPAttr key, const gchar* value) {
                     std::cerr << "SPTextPath: Bad side value: " << (value?value:"null") << std::endl;
                     side = SP_TEXT_PATH_SIDE_LEFT;
                 }
+                sourcePath->sourceDirty = true;
+                this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
                 break;
             case SPAttr::STARTOFFSET:
                 this->startOffset.readOrUnset(value);
