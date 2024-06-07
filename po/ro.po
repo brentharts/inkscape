@@ -6250,7 +6250,7 @@ msgstr "Interoghează lățimea "
 
 #: ../src/actions/actions-base.cpp:220
 msgid "Query 'width' value(s) of object(s)"
-msgstr "Interoghează 'lățimea' valoarea/valorile elementului/elementelor"
+msgstr "Interoghează 'lățimea' valoarea/valorile obiectului/obiectelor"
 
 #: ../src/actions/actions-base.cpp:221
 msgid "Query Height"
@@ -6258,7 +6258,7 @@ msgstr "Interoghează înălțimea"
 
 #: ../src/actions/actions-base.cpp:221
 msgid "Query 'height' value(s) of object(s)"
-msgstr "Interoghează 'înălțimea' valoarea/valorile elementului/elementelor"
+msgstr "Interoghează 'înălțimea' valoarea/valorile obiectului/obiectelor"
 
 #: ../src/actions/actions-base.cpp:222
 msgid "Query All"
@@ -6315,7 +6315,7 @@ msgstr "Mod de afișare: suprapunere de contur"
 msgid ""
 "Show objects as outlines, and the actual drawing below them with reduced "
 "opacity"
-msgstr "Arată conturul elementelor cu desenul propriu-zis dedesubt și cu opacitate redusă"
+msgstr "Arată conturul obiectelor  cu desenul propriu-zis dedesubt și cu opacitate redusă"
 
 #: ../src/actions/actions-canvas-mode.cpp:272
 msgid "Display Mode: Cycle"
@@ -6532,11 +6532,11 @@ msgstr "Comută alipirea la puncte diverse (global)"
 
 #: ../src/actions/actions-canvas-snapping.cpp:266
 msgid "Snap Object Midpoint"
-msgstr "Alipește mijlocul elementului"
+msgstr "Alipește mijlocul obiectului"
 
 #: ../src/actions/actions-canvas-snapping.cpp:266
 msgid "Toggle snapping to object midpoint"
-msgstr "Comută alipirea la mijlocul elementului"
+msgstr "Comută alipirea la mijlocul obiectului"
 
 #: ../src/actions/actions-canvas-snapping.cpp:267
 msgid "Snap Rotation Center"
@@ -6544,7 +6544,7 @@ msgstr "Alipește la centrul de rotație"
 
 #: ../src/actions/actions-canvas-snapping.cpp:267
 msgid "Toggle snapping to object rotation center"
-msgstr "Comută alipirea la centrul de rotație al elementului"
+msgstr "Comută alipirea la centrul de rotație al obiectului"
 
 #: ../src/actions/actions-canvas-snapping.cpp:268
 msgid "Snap Text Baselines"
@@ -7132,7 +7132,7 @@ msgstr "Lipește în loc"
 #: ../src/actions/actions-edit-window.cpp:64
 msgid ""
 "Paste objects from clipboard to the original position of the copied objects"
-msgstr "Lipește elementele copiate în poziția originală a elementelor copiate"
+msgstr "Lipește obiectele  copiate în poziția originală a obiectelor  copiate"
 
 #: ../src/actions/actions-edit-window.cpp:65
 #: ../src/ui/toolbar/node-toolbar.cpp:336
@@ -7150,7 +7150,7 @@ msgstr "Duplicare și transformare"
 
 #: ../src/actions/actions-edit.cpp:287
 msgid "Objects to Pattern"
-msgstr "Transformă elementul în model de umplere"
+msgstr "Transformă obiectul în model de umplere"
 
 #: ../src/actions/actions-edit.cpp:287
 msgid "Convert selection to a rectangle with tiled pattern fill"
@@ -7158,7 +7158,7 @@ msgstr "Convertește selecția într-un dreptunghi cu umplutură de model mozaic
 
 #: ../src/actions/actions-edit.cpp:288
 msgid "Pattern to Objects"
-msgstr "Transformă tiparul de umplere in element"
+msgstr "Transformă tiparul de umplere in obiect"
 
 #: ../src/actions/actions-edit.cpp:288
 msgid "Extract objects from a tiled pattern fill"
@@ -7166,7 +7166,7 @@ msgstr "Extrage obiectele dintr-o umplutură de model mozaicat"
 
 #: ../src/actions/actions-edit.cpp:289
 msgid "Objects to Marker"
-msgstr "Transformă elementul în marcator de traseu"
+msgstr "Transformă obiectul în marcator de traseu"
 
 #: ../src/actions/actions-edit.cpp:289
 msgid "Convert selection to a line marker"
@@ -7174,7 +7174,7 @@ msgstr "Convertește selecția într-un marcator de linie"
 
 #: ../src/actions/actions-edit.cpp:290
 msgid "Objects to Guides"
-msgstr "Transformă elementele în ghidaje"
+msgstr "Transformă obiectele în ghidaje"
 
 #: ../src/actions/actions-edit.cpp:290
 msgid ""
@@ -7202,7 +7202,7 @@ msgstr "Copiază selecția în clipboard"
 
 #: ../src/actions/actions-edit.cpp:293
 msgid "Paste Style"
-msgstr "Aplică selecției stilul elementului copiat"
+msgstr "Aplică selecției stilul obiectului copiat"
 
 #: ../src/actions/actions-edit.cpp:293
 msgid "Apply the style of the copied object to selection"
@@ -7210,7 +7210,7 @@ msgstr "Aplică la selecție stilul obiectului copiat"
 
 #: ../src/actions/actions-edit.cpp:294
 msgid "Paste Size"
-msgstr "Aplică selecției dimensiunea elementului copiat"
+msgstr "Aplică selecției dimensiunea obiectului copiat"
 
 #: ../src/actions/actions-edit.cpp:294
 msgid "Scale selection to match the size of the copied object"
@@ -7218,7 +7218,7 @@ msgstr "Dimensionează selecția pentru a se potrivi cu dimensiunea obiectului c
 
 #: ../src/actions/actions-edit.cpp:295
 msgid "Paste Width"
-msgstr "Aplică selecției lățimea elementului copiat"
+msgstr "Aplică selecției lățimea obiectului copiat"
 
 #: ../src/actions/actions-edit.cpp:295
 msgid "Scale selection horizontally to match the width of the copied object"
@@ -7228,7 +7228,7 @@ msgstr ""
 
 #: ../src/actions/actions-edit.cpp:296
 msgid "Paste Height"
-msgstr "Aplică selecției înălțimea elementului copiat"
+msgstr "Aplică selecției înălțimea obiectului copiat"
 
 #: ../src/actions/actions-edit.cpp:296
 msgid "Scale selection vertically to match the height of the copied object"
@@ -7350,7 +7350,7 @@ msgstr "Șterge selecția, nodurile sau textul"
 
 #: ../src/actions/actions-edit.cpp:309
 msgid "Delete Items"
-msgstr "Șterge elementele"
+msgstr "Șterge obiectele"
 
 #: ../src/actions/actions-edit.cpp:309
 msgid "Delete selected items"
@@ -7358,7 +7358,7 @@ msgstr "Șterge selecția"
 
 #: ../src/actions/actions-edit.cpp:310 
 msgid "Paste Path Effect"
-msgstr "Aplică efectul de traseu elementului selectat"
+msgstr "Aplică efectul de traseu obiectului selectat"
 
 #: ../src/actions/actions-edit.cpp:310
 msgid "Apply the path effect of the copied object to selection"
@@ -7702,27 +7702,27 @@ msgstr "ro"
 
 #: ../src/actions/actions-hide-lock.cpp:80
 msgid "Unhid all objects in the current layer"
-msgstr "Am dezvăluit elementele din stratul curent"
+msgstr "Am dezvăluit obiectele din stratul curent"
 
 #: ../src/actions/actions-hide-lock.cpp:94
 msgid "Unlocked all objects in the current layer"
-msgstr "Am deblocat toate elementele din stratul curent"
+msgstr "Am deblocat toate obiectele din stratul curent"
 
 #: ../src/actions/actions-hide-lock.cpp:117
 msgid "Unhid selected items and their descendents."
-msgstr "Am dezvăluit toate elementele din selecție și descendenții lor"
+msgstr "Am dezvăluit toate obiectele din selecție și descendenții lor"
 
 #: ../src/actions/actions-hide-lock.cpp:140
 msgid "Unlocked selected items and their descendents."
-msgstr "Am deblocat elementele din selecție și descendenții lor"
+msgstr "Am deblocat obiectele din selecție și descendenții lor"
 
 #: ../src/actions/actions-hide-lock.cpp:163
 msgid "Hid selected items."
-msgstr "Am ascuns elementele din selecție"
+msgstr "Am ascuns obiectele din selecție"
 
 #: ../src/actions/actions-hide-lock.cpp:163
 msgid "Unhid selected items."
-msgstr "Am dezvăluit elementele din selecție"
+msgstr "Am dezvăluit obiectele din selecție"
 
 #: ../src/actions/actions-hide-lock.cpp:187
 msgid "Locked selected items."
@@ -7738,7 +7738,7 @@ msgstr "Dezvăluie tot"
 
 #: ../src/actions/actions-hide-lock.cpp:195
 msgid "Unhide all objects"
-msgstr "Dezvăluie toate elementele"
+msgstr "Dezvăluie toate obiectele"
 
 #: ../src/actions/actions-hide-lock.cpp:196 ../share/ui/menus.ui:938
 msgid "Unlock All"
@@ -7746,7 +7746,7 @@ msgstr "Deblochează tot"
 
 #: ../src/actions/actions-hide-lock.cpp:196
 msgid "Unlock all objects"
-msgstr "Deblochează accesul la toate elementele"
+msgstr "Deblochează accesul la toate obiectele"
 
 #: ../src/actions/actions-hide-lock.cpp:198
 msgid "Hide selection"
@@ -7770,7 +7770,7 @@ msgstr "Dezvăluie descendenții"
 
 #: ../src/actions/actions-hide-lock.cpp:200
 msgid "Unhide all items inside selected objects"
-msgstr "Dezvăluie toate elementele dinăuntrul selecției"
+msgstr "Dezvăluie toate obiectele dinăuntrul selecției"
 
 #: ../src/actions/actions-hide-lock.cpp:202
 msgid "Lock selection"
@@ -7778,7 +7778,7 @@ msgstr "Blochează accesul la selecție"
 
 #: ../src/actions/actions-hide-lock.cpp:202
 msgid "Lock all selected objects"
-msgstr "Blochează accesul la toate elementele selectate"
+msgstr "Blochează accesul la toate obiectele selectate"
 
 #: ../src/actions/actions-hide-lock.cpp:203
 msgid "Unlock selection"
@@ -7786,7 +7786,7 @@ msgstr "Deblochează accesul la selecție"
 
 #: ../src/actions/actions-hide-lock.cpp:203
 msgid "Unlock all selected objects"
-msgstr "Deblochează toate elementele din selecție"
+msgstr "Deblochează toate obiectele din selecție"
 
 #: ../src/actions/actions-hide-lock.cpp:204
 msgid "Unlock descendents"
@@ -7794,7 +7794,7 @@ msgstr "Deblochează descendenții"
 
 #: ../src/actions/actions-hide-lock.cpp:204
 msgid "Unlock all items inside selected objects"
-msgstr "Deblochează toate elementele dinăuntrul selecției"
+msgstr "Deblochează toate obiectele dinăuntrul selecției"
 
 #: ../src/actions/actions-layer.cpp:56
 msgid "Duplicate layer"
@@ -8217,7 +8217,7 @@ msgstr "Aliniază selecția către centru"
 
 #: ../src/actions/actions-object-align.cpp:780
 msgid "Align text objects"
-msgstr "Aliniază elementele de text"
+msgstr "Aliniază obiectele text"
 
 #: ../src/actions/actions-object-align.cpp:780 
 msgid ""
@@ -8229,14 +8229,14 @@ msgstr ""
 
 #: ../src/actions/actions-object-align.cpp:782
 msgid "Distribute objects"
-msgstr "Distribuie elementele"
+msgstr "Distribuie obiectele"
 
 #: ../src/actions/actions-object-align.cpp:782
 msgid ""
 "Distribute selected objects; usage: [hgap | left | hcenter | right | vgap | "
 "top | vcenter | bottom]"
 msgstr ""
-"Distribuie elementele din selecție; folosire: [hgap | left | "
+"Distribuie obiectele din selecție; folosire: [hgap | left | "
 "hcenter | right | vgap | top | vcenter | bottom]"
 
 #: ../src/actions/actions-object-align.cpp:783
@@ -8315,7 +8315,7 @@ msgstr "Distribuie vertical cu o spațiere regulată  între marginile inferioar
 #: ../src/actions/actions-object-align.cpp:793
 #: ../src/actions/actions-object-align.cpp:794
 msgid "Distribute text objects"
-msgstr "Distribuie elemente de text"
+msgstr "Distribuie obiectele text"
 
 #: ../src/actions/actions-object-align.cpp:792
 msgid "Distribute text anchors; usage [vertical | horizontal]"
@@ -8333,14 +8333,14 @@ msgstr "Distribuie vertical nodurile de control ale textului"
 
 #: ../src/actions/actions-object-align.cpp:796
 msgid "Rearrange objects"
-msgstr "Rearanjează elementele"
+msgstr "Rearanjează obiectele"
 
 #: ../src/actions/actions-object-align.cpp:796 
 msgid ""
 "Rearrange selected objects; usage: [graph | exchange | exchangez | rotate | "
 "randomize | unclump]"
 msgstr ""
-"Rearanjează elementele din selecție: folosire [graph | exchange | exchangez "
+"Rearanjează obiectele din selecție: folosire [graph | exchange | exchangez "
 "| rotate | randomize | unclump]"
 
 #: ../src/actions/actions-object-align.cpp:797
@@ -8360,7 +8360,7 @@ msgstr "Interschimbă în ordinea selecției"
 #: ../src/actions/actions-object-align.cpp:798
 #: ../share/ui/align-and-distribute.ui:904
 msgid "Exchange positions of selected objects - selection order"
-msgstr "Interschimbă pozițiile elementelor din selecție - în ordinea selecției"
+msgstr "Interschimbă pozițiile obiectelor din selecție - în ordinea selecției"
 
 #: ../src/actions/actions-object-align.cpp:799
 msgid "Exchange in z-order"
@@ -8369,7 +8369,7 @@ msgstr "Interschimbă în ordinea 'z' (ex: de la suprafața cu de dedesubt)"
 #: ../src/actions/actions-object-align.cpp:799
 #: ../share/ui/align-and-distribute.ui:921
 msgid "Exchange positions of selected objects - stacking order"
-msgstr "Interschimbă pozițiile elementelor din selecție - în ordinea stivuirii (vezi: ordinea 'z')"
+msgstr "Interschimbă pozițiile obiectelor din selecție - în ordinea stivuirii (vezi: ordinea 'z')"
 
 #: ../src/actions/actions-object-align.cpp:800
 msgid "Exchange around center"
@@ -8378,7 +8378,7 @@ msgstr "Interschimbă în jurul centrului"
 #: ../src/actions/actions-object-align.cpp:800
 #: ../share/ui/align-and-distribute.ui:938
 msgid "Exchange positions of selected objects - rotate around center point"
-msgstr "Interschimbă pozițiile elementelor din selecție - rotește în jurul centrelor punctelor"
+msgstr "Interschimbă pozițiile obiectelor din selecție - rotește în jurul centrelor punctelor"
 
 #: ../src/actions/actions-object-align.cpp:801
 msgid "Random exchange"
@@ -8396,13 +8396,13 @@ msgstr "Deconglomerează"
 #: ../src/actions/actions-object-align.cpp:802
 #: ../share/ui/align-and-distribute.ui:972
 msgid "Unclump objects: try to equalize edge-to-edge distances"
-msgstr "Deconglomerează elementele: încearca să egalizeze distanțele din margine in margine"
+msgstr "Deconglomerează obiectele: încearca să egalizeze distanțele din margine in margine"
 
 #: ../src/actions/actions-object-align.cpp:804 
 msgid ""
 "Remove overlaps between objects: requires two comma separated numbers "
 "(horizontal and vertical gaps)"
-msgstr "Înlătură suprapunerile dintre elemente: necesita două valori separate de virgule "
+msgstr "Înlătură suprapunerile dintre obiecte: necesita două valori separate de virgule "
 "(interstiții orizontale și verticale)"
 
 #: ../src/actions/actions-object-align.cpp:811
@@ -8510,7 +8510,7 @@ msgstr "Dezleagă clonele și simbolurile"
 
 #: ../src/actions/actions-object.cpp:308
 msgid "Object To Path"
-msgstr "Transformă elementul într-un traseu"
+msgstr "Transformă obiectul într-un traseu"
 
 #: ../src/actions/actions-object.cpp:308
 msgid "Convert shapes to paths"
@@ -8534,46 +8534,46 @@ msgstr "Transformă contururile în traseu"
 
 #: ../src/actions/actions-object.cpp:312
 msgid "Object Clip Set"
-msgstr "Atribuie elementul folosit la decupare"
+msgstr "Atribuie obiectul folosit la decupare"
 
 #: ../src/actions/actions-object.cpp:312
 msgid ""
 "Apply clipping path to selection (using the topmost object as clipping path)"
 msgstr ""
 "Aplică un traseu de decupare a selecției "
-"(folosind cel mai din top element pentru decupare)"
+"(folosind cel mai din top obiect pentru decupare)"
 
 #: ../src/actions/actions-object.cpp:313
 msgid "Object Clip Set Inverse"
-msgstr "Atribuie elementul folosit la decupare în negativ"
+msgstr "Atribuie obiectul folosit la decupare în negativ"
 
 #: ../src/actions/actions-object.cpp:313
 msgid "Apply inverse clipping path to selection (Power Clip LPE)"
-msgstr "Aplică elementul folosit la decupare în negativ, selecției (Power CLip LPE)"
+msgstr "Aplică traseul folosit la decupare în negativ, selecției (Power CLip LPE)"
 
 #: ../src/actions/actions-object.cpp:314
 msgid "Object Clip Release"
-msgstr "Revocă elementul folosit la decupare"
+msgstr "Revocă obiectul folosit la decupare"
 
 #: ../src/actions/actions-object.cpp:314
 msgid "Remove clipping path from selection"
-msgstr "Elimină elementul folosit la decupare din selecție"
+msgstr "Elimină traseul folosit la decupare din selecție"
 
 #: ../src/actions/actions-object.cpp:315
 msgid "Object Clip Set Group"
-msgstr "Atribuie elementul folosit la decuparea unui grup"
+msgstr "Atribuie obiectul folosit la decuparea unui grup"
 
 #: ../src/actions/actions-object.cpp:315 
 msgid ""
 "Create a self-clipping group to which objects (not contributing to the clip-"
 "path) can be added"
 msgstr ""
-"Creează un grup de audo-decupare căruia îi pot fi adăugate elemente "
+"Creează un grup de audo-decupare căruia îi pot fi adăugate obiecte "
 "(care nu contribuie la traseul de decupare)"
 
 #: ../src/actions/actions-object.cpp:316
 msgid "Object Mask Set"
-msgstr "Atribuie elementul de mascare"
+msgstr "Atribuie obiectul de mascare"
 
 #: ../src/actions/actions-object.cpp:316
 msgid "Apply mask to selection (using the topmost object as mask)"
@@ -8581,7 +8581,7 @@ msgstr "Aplică mascarea la selecție (folosind obiectul cel mai de sus ca masc�
 
 #: ../src/actions/actions-object.cpp:317
 msgid "Object Mask Set Inverse"
-msgstr "Atribuie elementul de mascare în negativ"
+msgstr "Atribuie obiectul de mascare în negativ"
 
 #: ../src/actions/actions-object.cpp:317
 msgid "Apply inverse mask to selection (Power Mask LPE)"
@@ -8589,7 +8589,7 @@ msgstr "Aplică mascarea în negativ selecției (Power Mask LPE) "
 
 #: ../src/actions/actions-object.cpp:318
 msgid "Object Mask Release"
-msgstr "Revocă elementul de mascare"
+msgstr "Revocă obiectul de mascare"
 
 #: ../src/actions/actions-object.cpp:318
 msgid "Remove mask from selection"
@@ -8597,7 +8597,7 @@ msgstr "Elimină mascarea din selecție"
 
 #: ../src/actions/actions-object.cpp:320
 msgid "Object Rotate 90"
-msgstr "Rotește elementul cu 90 de grade"
+msgstr "Rotește obiectul cu 90 de grade"
 
 #: ../src/actions/actions-object.cpp:320
 #: ../src/ui/toolbar/select-toolbar.cpp:120
@@ -8615,7 +8615,7 @@ msgstr "Rotește selecția 90° în sens antiorar"
 
 #: ../src/actions/actions-object.cpp:322 
 msgid "Object Flip Horizontal"
-msgstr "Întoarce elementul în sens orizontal"
+msgstr "Întoarce obiectul în sens orizontal"
 
 #: ../src/actions/actions-object.cpp:322
 #: ../src/ui/toolbar/select-toolbar.cpp:130
@@ -8624,7 +8624,7 @@ msgstr "Întoarce pe orizontală obiectele selectate"
 
 #: ../src/actions/actions-object.cpp:323
 msgid "Object Flip Vertical"
-msgstr "Întoarce elementul în plan vertical"
+msgstr "Întoarce obiectul în plan vertical"
 
 #: ../src/actions/actions-object.cpp:323
 #: ../src/ui/toolbar/select-toolbar.cpp:140
@@ -8738,7 +8738,7 @@ msgstr "Exportă doar un "
 #: ../src/actions/actions-output.cpp:251
 msgid "Hide any objects not given in export-id option"
 msgstr ""
-"Ascunde orice elemente nespecificate în opțiunea de export ID"
+"Ascunde orice obiecte nespecificate în opțiunea de export ID"
 
 #: ../src/actions/actions-output.cpp:253
 msgid "Export Plain SVG"
@@ -8972,11 +8972,11 @@ msgstr "Șterge pagina selectată"
 
 #: ../src/actions/actions-pages.cpp:95
 msgid "Move Objects with Page"
-msgstr "Mută elementele împreună cu pagină"
+msgstr "Mută obiectele împreună cu pagină"
 
 #: ../src/actions/actions-pages.cpp:95
 msgid "Move overlapping objects as the page is moved"
-msgstr "Mută elementele ce se suprapun pe masură ce pagina este mutată"
+msgstr "Mută obiectele ce se suprapun pe masură ce pagina este mutată"
 
 #: ../src/actions/actions-pages.cpp:96 ../share/ui/toolbar-page.ui:154
 msgid "Move Before Previous"
@@ -9086,7 +9086,7 @@ msgstr "Fractură"
 
 #: ../src/actions/actions-paths.cpp:235
 msgid "Fracture one or more overlapping objects into all possible segments"
-msgstr "Fracturează una sau mai multe elemente suprapuse în toate segmentele posibile"
+msgstr "Fracturează una sau mai multe obiecte suprapuse în toate segmentele posibile"
 
 #: ../src/actions/actions-paths.cpp:236
 msgctxt "Path flatten"
@@ -9095,7 +9095,7 @@ msgstr "Aplatizează"
 
 #: ../src/actions/actions-paths.cpp:236
 msgid "Flatten one or more overlapping objects into their visible parts"
-msgstr "Aplatizează una sau mai multe elemente suprapuse în părțile lor vizibile"
+msgstr "Aplatizează una sau mai multe obiecte suprapuse în părțile lor vizibile"
 
 #: ../src/actions/actions-paths.cpp:237 ../share/ui/menus.ui:1076
 msgid "Fill between paths"
@@ -9498,7 +9498,7 @@ msgstr "Atribuie copia de rezervă a selecției"
 
 #: ../src/actions/actions-selection.cpp:251 
 msgid "Set backup of current selection of objects or nodes"
-msgstr "Atribuie o copie de rezervă a selecției curente de elemente și noduri"
+msgstr "Atribuie o copie de rezervă a selecției curente de obiecte și noduri"
 
 #: ../src/actions/actions-selection.cpp:252
 msgid "Restore selection backup"
@@ -9506,7 +9506,7 @@ msgstr "Restaurează copia de rezervă a selecției"
 
 #: ../src/actions/actions-selection.cpp:252
 msgid "Restore backup of stored selection of objects or nodes"
-msgstr "Restaurează copia de rezervă stocată a selecției de elemente și noduri"
+msgstr "Restaurează copia de rezervă stocată a selecției de obiecte și noduri"
 
 #: ../src/actions/actions-selection.cpp:253
 msgid "Empty selection backup"
@@ -9514,7 +9514,7 @@ msgstr "Golește copia de rezervă a selecției"
 
 #: ../src/actions/actions-selection.cpp:253
 msgid "Empty stored backup of selection of objects or nodes"
-msgstr "Golește copia de rezervă a selecției de elemente și noduri"
+msgstr "Golește copia de rezervă a selecției de obiecte și noduri"
 
 #: ../src/actions/actions-text.cpp:67
 msgid "Put on Path"
@@ -9915,7 +9915,7 @@ msgstr "Unealta de pulverizare"
 
 #: ../src/actions/actions-tools.cpp:384
 msgid "Spray copies or clones of objects"
-msgstr "Pulverizează copii sau clone ale elementelor"
+msgstr "Pulverizează copii sau clone ale obiectelor"
 
 #: ../src/actions/actions-tools.cpp:385
 msgid "Eraser Tool"
@@ -9923,7 +9923,7 @@ msgstr "Unealta radieră"
 
 #: ../src/actions/actions-tools.cpp:385
 msgid "Erase objects or paths"
-msgstr "Șterge elemente sau linii"
+msgstr "Șterge obiecte sau linii"
 
 #: ../src/actions/actions-tools.cpp:386
 msgid "Connector Tool"
@@ -9955,7 +9955,7 @@ msgstr "Unealta pentru măsurare"
 
 #: ../src/actions/actions-tools.cpp:390
 msgid "Measure objects"
-msgstr "Măsoară elemente"
+msgstr "Măsoară obiectele"
 
 #: ../src/actions/actions-tools.cpp:391
 msgid "Pages Tool"
@@ -10022,7 +10022,7 @@ msgstr "Mărește/micșorează"
 
 #: ../src/actions/actions-transform.cpp:124
 msgid "Grow/shrink selected objects"
-msgstr "Mărește/micșorează elementele din selecție"
+msgstr "Mărește/micșorează obiectele din selecție"
 
 #: ../src/actions/actions-transform.cpp:125
 msgid "Grow/Shrink Step"
@@ -10247,11 +10247,11 @@ msgstr "Arată sau ascunde paleta de culori"
 
 #: ../src/actions/actions-view-mode.cpp:272
 msgid "Statusbar"
-msgstr "Bara de informații"
+msgstr "Bara de statut"
 
 #: ../src/actions/actions-view-mode.cpp:272
 msgid "Show or hide the statusbar (at the bottom of the window)"
-msgstr "Arată sau ascunde bara de stare (în partea de jos a ferestrei)"
+msgstr "Arată sau ascunde bara de statut(în partea de jos a ferestrei)"
 
 #: ../src/actions/actions-view-mode.cpp:274
 #: ../src/ui/dialog/inkscape-preferences.cpp:2188
@@ -10394,7 +10394,7 @@ msgstr "<b>Linii de ghidaj</b>: %s"
 
 #: ../src/desktop-style.cpp:247
 msgid "<b>Locked</b> object(s) cannot be modified."
-msgstr "<b>Încuiat</b> elementele nu pot fi modificate"
+msgstr "<b>Încuiat</b> obiectele nu pot fi modificate"
 
 #: ../src/desktop.cpp:491
 msgid "No previous transform."
@@ -10472,7 +10472,7 @@ msgstr "Originea ghidajului"
 
 #: ../src/display/control/snap-indicator.cpp:56
 msgid "Object rotation center"
-msgstr "Centrul de rotație al elementului"
+msgstr "Centrul de rotație al obiectului"
 
 #: ../src/display/control/snap-indicator.cpp:57
 msgid "Object midpoint"
@@ -11489,7 +11489,7 @@ msgid ""
 "When exporting from the Export dialog, you can choose objects to export. "
 "'Save a copy' / 'Save as' will export all pages."
 msgstr ""
-"Când exporți din fereastra de Export, poți alege ce elemente să exporți."
+"Când exporți din fereastra de Export, poți alege ce obiecte să exporți."
 "Salvează o copie' / 'Salvează ca' vor exporta toate paginile"
 
 #: ../src/extension/internal/cairo-ps-out.cpp:301
@@ -14810,7 +14810,7 @@ msgid ""
 "The accuracy of the physical unit size and position values of objects\n"
 "in the file is most important. (Experimental.)"
 msgstr ""
-"Acuratețea unităților de măsură și valorile de poziție ale elementelor\n"
+"Acuratețea unităților de măsură și valorile de poziție ale obiectelor\n"
 "în fișier este deosebit de importantă. (Experimental.)"
 
 # fără punct în mod deliberat
@@ -14861,7 +14861,7 @@ msgstr ""
 "Este posibil ca scara lucrării de artă în raport cu dimensiunea documentului "
 "să nu fie exactă.\n"
 "\n"
-"<b>Scalarea elementelor individuale din opera de artă:</b> această metodă "
+"<b>Scalarea obiectelor individuale din opera de artă:</b> această metodă "
 "este mai puțin fiabilă și poate duce la modificarea aspectului,\n"
 "dar este mai bine pentru ieșirea fizică care se bazează pe dimensiuni și "
 "poziții precise (de exemplu, pentru imprimarea 3D.)\n"
@@ -15234,7 +15234,7 @@ msgid ""
 "%s %d for: %s%s; drag with <b>Ctrl</b> to snap offset; click with "
 "<b>Ctrl+Alt</b> to delete stop"
 msgstr ""
-"%s %d pentru: %s%s; trageți cu <b>Ctrl</b> pentru a acroșa decalajul; clic "
+"%s %d pentru: %s%s; trageți cu <b>Ctrl</b> pentru a alipi decalajul; clic "
 "cu <b>Ctrl+Alt</b> pentru a șterge oprirea"
 
 #: ../src/gradient-drag.cpp:1427 ../src/gradient-drag.cpp:1436
@@ -15255,7 +15255,7 @@ msgid ""
 "%s for: %s%s; drag with <b>Ctrl</b> to snap angle, with <b>Ctrl+Alt</b> to "
 "preserve angle, with <b>Ctrl+Shift</b> to scale around center"
 msgstr ""
-"%s pentru: %s%s; trageți cu <b>Ctrl</b> pentru a acroșa unghiul, cu "
+"%s pentru: %s%s; trageți cu <b>Ctrl</b> pentru a alipi unghiul, cu "
 "<b>Ctrl+Alt</b> pentru a păstra unghiul, cu <b>Ctrl+Shift</b> pentru a scala "
 "în jurul centrului"
 
@@ -15535,7 +15535,7 @@ msgstr "ID-UL-OBIECTULUI[;ID-UL-OBIECTULUI]*"
 
 #: ../src/inkscape-application.cpp:763
 msgid "Hide all objects except object with ID selected by export-id"
-msgstr "Ascunde toate elementele cu excepția celor cu ID-ul selectat de export-id"
+msgstr "Ascunde toate obiectele cu excepția celor cu ID-ul selectat de export-id"
 
 #: ../src/inkscape-application.cpp:764
 msgid "Remove Inkscape-specific SVG attributes/properties"
@@ -15567,7 +15567,7 @@ msgstr "Exportă textul separat într-un fișier LaTeX (PS/EPS/PDF)"
 
 #: ../src/inkscape-application.cpp:769
 msgid "Render objects without filters instead of rasterizing (PS/EPS/PDF)"
-msgstr "Redă elementele fără filtre în loc de a le rasteriza (PS/EPS/PDF)"
+msgstr "Redă obiectele fără filtre în loc de a le rasteriza (PS/EPS/PDF)"
 
 #: ../src/inkscape-application.cpp:770
 msgid ""
@@ -15612,11 +15612,11 @@ msgstr "Forțează dithering sau dezactivează-l"
 
 #: ../src/inkscape-application.cpp:778
 msgid "Query object/document geometry"
-msgstr "Chestionează geometria elementului/documentului"
+msgstr "Chestionează geometria obiectului/documentului"
 
 #: ../src/inkscape-application.cpp:779
 msgid "ID(s) of object(s) to be queried"
-msgstr "ID-urile elementelor de chestionat"
+msgstr "ID-urile obiectelor de chestionat"
 
 #: ../src/inkscape-application.cpp:779 ../src/inkscape-application.cpp:789
 msgid "OBJECT-ID[,OBJECT-ID]*"
@@ -15628,19 +15628,19 @@ msgstr "Tipărește casetele de încadrare ale tuturor obiectelor"
 
 #: ../src/inkscape-application.cpp:781 
 msgid "X coordinate of drawing or object (if specified by --query-id)"
-msgstr "Coordonata X a desenului sau elementului (dacă se specifică de --query-id)"
+msgstr "Coordonata X a desenului sau obiectului (dacă se specifică de --query-id)"
 
 #: ../src/inkscape-application.cpp:782
 msgid "Y coordinate of drawing or object (if specified by --query-id)"
-msgstr "Coordonata Y a desenului sau elementului (dacă se specifică de --query-id)"
+msgstr "Coordonata Y a desenului sau obiectului (dacă se specifică de --query-id)"
 
 #: ../src/inkscape-application.cpp:783
 msgid "Width of drawing or object (if specified by --query-id)"
-msgstr "Lățimea desenului sau elementului (dacă se specifică de --query-id)"
+msgstr "Lățimea desenului sau obiectului (dacă se specifică de --query-id)"
 
 #: ../src/inkscape-application.cpp:784
 msgid "Height of drawing or object (if specified by --query-id)"
-msgstr "Înălțimea desenului sau elementului (dacă se specifică de --query-id)"
+msgstr "Înălțimea desenului sau obiectului (dacă se specifică de --query-id)"
 
 #: ../src/inkscape-application.cpp:787
 msgid "Advanced file processing"
@@ -15652,7 +15652,7 @@ msgstr "Elimină definițiile nefolosite din <defs>-urile documentului"
 
 #: ../src/inkscape-application.cpp:789
 msgid "Select objects: comma-separated list of IDs"
-msgstr "Selectează elementele: o listă de ID-uri separate de virgule"
+msgstr "Selectează obiectele: o listă de ID-uri separate de virgule"
 
 #: ../src/inkscape-application.cpp:793
 msgid "List of actions (with optional arguments) to execute"
@@ -15867,7 +15867,7 @@ msgstr "Deformare înconjurătoare"
 
 #: ../src/live_effects/effect.cpp:218
 msgid "Adjust the shape of an object by transforming paths on its four sides"
-msgstr "Ajustează forma unui element transformându-i traseele de pe cele patru laturi"
+msgstr "Ajustează forma unui obiect transformându-i traseele de pe cele patru laturi"
 
 #: ../src/live_effects/effect.cpp:229
 msgctxt "path effect"
@@ -15905,7 +15905,7 @@ msgstr "Riglă"
 msgid ""
 "Add ruler marks to the object in adjustable intervals, using the object's "
 "stroke style."
-msgstr "Adaugă marcaje de riglă elementului în intervale ajustabile, folosindu-i stilul de contur"
+msgstr "Adaugă marcaje de riglă obiectului în intervale ajustabile, folosindu-i stilul de contur"
 
 #: ../src/live_effects/effect.cpp:286
 msgctxt "path effect"
@@ -15932,7 +15932,7 @@ msgid ""
 "Let an object take on the shape, fill, stroke and/or other attributes of "
 "another object."
 msgstr ""
-"Atribuie forma, umplutura și conturul unui element, altuia"
+"Atribuie forma, umplutura și conturul unui obiect, altuia"
 
 #: ../src/live_effects/effect.cpp:315
 msgctxt "path effect"
@@ -15944,7 +15944,7 @@ msgid ""
 "Smoothen and simplify a object. This effect is also available in the Pencil "
 "tool's tool controls."
 msgstr ""
-"Netezește și simplifică un element. Acest efect este disponibil și în meniul uneltei creion"
+"Netezește și simplifică un obiect. Acest efect este disponibil și în meniul uneltei creion"
 
 #: ../src/live_effects/effect.cpp:329
 msgctxt "path effect"
@@ -15953,7 +15953,7 @@ msgstr "Deformare cu zăbrele"
 
 #: ../src/live_effects/effect.cpp:332
 msgid "Warp an object's shape based on a 5x5 grid"
-msgstr "Îndoaie un forma unui element conform unei grile de 5x5"
+msgstr "Îndoaie un forma unui obiect conform unei grile de 5x5"
 
 #: ../src/live_effects/effect.cpp:343 
 msgctxt "path effect"
@@ -15965,7 +15965,7 @@ msgid ""
 "Transform the object to fit into a shape with four corners, either by "
 "stretching it or creating the illusion of a 3D-perspective"
 msgstr ""
-"Transformă elementul încât să încapă într-o forma cu patru colțuri, fie "
+"Transformă obiectul încât să încapă într-o forma cu patru colțuri, fie "
 "prin elongare  sau crearea unei iluzii de perspectivă 3D"
 
 #: ../src/live_effects/effect.cpp:357 
@@ -15978,7 +15978,7 @@ msgid ""
 "Connect the nodes of the object (e.g. corresponding to data points) by "
 "different types of lines."
 msgstr ""
-"Conectează nodurile elementuli (ex: corespunzătoare punctelor de date) "
+"Conectează nodurile obiectului (ex: corespunzătoare punctelor de date) "
 "cu diferite tipuri de linii."
 
 #: ../src/live_effects/effect.cpp:371
@@ -15988,7 +15988,7 @@ msgstr "Transfomă prin 2 puncte"
 
 #: ../src/live_effects/effect.cpp:374
 msgid "Scale, stretch and rotate an object by two handles"
-msgstr "Dimenzionează, elonghează și rotește un element prin două mânere"
+msgstr "Dimenzionează, elonghează și rotește un obiect prin două mânere"
 
 #: ../src/live_effects/effect.cpp:385
 msgctxt "path effect"
@@ -16000,7 +16000,7 @@ msgid ""
 "Draw the handles and nodes of objects (replaces the original styling with a "
 "black stroke)"
 msgstr ""
-"Desenează mânerele și nodurile elementelor (înlocuiește stilul original cu un "
+"Desenează mânerele și nodurile obiectelor (înlocuiește stilul original cu un "
 "contur negru)"
 
 #: ../src/live_effects/effect.cpp:399
@@ -16010,7 +16010,7 @@ msgstr "Asprește"
 
 #: ../src/live_effects/effect.cpp:402
 msgid "Roughen an object by adding and randomly shifting new nodes"
-msgstr "Asprește un element prin a-i adăuga și muta aleatoriu noi noduri"
+msgstr "Asprește un obiect prin a-i adăuga și muta aleatoriu noi noduri"
 
 #: ../src/live_effects/effect.cpp:413
 msgctxt "path effect"
@@ -16057,7 +16057,7 @@ msgid ""
 "Mirror an object along a movable axis, or around the page center. The "
 "mirrored copy can be styled independently."
 msgstr ""
-"Oglindește un element de-a lungul unei axe mutabile, sau în jurul centrului paginii."
+"Oglindește un obiect de-a lungul unei axe mutabile, sau în jurul centrului paginii."
 "Copia oglindită poate fi stilizată individual"
 
 #: ../src/live_effects/effect.cpp:469
@@ -16070,7 +16070,7 @@ msgid ""
 "Create multiple rotated copies of an object, as in a kaleidoscope. The "
 "copies can be styled independently."
 msgstr ""
-"Creează multiple copii rotite ale unui element, ca într-un calidoscop. "
+"Creează multiple copii rotite ale unui obiect, ca într-un calidoscop. "
 "Copiile pot fi stilizate individual"
 
 #: ../src/live_effects/effect.cpp:484
@@ -16212,7 +16212,7 @@ msgstr "Feliază"
 
 #: ../src/live_effects/effect.cpp:658
 msgid "Slices the item into parts. It can also be applied multiple times."
-msgstr "Feliază elementul în bucăți. Se poate aplica și de multiple ori."
+msgstr "Feliază obiectul în bucăți. Se poate aplica și de multiple ori."
 
 #: ../src/live_effects/effect.cpp:670
 msgctxt "path effect"
@@ -16224,7 +16224,7 @@ msgid ""
 "Create multiple copies of an object following a grid layout. Customize size, "
 "rotation, distances, style and tiling symmetry."
 msgstr ""
-"Creează multiple copii ale unui element, urmând o așezare grilă. "
+"Creează multiple copii ale unui obiect, urmând o așezare grilă. "
 "Personalizează distanțele, stilul și simetria placării."
 
 #: ../src/live_effects/effect.cpp:685
@@ -16359,7 +16359,7 @@ msgstr "Deformare cu zăbrele Învechită"
 
 #: ../src/live_effects/effect.cpp:844
 msgid "Deform an object using a 4x4 grid"
-msgstr "Deformează un element folosind o grilă 4x4"
+msgstr "Deformează un obiect folosind o grilă 4x4"
 
 #: ../src/live_effects/effect.cpp:855
 msgctxt "path effect"
@@ -18173,7 +18173,7 @@ msgstr "Obiecte legate:"
 msgid ""
 "Objects whose nodes are projected onto the path and generate new measurements"
 msgstr ""
-"Elemente ale căror noduri sunt proiectate pe traseu și generează măsurători"
+"Obiecte ale căror noduri sunt proiectate pe traseu și generează măsurători"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:98
 msgid "Distance"
@@ -20900,7 +20900,7 @@ msgstr "Se convertesc obiectele la traseu..."
 
 #: ../src/path-chemistry.cpp:334
 msgid "Object to path"
-msgstr "Transformă elementul în traseu"
+msgstr "Transformă obiectul în traseu"
 
 #: ../src/path-chemistry.cpp:337
 msgid "<b>No objects</b> to convert to path in the selection."
@@ -20981,7 +20981,7 @@ msgstr "<b>Niciun traseu</b> de simplicat în the selecție."
 
 #: ../src/path/path-offset.cpp:117
 msgid "Selected object is <b>not a path</b>, cannot inset/outset."
-msgstr "Elementul selectat <b>nu este unu trase</b>, nu se poate extruda/contracta."
+msgstr "Obiectul selectat <b>nu este unu trase</b>, nu se poate extruda/contracta."
 
 #: ../src/path/path-offset.cpp:186 ../src/path/path-offset.cpp:255
 msgid "Create linked offset"
@@ -21295,7 +21295,7 @@ msgstr "Selecția <b>nu se află într-un grup</b>."
 
 #: ../src/selection-chemistry.cpp:858
 msgid "Objects in selection must have the same grandparents."
-msgstr "Elementele din selecție trebuie să aibă aceeiași bunici."
+msgstr "Obiectele din selecție trebuie să aibă aceeiași bunici."
 
 #: ../src/selection-chemistry.cpp:865
 msgid "Pop selection from group"
@@ -21578,7 +21578,7 @@ msgid ""
 "The object you're trying to select is <b>not visible</b> (it is in &lt;"
 "defs&gt;)"
 msgstr ""
-"Elementul pe care încerci să-l selectezi <b>nu este vizibil</b> "
+"Obiectul pe care încerci să-l selectezi <b>nu este vizibil</b> "
 " (este în &lt;defs&gt;)"
 
 #: ../src/selection-chemistry.cpp:3120
@@ -21623,7 +21623,7 @@ msgstr "Dezsimbolizează toate simbolurile selectate"
 
 #: ../src/selection-chemistry.cpp:3447
 msgid "Select <b>object(s)</b> to convert to pattern."
-msgstr "Selectează <b>elementele</b> de convertit la model"
+msgstr "Selectează <b>obiectele</b> de convertit la model"
 
 #: ../src/selection-chemistry.cpp:3533
 msgid "Objects to pattern"
@@ -21686,7 +21686,7 @@ msgstr "Selectează <b>traseele</b> între care sa se creeze umplutură"
 
 #: ../src/selection-chemistry.cpp:4288 
 msgid "Create linked fill object between paths"
-msgstr "Creează element conectat de umplere între trasee"
+msgstr "Creează obiect conectat de umplere între trasee"
 
 #: ../src/selection-describer.cpp:119
 msgid "root"
@@ -21866,14 +21866,14 @@ msgstr "<b>Scalare</b>: %0.2f%% × %0.2f%%; <b>%s</b> pentru a bloca raportul"
 #: ../src/seltrans.cpp:1407
 #, c-format
 msgid "<b>Skew</b>: %0.2f&#176;; with <b>%s</b> to snap angle"
-msgstr "<b>Înclină</b>: %0.2f&#176;; <b>%s</b> pentru a acroșa unghiul"
+msgstr "<b>Înclină</b>: %0.2f&#176;; <b>%s</b> pentru a alipi unghiul"
 
 #. TRANSLATORS: don't modify the first ";"
 #. (it will NOT be displayed as ";" - only the second one will be)
 #: ../src/seltrans.cpp:1487
 #, c-format
 msgid "<b>Rotate</b>: %0.2f&#176;; with <b>%s</b> to snap angle"
-msgstr "<b>Rotește</b>: %0.2f&#176;; <b>%s</b> pentru a acroșa unghiul"
+msgstr "<b>Rotește</b>: %0.2f&#176;; <b>%s</b> pentru a alipi unghiul"
 
 #: ../src/seltrans.cpp:1524
 #, c-format
@@ -22039,7 +22039,7 @@ msgstr "Nu este nimic pe clipboard."
 
 #: ../src/ui/clipboard.cpp:726
 msgid "Select <b>object(s)</b> to paste style to."
-msgstr "Selectează <b>elementele</b> cărora li se va lipi stilul."
+msgstr "Selectează <b>obiectele</b> cărora li se va lipi stilul."
 
 #: ../src/ui/clipboard.cpp:738 ../src/ui/clipboard.cpp:768
 msgid "No style on the clipboard."
@@ -22047,7 +22047,7 @@ msgstr "Niciun stil copiat."
 
 #: ../src/ui/clipboard.cpp:793
 msgid "Select <b>object(s)</b> to paste size to."
-msgstr "Selectează <b>elementele</b> cărora li se va lipi stilul."
+msgstr "Selectează <b>obiectele</b> cărora li se va lipi stilul."
 
 #: ../src/ui/clipboard.cpp:801
 msgid "No size on the clipboard."
@@ -23062,7 +23062,7 @@ msgstr " Eli_mină "
 
 #: ../src/ui/dialog/clonetiler.cpp:1182
 msgid "Remove existing tiled clones of the selected object (siblings only)"
-msgstr "Elimină clonele placate existente ale elementului selectat (doar semenii)"
+msgstr "Elimină clonele placate existente ale obiectului selectat (doar semenii)"
 
 #: ../src/ui/dialog/clonetiler.cpp:1197
 msgid " R_eset "
@@ -23096,7 +23096,7 @@ msgstr "<small>Obiectul nu are clone mozaicate.</small>"
 
 #: ../src/ui/dialog/clonetiler.cpp:1971
 msgid "Select <b>one object</b> whose tiled clones to unclump."
-msgstr "Selectează <b>un element</b> ale cărui clone placate să fie deconglomerate."
+msgstr "Selectează <b>un obiect</b> ale cărui clone placate să fie deconglomerate."
 
 #: ../src/ui/dialog/clonetiler.cpp:1990
 msgid "Unclump tiled clones"
@@ -23104,7 +23104,7 @@ msgstr "Deconglomerează clonele placate"
 
 #: ../src/ui/dialog/clonetiler.cpp:2016
 msgid "Select <b>one object</b> whose tiled clones to remove."
-msgstr "Selectează <b>un element</b> ale cărui clone placate să fie înlăturate."
+msgstr "Selectează <b>un obiect</b> ale cărui clone placate să fie înlăturate."
 
 #: ../src/ui/dialog/clonetiler.cpp:2038
 msgid "Delete tiled clones"
@@ -23298,7 +23298,7 @@ msgstr "_Mesaje"
 
 #: ../src/ui/dialog/dialog-data.cpp:46
 msgid "_Object Attributes"
-msgstr "_Atributele elementului"
+msgstr "_Atributele obiectului"
 
 # apare ca titlu pe un tab
 #: ../src/ui/dialog/dialog-data.cpp:47
@@ -23680,7 +23680,7 @@ msgstr ""
 
 #: ../src/ui/dialog/document-properties.cpp:1372
 msgid "Snap to visible _grid lines only"
-msgstr "Acroșează numai la liniile de _grilă vizibile"
+msgstr "Alipește numai la liniile de _grilă vizibile"
 
 #: ../src/ui/dialog/document-properties.cpp:1373
 msgid ""
@@ -23942,7 +23942,7 @@ msgstr "Stil"
 
 #: ../src/ui/dialog/document-resources.cpp:1166
 msgid "Edit object title"
-msgstr "Editează stilul elementului"
+msgstr "Editează stilul obiectului"
 
 #: ../src/ui/dialog/export-batch.cpp:280
 msgid "Color used to fill the image background"
@@ -24058,7 +24058,7 @@ msgstr "Metoda de export vectori este folosită pentru EXTENSIA RASTER"
 #: ../src/ui/dialog/export.cpp:414
 #, c-format
 msgid "Could not export to filename <b>%s</b>. (missing object)\n"
-msgstr "Nu s-a putut exporta la numele fișierului <b>%s</b>. (lipsește elementul)\n"
+msgstr "Nu s-a putut exporta la numele fișierului <b>%s</b>. (lipsește obiectul)\n"
 
 #: ../src/ui/dialog/export.cpp:456 ../src/ui/dialog/export.cpp:495
 msgid "bitmap"
@@ -26732,7 +26732,7 @@ msgid ""
 "If on, each newly created object will be selected (deselecting previous "
 "selection)"
 msgstr ""
-"Dacă este activat, noul element creat va fi selectat (deselectând selectția "
+"Dacă este activat, noul obiect creat va fi selectat (deselectând selectția "
 "anterioară)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1045 
@@ -26866,7 +26866,7 @@ msgstr ""
 #: ../src/ui/dialog/inkscape-preferences.cpp:1116
 msgid "If on, connector attachment points will not be shown for text objects"
 msgstr ""
-"Dacă este activat, punctele de atașare de conectori nu vor fi arătate pentru elementele de text"
+"Dacă este activat, punctele de atașare de conectori nu vor fi arătate pentru obiectele de text"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1477
 #: ../src/ui/dialog/inkscape-preferences.cpp:1816
@@ -27297,17 +27297,17 @@ msgstr ""
 "lungimea ei reală. Această transformare este folosită la raportul de zoom de "
 "1:1, 1:2, etc., pentru a putea afișa obiectele la dimensiunea lor adevărată."
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:1635 !@#
+#: ../src/ui/dialog/inkscape-preferences.cpp:1635 
 msgid "Show zoom percentage corrected by factor"
 msgstr "Arată procentul de magnificare corectat cu un factor"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1636
 msgid "Zoom percentage can be either by the physical units or by pixels."
-msgstr ""
+msgstr "Procentul de magnificare poate fi în unități fizice sau pixeli."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1638
 msgid "Origin always on current page"
-msgstr ""
+msgstr "Originea întotdeauna pe pagina curentă"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1639
 msgid ""
@@ -27315,84 +27315,90 @@ msgid ""
 "page, instead of the position on the canvas (corresponding to the first "
 "page's position)."
 msgstr ""
+"Riglele și uneltele vor afișa informații despre poziția relativă cu pagina "
+"curentă, în loc de poziția pe canava (corespunzătoare poziției primei pagini)." 
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1641
 msgid "Origin at upper left with y-axis pointing down"
-msgstr ""
+msgstr "Originea în stânga sus cu axa y indicând in jos"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1643
 msgid "When off, origin is at lower left corner and y-axis points up"
 msgstr ""
+"Cănd este dezactivat, originea la cel mai jos colț stâng și axa y "
+" indică în sus"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1645
 msgid "Lock canvas rotation by default"
-msgstr ""
+msgstr "Blochează rotației canavei ca setare predeterminată"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1647
 msgid ""
 "Prevent accidental canvas rotation by disabling on-canvas keyboard and mouse "
 "actions for rotation"
 msgstr ""
+"Previne rotația accidentală a canavei prin dezactivarea acțiunilor de rotație pe "
+" canava a tastaturii și mouse-ului"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1649
 msgid "Show selection in ruler"
-msgstr ""
+msgstr "Arată selecția în riglă"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1650
 msgid "Shows a blue line in the ruler where the selection is."
-msgstr ""
+msgstr "Arată o linie albastră în riglă unde este selecția."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1652
 msgid "User Interface"
-msgstr ""
+msgstr "Interfața cu utilizatorul"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1655
 msgid "Set the relative size of node handles"
-msgstr ""
+msgstr "Setează mărimea relativă a mânerelor nodurilor"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1656
 msgid "Use narrow number entry boxes"
-msgstr ""
+msgstr "Folosește cutii de intrare cu număr îngust"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:1657
+#: ../src/ui/dialog/inkscape-preferences.cpp:1657 
 msgid "Make number editing boxes smaller by limiting padding"
-msgstr ""
+msgstr "Face căsuțele de editare a cifrelor mai mici, prin limitarea spațiului tampon"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1659
 msgid "Status bar"
-msgstr ""
+msgstr "Bara de statut"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1661
 msgid "Show current style"
-msgstr ""
+msgstr "Arată stilul curent"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1662
 msgid "Control visibility of current fill, stroke and opacity in status bar."
-msgstr ""
+msgstr "Controlează vizibilitatea umpluturii, conturului si opacității curent în bara de statut."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1664
 msgid "Show layer selector"
-msgstr ""
+msgstr "Arată selectorul de strat"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1665
 msgid "Control visibility of layer selection menu in status bar."
-msgstr ""
+msgstr "Controlează vizibilitatea meniului de selecție strat în bara de statut."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1667
 msgid "Show mouse coordinates"
-msgstr ""
+msgstr "Arată coordonatele mouse-ului"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1668
 msgid "Control visibility of mouse coordinates X & Y in status bar."
-msgstr ""
+msgstr "Controlează vizibilitatea coordonatelor X & Y ale mouse-ului în bara de statut."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1670
 msgid "Show canvas rotation"
-msgstr ""
+msgstr "Arată rotația canavei"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1671
 msgid "Control visibility of canvas rotation in status bar."
-msgstr ""
+msgstr "Controlează vizibilitatea rotației canavei în bara de statut."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1673
 msgid "Mouse cursors"
@@ -27478,7 +27484,7 @@ msgstr "_Contrast:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1755
 msgid "Make background brighter or darker to adjust contrast"
-msgstr ""
+msgstr "Face fundalul mai luminos sau mai întunecat pentru a ajusta contrastul"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1767
 msgid "Icons"
@@ -27520,23 +27526,23 @@ msgstr "Folosește culorile luminoase implicite pentru pictograme"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1839
 msgid "Icon color base"
-msgstr ""
+msgstr "Culoarea de bază a pictogramei"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1840
 msgid "Base color for icons"
-msgstr ""
+msgstr "Culoarea de bază a pictogramelor"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1846
 msgid "Icon color highlights"
-msgstr ""
+msgstr "Culoarea evidențierilor pictogramelor"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1847
 msgid "Highlight colors supported by some symbolic icon themes"
-msgstr ""
+msgstr "Culorile de evidențiere suportat de unele teme simbolice de pictogramă"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1853
 msgid "Reset theme colors for some symbolic icon themes"
-msgstr ""
+msgstr "Resetează culorile temei pentru unele teme simbolice de pictogramă"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1855
 msgid "Yes"
@@ -27563,15 +27569,15 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1860
 msgid "Shift icons in menus"
-msgstr ""
+msgstr "Decalează pictogramele în meniuri"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1862
 msgid "This preference fixes icon positions in menus."
-msgstr ""
+msgstr "Această preferință fixează pozițiile pictogramelor în meniuri."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1864
 msgid "XML Editor"
-msgstr ""
+msgstr "Editor XML"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1884
 msgid "Color theme:"
@@ -27579,7 +27585,7 @@ msgstr "Culoarea temei:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1884
 msgid "Syntax coloring for XML Editor"
-msgstr ""
+msgstr "Colorarea sintaxei pentru Editorul XML"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1911
 msgid "Monospaced font:"
@@ -27587,19 +27593,19 @@ msgstr "Font monospațiat:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1911
 msgid "Select fixed-width font"
-msgstr ""
+msgstr "Selectează fontul cu lățime-fixă"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1914
 msgid "Use monospaced font"
-msgstr ""
+msgstr "Folosește font monospațiat"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1915
 msgid "XML tree:"
-msgstr ""
+msgstr "Arbore XML:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1915
 msgid "Use fixed-width font in XML Editor"
-msgstr ""
+msgstr "Folosște font cu lățime-fixă în Editorul XML"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1920
 msgid "Theming"
@@ -27616,11 +27622,11 @@ msgstr "Selectați butoanele vizibile ale instrumentelor"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1956
 msgid "Toolbox icon size:"
-msgstr "Dimensiunea pictogramelor la trusa de instrumente:"
+msgstr "Dimensiunea pictogramelor din trusa de instrumente:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1957
 msgid "Control bar icon size:"
-msgstr "Dimensiunea pictogramelor la bara de control:"
+msgstr "Dimensiunea pictogramelor din bara de control:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1971
 msgid "Adjust toolbar icon size"
@@ -27632,24 +27638,24 @@ msgstr "Simplu"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1975
 msgid "Present simplified snapping options that manage all advanced settings"
-msgstr ""
+msgstr "Prezintă opțiuni simplificate de alipire care administrează toate setările avansate"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1976
 msgid "Expose all snapping options for manual control"
-msgstr ""
+msgstr "Expunde toate opțiunile de alipire pentru controlul manual"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1977
 #| msgid "German (de)"
 msgid "Permanent"
 msgstr "Permanent"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:1977
+#: ../src/ui/dialog/inkscape-preferences.cpp:1977 
 msgid "All advanced snap options appear in a permanent bar"
-msgstr ""
+msgstr "Toate opțiunile de alipire apar într-o bară permanentă"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1979
 msgid "Snap controls bar:"
-msgstr ""
+msgstr "Bara cu meniul de alipire:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1987
 msgid "Save and restore window geometry for each document"
@@ -27741,7 +27747,7 @@ msgstr "Stabilește dimensiunea implicită de fereastră"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2021
 msgid "Saving window size and position"
-msgstr ""
+msgstr "Se salvează mărimea și poziția ferestrei"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2023
 msgid "Let the window manager determine placement of all windows"
@@ -27888,19 +27894,19 @@ msgstr "Ferestre"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2080
 msgid "Use compact color selector mode switch"
-msgstr ""
+msgstr "Folosește comutatorul modului selector de culoare compactă"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2081
 msgid "Use compact combo box for selecting color modes"
-msgstr ""
+msgstr "Folosește meniul compact pentru selctarea modurilor de culoare"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2083
 msgid "Visible color pickers"
-msgstr ""
+msgstr "Selectoare de culori vizibile"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2110
 msgid "Select color pickers"
-msgstr ""
+msgstr "Alege selectoarele de culoare"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2113
 msgid "Color Selector"
@@ -27996,21 +28002,23 @@ msgstr "Opțiuni de afișare"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2182
 msgid "Show command line argument names"
-msgstr ""
+msgstr "Arată numele în linia de comandă"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2183
 msgid ""
 "Show action argument names in the command palette suggestions, most useful "
 "for using them on the command line"
 msgstr ""
+"Arată numele argumentelor de acțiune în sugestiile paletei de comandă, foarte "
+"folositor pentru utilizarea lor în linia de comandă"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2185
+#: ../src/ui/dialog/inkscape-preferences.cpp:2185 
 msgid "Show untranslated (English) names"
-msgstr ""
+msgstr "Arată numele netraduse (Engleză)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2186
 msgid "Also show the English names of the command"
-msgstr ""
+msgstr "Arată și numele în Engleză al comnezii"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2237
 msgid "Input/Output"
@@ -28035,7 +28043,7 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2243
 msgid "Add default metadata to new documents"
-msgstr ""
+msgstr "Adaugă metadate predefinite documentelor"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2245
 msgid ""
@@ -28043,18 +28051,18 @@ msgid ""
 "Document Properties->Metadata."
 msgstr ""
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2247
+#: ../src/ui/dialog/inkscape-preferences.cpp:2247 
 msgid "Show all outputs in Export Dialog"
-msgstr ""
+msgstr "Arată toate rezultatele în Fereastra de Export"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2249
 msgid ""
 "Will list all possible output extensions in the Export Dialog selection."
-msgstr ""
+msgstr "Va lista toate posibilele extensii rezultate în selecția Ferestrei de Export."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2253
 msgid "_Grab sensitivity:"
-msgstr ""
+msgstr "Sensitivitatea de _tragere:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2253
 #: ../src/ui/dialog/inkscape-preferences.cpp:2256
@@ -28069,6 +28077,8 @@ msgid ""
 "How close on the screen you need to be to an object to be able to grab it "
 "with mouse (in screen pixels)"
 msgstr ""
+"Cât de aproape pe ecran trebuie să fie un obiect pentru a putea fi tras "
+"cu mouse-ul (în pixeli de ecran)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2256
 msgid "_Click/drag threshold:"
@@ -28078,10 +28088,11 @@ msgstr "Pragul de _clic sau tragere:"
 msgid ""
 "Maximum mouse drag (in screen pixels) which is considered a click, not a drag"
 msgstr ""
+"Maximul de tragere cu mouse-ul (in pixeli de ecran) care este considerat un clic, nu o tragere"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2259
 msgid "Use pressure-sensitive tablet"
-msgstr ""
+msgstr "Folosește tableta sensibilă-la-presiune"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2261
 msgid ""
@@ -28089,15 +28100,18 @@ msgid ""
 "this only if you have problems with the tablet (you can still use it as a "
 "mouse)"
 msgstr ""
+"Folosește capabilităîile tabletei sau altui dispozitiv sensibili-la-presiune. "
+"Dezactivează doar dacă ai o problemă cu tableta (o poți folosi încă pe post de mouse)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2263
 msgid "Switch tool based on tablet device"
-msgstr ""
+msgstr "Comută unealta conform tipului de dispozitiv"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2265
 msgid ""
 "Change tool as different devices are used on the tablet (pen, eraser, mouse)"
 msgstr ""
+"Schimbă unealta pe măsură ce diferite dispozitive sunt folosite pe tabletă (creion, radieră, mouse)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2266
 msgid "Input devices"
@@ -28126,25 +28140,27 @@ msgstr "Atribute intercalate"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2275
 msgid "Put attributes on the same line as the element tag"
-msgstr ""
+msgstr "Pune atributele pe aceeași linie cu eticheta elementului"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2278
 msgid "_Indent, spaces:"
-msgstr ""
+msgstr "_Indentează, spațiile:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2278
 msgid ""
 "The number of spaces to use for indenting nested elements; set to 0 for no "
 "indentation"
 msgstr ""
+"Numărul de spații folosite pentru indentarea elementelor ierarhizate; setează "
+"la 0 pentru nicio indentație"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2280
 msgid "Path data"
-msgstr ""
+msgstr "Datele traseului"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2283
 msgid "Absolute"
-msgstr ""
+msgstr "Absolut"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2283
 msgid "Relative"
@@ -28157,7 +28173,7 @@ msgstr "Optimizat"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2287
 msgid "Path string format:"
-msgstr ""
+msgstr "Traseul în format de șir de caractere:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2287
 msgid ""
@@ -28165,16 +28181,21 @@ msgid ""
 "relative coordinates, or optimized for string length (mixed absolute and "
 "relative coordinates)"
 msgstr ""
+"Datele traseului trebuie scrise: doar cu coordonate absolute, doar cu "
+"coordonate relative sau optimizate pentru lungimea șirului ( coordonate "
+"absolute sau relative amestecate)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2289
 msgid "Force repeat commands"
-msgstr ""
+msgstr "Repetă forțat comenzile"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2290
 msgid ""
 "Force repeating of the same path command (for example, 'L 1,2 L 3,4' instead "
 "of 'L 1,2 3,4')"
 msgstr ""
+"Forțarea repetată a aceleiași comenzi de traseu ( de ex, 'L 1,2 L 3,4' în loc de "
+"'L1,2 3,4')"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2292
 msgid "Numbers"
@@ -28182,11 +28203,11 @@ msgstr "Numere"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2295
 msgid "_Numeric precision:"
-msgstr ""
+msgstr "Precizie _numerică:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2295
 msgid "Significant figures of the values written to the SVG file"
-msgstr ""
+msgstr "Cifre semnificative ale valorilor scrise în fișierul SVG"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2298
 msgid "Minimum _exponent:"
@@ -28197,53 +28218,60 @@ msgid ""
 "The smallest number written to SVG is 10 to the power of this exponent; "
 "anything smaller is written as zero"
 msgstr ""
+"Cel mai mic număar scris în SVG este 10 la puterea acestui exponent; "
+"orice număr mai mic est scris notat cu 0"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2303
 msgid "Improper Attributes Actions"
-msgstr ""
+msgstr "Acțiuni atributare neadecvate"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2305
 #: ../src/ui/dialog/inkscape-preferences.cpp:2313
 #: ../src/ui/dialog/inkscape-preferences.cpp:2321
 msgid "Print warnings"
-msgstr ""
+msgstr "Printează avertizările"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2306
 msgid ""
 "Print warning if invalid or non-useful attributes found. Database files "
 "located in inkscape_data_dir/attributes."
 msgstr ""
+"Printează o avertizare daca niciun atribut valid sau folositor nu a fost găsit. "
+"Fișierele bazei de date sunt amplasate la inkscape_data_dir/attributes."
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2307
+#: ../src/ui/dialog/inkscape-preferences.cpp:2307 
 msgid "Remove attributes"
-msgstr ""
+msgstr "Înlătură atributele"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2308
 msgid "Delete invalid or non-useful attributes from element tag"
-msgstr ""
+msgstr "Șterge atributele invalide sau nefolositoare din eticheta elementului"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2311
 msgid "Inappropriate Style Properties Actions"
-msgstr ""
+msgstr "Acțiuni de proprietăți ale stilului neadecvate"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2314
 msgid ""
 "Print warning if inappropriate style properties found (i.e. 'font-family' "
 "set on a <rect>). Database files located in inkscape_data_dir/attributes."
 msgstr ""
+"Printează o avertizare dacă sunt găsite proprietăți neadecvate stilului ( ex: 'font-family' "
+"pe un <rect>). "
+"Fișierele bazei de date sunt amplasate la inkscape_data_dir/attributes."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2315
 #: ../src/ui/dialog/inkscape-preferences.cpp:2323
 msgid "Remove style properties"
-msgstr ""
+msgstr "Înlătură proprietățile stilului"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2316
 msgid "Delete inappropriate style properties"
-msgstr ""
+msgstr "Șterge proprietățile neadecvate ale stilului"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2319
 msgid "Non-useful Style Properties Actions"
-msgstr ""
+msgstr "Acțiuni ale proprietăților stilului de nefolos"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2322
 msgid ""
@@ -28252,42 +28280,51 @@ msgid ""
 "same as would be inherited). Database files located in inkscape_data_dir/"
 "attributes."
 msgstr ""
+"Printează o avertizare dacă sunt găsite proprietăți neadecvate stilului ( ex: dacă o proprietate "
+"are valoarea predefinită și o valoare diferită nu este moștenită sau este ca și cum ar fi fost "
+"moștenită).
+"Fișierele bazei de date sunt amplasate la inkscape_data_dir/attributes."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2324
 msgid "Delete redundant style properties"
-msgstr ""
+msgstr "Șterge proprietățile redundante ale stilului"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2326
 msgid "Check Attributes and Style Properties on"
-msgstr ""
+msgstr "Verifică atributele și proprietățile stilului pe""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2328
 msgid "Reading"
-msgstr ""
+msgstr "Se citește"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2329
 msgid ""
 "Check attributes and style properties on reading in SVG files (including "
 "those internal to Inkscape which will slow down startup)"
 msgstr ""
+"Verifică atributele și proprietățile stilului când se citește din fișiere SVG "
+"(inclusiv pe acelea interne lui Inkscape care vor încetini startul aplicației)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2330
 msgid "Editing"
-msgstr ""
+msgstr "Se editează"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2331
 msgid ""
 "Check attributes and style properties while editing SVG files (may slow down "
 "Inkscape, mostly useful for debugging)"
 msgstr ""
+"Verifică atributele și proprietățile stilului când se editează fișiere SVG "
+"(ar putea încetini Inkscape, folositor în general pentru depanare)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2332
 msgid "Writing"
-msgstr ""
+msgstr "Se scrie"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2333
 msgid "Check attributes and style properties on writing out SVG files"
 msgstr ""
+"Verifică atributele și proprietățile stilului când se scriu fișiere SVG "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2335
 msgid "SVG output"
@@ -28295,7 +28332,7 @@ msgstr "Ieșire SVG"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2340
 msgid "SVG 2"
-msgstr ""
+msgstr "SVG 2"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2341
 msgid "Insert SVG 1.1 fallback in text"
@@ -28337,7 +28374,7 @@ msgstr "Folosește direcția corectă a markerului în redarea SVG 1.1"
 msgid "Use correct marker colors in SVG 1.1 renderers"
 msgstr "Folosește culorile corecte ale markerului în redarea SVG 1.1"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2355
+#: ../src/ui/dialog/inkscape-preferences.cpp:2355 
 msgid ""
 "SVG 2 allows markers to automatically be reversed at the start of a path "
 "with 'auto_start_reverse'. This adds a rotated duplicate of the marker's "
@@ -28552,20 +28589,20 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2497
 msgid "Color stock markers the same color as object"
-msgstr ""
+msgstr "Colorează marcatorii de bază în aceeași culoare cu obiectul"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2498
 msgid "Color custom markers the same color as object"
-msgstr ""
+msgstr "Colorează marcatorii personalizați în aceeași culoare cu obiectul"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2499
 #: ../src/ui/dialog/inkscape-preferences.cpp:2758
 msgid "Update marker color when object color changes"
-msgstr ""
+msgstr "Actualizeaîă culoarea marcatorului când culoarea obiectului se schimbă"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2502
 msgid "Select in all layers"
-msgstr ""
+msgstr "Selectează în toate straturile"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2503
 msgid "Select only within current layer"
@@ -28573,49 +28610,55 @@ msgstr "Selectează numai ce se află pe startul curent"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2504
 msgid "Select in current layer and sublayers"
-msgstr ""
+msgstr "Selectează în stratul și subtrstraturile lui curente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2505
 msgid "Ignore hidden objects and layers"
-msgstr ""
+msgstr "Ignoră obiectele și straturile ascunse"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2506
 msgid "Ignore locked objects and layers"
-msgstr ""
+msgstr "Ignoră obiectele și straturile blocate"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2507
 msgid "Select same behaves like select all"
-msgstr ""
+msgstr "Selectează aceleași se comportă ca selectează tot"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2509
 msgid "Deselect upon layer change"
-msgstr ""
+msgstr "Deselectează când se schimbă straturile"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2511
 msgid "Select the topmost items only when in touch selection mode"
-msgstr ""
+msgstr "Selecteazâ doar cele mai de sus elemente doar în mod de selecție tactil"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2512
 msgid "Select transparent objects, strokes, and fills"
-msgstr ""
+msgstr "Selectează obiectele, contururile și umpluturile transparente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2515
 msgid ""
 "Uncheck this to be able to keep the current objects selected when the "
 "current layer changes"
 msgstr ""
+"Debifează pentru a putea păstra curentele obiecte selectate când "
+"stratul curent se schimbă"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2518
 msgid ""
 "Check to make objects, strokes, and fills which are completely transparent "
 "selectable even if not in outline mode"
 msgstr ""
+"Bifează pentru a face obiectele, contururile și umpluturile complet transparente "
+"selectabile chiar dacă nu se află în mod conturat"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2521
 msgid ""
 "In touch selection mode, if multiple items overlap at a point, select only "
 "the topmost item"
 msgstr ""
+"În mod tactil de selecție, dacă multiple elemente se suprapun la un punct, selectează "
+"doar cel mai de sus element"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2523
 msgid "Ctrl+A, Tab, Shift+Tab"
@@ -28623,39 +28666,45 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2525
 msgid "Make keyboard selection commands work on objects in all layers"
-msgstr ""
+msgstr "Fă comenzile de selecție din tastatură să funcționeze în toate straturile"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2527
 msgid "Make keyboard selection commands work on objects in current layer only"
-msgstr ""
+msgstr "Fă comenzile de selecție din tastatură să funcționeze cu obiectele din stratul curent"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2529
+#: ../src/ui/dialog/inkscape-preferences.cpp:2529 
 msgid ""
 "Make keyboard selection commands work on objects in current layer and all "
 "its sublayers"
-msgstr ""
+msgstr "Fă comenzile de selecție din tastatură să funcționeze cu obiectele din toate straturile"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2531
 msgid ""
 "Uncheck this to be able to select objects that are hidden (either by "
 "themselves or by being in a hidden layer)"
 msgstr ""
+"Debifează pentru a putea selecta obiecte ascunse "
+"(fie de sine fie prin a se afla într-un strat ascuns)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2533
 msgid ""
 "Uncheck this to be able to select objects that are locked (either by "
 "themselves or by being in a locked layer)"
 msgstr ""
+"Debifează pentru a putea selecta obiecte care sunt blocate "
+"(fie de sine fie prin a se afla într-un strat blocat)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2535
 msgid ""
 "Check this to make the 'select same' functions work like the select all "
 "functions, restricting to current layer only."
 msgstr ""
+"Bifează pentru a face funcțiile 'selectează aidoma' să funcționeze ca "
+"funcțiile 'selectează tot', restricționate la doar stratul curent."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2537
 msgid "Wrap when cycling objects in z-order"
-msgstr ""
+msgstr "Înfășoară în timp ce comuți ciclic obiectele în ordine-z"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2539
 msgid "Alt+Scroll Wheel"
@@ -28664,10 +28713,13 @@ msgstr "Alt+rotiță de derulare"
 #: ../src/ui/dialog/inkscape-preferences.cpp:2541
 msgid "Wrap around at start and end when cycling objects in z-order"
 msgstr ""
+msgstr "Înfășoară împrejur la start și sfârșit în timp ce comuți ciclic "
+"obiectele în ordine-z"
+
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2544
 msgid "Paste above selection instead of layer-top"
-msgstr ""
+msgstr "Lipește deasupre selecției în loc de în topul-stratului"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2546
 msgid ""
@@ -28675,6 +28727,9 @@ msgid ""
 "above the current selection (z-order). Otherwise, insertion happens on top "
 "of all objects in the current layer."
 msgstr ""
+"Daca este bifat, obiectele lipite și documentele importate vor fi plasate "
+"imediat deasupra selecției curente (ordinea-z). Altfel, inserția are loc la vârf "
+"pentru toate obiectele din stratul curent."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2549
 msgid "Selecting"
@@ -28699,7 +28754,7 @@ msgstr "Transformă modelele"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2556
 msgid "Scale dashes with stroke"
-msgstr ""
+msgstr "Mărește liniuțele odată cu conturul"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2558
 msgid "Preserved"
@@ -28726,9 +28781,9 @@ msgstr "Mută degradeurile (în umplere sau contur) odată cu obiectele"
 msgid "Move patterns (in fill or stroke) along with the objects"
 msgstr "Mută modelele (în umplere sau contur) odată cu obiectele"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2568
+#: ../src/ui/dialog/inkscape-preferences.cpp:2568 
 msgid "When changing stroke width, scale dash array"
-msgstr ""
+msgstr "Schimbă și mărimea mulțimii de liniuțe când schimbi lățimea conturului"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2569
 msgid "Store transformation"
@@ -28771,7 +28826,7 @@ msgstr "De_rulează cu:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2584
 msgid "Pressing Ctrl+arrow key scrolls by this distance (in screen pixels)"
-msgstr ""
+msgstr "Apăsând Ctrl+săgeată deruleaza cu această distanță (în pixeli pe ecran)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2586
 msgid "_Acceleration:"
@@ -28782,6 +28837,8 @@ msgid ""
 "Pressing and holding Ctrl+arrow will gradually speed up scrolling (0 for no "
 "acceleration)"
 msgstr ""
+"Apăsând și ținând apăsat Ctrl+săgeată va accelera gradual derularea (0 pentru "
+"lipsă accelerație)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2588
 msgid "Autoscrolling"
@@ -28806,14 +28863,19 @@ msgid ""
 "How far (in screen pixels) you need to be from the canvas edge to trigger "
 "autoscroll; positive is outside the canvas, negative is within the canvas"
 msgstr ""
+"Cât de departe trebuie să fii de marginea canavei (în pixeli pe ecran) "
+"pentru a declanșa autorularea; pozitiv înseamnă în afara canavei, negativ "
+"este înauntrul ei"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2595
+#: ../src/ui/dialog/inkscape-preferences.cpp:2595 
 msgid "Mouse move pans when Space is pressed"
-msgstr ""
+msgstr "Mișcând de mouse trage de canava când ții apăsat Spațiu"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2597
 msgid "When on, pressing and holding Space and dragging pans canvas"
 msgstr ""
+"Când este activat, apăsând si ținând apăsat Spațiu și trăgând de mouse "
+"se trage de canava"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2598
 msgid "Scrolling"
@@ -28821,49 +28883,51 @@ msgstr "Derulare"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2601
 msgid "Snap indicator"
-msgstr "Indicator de acroșare"
+msgstr "Indicator de alipire"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2603
 msgid "Enable snap indicator"
-msgstr "Activează indicatorul de acroșare"
+msgstr "Activează indicatorul de alipire"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2605
 msgid "After snapping, a symbol is drawn at the point that has snapped"
-msgstr ""
+msgstr "După lipire, un simbol este desenat la punctul care a fost alipit"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2610
 msgid "Snap indicator persistence (in seconds):"
-msgstr ""
+msgstr "Persistența indicatorului de alirire (în scunde):"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2611
 msgid ""
 "Controls how long the snap indicator message will be shown, before it "
 "disappears"
 msgstr ""
+"Controlează cât timp va fi afișat mesajul indicator de alipire, înainte "
+"să dispară"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2613
 #: ../src/ui/dialog/inkscape-preferences.cpp:2615
 msgid "Show snap distance in case of alignment or distribution snap"
-msgstr ""
+msgstr "Arată distanța de alipire în caz de aliniament sau alipire de distribuție"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2617
 msgid "What should snap"
-msgstr ""
+msgstr "Ce ar trebui să se alipească"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2619
 msgid "Only snap the node closest to the pointer"
-msgstr "Acroșează numai nodul cel mai apropiat de indicator"
+msgstr "Alipește numai nodul cel mai apropiat de indicator"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2621
 msgid ""
 "Only try to snap the node that is initially closest to the mouse pointer"
 msgstr ""
-"Încearcă să acroșeze numai nodul care este cel mai apropiat de indicatorul "
+"Încearcă să alipești numai nodul care este cel mai apropiat de indicatorul "
 "mausului"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2624
 msgid "_Weight factor:"
-msgstr "_Factorul de ponderare:"
+msgstr "_Factorul de pondere:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2625
 msgid ""
@@ -28871,14 +28935,14 @@ msgid ""
 "closest transformation (when set to 0), or prefer the node that was "
 "initially the closest to the pointer (when set to 1)"
 msgstr ""
-"Când sunt găsite mai multe soluții de acroșare, Inkscape poate fie să "
+"Când sunt găsite mai multe soluții de alipire, Inkscape poate fie să "
 "prefere cea mai apropiată transformare (când valoarea este 0), fie să "
 "prefere nodul care a fost inițial cel mai apropiat de indicator (când "
 "valoarea este 1)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2627
 msgid "Snap the mouse pointer when dragging a constrained knot"
-msgstr "Acroșează indicatorul mausului la tragerea unui nod constrâns"
+msgstr "Alipește indicatorul mausului la tragerea unui nod constrâns"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2629
 msgid ""
@@ -28886,13 +28950,13 @@ msgid ""
 "mouse pointer instead of snapping the projection of the knot onto the "
 "constraint line"
 msgstr ""
-"Când se trage un nod în lungul unei linii de constrângere, acroșează poziția "
-"indicatorului de maus în loc de a acroșa proiecția nodului pe linia de "
+"Când se trage un nod în lungul unei linii de constrângere, alipește poziția "
+"indicatorului de maus în loc de a alipi proiecția nodului pe linia de "
 "constrângere"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2631
 msgid "Delayed snap"
-msgstr ""
+msgstr "Alipire întârziată"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2634
 msgid "Delay (in seconds):"
@@ -28904,6 +28968,10 @@ msgid ""
 "additional fraction of a second. This additional delay is specified here. "
 "When set to zero or to a very small number, snapping will be immediate."
 msgstr ""
+"Contramandează alipirea cât timp mouse-ul se mișcă și apoi așteaptă "
+"încă o fracțiune de secundă. Această întârziere suplimentară este "
+"specificată aici. Când este setat la 0 sau un număr foarte mic, alipirea 
+va fi imediată."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2643
 msgid "_Arrow keys move by:"
@@ -28916,11 +28984,11 @@ msgstr ""
 "Apăsarea unei taste de săgeți mută obiectele selectate sau nodurile cu "
 "această distanță"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2647
+#: ../src/ui/dialog/inkscape-preferences.cpp:2647 
 msgid "&gt; and &lt; _scale by:"
 msgstr "&gt; și &lt; _scalează cu:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2648
+#: ../src/ui/dialog/inkscape-preferences.cpp:2648 
 msgid "Pressing > or < scales selection up or down by this increment"
 msgstr ""
 "Apăsarea tastelor > sau < scalează selecția în sus sau în jos cu acest "
@@ -28928,11 +28996,11 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2650
 msgid "_Inset/Outset by:"
-msgstr ""
+msgstr "_Contractă/Dilată cu:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2651
 msgid "Inset and Outset commands displace the path by this distance"
-msgstr ""
+msgstr "Comenzile de Expandare și Contractare dislocă traseul cu această distanță"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2652
 msgid "Compass-like display of angles"
@@ -28955,7 +29023,7 @@ msgstr "Fără"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2660
 msgid "_Rotation snaps every:"
-msgstr "_Rotirea acroșează la fiecare:"
+msgstr "_Rotirea alipește la fiecare:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2660
 #: ../src/ui/dialog/inkscape-preferences.cpp:2672 ../share/ui/units.xml:54
@@ -28967,20 +29035,22 @@ msgid ""
 "Rotating with Ctrl pressed snaps every that much degrees; also, pressing "
 "[ or ] rotates by this amount"
 msgstr ""
-"Rotirea cu Ctrl apăsat acroșează la fiecare atâtea grade; de asemenea, "
+"Rotirea cu Ctrl apăsat alipește la fiecare atâtea grade; de asemenea, "
 "apăsând [ sau ] se rotește cu această valoare"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2662
 msgid "Relative snapping of guideline angles"
-msgstr ""
+msgstr "Alipirea relativă a unghiurilor de ghidaj"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2664
 msgid ""
 "When on, the snap angles when rotating a guideline will be relative to the "
 "original angle"
 msgstr ""
+"Când este activat și când rotești o linie de ghidaj, unghiurile de alipire vor fi "
+"relative cu unghiul original"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2666
+#: ../src/ui/dialog/inkscape-preferences.cpp:2666 
 msgid "_Zoom in/out by:"
 msgstr "_Zoom strâns sau larg cu:"
 
@@ -28995,16 +29065,19 @@ msgid ""
 "Zoom tool click, +/- keys, and middle click zoom in and out by this "
 "multiplier"
 msgstr ""
+"Clicul cu unealta de magnificare, tastele +/- și mărire/micșorare cu butonul "
+"de mouse din mijloc multiplicate cu acest coeficient"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2668
 msgid "Zoom with middle mouse click"
-msgstr ""
+msgstr "Magnifică cu butonul de mouse din mijloc"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2670
 msgid ""
 "When activated, clicking the middle mouse button (usually the mouse wheel) "
 "zooms."
 msgstr ""
+"Când este activat, clicul cu butonul din mijloc al mouse-ului (de obicei rotița), magnifică"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2672
 msgid "_Rotate canvas by:"
@@ -29028,7 +29101,7 @@ msgstr "Rămân pe loc"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2681
 msgid "Move according to transform"
-msgstr ""
+msgstr "Mută conform cu transformarea"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2683
 msgid "Are unlinked"
@@ -29040,37 +29113,39 @@ msgstr "Sunt șterse"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2688
 msgid "Moving original: clones and linked offsets"
-msgstr ""
+msgstr "Mutând originalul: clonele și decalajele coordonate"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2690
 msgid "Clones are translated by the same vector as their original"
-msgstr ""
+msgstr "Clonele sunt mutate cu același vector ca și originalul lor"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2692
 msgid "Clones preserve their positions when their original is moved"
-msgstr ""
+msgstr "Clonele iși prezervă poziția când originalul le este mutat "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2694
 msgid ""
 "Each clone moves according to the value of its transform= attribute; for "
 "example, a rotated clone will move in a different direction than its original"
 msgstr ""
+"Fiecare clonă se mută conform valorii atributului ei de transformare; de ex: "
+"o clonă rotită se va muta într-o direcție diferită de cea a originialului"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2695
 msgid "Deleting original: clones"
-msgstr ""
+msgstr "Șterge originalul: clone"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2697
 msgid "Orphaned clones are converted to regular objects"
-msgstr ""
+msgstr "Clonele fără parinte sunt convertite la obiecte obișnuite"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2699
 msgid "Orphaned clones are deleted along with their original"
-msgstr ""
+msgstr "Clonele fără stapân sunt șterse împreună cu originalul lor"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2701
+#: ../src/ui/dialog/inkscape-preferences.cpp:2701 
 msgid "Duplicating original+clones/linked offset"
-msgstr ""
+msgstr "Dublând originalul+clonele/decalajul coordonat"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2703
 msgid "Relink duplicated clones"
@@ -29089,23 +29164,27 @@ msgstr "Dezlegare clone"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2708
 msgid "Path operations unlink clones"
-msgstr ""
+msgstr "Operațiunea de trasee dezlegare clone"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2710
 msgid ""
 "The following path operations will unlink clones: Stroke to path, Object to "
 "path, Boolean operations, Combine, Break apart"
 msgstr ""
+"Următoarele operațiuni de trasee vor dezlega clonele: Contur transformat în traseu, "
+"Obiect transformat în traseu, operațiuni Booleane, Combină, Rupe în bucăți"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2711
 msgid "'Object to Path' only unlinks (keeps LPEs, shapes)"
-msgstr ""
+msgstr "'Obiect transformat la traseu' doar dezleagă (păstrează LPS-urile, formele)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2713
 msgid ""
 "'Object to path' only unlinks clones when they are converted to paths, but "
 "preserves any LPEs and shapes within the clones."
 msgstr ""
+msgstr "'Obiect transformat la traseu' doar dezleagă când sunt convertite la trasee, "
+"dar prezervă orice LPE-uri și forme dinăuntrul clonelor."
 
 #. TRANSLATORS: Heading for the Inkscape Preferences "Clones" Page
 #: ../src/ui/dialog/inkscape-preferences.cpp:2715
@@ -29115,62 +29194,66 @@ msgstr "Clone"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2718
 msgid "When applying, use the topmost selected object as clippath/mask"
-msgstr ""
+msgstr "Când se aplică, folosește cel mai de sus obiect selectat ca mască/traseu de "
+"taietură"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2720
 msgid ""
 "Uncheck this to use the bottom selected object as the clipping path or mask"
 msgstr ""
+"Debifează pentru a folosi cel mai de jos obiect selectat. ca mască sau trasu de "
+"tăietura"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2721
 msgid "When ungrouping, clips/masks are preserved in children"
-msgstr ""
+msgstr "Când degrupezi, decupajele/mascările sunt păstrate în descendenți"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2723
+#: ../src/ui/dialog/inkscape-preferences.cpp:2723 
 msgid "Uncheck this to remove clip/mask on ungroup"
-msgstr ""
+msgstr "Debifează pentru a înlătura măstile/decupajele, când sunt degrupate"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2724
 msgid "Remove clippath/mask object after applying"
-msgstr ""
+msgstr "Înlătură obiectul mască/traseu de decupare după aplicare" 
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2726
 msgid ""
 "After applying, remove the object used as the clipping path or mask from the "
 "drawing"
 msgstr ""
+"După aplicare, înlătură obiectul folosit ca traseu de decupare sau mască din desen"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2728
 msgid "Before applying"
-msgstr ""
+msgstr "Înainte de aplicare"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2730
 msgid "Do not group clipped/masked objects"
-msgstr ""
+msgstr "Nu grupa obiectele mascate/decupate"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2731
 msgid "Put every clipped/masked object in its own group"
-msgstr ""
+msgstr "Pune fiecare obiect mascat/decupat într-un grup doar al lui"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2732
 msgid "Put all clipped/masked objects into one group"
-msgstr ""
+msgstr "Pune toate obiectele mascate/decupate într-un singur grup"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2735
 msgid "Apply clippath/mask to every object"
-msgstr ""
+msgstr "Aplică masca/traseul de decupare fiecărui obiect"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2738
 msgid "Apply clippath/mask to groups containing single object"
-msgstr ""
+msgstr "Aplică masca/traseul de decupare grupurilor conținând câte un singur obiect"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2741
 msgid "Apply clippath/mask to group containing all objects"
-msgstr ""
+msgstr "Aplică masca/traseul de decupare grupului care conține toate obiectele"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2743
 msgid "After releasing"
-msgstr ""
+msgstr "După eliberare"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2745
 msgid "Ungroup automatically created groups"
@@ -29178,16 +29261,17 @@ msgstr "Degrupează automat grupurile create"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2747
 msgid "Ungroup groups created when setting clip/mask"
-msgstr ""
+msgstr "Degrupează grupurile create setând masca/traseul de decupare"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2749
+#: ../src/ui/dialog/inkscape-preferences.cpp:2749 
 msgid "Clippaths and masks"
 msgstr "Trasee de tăiere și măști"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2752
 msgid "Stroke Style Markers"
-msgstr ""
+msgstr "Marcajele stilului de contur"
 
+#????????
 #: ../src/ui/dialog/inkscape-preferences.cpp:2754
 #: ../src/ui/dialog/inkscape-preferences.cpp:2756
 msgid ""
@@ -29197,32 +29281,36 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2763
 msgid "Copy computed style"
-msgstr ""
+msgstr "Copiază stilul computat"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2764
 msgid "Copy class and style attributes verbatim"
-msgstr ""
+msgstr "Copiază atributele de clasă și stil verbatim"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2767
 msgid "Copying objects to the clipboard"
-msgstr ""
+msgstr "Se copiază obiectele"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2769
 msgid ""
 "The object's 'style' attribute will be set to the computed style, preserving "
 "the object's appearance as in previous Inkscape versions"
 msgstr ""
+"Atributul de 'stil' al obiectului va fi setat la stilul computat, păstrând "
+"înfățișarea obiectului ca în versiunile anterioare de Inkscape"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2773
 msgid ""
 "The object's 'style' and 'class' values will be copied verbatim, and will "
 "replace those of the target object when using 'Paste style'"
 msgstr ""
+"Valorile 'stil' și 'clasă' ale obiectului vor fi copiate verbatim și le vor "
+"înlocui pe cele ale obiectulu țintă la folosirea 'Lipește stilul'"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2775
 #| msgid "From clipboard"
 msgid "Clipboard"
-msgstr "Clipboard"
+msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2778
 msgid "Document cleanup"
@@ -29246,20 +29334,21 @@ msgstr "Arată efectele experimentale"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2787
 msgid "Show deprecated LPE gallery"
-msgstr ""
+msgstr "Arată galeria LPE depreciată"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2789
 msgid ""
 "Adds a button to the LPE dialog that opens the old-style LPE selection dialog"
 msgstr ""
+"Adaugă un buton la fereastra LPE care deschide dialogul de selecție LPE pe stil vechi"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2790
 msgid "Tiling"
-msgstr ""
+msgstr "Placare"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2791
 msgid "Add advanced tiling options"
-msgstr ""
+msgstr "Adaugă opțiuni de placare avansate"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2793
 msgid ""
@@ -29267,10 +29356,12 @@ msgid ""
 "copies that are mirrored differently between the rows and the columns) for "
 "Tiling LPE"
 msgstr ""
+"Activează folosind 16 opțiuni de oglindire avansate între copii (ca să poată "
+"fi copii care sunt oglindite diferit între rănduri și coloane) pentru umplerile LPE"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2794
 msgid "Live Path Effects (LPE)"
-msgstr ""
+msgstr "Efecte de traseu în timp real (LPE)"
 
 # hm ? sau thread-uri ?
 #: ../src/ui/dialog/inkscape-preferences.cpp:2801
@@ -29283,10 +29374,12 @@ msgid ""
 "Configure number of threads to use when rendering. The default value of zero "
 "means choose automatically."
 msgstr ""
+"Configurează numărul de fire folosit la redare. Valoarea predefinită 0 înseamnă "
+"alegerea automată"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2805
 msgid "Rendering _cache size:"
-msgstr ""
+msgstr "Se redă mărimea de _cache:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2805
 msgctxt "mebibyte (2^20 bytes) abbreviation"
@@ -29298,54 +29391,61 @@ msgid ""
 "Set the amount of memory per document which can be used to store rendered "
 "parts of the drawing for later reuse; set to zero to disable caching"
 msgstr ""
+"Setează câtă memorie per document poate fi folosită pentru stocarea "
+"părților redate ale desenului pentru uz ulterior; setează la 0 pentru dezactivarea "
+"caching"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2809
 msgid "X-ray radius:"
-msgstr ""
+msgstr "Raza X-ray:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2809
 msgid "Radius of the circular area around the mouse cursor in X-ray mode"
-msgstr ""
+msgstr "Raza ariei circulare din jurul cursorului mouse-ului în mod X-ray"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2813
 msgid "Outline overlay opacity:"
-msgstr ""
+msgstr "Opacitatea suprapunerii de contur:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2813
 msgid "Opacity of the overlay in outline overlay view mode"
-msgstr ""
+msgstr "Opacitatea suprapunerii în mod vedere suprapunere contur"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2818
 msgid "Responsive"
-msgstr ""
+msgstr "Responsivitate"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2818
 msgid "Full redraw"
-msgstr ""
+msgstr "Redesenare totală"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2818
 msgid "Multiscale"
-msgstr ""
+msgstr "Multidimensionare"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2820
 msgid "Update strategy:"
-msgstr ""
+msgstr "Strategie de actluaizare:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2820
+#: ../src/ui/dialog/inkscape-preferences.cpp:2820 
 msgid ""
 "How to update continually changing content when it can't be redrawn fast "
 "enough"
 msgstr ""
+"Cum să actualizezi conținutul în continuă schimbare când nu poate fi redesenat "
+"îndeajuns de rapid"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2824
 msgid "Enable OpenGL"
-msgstr ""
+msgstr "Activează OpenGL"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2825
 msgid ""
 "Request that the canvas should be painted with OpenGL rather than Cairo. If "
 "OpenGL is unsupported, it will fall back to Cairo."
 msgstr ""
+"Cere ca canava să fie redată cu OpenGL în loc de Cairo. Dacă OpenGL nu este "
+"suportat, se va recurge la a se folosi Cairo."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2828
 #: ../src/ui/dialog/inkscape-preferences.cpp:2852
@@ -29413,63 +29513,66 @@ msgstr "Calitatea efectelor de filtru pentru afișor"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2876
 msgid "Use dithering"
-msgstr ""
+msgstr "Folosește dithering"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2877
 msgid ""
 "Makes gradients smoother. This can significantly impact the size of "
 "generated PNG files."
 msgstr ""
+"Face degradeurile mai fine. Aceasta poate impacta semnificativ mărimea "
+"imaginilor PNG generate."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2888
 msgid "Enable developer mode"
-msgstr ""
+msgstr "Activează modul pentru dezvoltatori"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2890
 msgid "Developer mode"
-msgstr ""
+msgstr "Mod dezvoltator"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2891
 msgid "Enable additional debugging options"
-msgstr ""
+msgstr "Activează opțiuni de depanare suplimentare"
 
 #. TRANSLATORS: The following are options for fine-tuning rendering, meant to be used by developers,
 #. find more explanations at https://gitlab.com/inkscape/inbox/-/issues/6544#note_886540227
 #: ../src/ui/dialog/inkscape-preferences.cpp:2928
 msgid "Low-level tuning options"
-msgstr ""
+msgstr "Opțiuni de configurare de nivel jos"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2930
 #: ../share/ui/dialog-symbols.glade:36
 msgid "Tile size"
-msgstr ""
+msgstr "Mărimea plăacii"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2930
 msgid ""
 "Halve rendering tile rectangles until their largest dimension is this small"
 msgstr ""
+"Înjumătățește redarea dreptunhiurilor plăcilor până când cea mai mare dimensiune a lor este atât de mică"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2932
 msgid "Render time limit"
-msgstr ""
+msgstr "Redă limita de timp"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2932
 #| msgid "m"
 msgctxt "millisecond abbreviation"
 msgid "ms"
-msgstr "ms"
+msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2932
 msgid "The maximum time allowed for a rendering time slice"
-msgstr ""
+msgstr "Maximul de timp admis pentru a reda o felie de timp"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2934
 msgid "Use block updates"
-msgstr ""
+msgstr "Folosește actualizări bloc"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2934
 msgid "Update the dragged region as a single block"
-msgstr ""
+msgstr "Actualizează regiunile trase ca un singur bloc"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2937
 msgid "Persistent"
@@ -29477,11 +29580,11 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2937
 msgid "Asynchronous"
-msgstr ""
+msgstr "Asincronic"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2937
 msgid "Synchronous"
-msgstr ""
+msgstr "Sincronizat"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2939
 msgid "Pixel streaming method"
@@ -29493,10 +29596,13 @@ msgid ""
 "Auto, which picks the best method available at runtime. As for the other "
 "options, higher up is better."
 msgstr ""
+"Schimbă metoda folosită pentru a transmite date despre pixeli către placa video. "
+"Predefinirea este Auto, care alege cea mai bună metodă disponibilă în timpul rulării. "
+"Cât despre celelalte opțiuni, mai mult înseamnă mai bine."
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2942
+#: ../src/ui/dialog/inkscape-preferences.cpp:2942 
 msgid "Buffer padding"
-msgstr ""
+msgstr "Căptușealaa tamponului de date"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2942
 #: ../src/ui/dialog/inkscape-preferences.cpp:2948
@@ -29507,35 +29613,37 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2942
 msgid "Use buffers bigger than the window by this amount"
-msgstr ""
+msgstr "Folosește tampoante mai mari decât fereastra cu atat"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2944
 msgid "Prerender margin"
-msgstr ""
+msgstr "Redă în avans marginea"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2944
 msgid "Pre-render a margin around the visible region."
-msgstr ""
+msgstr "Redă în avans o maringe din jurul regiunii vizibile."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2946
 msgid "Preempt size"
-msgstr ""
+msgstr "Golește în avans mărimea"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2946
 msgid ""
 "Prevent thin tiles at the rendering edge by making them at least this size."
 msgstr ""
+"Previne plăcile subțiri la redarea muchiilor prin mascarea lor cu cel puțin atat."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2948
 msgid "Min size for coarsener algorithm"
-msgstr ""
+msgstr "Mărimea minima pentru algoritmul de asprire"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2948
 msgid ""
 "Coarsener algorithm only processes rectangles smaller/thinner than this."
 msgstr ""
+"Algoritmul de asprire procesează doar dreptunghiurile mai mici/mai mari decât acesta."
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2950
+#: ../src/ui/dialog/inkscape-preferences.cpp:2950 !@#
 msgid "Glue size for coarsener algorithm"
 msgstr ""
 
@@ -31735,7 +31843,7 @@ msgstr ""
 
 #: ../src/ui/knot/knot-holder.cpp:368
 msgid "<b>Rotate</b> the pattern fill; with <b>Ctrl</b> to snap angle"
-msgstr "<b>Rotește</b> umplerea modelului; <b>Ctrl</b> pentru a acroșa unghiul"
+msgstr "<b>Rotește</b> umplerea modelului; <b>Ctrl</b> pentru a alipi unghiul"
 
 #. TRANSLATORS: This refers to the pattern that's inside the object
 #: ../src/ui/knot/knot-holder.cpp:381
@@ -31761,7 +31869,7 @@ msgstr "<b>Scalează</b> umplerea hașurării; <b>Ctrl</b> pentru a o uniformiza
 
 #: ../src/ui/knot/knot-holder.cpp:412
 msgid "<b>Rotate</b> the hatch fill; with <b>Ctrl</b> to snap angle"
-msgstr "<b>Rotește</b> umplerea hașurării; <b>Ctrl</b> pentru a acroșa unghiul"
+msgstr "<b>Rotește</b> umplerea hașurării; <b>Ctrl</b> pentru a alipi unghiul"
 
 #. TRANSLATORS: This refers to the pattern that's inside the object
 #: ../src/ui/knot/knot-holder.cpp:425
@@ -31774,7 +31882,7 @@ msgstr "<b>Scalează</b> conturul hașurării; <b>Ctrl</b> pentru a-l uniformiza
 
 #: ../src/ui/knot/knot-holder.cpp:431
 msgid "<b>Rotate</b> the hatch stroke; with <b>Ctrl</b> to snap angle"
-msgstr "<b>Rotește</b> conturul hașurării; <b>Ctrl</b> pentru a acroșa unghiul"
+msgstr "<b>Rotește</b> conturul hașurării; <b>Ctrl</b> pentru a alipi unghiul"
 
 #: ../src/ui/knot/knot-holder.cpp:445 ../src/ui/knot/knot-holder.cpp:447
 msgid "<b>Resize</b> the filter effect region"
@@ -31905,11 +32013,11 @@ msgstr "Mută obiectele cu incremente stabilite la tragerea lor"
 
 #: ../src/ui/modifiers.cpp:49
 msgid "No Move Snapping"
-msgstr "Fără acroșare la mutare"
+msgstr "Fără alipire la mutare"
 
 #: ../src/ui/modifiers.cpp:49
 msgid "Disable snapping when moving objects"
-msgstr "Dezactivează acroșarea la mutarea obiectelor"
+msgstr "Dezactivează alipirea la mutarea obiectelor"
 
 #: ../src/ui/modifiers.cpp:50
 msgid "Keep aspect ratio"
@@ -31941,12 +32049,12 @@ msgstr ""
 
 #: ../src/ui/modifiers.cpp:53
 msgid "No Transform Snapping"
-msgstr "Fără acroșare la transformare"
+msgstr "Fără alipire la transformare"
 
 # fără punct în mod deliberat
 #: ../src/ui/modifiers.cpp:53
 msgid "Disable snapping when transforming object."
-msgstr "Dezactivează acroșarea la transformarea obiectului"
+msgstr "Dezactivează alipirea la transformarea obiectului"
 
 #: ../src/ui/modifiers.cpp:56
 msgid "Switch mode"
@@ -32083,7 +32191,7 @@ msgid ""
 "b> the ellipse for arc, <b>outside</b> for segment"
 msgstr ""
 "Poziționează <b>punctul de pornire</b> al segmentului de arc; <b>Shift</b> "
-"pentru a muta cu <b>punctul de sfârșit</b>; <b>Ctrl</b> pentru a acroșa "
+"pentru a muta cu <b>punctul de sfârșit</b>; <b>Ctrl</b> pentru a alipi"
 "unghiul; trageți <b>înăuntrul</b> elipsei pentru arc, sau <b>în afara</b> ei "
 "pentru segment"
 
@@ -32094,7 +32202,7 @@ msgid ""
 "<b>inside</b> the ellipse for arc, <b>outside</b> for segment"
 msgstr ""
 "Poziționează <b>punctul de sfârșit</b> al segmentului de arc; <b>Shift</b> "
-"pentru a muta cu <b>punctul de pornire</b>; <b>Ctrl</b> pentru a acroșa "
+"pentru a muta cu <b>punctul de pornire</b>; <b>Ctrl</b> pentru a alipi"
 "unghiul; trageți <b>înăuntrul</b> elipsei pentru arc, sau <b>în afara</b> ei "
 "pentru segment"
 
@@ -32130,7 +32238,7 @@ msgid ""
 "Roll/unroll the spiral from <b>inside</b>; with <b>Ctrl</b> to snap angle; "
 "with <b>Alt</b> to converge/diverge"
 msgstr ""
-"Răsucește sau dezrăsucește <b>înăuntru</b>; <b>Ctrl</b> pentru a acroșa "
+"Răsucește sau dezrăsucește <b>înăuntru</b>; <b>Ctrl</b> pentru a alipi"
 "unghiul; <b>Alt</b> pentru convergență sau divergență"
 
 #: ../src/ui/shape-editor-knotholders.cpp:2106
@@ -32139,7 +32247,7 @@ msgid ""
 "with <b>Shift</b> to scale/rotate; with <b>Alt</b> to lock radius"
 msgstr ""
 "Răsucește sau dezrăsucește spirala din <b>afară</b>; <b>Ctrl</b> pentru a "
-"acroșa unghiul; <b>Shift</b> pentru a scala sau roti; <b>Alt</b> pentru a "
+"alipi unghiul; <b>Shift</b> pentru a scala sau roti; <b>Alt</b> pentru a "
 "bloca raza"
 
 #: ../src/ui/shape-editor-knotholders.cpp:2158
@@ -32390,21 +32498,21 @@ msgid ""
 "<b>Shift+Ctrl</b>: snap rotation angle to %g° increments, and rotate both "
 "handles"
 msgstr ""
-"<b>Shift+Ctrl</b>: acroșează unghiul de rotație la incremente de %g° și "
+"<b>Shift+Ctrl</b>: alipește unghiul de rotație la incremente de %g° și "
 "rotește ambele mânere"
 
 #: ../src/ui/tool/node.cpp:645
 msgctxt "Path handle tip"
 msgid "<b>Ctrl</b>: Snap handle to steps defined in BSpline Live Path Effect"
 msgstr ""
-"<b>Ctrl</b>: acroșează mânerul la treptele definite în BSpline Live Path Effect"
+"<b>Ctrl</b>: alipește mânerul la treptele definite în BSpline Live Path Effect"
 
 #: ../src/ui/tool/node.cpp:650
 #, c-format
 msgctxt "Path handle tip"
 msgid "<b>Ctrl</b>: snap rotation angle to %g° increments, click to retract"
 msgstr ""
-"<b>Ctrl</b>: acroșează unghiul de rotație la incremente de %g°, clic pentru "
+"<b>Ctrl</b>: alpiește unghiul de rotație la incremente de %g°, clic pentru "
 "a retracta"
 
 #: ../src/ui/tool/node.cpp:657
@@ -35368,7 +35476,7 @@ msgid ""
 "<b>Ctrl</b>: make circle or integer-ratio ellipse, snap arc/segment angle"
 msgstr ""
 "<b>Ctrl</b>: produce un cerc sau o elipsă cu raport de aspect întreg, sau "
-"acroșează la unghiul de arc sau de segment"
+"alipește la unghiul de arc sau de segment"
 
 #: ../src/ui/tools/arc-tool.cpp:223 ../src/ui/tools/rect-tool.cpp:246
 msgid "<b>Shift</b>: draw around the starting point"
@@ -35706,7 +35814,7 @@ msgstr ""
 
 #: ../src/ui/tools/gradient-tool.cpp:618
 msgid "<b>Ctrl</b>: snap gradient angle"
-msgstr "<b>Ctrl</b>: acroșează unghiul degradeului"
+msgstr "<b>Ctrl</b>: alipește unghiul degradeului"
 
 #: ../src/ui/tools/gradient-tool.cpp:619
 msgid "<b>Shift</b>: draw gradient around the starting point"
@@ -35717,11 +35825,11 @@ msgstr ""
 msgid "<b>Gradient</b> for %d object; with <b>Ctrl</b> to snap angle"
 msgid_plural "<b>Gradient</b> for %d objects; with <b>Ctrl</b> to snap angle"
 msgstr[0] ""
-"<b>Degrade</b> pentru %d obiect; <b>Ctrl</b> pentru a acroșa unghiul"
+"<b>Degrade</b> pentru %d obiect; <b>Ctrl</b> pentru a alipi unghiul"
 msgstr[1] ""
-"<b>Degrade</b> pentru %d obiecte; <b>Ctrl</b> pentru a acroșa unghiul"
+"<b>Degrade</b> pentru %d obiecte; <b>Ctrl</b> pentru a alipi unghiul"
 msgstr[2] ""
-"<b>Degrade</b> pentru %d de obiecte; <b>Ctrl</b> pentru a acroșa unghiul"
+"<b>Degrade</b> pentru %d de obiecte; <b>Ctrl</b> pentru a alipi unghiul"
 
 #: ../src/ui/tools/gradient-tool.cpp:804 ../src/ui/tools/mesh-tool.cpp:953
 msgid "Select <b>objects</b> on which to create gradient."
@@ -36000,7 +36108,7 @@ msgid ""
 "snap angle, <b>Enter</b> or <b>Shift+Enter</b> to finish the path"
 msgstr ""
 "<b>Segment de curbă</b>: unghi %3.2f°, distanță %s; <b>Ctrl</b> pentru a "
-"acroșa unghiul, <b>Enter</b> sau <b>Shift+Enter</b> pentru a finaliza traseul"
+"alipi unghiul, <b>Enter</b> sau <b>Shift+Enter</b> pentru a finaliza traseul"
 
 #: ../src/ui/tools/pen-tool.cpp:1718
 #, c-format
@@ -36009,7 +36117,7 @@ msgid ""
 "snap angle, <b>Enter</b> or <b>Shift+Enter</b> to finish the path"
 msgstr ""
 "<b>Segment de linie</b>: unghi %3.2f°, distanță %s; <b>Ctrl</b> pentru a "
-"acroșa unghiul, <b>Enter</b> sau <b>Shift+Enter</b> pentru a finaliza traseul"
+"alipi unghiul, <b>Enter</b> sau <b>Shift+Enter</b> pentru a finaliza traseul"
 
 #: ../src/ui/tools/pen-tool.cpp:1741
 #, c-format
@@ -36018,7 +36126,7 @@ msgid ""
 "angle"
 msgstr ""
 "<b>Mânerul de curbă</b>: unghi %3.2f&#176;, lungime %s; <b>Ctrl</b> pentru a "
-"acroșa unghiul"
+"alipi unghiul"
 
 #: ../src/ui/tools/pen-tool.cpp:1772
 #, c-format
@@ -36027,7 +36135,7 @@ msgid ""
 "b> to snap angle, with <b>Shift</b> to move this handle only"
 msgstr ""
 "<b>Mânerul de curbă, simetric</b>: unghi %3.2f&#176;, lungime %s; <b>Ctrl</"
-"b> pentru a acroșa unghiul, <b>Shift</b> pentru a muta numai acest mâner"
+"b> pentru a alipi unghiul, <b>Shift</b> pentru a muta numai acest mâner"
 
 #: ../src/ui/tools/pen-tool.cpp:1773
 #, c-format
@@ -36036,7 +36144,7 @@ msgid ""
 "angle, with <b>Shift</b> to move this handle only"
 msgstr ""
 "<b>Mânerul curbei</b>: unghi %3.2f&#176;, lungime %s; <b>Ctrl</b> pentru a "
-"acroșa unghiul, <b>Shift</b> pentru a muta numai acest mâner"
+"alipi unghiul, <b>Shift</b> pentru a muta numai acest mâner"
 
 #: ../src/ui/tools/pen-tool.cpp:1947
 msgid "Drawing finished"
@@ -36165,7 +36273,7 @@ msgstr "Obiectul selectat nu este un grup. Nu se poate intra."
 
 #: ../src/ui/tools/spiral-tool.cpp:220
 msgid "<b>Ctrl</b>: snap angle"
-msgstr "<b>Ctrl</b>: acroșează unghiul"
+msgstr "<b>Ctrl</b>: alipește unghiul"
 
 #: ../src/ui/tools/spiral-tool.cpp:222
 msgid "<b>Alt</b>: lock spiral radius"
@@ -36176,7 +36284,7 @@ msgstr ""
 msgid ""
 "<b>Spiral</b>: radius %s, angle %.2f&#176;; with <b>Ctrl</b> to snap angle"
 msgstr ""
-"<b>Spirală</b>: rază %s, unghi %.2f&#176;; <b>Ctrl</b> pentru a acroșa "
+"<b>Spirală</b>: rază %s, unghi %.2f&#176;; <b>Ctrl</b> pentru a alipi"
 "unghiul"
 
 #: ../src/ui/tools/spiral-tool.cpp:373
