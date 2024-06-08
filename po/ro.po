@@ -29182,7 +29182,7 @@ msgid ""
 "'Object to path' only unlinks clones when they are converted to paths, but "
 "preserves any LPEs and shapes within the clones."
 msgstr ""
-msgstr "'Obiect transformat la traseu' doar dezleagă când sunt convertite la trasee, "
+"'Obiect transformat la traseu' doar dezleagă când sunt convertite la trasee, "
 "dar prezervă orice LPE-uri și forme dinăuntrul clonelor."
 
 #. TRANSLATORS: Heading for the Inkscape Preferences "Clones" Page
