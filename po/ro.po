@@ -28282,7 +28282,7 @@ msgid ""
 msgstr ""
 "Printează o avertizare dacă sunt găsite proprietăți neadecvate stilului ( ex: dacă o proprietate "
 "are valoarea predefinită și o valoare diferită nu este moștenită sau este ca și cum ar fi fost "
-"moștenită).
+"moștenită)."
 "Fișierele bazei de date sunt amplasate la inkscape_data_dir/attributes."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2324
@@ -28291,7 +28291,7 @@ msgstr "Șterge proprietățile redundante ale stilului"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2326
 msgid "Check Attributes and Style Properties on"
-msgstr "Verifică atributele și proprietățile stilului pe""
+msgstr "Verifică atributele și proprietățile stilului pe"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2328
 msgid "Reading"
@@ -28713,9 +28713,8 @@ msgstr "Alt+rotiță de derulare"
 #: ../src/ui/dialog/inkscape-preferences.cpp:2541
 msgid "Wrap around at start and end when cycling objects in z-order"
 msgstr ""
-msgstr "Înfășoară împrejur la start și sfârșit în timp ce comuți ciclic "
+"Înfășoară împrejur la start și sfârșit în timp ce comuți ciclic "
 "obiectele în ordine-z"
-
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2544
 msgid "Paste above selection instead of layer-top"
@@ -28970,8 +28969,8 @@ msgid ""
 msgstr ""
 "Contramandează alipirea cât timp mouse-ul se mișcă și apoi așteaptă "
 "încă o fracțiune de secundă. Această întârziere suplimentară este "
-"specificată aici. Când este setat la 0 sau un număr foarte mic, alipirea 
-va fi imediată."
+"specificată aici. Când este setat la 0 sau un număr foarte mic, alipirea "
+"va fi imediată."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2643
 msgid "_Arrow keys move by:"
