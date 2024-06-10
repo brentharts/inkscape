@@ -3327,7 +3327,7 @@ msgstr "Pastile"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Tiles 1"
-msgstr "Titluri 1"
+msgstr "Plăci 1"
 
 #: ../build/share/paint/patterns.svg.h:1
 msgid "Abstract 2"
@@ -29642,55 +29642,55 @@ msgid ""
 msgstr ""
 "Algoritmul de asprire procesează doar dreptunghiurile mai mici/mai mari decât acesta."
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2950 !@#
+#: ../src/ui/dialog/inkscape-preferences.cpp:2950 
 msgid "Glue size for coarsener algorithm"
-msgstr ""
+msgstr "Dimensiunea de lipire pentru algoritmul de asprire"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2950
 msgid "Coarsener algorithm absorbs nearby rectangles within this distance."
-msgstr ""
+msgstr "Algoritmul de asprire absoarbe dreptunghiurile apropiate din această distanță."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2952
 msgid "Min fullness for coarsener algorithm"
-msgstr ""
+msgstr "Întregimea minimă a algoritmului de asprire"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2952
 msgid ""
 "Refuse coarsening algorithm's attempt if the result would be more empty than "
 "this."
-msgstr ""
+msgstr "Refuză încercarea algoritmului de asprire dacă rezultatul ar fi mai gol de atât."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2954
 msgid "Debugging, profiling and experiments"
-msgstr ""
+msgstr "Depanare, profilare și experimente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2956
 msgid "Framecheck"
-msgstr ""
+msgstr "Verificare de cadran"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2956
 msgid "Print profiling data of selected operations to a file"
-msgstr ""
+msgstr "Printează datele de profilare ale operațiunilor selectate către un fișier"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2958
 msgid "Logging"
-msgstr ""
+msgstr "Înregistrare"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2958
 msgid "Log certain events to the console"
-msgstr ""
+msgstr "Înregistrează anumite evenimente către consolă"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2960
+#: ../src/ui/dialog/inkscape-preferences.cpp:2960 
 msgid "Delay redraw"
-msgstr ""
+msgstr "Întârzie redesenarea"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2960
 msgid "Introduce a fixed delay for each tile"
-msgstr ""
+msgstr "Introdu o întârziere fixă pentru fiecare placă"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2962
 msgid "Delay redraw time"
-msgstr ""
+msgstr "Timpul de întârziere al redesenării"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2962
 msgctxt "microsecond abbreviation"
@@ -29699,71 +29699,75 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2962
 msgid "The delay to introduce for each tile"
-msgstr ""
+msgstr "Întârzierea de introdus pentru fiecare placă"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2964
 msgid "Show redraw"
-msgstr ""
+msgstr "Arată redesenarea"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2964
 msgid "Paint a translucent random colour over each newly drawn tile"
-msgstr ""
+msgstr "Desenează o culoare aleatorie translucentă peste fiecare placă nou creată"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2966
+#: ../src/ui/dialog/inkscape-preferences.cpp:2966 
 msgid "Show unclean region"
-msgstr ""
+msgstr "Arată regiunea necurățată"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2966
 msgid "Show the region that needs to be redrawn in red (only in Cairo mode)"
-msgstr ""
+msgstr "Arată regiunea care trebuie redesenată în roșu (doar în mod Cairo)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2968
 msgid "Show snapshot region"
-msgstr ""
+msgstr "Arată regiunea instantanee"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2968
 msgid ""
 "Show the region that still contains a saved copy of previously rendered "
 "content in blue (only in Cairo mode)"
 msgstr ""
+"Afișează cu albastru regiunea care încă conține o copie salvată a conținutului "
+"redat anterior (doar în mod Cairo)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2970
 msgid "Show clean region's fragmentation"
-msgstr ""
+msgstr "Arată fragmentarea regunii curățate"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2970
 msgid ""
 "Show the outlines of the rectangles in the region where rendering is "
 "complete in green (only in Cairo mode)"
 msgstr ""
+"Afișează cu verde contururile dreptunghiurilor în regiunea unde redarea este completă ("
+"doar în mod Cairo)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2972
 msgid "Disable redraw"
-msgstr ""
+msgstr "Dezactivează redesenarea"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2972
 msgid "Temporarily disable the idle redraw process completely"
-msgstr ""
+msgstr "Dezactivează complet dar temporar procesul redesenare inactiv"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2974
 msgid "Sticky decoupled mode"
-msgstr ""
+msgstr "Mod lipicios decuplat"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2974
 msgid "Stay in decoupled mode even after rendering is complete"
-msgstr ""
+msgstr "Rămâi în mod decuplat chiar și dupa ce redarea este comepletă"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2976
+#: ../src/ui/dialog/inkscape-preferences.cpp:2976 
 msgid "Animate"
-msgstr ""
+msgstr "Animează"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2976
 msgid "Continuously adjust viewing parameters in an animation loop."
-msgstr ""
+msgstr "Ajustează continuu parametrii de vizionare într-o buclă de animație."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2978 ../src/ui/dialog/print.cpp:90
 msgid "Rendering"
-msgstr "Randare"
+msgstr "Redare"
 
 # titlu de chenar
 #: ../src/ui/dialog/inkscape-preferences.cpp:2984
@@ -29778,7 +29782,7 @@ msgstr "Reîncarcă imaginile automat"
 #: ../src/ui/dialog/inkscape-preferences.cpp:2987
 msgid "Automatically reload linked images when file is changed on disk"
 msgstr ""
-"Reîncarcă automat imaginile legate atunci când fișierul este modificat pe "
+"Reîncarcă automat imaginile conectate atunci când fișierul este modificat pe "
 "disc"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2989
@@ -29808,13 +29812,13 @@ msgstr "_Rezoluția de export implicită:"
 #: ../src/ui/dialog/inkscape-preferences.cpp:2999
 #: ../src/ui/dialog/inkscape-preferences.cpp:3043
 msgid "dpi"
-msgstr "dpi"
+msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2996
 msgid "Default image resolution (in dots per inch) in the Export dialog"
 msgstr ""
 "Rezoluția implicită de imagine (exprimată în puncte per inch) în dialogul de "
-"export"
+"Export"
 
 # titlu de chenar
 #: ../src/ui/dialog/inkscape-preferences.cpp:2997
@@ -29850,7 +29854,7 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3010
 msgid "Store absolute file path for linked images"
-msgstr ""
+msgstr "Stochează calea absolută a imaginilor conectate"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3014
 msgid ""
@@ -29861,8 +29865,15 @@ msgid ""
 "disk. Note that this will expose your directory structure in the file's "
 "source code, which can include personal information like your username."
 msgstr ""
+"Predefinit, legăturile la imagini sunt stocate ca trasee relative de locație "
+"oricând este posibil. Dacă această opțiune este activată, Inkscape va adăuga "
+"un traseu de locație absolut (atributul 'sodipodi:absref') la imagine. Opțiunea "
+"este folosită ca o plasă de siguranță pentru localizarea imaginilor conectate, de "
+"exemplu dacă documentul SVG a fost mutat pe disc. Ca mențiune aceasta îți va expune "
+"structura directorului în codul sursă al fișierului, care poate include informații "
+"personale precum numele tau de utilizator."
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3024
+#: ../src/ui/dialog/inkscape-preferences.cpp:3024 
 msgid "Bitmap import/open mode:"
 msgstr "Mod de import/salvare bitmap:"
 
@@ -29873,7 +29884,7 @@ msgstr "Include"
 #: ../src/ui/dialog/inkscape-preferences.cpp:3028
 #: ../share/ui/dialog-export.glade:918
 msgid "Pages"
-msgstr ""
+msgstr "Pagini"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3031
 msgid "SVG import mode:"
@@ -29904,13 +29915,15 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3051
 msgid "Images in Outline Mode"
-msgstr ""
+msgstr "Imagini în Mod Contur"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3052
+#: ../src/ui/dialog/inkscape-preferences.cpp:3052 
 msgid ""
 "When active will render images while in outline mode instead of a red box "
 "with an x. This is useful for manual tracing."
 msgstr ""
+"Când este activat va reda imaginile în mod contur în loc de un chenar roșu "
+"cu un x în locul lor. Folositor pentru trasarea manuală."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3054
 msgid "Imported Images"
@@ -29921,6 +29934,8 @@ msgid ""
 "Select a file of predefined shortcuts and modifiers to use. Any "
 "customizations you create will be added separately to %1"
 msgstr ""
+"Selecteaîă un fișier de scurtături predefinite și modificatori pentru utilizare. "
+"Orice personalizare creezi va fi adăugată repetat la %1"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3068
 msgid "Keyboard file:"
@@ -29941,7 +29956,7 @@ msgstr "Descriere"
 #: ../src/ui/dialog/inkscape-preferences.cpp:3132
 #: ../share/ui/marker-popup.glade:428
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3115
 msgid "Shortcuts"
@@ -30054,7 +30069,7 @@ msgstr "Ignoră cuvintele scrise numai cu majuscule, precum „IUPAC”"
 msgid "Spellcheck"
 msgstr "Verificare ortografică"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3643
+#: ../src/ui/dialog/inkscape-preferences.cpp:3643 
 msgid "Shared default resources folder:"
 msgstr ""
 
@@ -30067,6 +30082,12 @@ msgid ""
 "access to that folder (on the same computer or in the network). Requires a "
 "restart of Inkscape to work when changed."
 msgstr ""
+"O structură de directori ca un director cu preferințe de utilizator Inkscape. "
+"Aceasta face posibilă partajarea de resurse precum extensiile, fonturile, "
+"seturile de pictograme, modele/hașuri, palete, simboluri, șabloane, teme, "
+"fișiere cu definiții ale interfeței de utilizator între multipli utilizatori "
+"care au acces la acel director (pe același calculator sau în rețea). Necesită "
+"repornirea Inkscape pentru a funcționa după modificări."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3645
 msgid "System info"
@@ -30439,21 +30460,23 @@ msgstr "Sub cel curent"
 msgid "As sublayer of current"
 msgstr "Ca substrat al celui curent"
 
-#: ../src/ui/dialog/livepatheffect-add.cpp:627
+#: ../src/ui/dialog/livepatheffect-add.cpp:627 
 msgid ""
 "You don't have any favorites yet. Click on the favorites star again to see "
 "all LPEs."
 msgstr ""
+"Nu ai favorite încă. Clic pe steaua cu favorite din nou pentru a vedea toate "
+"LPE-urile."
 
 #: ../src/ui/dialog/livepatheffect-add.cpp:631
 msgid "These are your favorite effects"
-msgstr ""
+msgstr "Aceastea sunt efectele tale favorite"
 
 #: ../src/ui/dialog/livepatheffect-add.cpp:636
 #: ../src/ui/dialog/livepatheffect-add.cpp:648
 #: ../src/ui/dialog/livepatheffect-add.cpp:657
 msgid "Nothing found! Please try again with different search terms."
-msgstr ""
+msgstr "Nu s-a găsit nimic! Încearcă din nou cu termeni diferiți de cautare."
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:138
 #: ../src/ui/dialog/livepatheffect-editor.cpp:901
@@ -30468,7 +30491,7 @@ msgstr "Dezafectează favoritul"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:191
 msgid "Add Live Path Effect"
-msgstr ""
+msgstr "Adaugă un Efect de Trase Live"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:306
 msgid "Deactivate path effect"
@@ -30480,7 +30503,7 @@ msgstr "Activează efectul de traseu"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:311
 msgid "Favorites"
-msgstr ""
+msgstr "Favorite"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:312
 msgid "Edit/Tools"
@@ -30497,7 +30520,7 @@ msgstr "Experimental"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:496
 msgid "Text objects do not support Live Path Effects"
-msgstr ""
+msgstr "Obiectele text nu suportă Efecte de Traseu Live"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:532
 #: ../src/ui/dialog/livepatheffect-editor.cpp:586
@@ -30506,23 +30529,23 @@ msgstr "Selectați un traseu, o formă, o clonă sau un grup"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:558
 msgid "Select %1 with %2 LPE"
-msgstr ""
+msgstr "Selectează %1 cu %2 LPE"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:589
 msgid "Select only one path, shape, clone or group"
-msgstr ""
+msgstr "Alege un singur traseu, formă, clonă sau grup"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:656
 msgid "<small>Without parameters</small>"
 msgstr "<small>Fără parametri</small>"
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:817
+#: ../src/ui/dialog/livepatheffect-editor.cpp:817 
 msgid "Drag to change position in path effects stack"
-msgstr ""
+msgstr "Trage pentru a schimba poziția în stiva de efecte de traseu"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:871
 msgid "Duplicate path effect"
-msgstr ""
+msgstr "Duplică efectul de traseu"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:876
 msgid "Move path effect up"
@@ -30534,7 +30557,7 @@ msgstr "Mută mai jos efectul de traseu"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:1098
 msgid "Flatten path effect(s)"
-msgstr ""
+msgstr "Aplatizează efectele de traseu"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:1116
 msgid "Remove path effect"
@@ -30544,13 +30567,13 @@ msgstr "Elimină efectul de traseu"
 msgid "Radius (pixels):"
 msgstr "Rază (pixeli):"
 
-#: ../src/ui/dialog/lpe-fillet-chamfer-properties.cpp:53
+#: ../src/ui/dialog/lpe-fillet-chamfer-properties.cpp:53 
 msgid "Chamfer subdivisions:"
-msgstr ""
+msgstr "Șanfrenează subdiviunile:"
 
 #: ../src/ui/dialog/lpe-fillet-chamfer-properties.cpp:116
 msgid "Modify Fillet-Chamfer"
-msgstr ""
+msgstr "Modifică Fileul-Șanfrenul"
 
 #: ../src/ui/dialog/lpe-fillet-chamfer-properties.cpp:117
 msgid "_Modify"
@@ -30562,11 +30585,11 @@ msgstr "Rază"
 
 #: ../src/ui/dialog/lpe-fillet-chamfer-properties.cpp:186
 msgid "Radius approximated"
-msgstr ""
+msgstr "Raza aproximată"
 
 #: ../src/ui/dialog/lpe-fillet-chamfer-properties.cpp:189
 msgid "Knot distance"
-msgstr ""
+msgstr "Distanța nodului"
 
 #: ../src/ui/dialog/lpe-fillet-chamfer-properties.cpp:194
 msgid "Position (%):"
@@ -30578,11 +30601,11 @@ msgstr "%1:"
 
 #: ../src/ui/dialog/lpe-powerstroke-properties.cpp:106
 msgid "Modify Node Position"
-msgstr ""
+msgstr "Modifică poziția traseului"
 
 #: ../src/ui/dialog/memory.cpp:46
 msgid "Heap"
-msgstr "Încărcare"
+msgstr "Grămada"
 
 #: ../src/ui/dialog/memory.cpp:47
 msgid "In Use"
@@ -30659,29 +30682,29 @@ msgstr "Arată:"
 #. TRANSLATORS: for info, see http://www.w3.org/TR/2000/CR-SVG-20000802/linking.html#AElementXLinkActuateAttribute
 #: ../src/ui/dialog/object-attributes.cpp:86
 msgid "Actuate:"
-msgstr ""
+msgstr "Actționează:"
 
 #: ../src/ui/dialog/object-attributes.cpp:95
 msgid "Item's fill, stroke and opacity"
 msgstr "Umplerea, conturul și opacitatea elementului"
 
-#: ../src/ui/dialog/object-attributes.cpp:133
+#: ../src/ui/dialog/object-attributes.cpp:133 
 msgid "Multiple objects selected"
-msgstr ""
+msgstr "Multiple obiecte selectate"
 
 #: ../src/ui/dialog/object-attributes.cpp:222
 msgid "Removed live path effect"
-msgstr ""
+msgstr "S-a înlăturat efectul de traseu live"
 
 #: ../src/ui/dialog/object-attributes.cpp:294
 #: ../src/ui/dialog/object-attributes.cpp:305
 #: ../src/ui/dialog/object-attributes.cpp:316
 msgid "Change object attribute"
-msgstr ""
+msgstr "Modifică atributele obiectului"
 
 #: ../src/ui/dialog/object-attributes.cpp:575
 msgid "Change arc type"
-msgstr ""
+msgstr "Schimbă tipul de arc"
 
 #: ../src/ui/dialog/object-properties.cpp:54
 #: ../src/ui/dialog/object-properties.cpp:335
@@ -30857,7 +30880,7 @@ msgstr "Schimbă opacitatea"
 
 #: ../src/ui/dialog/objects.cpp:818
 msgid "Change blend mode"
-msgstr ""
+msgstr "Schimbă modul de mixare"
 
 #: ../src/ui/dialog/objects.cpp:898
 msgid ""
@@ -30992,7 +31015,7 @@ msgstr "Nu s-a putut deschide un PNG temporar pentru tipărire bitmap"
 
 #: ../src/ui/dialog/print.cpp:250
 msgid "Could not set up Document"
-msgstr ""
+msgstr "Documentul nu s-a putut pune la punct"
 
 #: ../src/ui/dialog/print.cpp:254
 msgid "Failed to set CairoRenderContext"
@@ -31469,7 +31492,7 @@ msgstr "Toate seturile de simboluri"
 
 #: ../src/ui/dialog/symbols.cpp:602 ../src/ui/dialog/symbols.cpp:605
 msgid "No symbols found."
-msgstr ""
+msgstr "Nu s-a găsit niciun simbol"
 
 #: ../src/ui/dialog/symbols.cpp:603
 msgid ""
@@ -31485,6 +31508,9 @@ msgid ""
 "Choose a different symbol set\n"
 "or add a new symbol."
 msgstr ""
+"Niciun simbol în documentu lcurent.\n"
+"Alege un set de simboluri diferit\n."
+"sau adaugă un simbol nou."
 
 #: ../src/ui/dialog/symbols.cpp:678
 msgid "Group from symbol"
@@ -31514,13 +31540,13 @@ msgstr "Stabilește stilul textului"
 #: ../src/ui/dialog/tile.cpp:55
 msgctxt "Arrange dialog"
 msgid "Align"
-msgstr ""
+msgstr "Aliniază"
 
 #. TRANSLATORS: "Grid" refers to grid (columns/rows) arrangement
 #: ../src/ui/dialog/tile.cpp:57
 msgctxt "Arrange dialog"
 msgid "Grid"
-msgstr ""
+msgstr "Grilă"
 
 #. TRANSLATORS: "Circular" refers to circular/radial arrangement
 #: ../src/ui/dialog/tile.cpp:59
@@ -31649,12 +31675,16 @@ msgid ""
 "Apply the scale/rotate/skew to each selected object separately; otherwise, "
 "transform the selection as a whole"
 msgstr ""
+"Aplică dimensionarea/rotația/înclinarea fiecărui obiect slectat, în parte; "
+"altfel transformă selecția cu totul"
 
 #: ../src/ui/dialog/transformation.cpp:91
 msgid ""
 "Edit the current transform= matrix; otherwise, post-multiply transform= by "
 "this matrix"
 msgstr ""
+"Editează matricea de transformare= curentă; altfel, post-multiplică transformare="
+" cu această matrice"
 
 # apare ca titlu pe un tab
 #: ../src/ui/dialog/transformation.cpp:103
@@ -31694,14 +31724,17 @@ msgstr "Rotește în sens orar"
 
 #: ../src/ui/dialog/transformation.cpp:355
 msgid "E and F units"
-msgstr ""
+msgstr "Unitățile E și F"
 
-#: ../src/ui/dialog/transformation.cpp:465
+#: ../src/ui/dialog/transformation.cpp:465 
 msgid ""
 "<small><a href=\"https://www.w3.org/TR/SVG11/coords."
 "html#TransformMatrixDefined\">2D transformation matrix</a> that combines "
 "translation (E,F), scaling (A,D), rotation (A-D) and shearing (B,C).</small>"
 msgstr ""
+"<small><a href=\"https://www.w3.org/TR/SVG11/coords."
+"html#TransformMatrixDefined\">matricea de transformare 2D</a> care combină "
+"translația (E,F), dimensionarea (A,D), rotația (A-D) and forfecarea (B,C).</small>"
 
 #: ../src/ui/dialog/transformation.cpp:853
 #: ../src/ui/dialog/transformation.cpp:864
@@ -31711,11 +31744,11 @@ msgstr ""
 #: ../src/ui/dialog/transformation.cpp:925
 #: ../src/ui/dialog/transformation.cpp:948
 msgid "Transform matrix is singular, <b>not used</b>."
-msgstr ""
+msgstr "Matricea de transformare este singulară, <b>nefolosită</b>."
 
 #: ../src/ui/dialog/transformation.cpp:963
 msgid "Edit transformation matrix"
-msgstr ""
+msgstr "Editează matricea de transformare"
 
 #: ../src/ui/dialog/transformation.cpp:1061
 msgid "Rotation angle (positive = clockwise)"
@@ -31728,9 +31761,9 @@ msgstr "Trageți pentru a reordona nodurile"
 #: ../src/ui/dialog/xml-tree.cpp:129
 msgctxt "Undo History / XML Editor"
 msgid "Drag XML subtree"
-msgstr ""
+msgstr "Trage sub-arobrele XML"
 
-#: ../src/ui/dialog/xml-tree.cpp:188
+#: ../src/ui/dialog/xml-tree.cpp:188 !@#
 msgid ""
 "Automatic panel layout:\n"
 "changes with dialog size"
