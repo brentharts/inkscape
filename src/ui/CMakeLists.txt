@@ -267,6 +267,7 @@ set(ui_SRC
 	widget/swatch-selector.cpp
 	widget/template-list.cpp
 	widget/text.cpp
+	widget/textpath-popover.cpp
 	widget/unit-menu.cpp
 	widget/unit-tracker.cpp
 	widget/widget-vfuncs-class-init.cpp
@@ -561,6 +562,7 @@ set(ui_SRC
 	widget/swatch-selector.h
 	widget/template-list.h
 	widget/text.h
+	widget/textpath-popover.h
 	widget/unit-menu.h
 	widget/unit-tracker.h
 	widget/widget-vfuncs-class-init.h

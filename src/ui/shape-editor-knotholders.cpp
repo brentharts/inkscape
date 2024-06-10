@@ -19,6 +19,7 @@
 #include "desktop.h"
 #include "document.h"
 #include "helper/geom-nodetype.h"
+#include "libnrtype/Layout-TNG.h"
 #include "livarot/Path.h"
 #include "live_effects/effect.h"
 #include "object/box3d.h"
@@ -39,8 +40,14 @@
 #include "preferences.h"
 #include "style.h"
 #include "svg/css-ostringstream.h"
+#include "text-editing.h"
 #include "ui/knot/knot-holder-entity.h"
 #include "ui/knot/knot-holder.h"
+#include "ui/popup-menu.h"
+#include "ui/widget/canvas-grid.h"
+#include "ui/widget/canvas.h"
+#include "ui/widget/desktop-widget.h"
+#include "ui/widget/textpath-popover.h"
 
 class RectKnotHolder : public KnotHolder {
 public:
@@ -2347,87 +2354,75 @@ TextKnotHolderEntityInlineSize::knot_click(unsigned int state)
 class TextPathKnotHolderEntityStartOffset : public KnotHolderEntity
 {
 public:
-    SPTextPath *textpath = nullptr;
-    bool first_call = true;
-    Geom::Point position;
+    enum class Mode
+    {
+        START,
+        END,
+        MIDDLE
+    };
+
+    TextPathKnotHolderEntityStartOffset(SPDesktop *desktop, SPTextPath *textpath, Mode mode);
+
     Geom::Point knot_get() const override;
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
-    void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override{};
+    void knot_grabbed(Geom::Point const & /*grab_position*/, unsigned /*state*/) override;
+    void knot_ungrabbed(Geom::Point const & /*p*/, Geom::Point const & /*origin*/, guint /*state*/) override;
     void knot_click(unsigned int state) override;
-    void set_textpath(SPTextPath *tpath);
+    void set_initial_position();
+
+private:
+    SPDesktop *desktop = nullptr;
+    SPTextPath *textpath = nullptr;
+    double offset_val = 0.0;
+    Geom::Point position;
+    Mode mode = Mode::START;
+    int winding_number = 0;
 };
+
+TextPathKnotHolderEntityStartOffset::TextPathKnotHolderEntityStartOffset(SPDesktop *desktop, SPTextPath *textpath,
+                                                                         Mode mode)
+    : desktop(desktop)
+    , textpath(textpath)
+    , mode(mode)
+{}
 
 Geom::Point TextPathKnotHolderEntityStartOffset::knot_get() const
 {
-    if (!first_call) {
-        return position;
-    }
-
-    // Calculate the position of the knot by querying the
-    // startOffset until the knot is moved.
-    auto text = cast<SPText>(item);
-    g_assert(text != nullptr);
-
-    Geom::Point p(text->geometricBounds()->min());
-    auto offset_str = textpath->getAttribute("startOffset");
-    int offset_val = 0;
-
-    if (offset_str) {
-        // Remove the percentage sign
-        std::string str(offset_str);
-        str.pop_back();
-
-        std::stringstream ss(str);
-        if (!(ss >> offset_val)) {
-            return p;
-        }
-
-        if (offset_val < 0) {
-            offset_val = 0;
-        } else if (offset_val > 100) {
-            offset_val = 100;
-        }
-    }
-
-    if (auto path_item = static_cast<SPPath *>(sp_textpath_get_path_item(textpath))) {
-        if (auto curve = path_item->curve()) {
-            auto const pwd2 = Geom::paths_to_pw(curve->get_pathvector());
-            double path_len = Geom::length(pwd2);
-
-            if (!offset_str) {
-                // Set the position to the starting point of the path if the
-                // startOffset value is not set.
-                p = pwd2.valueAt(0);
-            }
-
-            // Determine the point on the path at a certain distance
-            // from the starting point.
-            int unused = 0;
-            double offset = offset_val * path_len / 100;
-            Path::cut_position *point = textpath->originalPath->CurvilignToPosition(1, &offset, unused);
-
-            if (point && point[0].piece >= 0) {
-                Geom::Point tangent;
-                textpath->originalPath->PointAndTangentAt(point[0].piece, point[0].t, p, tangent);
-            }
-        }
-    }
-
-    return p;
+    return position;
 }
 
 // Conversion from Inkscape SVG 1.1 to SVG 2 'start-offset'.
-void TextPathKnotHolderEntityStartOffset::knot_set(Geom::Point const &p, Geom::Point const & /*origin*/,
-                                                   unsigned int state)
+void TextPathKnotHolderEntityStartOffset::knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state)
 {
-    first_call = false;
-    double offset = 0;
+    auto text = cast<SPText>(item);
+    g_assert(text != nullptr);
 
     if (auto path_item = static_cast<SPPath *>(sp_textpath_get_path_item(textpath))) {
         if (auto curve = path_item->curve()) {
             // Find the total length of the path.
             auto const pwd2 = Geom::paths_to_pw(curve->get_pathvector());
             auto total_len = Geom::length(pwd2);
+            Glib::ustring side_str = "left";
+
+            if (auto side = textpath->getAttribute("side")) {
+                side_str = side;
+            }
+
+            if (mode == Mode::MIDDLE) {
+                // Winding number based approach to check if the textPath side needs
+                // changing. Typically, points with non-zero winding or odd winding
+                // are considered inside the path.
+                int winding_number = curve->get_pathvector().winding(p);
+
+                if (winding_number % 2) {
+                    // Odd winding number. i.e. the point is inside the path.
+                    if (side_str != "right") {
+                        textpath->setAttribute("side", "right");
+                    }
+                } else if (side_str != "left") {
+                    textpath->setAttribute("side", "left");
+                }
+            }
 
             // Find the projection of this point on the path.
             double t0 = Geom::nearest_time(p, pwd2);
@@ -2437,30 +2432,85 @@ void TextPathKnotHolderEntityStartOffset::knot_set(Geom::Point const &p, Geom::P
             auto const tmp_pwd2 = Geom::portion(pwd2, 0, t0);
             auto portion_len = Geom::length(tmp_pwd2);
 
+            if (mode != Mode::START) {
+                auto &layout = text->layout;
+                auto iter = layout.begin();
+                Geom::Point start_pt = layout.characterAnchorPoint(iter);
+
+                iter = layout.end();
+                Geom::Point end_pt = layout.characterAnchorPoint(iter);
+                double mode_offset = Geom::distance(start_pt, end_pt) / static_cast<int>(mode);
+
+                if (side_str == "right") {
+                    portion_len += mode_offset;
+                } else {
+                    portion_len -= mode_offset;
+                }
+
+                if (portion_len < 0 || portion_len > total_len) {
+                    return;
+                }
+            }
+
             // Offset = % length of the path covered until this point /
             // total length of the path.
-            offset = (100.0 * portion_len) / total_len;
+            offset_val = (100.0 * portion_len) / total_len;
+
+            if (side_str == "right") {
+                // Calculate the offset from the end.
+                offset_val = (100.0 * (total_len - portion_len)) / total_len;
+            }
 
             position = pwd2.valueAt(t0);
+
+            // Move the handle at a certain distance from the direction of the path.
+            if (mode == Mode::MIDDLE) {
+                auto direction = Geom::unit_vector(p - pwd2.valueAt(t0));
+                double handle_offset = 5 / desktop->current_zoom();
+                position += handle_offset * direction;
+            }
         }
     }
 
     // Offset should never be negative or greater than 100
-    if (offset < 0) {
-        offset = 0;
-    } else if (offset > 100) {
-        offset = 100;
+    if (offset_val < 0) {
+        offset_val = 0;
+    } else if (offset_val > 100) {
+        offset_val = 100;
     }
 
     // Set 'startOffset'.
-    auto offset_str = std::to_string(offset) + "%";
+    auto offset_str = std::to_string(offset_val) + "%";
     textpath->getRepr()->setAttribute("startOffset", offset_str.c_str());
-
-    auto text = cast<SPText>(item);
-    g_assert(text != nullptr);
 
     text->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
     text->updateRepr();
+}
+
+void TextPathKnotHolderEntityStartOffset::knot_grabbed(Geom::Point const & /*grab_position*/, unsigned /*state*/)
+{
+    for (auto ent : parent_holder->entity) {
+        // Hide all the knots except the knot being dragged.
+        if (ent != this) {
+            ent->knot->hide();
+        }
+    }
+}
+
+void TextPathKnotHolderEntityStartOffset::knot_ungrabbed(Geom::Point const & /*p*/, Geom::Point const & /*origin*/,
+                                                         guint /*state*/)
+{
+    for (auto ent : parent_holder->entity) {
+        if (ent != this) {
+            if (auto textpath_ent = dynamic_cast<TextPathKnotHolderEntityStartOffset *>(ent)) {
+                // Re-calculate the positions for each of the hidden knots
+                // before marking them visible.
+                textpath_ent->set_initial_position();
+                textpath_ent->update_knot();
+                ent->knot->show();
+            }
+        }
+    }
 }
 
 // Conversion from SVG 2 'inline-offset' to Inkscape's SVG 1.1.
@@ -2468,11 +2518,96 @@ void TextPathKnotHolderEntityStartOffset::knot_click(unsigned int state)
 {
     auto text = cast<SPText>(item);
     g_assert(text != nullptr);
+
+    auto const popup = [&](/* std::optional<Geom::Point> const &pos */) {
+        auto popover = Gtk::make_managed<Inkscape::UI::Widget::TextpathPopover>(text, textpath, offset_val);
+        popover->signal_closed().connect([this] {
+            // TODO: Update the position only if something changed.
+            // Update the position of all the knots.
+            for (auto ent : parent_holder->entity) {
+                if (auto textpath_ent = dynamic_cast<TextPathKnotHolderEntityStartOffset *>(ent)) {
+                    textpath_ent->set_initial_position();
+                    textpath_ent->update_knot();
+                }
+            }
+        });
+
+        auto canvas = desktop->getCanvas();
+        desktop->getDesktopWidget()->get_canvas_grid()->setPopover(popover);
+
+        // TODO: Replace get_last_mouse with pos after converting it to
+        // world coordinates.
+        Inkscape::UI::popup_at(*popover, *canvas, canvas->get_last_mouse());
+    };
+
+    popup(/*position*/);
 }
 
-void TextPathKnotHolderEntityStartOffset::set_textpath(SPTextPath *tpath)
+void TextPathKnotHolderEntityStartOffset::set_initial_position()
 {
-    textpath = tpath;
+    // Calculate the position of the knot by querying the
+    // startOffset until the knot is moved.
+    auto text = cast<SPText>(item);
+    g_assert(text != nullptr);
+
+    if (auto path_item = static_cast<SPPath *>(sp_textpath_get_path_item(textpath))) {
+        if (auto curve = path_item->curve()) {
+            auto const pwd2 = Geom::paths_to_pw(curve->get_pathvector());
+            double path_len = Geom::length(pwd2);
+
+            // Set the position to the starting point of the path if the
+            position = pwd2.valueAt(0);
+
+            if (auto offset_str = textpath->getAttribute("startOffset")) {
+                // Remove the percentage sign
+                std::string str(offset_str);
+                str.pop_back();
+
+                std::stringstream ss(str);
+                if (!(ss >> offset_val)) {
+                    return;
+                }
+
+                if (offset_val < 0) {
+                    offset_val = 0;
+                } else if (offset_val > 100) {
+                    offset_val = 100;
+                }
+            } else {
+                // startOffset value is not set.
+                offset_val = 0;
+            }
+
+            // Determine the point on the path at a certain distance
+            // from the starting point.
+            int unused = 0;
+            double offset = offset_val * path_len / 100;
+
+            if (mode != Mode::START) {
+                auto &layout = text->layout;
+                auto iter = layout.begin();
+                Geom::Point start_pt = layout.characterAnchorPoint(iter);
+
+                iter = layout.end();
+                Geom::Point end_pt = layout.characterAnchorPoint(iter);
+
+                offset += Geom::distance(start_pt, end_pt) / static_cast<int>(mode);
+            }
+
+            Path::cut_position *point = textpath->originalPath->CurvilignToPosition(1, &offset, unused);
+
+            if (point && point[0].piece >= 0) {
+                Geom::Point tangent;
+                textpath->originalPath->PointAndTangentAt(point[0].piece, point[0].t, position, tangent);
+
+                if (mode == Mode::MIDDLE) {
+                    auto direction = -Geom::unit_vector(Geom::rot90(tangent));
+                    double handle_offset = 5 / desktop->current_zoom();
+                    position += handle_offset * direction;
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -2710,18 +2845,28 @@ TextPathKnotHolder::TextPathKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotH
     auto text = cast<SPText>(item);
     g_assert(text != nullptr);
 
-    // Add entity_startoffset similar to entity_inlinesize
-    TextPathKnotHolderEntityStartOffset *entity_startoffset = new TextPathKnotHolderEntityStartOffset();
+    SPTextPath *textpath = nullptr;
 
     for (auto child : text->childList(false)) {
-        if (auto textpath = cast<SPTextPath>(child)) {
-            entity_startoffset->set_textpath(textpath);
+        if (auto t_path = cast<SPTextPath>(child)) {
+            textpath = t_path;
             break;
         }
     }
-    entity_startoffset->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SHAPER, "TextPath:startOffset",
-                               _("Adjust the <b>start offset</b> of the text path."));
-    entity.push_back(entity_startoffset);
+
+    Glib::ustring tip =
+        _("<b>Drag</b> to adjust the <b>start offset</b>. <b>Click</b> to open on-canvas textPath controls.");
+
+    // Add entity_startoffset similar to entity_inlinesize
+    for (int i = 0; i < 3; i++) {
+        TextPathKnotHolderEntityStartOffset::Mode mode = static_cast<TextPathKnotHolderEntityStartOffset::Mode>(i);
+        TextPathKnotHolderEntityStartOffset *entity_startOffset =
+            new TextPathKnotHolderEntityStartOffset(desktop, textpath, mode);
+        entity_startOffset->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SHAPER, "TextPath:startOffset",
+                                   tip.c_str());
+        entity_startOffset->set_initial_position();
+        entity.push_back(entity_startOffset);
+    }
 }
 
 // TODO: this is derived from RectKnotHolderEntityWH because it used the same static function
