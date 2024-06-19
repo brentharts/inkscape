@@ -63,6 +63,7 @@ bool ZoomTool::root_handler(CanvasEvent const &event)
             if (event.button == 1) {
                 saveDragOrigin(event.pos);
                 Rubberband::get(_desktop)->start(_desktop, button_dt);
+                _rubberband = true;
                 escaped = false;
                 ret = true;
             } else if (event.button == 3) {
@@ -82,6 +83,12 @@ bool ZoomTool::root_handler(CanvasEvent const &event)
 
         [&] (MotionEvent const &event) {
             if (!(event.modifiers & GDK_BUTTON1_MASK)) {
+                if (_rubberband) {
+                    // recover from lost button release event
+                    auto const button_dt = _desktop->w2d(event.pos);
+                    button_up(1, button_dt, event.modifiers);
+                    ret = true;
+                }
                 return;
             }
 
@@ -98,28 +105,8 @@ bool ZoomTool::root_handler(CanvasEvent const &event)
 
         [&] (ButtonReleaseEvent const &event) {
             auto const button_dt = _desktop->w2d(event.pos);
-
-            if (event.button == 1) {
-                auto const b = Rubberband::get(_desktop)->getRectangle();
-
-                if (b && !within_tolerance && !(event.modifiers & GDK_SHIFT_MASK)) {
-                    _desktop->set_display_area(*b, 10);
-                } else if (!escaped) {
-                    double const zoom_rel = (event.modifiers & GDK_SHIFT_MASK)
-                                          ? 1 / zoom_inc
-                                          : zoom_inc;
-                    _desktop->zoom_relative(button_dt, zoom_rel);
-                }
-
-                ret = true;
-            }
-
-            Rubberband::get(_desktop)->stop();
-
-            ungrabCanvasEvents();
-
-            xyp = {};
-            escaped = false;
+            button_up(event.button, button_dt, event.modifiers);
+            ret = true;
         },
 
         [&] (KeyPressEvent const &event) {
@@ -178,6 +165,31 @@ bool ZoomTool::root_handler(CanvasEvent const &event)
     );
 
     return ret || ToolBase::root_handler(event);
+}
+
+void ZoomTool::button_up(int button, const Geom::Point& point, unsigned int modifiers) {
+    if (button == 1) {
+        auto const b = Rubberband::get(_desktop)->getRectangle();
+
+        if (b && !within_tolerance && !(modifiers & GDK_SHIFT_MASK)) {
+            _desktop->set_display_area(*b, 10);
+        } else if (!escaped) {
+            auto prefs = Preferences::get();
+            double const zoom_inc = prefs->getDoubleLimited("/options/zoomincrement/value", M_SQRT2, 1.01, 10);
+            double const zoom_rel = (modifiers & GDK_SHIFT_MASK)
+                                    ? 1 / zoom_inc
+                                    : zoom_inc;
+            _desktop->zoom_relative(point, zoom_rel);
+        }
+    }
+
+    Rubberband::get(_desktop)->stop();
+    _rubberband = false;
+
+    ungrabCanvasEvents();
+
+    xyp = {};
+    escaped = false;
 }
 
 } // namespace Inkscape::UI::Tools
