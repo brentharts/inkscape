@@ -5,10 +5,9 @@
 file(TO_NATIVE_PATH "/" _separator)
 ADD_DEFINITIONS(-DINKSCAPE_TESTS_DIR="${CMAKE_SOURCE_DIR}/testfiles")
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-                        DEPENDS tests
+                        DEPENDS tests unit_tests
                         WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_dependencies(check inkscape)
-
 
 # create symlink "inkscape_datadir" to use as INKSCAPE_DATADIR
 # - ensures tests can be run without installing the project
@@ -44,8 +43,6 @@ set(INKSCAPE_TEST_PROFILE_DIR ${CMAKE_CURRENT_BINARY_DIR}/test_profile_dir)
 set(INKSCAPE_TEST_PROFILE_DIR_ENV INKSCAPE_PROFILE_DIR=${INKSCAPE_TEST_PROFILE_DIR})
 configure_file(CTestCustom.cmake.in ${CMAKE_BINARY_DIR}/CTestCustom.cmake)
 
-
-
 ### tests using gtest
 include_directories("${CMAKE_SOURCE_DIR}/src/3rdparty/adaptagrams") # TODO: remove this hack
 
@@ -57,20 +54,45 @@ if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
     )
 endif()
 
+# Integration tests (linking all of Inkscape)
 set(TEST_SOURCES
     actions-svg-processing
     async_channel-test
     async_funclog-test
     async_progress-test
+    colors/cms-test
+    colors/color-test
+    colors/document-cms-test
+    colors/dragndrop-test
+    colors/manager-test
+    colors/parser-test
+    colors/printer-test
+    colors/color-set-test
+    colors/spaces-cms-test
+    colors/spaces-cmyk-test
+    colors/spaces-gray-test
+    colors/spaces-hsl-test
+    colors/spaces-hsluv-test
+    colors/spaces-hsv-test
+    colors/spaces-lab-test
+    colors/spaces-lch-test
+    colors/spaces-linear-rgb-test
+    colors/spaces-luv-test
+    colors/spaces-named-test
+    colors/spaces-okhsl-test
+    colors/spaces-oklab-test
+    colors/spaces-oklch-test
+    colors/spaces-rgb-test
+    colors/spaces-xyz-test
+    colors/utils-test
+    colors/xml-color-test
     uri-test
     util-test
     drag-and-drop-svgz
     drawing-pattern-test
     extract-uri-test
     attributes-test
-    color-profile-test
     dir-util-test
-    oklab-color-test
     sp-item-test
     sp-object-test
     sp-object-tags-test
@@ -87,7 +109,6 @@ set(TEST_SOURCES
     style-test
     svg-affine-test
     svg-box-test
-    svg-color-test
     svg-length-test
     svg-stringstream-test
     sp-gradient-test
@@ -105,15 +126,17 @@ set(TEST_SOURCES
     sp-item-group-test
     store-test
     lpe-test
+    ui-util-test
     ${LPE_TESTS_64bit}
     )
 
-add_library(cpp_test_static_library SHARED unittest.cpp doc-per-case-test.cpp compare-paths-test.h lpespaths-test.h store-integrity-test.h test-with-svg-object-pairs.cpp)
+add_library(cpp_test_static_library SHARED inkscape-test.cpp doc-per-case-test.cpp compare-paths-test.h lpespaths-test.h store-integrity-test.h test-with-svg-object-pairs.cpp)
 target_link_libraries(cpp_test_static_library PUBLIC ${GTEST_LIBRARIES} inkscape_base)
 
 add_custom_target(tests)
 foreach(test_source ${TEST_SOURCES})
     string(REPLACE "-test" "" testname "test_${test_source}")
+    string(REPLACE "/" "_" testname "${testname}")
     add_executable(${testname} src/${test_source}.cpp)
     target_include_directories(${testname} SYSTEM PRIVATE ${GTEST_INCLUDE_DIRS})
     target_link_libraries(${testname} cpp_test_static_library 2Geom::2geom)
@@ -121,7 +144,10 @@ foreach(test_source ${TEST_SOURCES})
     set_tests_properties(${testname} PROPERTIES ENVIRONMENT "${INKSCAPE_TEST_PROFILE_DIR_ENV}/${testname};${CMAKE_CTEST_ENV}")
     add_dependencies(tests ${testname})
 endforeach()
+include(${CMAKE_SOURCE_DIR}/CMakeScripts/UnitTest.cmake)
 
+### Unit tests
+add_unit_test(version-test SOURCES version.cpp)
 
 ### CLI rendering tests and LPE
 add_subdirectory(cli_tests)

@@ -26,10 +26,11 @@
 #include "document.h"
 #include "object/sp-page.h"
 
+#include "colors/manager.h"
+#include "colors/color.h"
 #include "util/units.h"
 #include "helper/png-write.h"
 #include "page-manager.h"
-#include "svg/svg-color.h"
 
 #include <glibmm/i18n.h>
 
@@ -112,6 +113,7 @@ void Print::setup_page(const Glib::RefPtr<Gtk::PrintContext>& context, int page_
 void Print::set_paper_size(const Glib::RefPtr<Gtk::PageSetup> &page_setup, double page_width, double page_height)
 {
     auto p_size = Gtk::PaperSize("custom", "custom", page_width, page_height, Gtk::Unit::POINTS);
+    Gtk::PageOrientation orientation = Gtk::PageOrientation::PORTRAIT;
 
     // Some print drivers, like the EPSON's ESC/P-R CUPS driver, don't accept custom
     // page sizes, so we'll try to find a known page size.
@@ -121,9 +123,9 @@ void Print::set_paper_size(const Glib::RefPtr<Gtk::PageSetup> &page_setup, doubl
     // mode.
     // As a compromise, we'll only rotate the page if we actually find a matching paper size,
     // since laser cutter beds tend to be custom sizes.
-    Gtk::PageOrientation orientation = Gtk::PageOrientation::PORTRAIT;
+    Gtk::PageOrientation search_orientation = Gtk::PageOrientation::PORTRAIT;
     if (page_width > page_height) {
-        orientation = Gtk::PageOrientation::REVERSE_LANDSCAPE;
+        search_orientation = Gtk::PageOrientation::LANDSCAPE;
         std::swap(page_width, page_height);
     }
 
@@ -140,6 +142,7 @@ void Print::set_paper_size(const Glib::RefPtr<Gtk::PageSetup> &page_setup, doubl
         }
         // size matches
         p_size = size;
+        orientation = search_orientation;
         break;
     }
     page_setup->set_paper_size(p_size);
@@ -179,7 +182,10 @@ void Print::draw_page(const Glib::RefPtr<Gtk::PrintContext>& context, int page_n
             guint32 bgcolor = 0x00000000;
             Inkscape::XML::Node *nv = _workaround._doc->getReprNamedView();
             if (nv && nv->attribute("pagecolor")){
-                bgcolor = sp_svg_read_color(nv->attribute("pagecolor"), 0xffffff00);
+                if (auto c = Colors::Color::parse(nv->attribute("pagecolor"))) {
+                    // TODO allow page color to be any color space, not just RGB
+                    bgcolor = c->toRGBA();
+                }
             }
             if (nv && nv->attribute("inkscape:pageopacity")){
                 double opacity = nv->getAttributeDouble("inkscape:pageopacity", 1.0);

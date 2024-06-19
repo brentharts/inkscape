@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /** @file
- * TODO: insert short description here
+ * SPObject of the color-profile object found a direct child of defs.
  *//*
  * Authors: see git history
  *
@@ -10,72 +10,54 @@
 #ifndef SEEN_COLOR_PROFILE_H
 #define SEEN_COLOR_PROFILE_H
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"  // only include where actually required!
-#endif
-
-#include <set>
-#include <vector>
-
-#include <glibmm/ustring.h>
-
+#include "colors/cms/system.h"
+#include "colors/spaces/enum.h" // RenderingIntent
 #include "sp-object.h"
-#include "color/cms-color-types.h"
-
-struct SPColor;
 
 namespace Inkscape {
 
-enum {
-    RENDERING_INTENT_UNKNOWN = 0,
-    RENDERING_INTENT_AUTO = 1,
-    RENDERING_INTENT_PERCEPTUAL = 2,
-    RENDERING_INTENT_RELATIVE_COLORIMETRIC = 3,
-    RENDERING_INTENT_SATURATION = 4,
-    RENDERING_INTENT_ABSOLUTE_COLORIMETRIC = 5
+class URI;
+
+enum class ColorProfileStorage
+{
+    HREF_DATA,
+    HREF_FILE,
+    LOCAL_ID,
 };
 
-class ColorProfileImpl;
-
-
-/**
- * Color Profile.
- */
-class ColorProfile final : public SPObject {
+class ColorProfile final : public SPObject
+{
 public:
-    ColorProfile();
-    ~ColorProfile() override;
+    ColorProfile() = default;
+    ~ColorProfile() override = default;
     int tag() const override { return tag_of<decltype(*this)>; }
 
-    bool operator<(ColorProfile const &other) const;
+    static ColorProfile *createFromProfile(SPDocument *doc, Colors::CMS::Profile const &profile,
+                                           std::string const &name, ColorProfileStorage storage);
 
-    ColorSpaceSig getColorSpace() const;
-    ColorProfileClassSig getProfileClass() const;
-    cmsHTRANSFORM getTransfToSRGB8();
-    cmsHTRANSFORM getTransfFromSRGB8();
-    cmsHTRANSFORM getTransfGamutCheck();
-    bool GamutCheck(SPColor color);
-    int getChannelCount() const;
-    bool isPrintColorSpace();
-    cmsHPROFILE getHandle();
+    std::string getName() const { return _name; }
+    std::string getLocalProfileId() const { return _local; }
+    std::string getProfileData() const;
+    Colors::RenderingIntent getRenderingIntent() const { return _intent; }
 
-
-    // TODO: Make private
-    char* href;
-    char* local;
-    char* name;
-    char* intentStr;
-    unsigned int rendering_intent; // FIXME: type the enum and hold that instead
+    // This is the only variable we expect inkscape to modify. Changing the icc
+    // profile data or ID should instead involve creating a new ColorProfile element.
+    void setRenderingIntent(Colors::RenderingIntent intent);
 
 protected:
-    ColorProfileImpl *impl;
-
-    void build(SPDocument* doc, Inkscape::XML::Node* repr) override;
+    void build(SPDocument *doc, Inkscape::XML::Node *repr) override;
     void release() override;
 
-    void set(SPAttr key, char const* value) override;
+    void set(SPAttr key, char const *value) override;
 
-    Inkscape::XML::Node* write(Inkscape::XML::Document* doc, Inkscape::XML::Node* repr, unsigned int flags) override;
+    Inkscape::XML::Node *write(Inkscape::XML::Document *doc, Inkscape::XML::Node *repr, unsigned int flags) override;
+
+private:
+    std::string _name;
+    std::string _local;
+    Colors::RenderingIntent _intent;
+
+    std::unique_ptr<Inkscape::URI> _uri;
 };
 
 } // namespace Inkscape

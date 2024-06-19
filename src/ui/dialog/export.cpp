@@ -34,7 +34,10 @@
 #include "message.h"                        // for MessageType
 #include "message-stack.h"
 
-#include "color/color-conv.h"
+#include "colors/utils.h"
+#include "colors/color.h"
+#include "colors/manager.h"
+
 #include "extension/output.h"
 #include "helper/png-write.h"
 #include "io/resource.h"
@@ -463,7 +466,12 @@ std::string Export::prependDirectory(Glib::ustring name, const std::string &orig
         directory = Inkscape::IO::Resource::homedir_path();
     }
 
-    return Glib::canonicalize_filename(Glib::build_filename(directory, Glib::filename_from_utf8(name)), orig);
+    if (Glib::path_is_absolute(Glib::filename_from_utf8(orig)))
+        return orig;
+    auto dir = Glib::build_filename(directory, Glib::filename_from_utf8(name));
+    if (orig.empty())
+        return dir;
+    return Glib::canonicalize_filename(dir, orig);
 }
 
 std::string Export::defaultFilename(SPDocument *doc, std::string &filename_entry_text, std::string extension)
@@ -479,16 +487,16 @@ std::string Export::defaultFilename(SPDocument *doc, std::string &filename_entry
     return filename;
 }
 
-void set_export_bg_color(SPObject* object, guint32 color) {
+void set_export_bg_color(SPObject* object, Inkscape::Colors::Color const &color) {
     if (object) {
-        object->setAttribute("inkscape:export-bgcolor", Inkscape::Util::rgba_color_to_string(color).c_str());
+        object->setAttribute("inkscape:export-bgcolor", color.toString());
     }
 }
 
-guint32 get_export_bg_color(SPObject* object, guint32 default_color) {
+Inkscape::Colors::Color get_export_bg_color(SPObject* object, Inkscape::Colors::Color const &default_color) {
     if (object) {
-        if (auto color = Inkscape::Util::string_to_rgba_color(object->getAttribute("inkscape:export-bgcolor"))) {
-            return *color;
+        if (auto c = Inkscape::Colors::Color::parse(object->getAttribute("inkscape:export-bgcolor"))) {
+            return *c;
         }
     }
     return default_color;
