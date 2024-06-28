@@ -30,6 +30,7 @@
 #include <gtkmm/recentmanager.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/spinbutton.h>
+#include <gtkmm/text.h>
 #include <sigc++/adaptors/bind.h>
 #include <sigc++/functors/mem_fun.h>
 
@@ -223,6 +224,16 @@ void SingleExport::setupUnits()
 // Create all spin buttons
 void SingleExport::setupSpinButtons()
 {
+    for (auto &pair : spin_buttons) {
+        Gtk::SpinButton* sb = pair.second;
+        if (sb) {
+            auto widget = dynamic_cast<Gtk::Text*>(sb->get_first_child());
+            if (widget) {
+                widget->set_input_hints(Gtk::InputHints::NO_EMOJI);
+            }
+        }
+    }
+
     setupSpinButton<sb_type>(spin_buttons[SPIN_X0], 0.0, -1000000.0, 1000000.0, 0.1, 1.0, EXPORT_COORD_PRECISION, true,
                              &SingleExport::onAreaXChange, SPIN_X0);
     setupSpinButton<sb_type>(spin_buttons[SPIN_X1], 0.0, -1000000.0, 1000000.0, 0.1, 1.0, EXPORT_COORD_PRECISION, true,

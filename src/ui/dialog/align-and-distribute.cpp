@@ -27,6 +27,7 @@
 #include <gtkmm/combobox.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/togglebutton.h>
+#include <gtkmm/text.h>
 
 #include "desktop.h"               // Tool switching.
 #include "inkscape-application.h"  // Access window.
@@ -140,6 +141,16 @@ AlignAndDistribute::AlignAndDistribute(Inkscape::UI::Dialog::DialogBase* dlg)
     // dialog based icon sizes, perhaps done via css instead.
     _icon_sizes_changed = prefs->createObserver("/toolbox/tools/iconsize", set_icon_size_prefs);
     set_icon_size_prefs();
+
+    auto remove_overlap_hgap_child = dynamic_cast<Gtk::Text*>(remove_overlap_hgap.get_first_child());
+    if (remove_overlap_hgap_child) {
+        remove_overlap_hgap_child->set_input_hints(Gtk::InputHints::NO_EMOJI);
+    }
+
+    auto remove_overlap_vgap_child = dynamic_cast<Gtk::Text*>(remove_overlap_vgap.get_first_child());
+    if (remove_overlap_vgap_child) {
+        remove_overlap_vgap_child->set_input_hints(Gtk::InputHints::NO_EMOJI);
+    }
 }
 
 void
