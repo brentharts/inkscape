@@ -86,13 +86,28 @@ node_distribute(InkscapeWindow* win, Geom::Dim2 direction)
     node_tool->_multipath->distributeNodes(direction);
 } 
 
+void
+node_symmetry(InkscapeWindow* win, Geom::Dim2 direction)
+{
+    auto const tool = win->get_desktop()->getTool();
+    auto node_tool = dynamic_cast<Inkscape::UI::Tools::NodeTool*>(tool);
+    if (node_tool) {
+        node_tool->_multipath->symmetricNodes(direction);
+        return;
+    }
+    show_output("node_symmetry: tool is not Node tool!");
+}
+
+
 std::vector<std::vector<Glib::ustring>> raw_data_node_align =
 {
     // clang-format off
     {"win.node-align-horizontal",       N_("Align nodes horizontally"),      "Node", N_("Align selected nodes horizontally; usage [last|first|middle|min|max|pref]" )},
     {"win.node-align-vertical",         N_("Align nodes vertically"),        "Node", N_("Align selected nodes vertically; usage [last|first|middle|min|max|pref]"   )},
     {"win.node-distribute-horizontal",  N_("Distribute nodes horizontally"), "Node", N_("Distribute selected nodes horizontally"                              )},
-    {"win.node-distribute-vertical",    N_("Distribute nodes vertically"),   "Node", N_("Distribute selected nodes vertically"                                )}
+    {"win.node-distribute-vertical",    N_("Distribute nodes vertically"),   "Node", N_("Distribute selected nodes vertically"                                )},
+    {"win.node-symmetry-horizontal",    N_("Make nodes horizontally symmetric"), "Node", N_("Make the shape symmetrical in the horizontal direction"                )},
+    {"win.node-symmetry-vertical",      N_("Make nodes vertically symmetric"),   "Node", N_("Make the shape symmetrical in the vertical direction"                  )}
     // clang-format on
 };
 
@@ -107,6 +122,8 @@ add_actions_node_align(InkscapeWindow* win)
     win->add_action_with_parameter( "node-align-vertical",        String, sigc::bind(sigc::ptr_fun(&node_align),      win, Geom::Y));
     win->add_action(                "node-distribute-horizontal",         sigc::bind(sigc::ptr_fun(&node_distribute), win, Geom::X));
     win->add_action(                "node-distribute-vertical",           sigc::bind(sigc::ptr_fun(&node_distribute), win, Geom::Y));
+    win->add_action(                "node-symmetry-horizontal",           sigc::bind(sigc::ptr_fun(&node_symmetry),   win, Geom::X));
+    win->add_action(                "node-symmetry-vertical",             sigc::bind(sigc::ptr_fun(&node_symmetry),   win, Geom::Y));
     // clang-format on
 
     auto app = InkscapeApplication::instance();

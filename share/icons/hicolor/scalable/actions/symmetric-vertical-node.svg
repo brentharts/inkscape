@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg inkscape:version="1.3.2 (1:1.3.2+202311252150+091e20ef0f)" sodipodi:docname="symmetric-horizontal-node-symbolic.svg" viewBox="0 0 16 16" height="16" width="16" id="svg1" version="1.1" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <style id="s0" />
+  <style id="s2"> 
+     @import '../../highlights.css'; 
+  </style>
+  <metadata id="metadata1217">
+    <rdf:RDF>
+      <cc:Work rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs id="defs1215">
+    <inkscape:path-effect attempt_force_join="true" miter_limit="100" linejoin_type="extrp_arc" line_width="2" linecap_type="butt" is_visible="true" id="path-effect3466" effect="join_type" />
+  </defs>
+  <sodipodi:namedview inkscape:snap-global="false" inkscape:document-rotation="0" inkscape:current-layer="g19671" inkscape:window-maximized="1" inkscape:window-y="0" inkscape:window-x="0" inkscape:window-height="1295" inkscape:window-width="2560" inkscape:cy="7.2362927" inkscape:cx="5.1863832" inkscape:zoom="44.636116" showgrid="true" id="namedview" guidetolerance="10" gridtolerance="10" objecttolerance="10" pagecolor="#ffffff" bordercolor="#666666" borderopacity="1.0" inkscape:pageshadow="2" inkscape:pageopacity="0.0" inkscape:pagecheckerboard="0" inkscape:showpageshadow="2" inkscape:deskcolor="#d1d1d1">
+    <inkscape:grid id="grid" type="xygrid" originx="0" originy="0" spacingy="1" spacingx="1" units="px" visible="true" />
+  </sodipodi:namedview>
+  <g id="align-vertical-node" inkscape:label="00295" transform="matrix(0.66653,0,0,0.666667,-721.18547,-574.24133)">
+    <g transform="matrix(0,-1,-1,0,1967.362,1929.362)" id="g19671" inkscape:label="#node_valign">
+      <path style="display:inline;opacity:0;fill:none" d="m 1044,861.36218 h 24 v 24 h -24 z" id="rect19683" inkscape:connector-curvature="0" />
+      <path inkscape:connector-curvature="0" id="rect5251" d="m 1063.5013,862.85737 h -4.5009 v 4.50092 h 4.5009 z m -4.5004,7.50101 H 1054.5 v 4.50092 h 4.5009 z m 6.0009,7.50154 h -4.5009 v 4.50092 h 4.5009 z" style="display:inline" sodipodi:nodetypes="ccccccccccccccc" />
+      <path inkscape:connector-curvature="0" id="path5262" d="m 1057.5009,861.35653 v 24.00493 h -1.5 v -24.00493 z" style="fill:#000000;fill-opacity:1" sodipodi:nodetypes="ccccc" />
+      <path inkscape:connector-curvature="0" id="path2" d="m 1054.5004,862.85737 h -4.5009 v 4.50092 h 4.5009 z m -1.4986,15.00255 h -4.5009 v 4.50092 h 4.5009 z" style="display:inline" sodipodi:nodetypes="cccccccccc" />
+    </g>
+  </g>
+</svg>
