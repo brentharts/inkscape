@@ -22,7 +22,6 @@ set(inkscape_SRC
   desktop-events.cpp
   desktop-style.cpp
   desktop.cpp
-  device-manager.cpp
   distribution-snapper.cpp
   document-subset.cpp
   document-undo.cpp
@@ -111,7 +110,6 @@ set(inkscape_SRC
   desktop-events.h
   desktop-style.h
   desktop.h
-  device-manager.h
   distribution-snapper.h
   document-subset.h
   document-undo.h
