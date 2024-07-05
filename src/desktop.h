@@ -170,6 +170,7 @@ private:
     std::unique_ptr<Inkscape::MessageContext> _tips_message_context;
 
     Inkscape::auto_connection _message_changed_connection;
+    Inkscape::auto_connection _message_idle_connection;
     Inkscape::auto_connection _document_uri_set_connection;
     // End Formerly in View::View ^^^^^^^^^^^^^^^^^^
 
@@ -322,6 +323,7 @@ public:
     void set_coordinate_status (Geom::Point p);
     SPItem *getItemFromListAtPointBottom(const std::vector<SPItem*> &list, Geom::Point const &p) const;
     SPItem *getItemAtPoint(Geom::Point const &p, bool into_groups, SPItem *upto = nullptr) const;
+    std::vector<SPItem*> getItemsAtPoints(std::vector<Geom::Point> ps, bool all_layers = true, bool topmost_only = true, size_t limit = 0, bool active_only = true) const;
     SPItem *getGroupAtPoint(Geom::Point const &p) const;
     Geom::Point point() const;
 

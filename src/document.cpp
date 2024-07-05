@@ -54,7 +54,7 @@
 #include "inkscape.h"
 #include "layer-manager.h"
 #include "page-manager.h"
-#include "profile-manager.h"
+#include "colors/document-cms.h"
 #include "rdf.h"
 #include "selection.h"
 
@@ -146,9 +146,6 @@ SPDocument::SPDocument() :
     history_size = 0;
     seeking = false;
 
-    // Once things are set, hook in the manager
-    _profileManager = std::make_unique<Inkscape::ProfileManager>(this);
-
     // For undo/redo
     undoStackObservers.add(*_event_log);
 
@@ -164,13 +161,13 @@ SPDocument::SPDocument() :
     add_document_actions_effect(this);
 
     _page_manager = std::make_unique<Inkscape::PageManager>(this);
+    _cms_manager = std::make_unique<Inkscape::Colors::DocumentCMS>(this);
 }
 
 SPDocument::~SPDocument() {
     destroySignal.emit();
 
     // kill/unhook this first
-    _profileManager.reset();
     _desktop_activated_connection.disconnect();
 
     if (partial) {

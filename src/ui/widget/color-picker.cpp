@@ -12,134 +12,128 @@
  */
 
 #include "color-picker.h"
+#include <glibmm/ustring.h>
+#include <gtkmm/enums.h>
+#include <gtkmm/menubutton.h>
+#include <gtkmm/cssprovider.h>
+#include <gtkmm/widget.h>
+#include <utility>
 
 #include "desktop.h"
 #include "document-undo.h"
 #include "inkscape.h"
-
-#include "ui/dialog-events.h"
+#include "ui/util.h"
 #include "ui/widget/color-notebook.h"
+#include "ui/widget/color-preview.h"
 
 static bool _in_use = false;
 
 namespace Inkscape::UI::Widget {
 
-ColorPicker::ColorPicker(Glib::ustring const &title,
+ColorPicker::ColorPicker(Glib::ustring title,
                          Glib::ustring const &tip,
-                         std::uint32_t const rgba,
+                         Colors::Color const &initial,
                          bool const undo,
-                         Gtk::Button * const external_button)
-    : _preview(Gtk::make_managed<ColorPreview>(rgba))
-    , _title(title)
-    , _rgba(rgba)
+                         bool use_transparency)
+    : _preview(Gtk::make_managed<ColorPreview>(initial.toRGBA()))
+    , _title(std::move(title))
     , _undo(undo)
+    , _colors(std::make_shared<Colors::ColorSet>(nullptr, use_transparency))
 {
-    auto button = external_button ? external_button : this;
-    button->set_child(*_preview);
     // set tooltip if given, otherwise leave original tooltip in place (from external button)
     if (!tip.empty()) {
-        button->set_tooltip_text(tip);
+        set_tooltip_text(tip);
     }
-    _selected_color.signal_changed.connect(sigc::mem_fun(*this, &ColorPicker::_onSelectedColorChanged));
-    _selected_color.signal_dragged.connect(sigc::mem_fun(*this, &ColorPicker::_onSelectedColorChanged));
-    _selected_color.signal_released.connect(sigc::mem_fun(*this, &ColorPicker::_onSelectedColorChanged));
 
-    if (external_button) {
-        external_button->signal_clicked().connect([this] { on_clicked(); });
-    }
-    
-    sp_transientize(_colorSelectorDialog);
-    _colorSelectorDialog.set_title(title);
-    _colorSelectorDialog.set_hide_on_close();
+    _colors->set(initial);
+    _construct();
+}
 
-    property_sensitive().signal_changed().connect([this](){
-        _preview->setEnabled(is_sensitive());
+ColorPicker::ColorPicker(BaseObjectType *cobject, Glib::RefPtr<Gtk::Builder> const &,
+                         Glib::ustring title, bool use_transparency)
+    : Gtk::MenuButton(cobject)
+    , _preview(Gtk::make_managed<ColorPreview>(0x0))
+    , _title(std::move(title))
+    , _colors(std::make_shared<Colors::ColorSet>(nullptr, use_transparency))
+{
+    _construct();
+}
+
+void ColorPicker::_construct() {
+    // match min height with that of the current theme button and enforce square shape for our color picker
+    Gtk::Button button;
+    auto height = button.measure(Gtk::Orientation::VERTICAL).sizes.minimum;
+    set_name("ColorPicker");
+    restrict_minsize_to_square(*this, height);
+
+    _preview->setStyle(ColorPreview::Outlined);
+    set_child(*_preview);
+
+    // postpone color selector creation until popup is open
+    _popup.signal_show().connect([this](){
+        if (!_color_selector) {
+            _color_selector = Gtk::make_managed<ColorNotebook>(_colors);
+            _color_selector->set_label(_title);
+            _color_selector->set_margin(4);
+            _popup.set_child(*_color_selector);
+        }
     });
+    set_popover(_popup);
+
+    _colors->signal_changed.connect(sigc::mem_fun(*this, &ColorPicker::_onSelectedColorChanged));
+    _colors->signal_released.connect(sigc::mem_fun(*this, &ColorPicker::_onSelectedColorChanged));
 }
 
 ColorPicker::~ColorPicker() = default;
 
-void ColorPicker::setRgba32(std::uint32_t const rgba)
+void ColorPicker::setTitle(Glib::ustring title) {
+    _title = std::move(title);
+}
+
+void ColorPicker::setColor(Colors::Color const &color)
 {
     if (_in_use) return;
 
-    set_preview(rgba);
-    _rgba = rgba;
-
-    if (_color_selector)
-    {
-        _updating = true;
-        _selected_color.setValue(rgba);
-        _updating = false;
-    }
-}
-
-void ColorPicker::closeWindow()
-{
-    _colorSelectorDialog.set_visible(false);
+    _updating = true;
+    set_preview(color.toRGBA());
+    _colors->set(color);
+    _updating = false;
 }
 
 void ColorPicker::open() {
-    on_clicked();
+    popup();
 }
 
-void ColorPicker::on_clicked()
+void ColorPicker::close() {
+    popdown();
+}
+
+void ColorPicker::_onSelectedColorChanged()
 {
-    if (!_color_selector) {
-        _color_selector = Gtk::make_managed<ColorNotebook>(_selected_color, _ignore_transparency);
-        _color_selector->set_label(_title);
-        _color_selector->set_margin(4);
-        _colorSelectorDialog.set_child(*_color_selector);
-    }
-
-    _updating = true;
-    _selected_color.setValue(_rgba);
-    _updating = false;
-
-    _colorSelectorDialog.present();
-}
-
-void ColorPicker::on_changed(std::uint32_t)
-{
-}
-
-void ColorPicker::_onSelectedColorChanged() {
-    if (_updating) {
+    if (_updating || _in_use)
         return;
-    }
 
-    if (_in_use) {
-        return;
-    } else {
-        _in_use = true;
-    }
+    auto color = _colors->get();
+    if (!color) return;
 
-    auto const rgba = _selected_color.value();
-    set_preview(rgba);
+    set_preview(color->toRGBA());
 
     if (_undo && SP_ACTIVE_DESKTOP) {
-        DocumentUndo::done(SP_ACTIVE_DESKTOP->getDocument(), /* TODO: annotate */ "color-picker.cpp:129", "");
+        DocumentUndo::done(SP_ACTIVE_DESKTOP->getDocument(), /* TODO: annotate */ "color-picker.cpp:122", "");
     }
 
-    on_changed(rgba);
+    _in_use = true;
+    _changed_signal.emit(*color);
+    on_changed(*color);
     _in_use = false;
-    _rgba = rgba;
-    _changed_signal.emit(rgba);
 }
 
-void ColorPicker::set_preview(std::uint32_t const rgba)
+void ColorPicker::on_changed(Colors::Color const &) {}
+
+void ColorPicker::set_preview(std::uint32_t rgba)
 {
-    _preview->setRgba32(_ignore_transparency ? rgba | 0xff : rgba);
-}
-
-void ColorPicker::use_transparency(bool enable) {
-    _ignore_transparency = !enable;
-    set_preview(_rgba);
-}
-
-std::uint32_t ColorPicker::get_current_color() const
-{
-    return _rgba;
+    bool has_alpha = _colors->getAlphaConstraint().value_or(true);
+    _preview->setRgba32(has_alpha ? rgba : rgba | 0xff);
 }
 
 } // namespace Inkscape::UI::Widget

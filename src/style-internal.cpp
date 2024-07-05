@@ -25,11 +25,19 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 #include <sigc++/bind.h>
 #include <glibmm/regex.h>
+#include <glibmm/ustring.h>
 
+#include "style-enums.h"
 #include "style-internal.h"
 #include "style.h"
+
+#include "colors/color.h"
+#include "colors/document-cms.h"
+
+#include "document.h"
 
 #include "bad-uri-exception.h"
 #include "extract-uri.h"
@@ -798,6 +806,61 @@ void SPIEnum<T>::read(gchar const *str)
     }
 }
 
+// special read() version for font-weight attribute to handle numerical values,
+// values which Pango supports and some fonts require
+template <>
+void SPIEnum<SPCSSFontWeight>::read(gchar const *str) {
+    if (!str) return;
+
+    if (!strcmp(str, "inherit")) {
+        set = true;
+        inherit = true;
+    } else {
+        auto const *enums = get_enums<SPCSSFontWeight>();
+        bool translated = false;
+        for (unsigned i = 0; enums[i].key; i++) {
+            if (!strcmp(str, enums[i].key)) {
+                set = true;
+                inherit = false;
+                value = static_cast<SPCSSFontWeight>(enums[i].value);
+                translated = true;
+                break;
+            }
+        }
+        // translate numbers only; no leading spaces or trailing characters accepted
+        // to make it as strict as key matching above
+        if (!translated && isdigit(*str)) {
+            char* end = nullptr;
+            auto weight = strtol(str, &end, 10);
+            if (end && (*end == '\0' || *end == ' ') && weight > 0 && weight <= 1000) {
+                set = true;
+                inherit = false;
+                value = static_cast<SPCSSFontWeight>(weight);
+            }
+        }
+
+        // type-specialized subroutine
+        update_computed();
+    }
+}
+
+template <>
+const Glib::ustring SPIEnum<SPCSSFontWeight>::get_value() const {
+    if (this->inherit) return Glib::ustring("inherit");
+    auto const *enums = get_enums<SPCSSFontWeight>();
+    auto val = static_cast<int>(value);
+    for (unsigned i = 0; enums[i].key; ++i) {
+        if (enums[i].value == val) {
+            return Glib::ustring(enums[i].key);
+        }
+    }
+    if (val > 0 && val <= 1000) {
+        return Glib::ustring::format(val);
+    }
+    return Glib::ustring("");
+}
+
+
 template <typename T>
 const Glib::ustring SPIEnum<T>::get_value() const
 {
@@ -818,9 +881,9 @@ void SPIEnum<SPCSSFontWeight>::update_computed_cascade(SPCSSFontWeight const &p_
     // expressible in the current font family, but that's difficult to
     // find out, so jumping by 3 seems an appropriate approximation
     if (value == SP_CSS_FONT_WEIGHT_LIGHTER) {
-        computed = static_cast<SPCSSFontWeight>(std::max<int>(SP_CSS_FONT_WEIGHT_100, int(p_computed) - 3));
+        computed = static_cast<SPCSSFontWeight>(std::max<int>(SP_CSS_FONT_WEIGHT_100, int(p_computed) - 3 * 100));
     } else if (value == SP_CSS_FONT_WEIGHT_BOLDER) {
-        computed = static_cast<SPCSSFontWeight>(std::min<int>(SP_CSS_FONT_WEIGHT_900, p_computed + 3));
+        computed = static_cast<SPCSSFontWeight>(std::min<int>(SP_CSS_FONT_WEIGHT_900, p_computed + 3 * 100));
     }
 }
 
@@ -1387,13 +1450,57 @@ void SPIShapes::hrefs_clear()
 
 // SPIColor -------------------------------------------------------------
 
-// Used for 'color', 'text-decoration-color', 'flood-color', 'lighting-color', and 'stop-color'.
-// (The last three have yet to be implemented.)
-// CSS3: 'currentcolor' is allowed value and is equal to inherit for the 'color' property.
-// FIXME: We should preserve named colors, hsl colors, etc.
-void SPIColor::read( gchar const *str ) {
+SPIColor::SPIColor(bool inherits)
+        : SPIBase(inherits)
+{}
 
-    if( !str ) return;
+bool SPIColor::canHaveCMS() const
+{
+    return style && style->document;
+}
+
+Colors::DocumentCMS const &SPIColor::getCMS() const
+{
+    if (!style || !style->document) {
+        g_error("Can not get Document CMS manager.");
+    }
+    return style->document->getDocumentCMS();
+}
+
+SPIColor& SPIColor::operator=(const SPIColor& rhs)
+{
+    SPIBase::operator=(rhs);
+    currentcolor = rhs.currentcolor;
+    _color = rhs._color;
+    return *this;
+}
+
+SPIColor& SPIColor::operator=(const Colors::Color &rhs)
+{
+    auto copy = rhs;
+    setColor(copy);
+    return *this;
+}
+
+void SPIColor::setColor(Colors::Color const &other)
+{
+    currentcolor = false;
+    _color = other;
+    set = true;
+}
+
+Colors::Color const &SPIColor::getColor() const
+{
+    static auto default_color = Colors::Color(0x0); // Transparent RGB black
+    return _color ? *_color : default_color;
+}
+
+// Used for 'color', 'text-decoration-color', 'flood-color', 'lighting-color', and 'stop-color'.
+// CSS3: 'currentcolor' is allowed value and is equal to inherit for the 'color' property.
+
+void SPIColor::read(gchar const *str)
+{
+    if(!str) return;
 
     set = false;
     inherit = false;
@@ -1407,12 +1514,22 @@ void SPIColor::read( gchar const *str ) {
         if (id() == SPAttr::COLOR) {
             inherit = true;  // CSS3
         } else if (style) {
-            setColor( style->color.value.color );
+            _color = style->color._color;
         } else {
             std::cerr << "SPIColor::read(): value is 'currentColor' but 'color' not available." << std::endl;
         }
     } else {
-        set = value.color.fromString(str);
+        if (canHaveCMS()) {
+            _color = getCMS().parse(str);
+        } else {
+            if (str) { // DEBUG
+                if (std::string(str).find("icc") != std::string::npos) {
+                    g_error("CMS color '%s' not parsed, no CMS document available.", str);
+                }
+            }
+            _color = Colors::Color::parse(str);
+        }
+        set = (bool)_color;
     }
 }
 
@@ -1421,15 +1538,16 @@ const Glib::ustring SPIColor::get_value() const
     // currentcolor goes first to handle special case for 'color' property
     if (this->currentcolor) return Glib::ustring("currentColor");
     if (this->inherit) return Glib::ustring("inherit");
-    return this->value.color.toString();
+    return _color ? _color->toString() : "";
 }
 
 void
 SPIColor::cascade( const SPIBase* const parent ) {
     if( const SPIColor* p = dynamic_cast<const SPIColor*>(parent) ) {
         if( (inherits && !set) || inherit) { // FIXME verify for 'color'
-            if( !(inherit && currentcolor) ) currentcolor = p->currentcolor;
-            setColor( p->value.color );
+            if (!(inherit && currentcolor))
+                currentcolor = p->currentcolor;
+            _color = p->_color;
         } else {
             // Add CSS4 Color: Lighter, Darker
         }
@@ -1447,7 +1565,7 @@ SPIColor::merge( const SPIBase* const parent ) {
                 set           = p->set;
                 inherit       = p->inherit;
                 currentcolor  = p->currentcolor;
-                value.color   = p->value.color;
+                _color = p->_color;
             }
         }
     }
@@ -1457,11 +1575,15 @@ bool
 SPIColor::equals(const SPIBase& rhs) const {
     if( const SPIColor* r = dynamic_cast<const SPIColor*>(&rhs) ) {
 
-        // ICC support is handled by SPColor==
-        if (currentcolor != r->currentcolor || value.color != r->value.color) {
+        if (currentcolor != r->currentcolor) {
             return false;
         }
-
+        if ((_color && !r->_color) || (!_color && r->_color)) {
+            return false;
+        }
+        if (_color && r->_color && *_color != *r->_color) {
+            return false;
+        }
         return SPIBase::equals(rhs);
 
     } else {
@@ -1478,6 +1600,24 @@ SPIColor::equals(const SPIBase& rhs) const {
 // It is needed for computed value when value is 'currentColor'. It is also needed to
 // find the object for creating an href (this is done through document but should be done
 // directly so document not needed.. FIXME).
+
+SPIPaint::SPIPaint()
+{
+    clear();
+}
+
+bool SPIPaint::canHaveCMS() const
+{
+    return style && style->document;
+}
+
+Colors::DocumentCMS const &SPIPaint::getCMS() const
+{
+    if (!style || !style->document) {
+        g_error("Can not get Document CMS manager.");
+    }
+    return style->document->getDocumentCMS();
+}
 
 /**
  * Set SPIPaint object from string.
@@ -1529,21 +1669,21 @@ SPIPaint::read( gchar const *str ) {
                 SPDocument *document = (style->object) ? style->object->document : nullptr;
 
                 // Create href if not done already
-                if (!value.href) {
+                if (!href) {
 
                     if (style->object) {
-                        value.href = std::make_shared<SPPaintServerReference>(style->object);
+                        href = std::make_shared<SPPaintServerReference>(style->object);
                     } else if (document) {
-                        value.href = std::make_shared<SPPaintServerReference>(document);
+                        href = std::make_shared<SPPaintServerReference>(document);
                     } else {
                         std::cerr << "SPIPaint::read: No valid object or document!" << std::endl;
                         return;
                     }
 
                     if (this == &style->fill) {
-                        style->fill_ps_changed_connection = value.href->changedSignal().connect(sigc::bind(sigc::ptr_fun(sp_style_fill_paint_server_ref_changed), style));
+                        style->fill_ps_changed_connection = href->changedSignal().connect(sigc::bind(sigc::ptr_fun(sp_style_fill_paint_server_ref_changed), style));
                     } else {
-                        style->stroke_ps_changed_connection = value.href->changedSignal().connect(sigc::bind(sigc::ptr_fun(sp_style_stroke_paint_server_ref_changed), style));
+                        style->stroke_ps_changed_connection = href->changedSignal().connect(sigc::bind(sigc::ptr_fun(sp_style_stroke_paint_server_ref_changed), style));
                     }
                 }
 
@@ -1552,6 +1692,7 @@ SPIPaint::read( gchar const *str ) {
             }
         }
 
+        // Continue to parse after url for fallback colors.
         while ( g_ascii_isspace(*str) ) {
             ++str;
         }
@@ -1560,14 +1701,14 @@ SPIPaint::read( gchar const *str ) {
             set = true;
             paintOrigin = SP_CSS_PAINT_ORIGIN_CURRENT_COLOR;
             if (style) {
-                setColor( style->color.value.color );
+                setColor(style->color.getColor());
             } else {
                 // Normally an SPIPaint is part of an SPStyle and the value of 'color' is
                 // available.  SPIPaint can be used 'stand-alone' (e.g. to parse color values) in
                 // which case a value of 'currentColor' is meaningless, thus we shouldn't reach
                 // here.
                 std::cerr << "SPIPaint::read(): value is 'currentColor' but 'color' not available." << std::endl;
-                setColor( 0 );
+                setColor(Colors::Color(0x000000ff));
             }
         } else if (streq(str, "context-fill")) {
             set = true;
@@ -1578,20 +1719,11 @@ SPIPaint::read( gchar const *str ) {
         } else if (streq(str, "none")) {
             set = true;
             noneSet = true;
-        } else if (value.color.fromString(str)) {
+        } else if (auto color = canHaveCMS() ? getCMS().parse(str) : Colors::Color::parse(str)) {
             set = true;
-            colorSet = true;
+            _color = color;
         }
     }
-}
-
-// Stand-alone read (Legacy read()), used multiple places, e.g. sp-stop.cpp
-// This function should not be necessary. FIXME
-void
-SPIPaint::read( gchar const *str, SPStyle &style_in, SPDocument *document_in ) {
-    style = &style_in;
-    style->document = document_in;
-    read( str );
 }
 
 const Glib::ustring SPIPaint::get_value() const
@@ -1600,8 +1732,8 @@ const Glib::ustring SPIPaint::get_value() const
     if (this->noneSet) return Glib::ustring("none");
     // url must go first as other values can serve as fallbacks
     auto ret = Glib::ustring("");
-    if (this->value.href && this->value.href->getURI()) {
-        ret += this->value.href->getURI()->cssStr();
+    if (this->href && this->href->getURI()) {
+        ret += this->href->getURI()->cssStr();
     }
     switch(this->paintOrigin) {
         case SP_CSS_PAINT_ORIGIN_CURRENT_COLOR:
@@ -1617,13 +1749,27 @@ const Glib::ustring SPIPaint::get_value() const
             ret += "context-stroke";
             break;
         case SP_CSS_PAINT_ORIGIN_NORMAL:
-            if (this->colorSet) {
+            if (_color) {
                 if (!ret.empty()) ret += " ";
-                ret += value.color.toString();
+                ret += _color->toString();
             }
             break;
     }
     return ret;
+}
+
+void SPIPaint::setColor(Colors::Color const &other)
+{
+    _color = other;
+    set = true;
+}
+
+Colors::Color const &SPIPaint::getColor() const
+{
+    static auto default_color = Colors::Color(0x0); // Transparent RGB black
+    if (_color)
+        return *_color;
+    return default_color;
 }
 
 void
@@ -1638,15 +1784,13 @@ SPIPaint::reset( bool init ) {
     // std::cout << "SPIPaint::reset(): " << name << " " << init << std::endl;
     SPIBase::clear();
     paintOrigin = SP_CSS_PAINT_ORIGIN_NORMAL;
-    colorSet = false;
     noneSet = false;
-    value.color.set(0x0);
-    value.color.unsetColorProfile();
+    _color.reset();
     tag = nullptr;
-    value.href.reset();
+    href.reset();
 
     if (init && id() == SPAttr::FILL) {
-        setColor(0.0, 0.0, 0.0); // 'black' is default for 'fill'
+        _color = Inkscape::Colors::Color(0x000000ff); // 'black' is default for 'fill'
     }
 }
 
@@ -1660,19 +1804,19 @@ SPIPaint::cascade( const SPIBase* const parent ) {
             reset( false ); // Do not init
 
             if( p->isPaintserver() ) {
-                if( p->value.href) {
+                if( p->href) {
                     // Why can we use p->document ?
-                    sp_style_set_ipaint_to_uri( style, this, p->value.href->getURI(), p->value.href->getOwnerDocument());
+                    sp_style_set_ipaint_to_uri( style, this, p->href->getURI(), p->href->getOwnerDocument());
                 } else {
                     std::cerr << "SPIPaint::cascade: Expected paint server not found." << std::endl;
                 }
             } else if( p->isColor() ) {
-                setColor( p->value.color );
+                _color = p->_color;
             } else if( p->isNoneSet() ) {
                 noneSet = true;
             } else if( p->paintOrigin == SP_CSS_PAINT_ORIGIN_CURRENT_COLOR ) {
                 paintOrigin = SP_CSS_PAINT_ORIGIN_CURRENT_COLOR;
-                setColor( style->color.value.color );
+                _color = style->color.getColor();
             } else if( isNone() ) {
                 //
             } else {
@@ -1681,7 +1825,7 @@ SPIPaint::cascade( const SPIBase* const parent ) {
         } else {
             if( paintOrigin == SP_CSS_PAINT_ORIGIN_CURRENT_COLOR ) {
                 // Update in case color value changed.
-                setColor( style->color.value.color );
+                _color = style->color.getColor();
             }
         }
 
@@ -1715,17 +1859,14 @@ SPIPaint::equals(const SPIBase& rhs) const {
         }
 
         if ( this->isPaintserver() ) {
-            if( this->value.href == nullptr || r->value.href == nullptr ||
-                this->value.href->getObject() != r->value.href->getObject() ) {
+            if( this->href == nullptr || r->href == nullptr ||
+                this->href->getObject() != r->href->getObject() ) {
                 return false;
             }
         }
 
-        if ( this->isColor() ) {
-            // ICC handled by SPColor==
-            if (value.color != r->value.color) {
-                return false;
-            }
+        if (this->isColor() && *_color != *r->_color) {
+            return false;
         }
 
         return SPIBase::equals(rhs);
@@ -1957,7 +2098,7 @@ SPIFilter::read( gchar const *str ) {
 const Glib::ustring SPIFilter::get_value() const
 {
     if (this->inherit) return Glib::ustring("inherit");
-    if (this->href) return this->href->getURI()->cssStr();
+    if (this->href && this->href->getURI()) return this->href->getURI()->cssStr();
     return Glib::ustring("");
 }
 
@@ -2003,11 +2144,11 @@ SPIFilter::merge( const SPIBase* const parent ) {
                 }
             } else {
                 // If we don't have an href, create it
-                if( style->document ) { // FIXME
+                if (style->object) {
+                    href = new SPFilterReference(style->object);
+                } else if (style->document) { // FIXME
                     href = new SPFilterReference(style->document);
                     //href->changedSignal().connect(sigc::bind(sigc::ptr_fun(sp_style_filter_ref_changed), style));
-                } else if (style->object) {
-                    href = new SPFilterReference(style->object);
                 }
             }
             if( href ) {

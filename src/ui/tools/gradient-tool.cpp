@@ -259,6 +259,24 @@ static auto get_stop_intervals(GrDrag *drag)
 
 void GradientTool::add_stops_between_selected_stops()
 {
+    if (_grdrag->hasSelection()) {
+        auto dragger = *_grdrag->selected.begin();
+        auto draggable = dragger->draggables[0];
+        auto gradient = getGradient(draggable->item, draggable->fill_or_stroke);
+        auto vector = sp_gradient_get_forked_vector_if_necessary(gradient, false);
+
+        // Treat single stop gradients separately.
+        if (vector->getStopCount() == 1) {
+            auto newstop = sp_gradient_add_stop(vector, vector->getFirstStop());
+            gradient->ensureVector();
+            _grdrag->updateDraggers();
+            _grdrag->local_change = true;
+            _grdrag->selectByStop(newstop);
+            DocumentUndo::done(gradient->document, _("Add gradient stop"), INKSCAPE_ICON("color-gradient"));
+            return;
+        }
+    }
+
     auto ret = get_stop_intervals(_grdrag);
 
     if (ret.these_stops.empty() && _grdrag->numSelected() == 1) {
@@ -270,9 +288,16 @@ void GradientTool::add_stops_between_selected_stops()
                 // To avoid creating 2 separate stops, ignore this draggable point type
                 continue;
             }
+
+            // Mark the second-to-last stop as the current stop if the last gradient point is
+            // selected to insert a stop.
+            auto const point_i =
+                d->point_type == POINT_LG_END || d->point_type == POINT_RG_R1 || d->point_type == POINT_RG_R2
+                    ? d->point_i - 1
+                    : d->point_i;
             auto gradient = getGradient(d->item, d->fill_or_stroke);
             auto vector = sp_gradient_get_forked_vector_if_necessary(gradient, false);
-            if (auto this_stop = sp_get_stop_i(vector, d->point_i)) {
+            if (auto this_stop = sp_get_stop_i(vector, point_i)) {
                 if (auto next_stop = this_stop->getNextStop()) {
                     ret.these_stops.emplace_back(this_stop);
                     ret.next_stops.emplace_back(next_stop);
@@ -346,18 +371,9 @@ void GradientTool::simplify(double tolerance)
                 }
 
                 // compare color of stop1 to the average color of stop0 and stop2
-                uint32_t const c0 = stop0->get_rgba32();
-                uint32_t const c2 = stop2->get_rgba32();
-                uint32_t const c1r = stop1->get_rgba32();
-                uint32_t const c1 = average_color(c0, c2, (stop1->offset - stop0->offset) / (stop2->offset - stop0->offset));
-
-                double diff =
-                    Geom::sqr(SP_RGBA32_R_F(c1) - SP_RGBA32_R_F(c1r)) +
-                    Geom::sqr(SP_RGBA32_G_F(c1) - SP_RGBA32_G_F(c1r)) +
-                    Geom::sqr(SP_RGBA32_B_F(c1) - SP_RGBA32_B_F(c1r)) +
-                    Geom::sqr(SP_RGBA32_A_F(c1) - SP_RGBA32_A_F(c1r));
-
-                if (diff < tolerance) {
+                auto coord = (stop1->offset - stop0->offset) / (stop2->offset - stop0->offset);
+                auto avg = stop0->getColor().averaged(stop2->getColor(), coord);
+                if (avg.difference(stop1->getColor()) < tolerance) {
                     todel.emplace(stop1);
                 }
             }
@@ -432,7 +448,8 @@ bool GradientTool::root_handler(CanvasEvent const &event)
 
             auto button_dt = _desktop->w2d(event.pos);
             if (event.modifiers & GDK_SHIFT_MASK && !(event.modifiers & GDK_CONTROL_MASK)) {
-                Rubberband::get(_desktop)->start(_desktop, button_dt);
+                auto rubberband = Rubberband::get(_desktop);
+                rubberband->start(_desktop, button_dt);
             } else {
                 // remember clicked item, disregarding groups, honoring Alt; do nothing with Crtl to
                 // enable Ctrl+doubleclick of exactly the selected item(s)
@@ -461,7 +478,7 @@ bool GradientTool::root_handler(CanvasEvent const &event)
 
             auto const motion_dt = _desktop->w2d(event.pos);
 
-            if (Rubberband::get(_desktop)->is_started()) {
+            if (Rubberband::get(_desktop)->isStarted()) {
                 Rubberband::get(_desktop)->move(motion_dt);
                 defaultMessageContext()->set(NORMAL_MESSAGE, _("<b>Draw around</b> handles to select them"));
             } else {
@@ -523,9 +540,9 @@ bool GradientTool::root_handler(CanvasEvent const &event)
                     // or rubberband-select if we have rubberband
                     auto r = Rubberband::get(_desktop);
 
-                    if (r->is_started() && !within_tolerance) {
+                    if (r->isStarted() && !within_tolerance) {
                         // this was a rubberband drag
-                        if (r->getMode() == RUBBERBAND_MODE_RECT) {
+                        if (r->getMode() == Rubberband::Mode::RECT) {
                             _grdrag->selectRect(*r->getRectangle());
                         }
                     }

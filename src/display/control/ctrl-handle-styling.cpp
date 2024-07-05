@@ -70,7 +70,13 @@ std::unordered_map<std::string, CanvasItemCtrlType> const ctrl_type_map = {
     {".inkscape-invisible", CANVAS_ITEM_CTRL_TYPE_INVISIPOINT},
     {".inkscape-guide-handle", CANVAS_ITEM_CTRL_TYPE_GUIDE_HANDLE},
     {".inkscape-pointer", CANVAS_ITEM_CTRL_TYPE_POINTER},
-    {".inkscape-move", CANVAS_ITEM_CTRL_TYPE_MOVE}
+    {".inkscape-move", CANVAS_ITEM_CTRL_TYPE_MOVE},
+    {".inkscape-selection-rect", RUBBERBAND_RECT},
+    {".inkscape-selection-lasso", RUBBERBAND_TOUCHPATH},
+    {".inkscape-selection-path.selector", RUBBERBAND_TOUCHPATH_SELECT},
+    {".inkscape-selection-path.eraser", RUBBERBAND_TOUCHPATH_ERASER},
+    {".inkscape-selection-path.paint-bucket", RUBBERBAND_TOUCHPATH_FLOOD},
+    {".inkscape-selection-touchrect", RUBBERBAND_TOUCHRECT},
 };
 
 /**
@@ -118,7 +124,7 @@ CanvasItemCtrlShape parse_shape(CRTerm const *term)
     auto const str = get_string(term);
     auto const it = ctrl_shape_map.find(str);
     if (it == ctrl_shape_map.end()) {
-        throw Exception{Glib::ustring::compose(_("Unrecognized shape %1"), str)};
+        throw Exception{Glib::ustring::compose(_("Unrecognized shape '%1'"), str)};
     }
     return it->second;
 }

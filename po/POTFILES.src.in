@@ -41,7 +41,7 @@ ${_build_dir}/share/templates/templates.h
 ../src/actions/actions-view-window.cpp
 ../src/actions/actions-window.cpp
 ../src/auto-save.cpp
-../src/color/cms-util.cpp
+../src/colors/spaces/components.cpp
 ../src/context-fns.cpp
 ../src/desktop-events.cpp
 ../src/desktop-style.cpp
@@ -362,7 +362,6 @@ ${_build_dir}/share/templates/templates.h
 ../src/ui/toolbar/star-toolbar.cpp
 ../src/ui/toolbar/text-toolbar.cpp
 ../src/ui/toolbar/tool-toolbar.cpp
-../src/ui/toolbar/toolbars.cpp
 ../src/ui/tools/arc-tool.cpp
 ../src/ui/tools/booleans-tool.cpp
 ../src/ui/tools/box3d-tool.cpp
@@ -382,6 +381,7 @@ ${_build_dir}/share/templates/templates.h
 ../src/ui/tools/pencil-tool.cpp
 ../src/ui/tools/rect-tool.cpp
 ../src/ui/tools/select-tool.cpp
+../src/ui/tools/shortcuts.cpp
 ../src/ui/tools/spiral-tool.cpp
 ../src/ui/tools/spray-tool.cpp
 ../src/ui/tools/star-tool.cpp
@@ -391,7 +391,6 @@ ${_build_dir}/share/templates/templates.h
 ../src/ui/util.cpp
 ../src/ui/widget/canvas-grid.cpp
 ../src/ui/widget/color-entry.cpp
-../src/ui/widget/color-icc-selector.cpp
 ../src/ui/widget/color-notebook.cpp
 ../src/ui/widget/color-palette.cpp
 ../src/ui/widget/color-scales.cpp
@@ -403,8 +402,10 @@ ${_build_dir}/share/templates/templates.h
 ../src/ui/widget/fill-style.cpp
 ../src/ui/widget/filter-effect-chooser.cpp
 ../src/ui/widget/font-collection-selector.cpp
+../src/ui/widget/font-list.cpp
 ../src/ui/widget/font-selector.cpp
 ../src/ui/widget/font-variants.cpp
+../src/ui/widget/font-variations.cpp
 ../src/ui/widget/gradient-editor.cpp
 ../src/ui/widget/gradient-selector.cpp
 ../src/ui/widget/gradient-vector-selector.cpp
@@ -422,14 +423,13 @@ ${_build_dir}/share/templates/templates.h
 ../src/ui/widget/registered-widget.cpp
 ../src/ui/widget/rendering-options.cpp
 ../src/ui/widget/selected-style.cpp
-../src/ui/widget/status-bar.cpp
 ../src/ui/widget/stroke-style.cpp
 ../src/ui/widget/style-swatch.cpp
 ../src/ui/widget/swatch-selector.cpp
 ../src/ui/widget/template-list.cpp
 ../src/util/enums.h
 ../src/util/font-collections.h
+../src/util/font-tags.cpp
 ../src/util/paper.cpp
 ../src/vanishing-point.cpp
-../src/widgets/paintdef.cpp
 ../src/widgets/sp-attribute-widget.cpp

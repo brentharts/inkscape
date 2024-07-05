@@ -30,7 +30,6 @@
 #include <sigc++/adaptors/bind.h>
 
 #include "desktop.h"
-#include "color.h"
 #include "desktop-events.h"
 #include "desktop-style.h"
 #include "document-undo.h"
@@ -111,7 +110,10 @@ SPDesktop::SPDesktop()
     _tips_message_context = std::make_unique<Inkscape::MessageContext>(_message_stack);
 
     _message_changed_connection = _message_stack->connectChanged([this](auto const type, auto const message) {
-        onStatusMessage(type, message);
+        _message_idle_connection = Glib::signal_idle().connect([=, this](){
+            onStatusMessage(type, message);
+            return false;
+        }, Glib::PRIORITY_HIGH);
     });
 
 }
@@ -431,6 +433,13 @@ SPItem *SPDesktop::getItemAtPoint(Geom::Point const &p, bool into_groups, SPItem
 {
     g_return_val_if_fail (doc() != nullptr, NULL);
     return doc()->getItemAtPoint( dkey, p, into_groups, upto);
+}
+
+std::vector<SPItem*> SPDesktop::getItemsAtPoints(std::vector<Geom::Point> points, bool all_layers, bool topmost_only, size_t limit, bool active_only) const
+{
+    if (!doc())
+        return {};
+    return doc()->getItemsAtPoints(dkey, points, all_layers, topmost_only, limit, active_only);
 }
 
 /**

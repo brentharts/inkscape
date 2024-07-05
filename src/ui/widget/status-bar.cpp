@@ -15,7 +15,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <glibmm/i18n.h>
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
@@ -62,13 +61,13 @@ StatusBar::StatusBar()
     // Can't seem to add actions with double parameters to .ui file, add here.
     const std::vector<std::pair<std::string, std::string>> zoom_entries =
     {
-        { _(  "10%"), "win.canvas-zoom-absolute(0.1)" },
-        { _(  "20%"), "win.canvas-zoom-absolute(0.2)" },
-        { _(  "50%"), "win.canvas-zoom-absolute(0.5)" },
-        { _( "100%"), "win.canvas-zoom-absolute(1.0)" }, // Must include decimal point!
-        { _( "200%"), "win.canvas-zoom-absolute(2.0)" },
-        { _( "500%"), "win.canvas-zoom-absolute(5.0)" },
-        { _("1000%"), "win.canvas-zoom-absolute(10.0)"},
+        {  "10%", "win.canvas-zoom-absolute(0.1)" },
+        {  "20%", "win.canvas-zoom-absolute(0.2)" },
+        {  "50%", "win.canvas-zoom-absolute(0.5)" },
+        { "100%", "win.canvas-zoom-absolute(1.0)" }, // Must include decimal point!
+        {  "200%", "win.canvas-zoom-absolute(2.0)" },
+        {  "500%", "win.canvas-zoom-absolute(5.0)" },
+        { "1000%", "win.canvas-zoom-absolute(10.0)"},
     };
 
     auto zoom_menu = UI::get_object<Gio::Menu>(builder, "statusbar-zoom-menu");
@@ -98,14 +97,14 @@ StatusBar::StatusBar()
     // Can't seem to add actions with double parameters to .ui file, add here.
     const std::vector<std::pair<std::string, std::string>> rotate_entries =
     {
-        {  _( "180°"), "win.canvas-rotate-absolute-degrees( 180.0)" }, // Must include decimal point!
-        {  _( "135°"), "win.canvas-rotate-absolute-degrees( 135.0)" },
-        {  _(  "90°"), "win.canvas-rotate-absolute-degrees(  90.0)" },
-        {  _(  "45°"), "win.canvas-rotate-absolute-degrees(  45.0)" },
-        {  _(   "0°"), "win.canvas-rotate-absolute-degrees(   0.0)" },
-        {  _( "-45°"), "win.canvas-rotate-absolute-degrees( -45.0)" },
-        {  _( "-90°"), "win.canvas-rotate-absolute-degrees( -90.0)" },
-        {  _("-135°"), "win.canvas-rotate-absolute-degrees(-135.0)" },
+        {  "180°", "win.canvas-rotate-absolute-degrees( 180.0)" }, // Must include decimal point!
+        {  "135°", "win.canvas-rotate-absolute-degrees( 135.0)" },
+        {   "90°", "win.canvas-rotate-absolute-degrees(  90.0)" },
+        {   "45°", "win.canvas-rotate-absolute-degrees(  45.0)" },
+        {    "0°", "win.canvas-rotate-absolute-degrees(   0.0)" },
+        {  "-45°", "win.canvas-rotate-absolute-degrees( -45.0)" },
+        {  "-90°", "win.canvas-rotate-absolute-degrees( -90.0)" },
+        { "-135°", "win.canvas-rotate-absolute-degrees(-135.0)" },
     };
 
     auto rotate_menu = UI::get_object<Gio::Menu>(builder, "statusbar-rotate-menu");
@@ -171,18 +170,17 @@ StatusBar::set_desktop(SPDesktop* desktop_in)
 void
 StatusBar::set_message(const Inkscape::MessageType type, const char* message)
 {
+    Glib::ustring pattern = "%1";
+#ifndef _WIN32
 #if PANGO_VERSION_CHECK(1,50,0)
-    auto const msg = Glib::ustring::compose("<span line_height='0.9'>%1</span>", message ? message : "");
-    selection->set_markup(msg.c_str());
-#else
-     selection->set_markup(message ? message : "");
+    // line height give delays on windows so better unset, also is not necesary label is well placed without
+    pattern = "<span line_height='0.8'>%1</span>";
+#endif
 #endif
 
-    // Display important messages immediately!
-    if (type == Inkscape::IMMEDIATE_MESSAGE && selection->is_drawable()) {
-        selection->queue_draw();
-    }
-
+    auto const msg = Glib::ustring::compose(pattern, message ? message : "");
+    selection->set_markup(msg);
+    // we don't use Inkscape::MessageType because previous queue_draw is not needed, is called on allocation and is overridden by next message sent anyway
     // Allow user to view the entire message even if it doesn't fit into label (after removing markup).
     selection->set_tooltip_text(selection->get_text());
 }

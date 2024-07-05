@@ -775,11 +775,9 @@ void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place, 
             m.setup(desktop);
             desktop->getTool()->discard_delayed_snap_event();
 
-            // get offset from mouse pointer to bbox center, snap to grid if enabled
-            Geom::Point mouse_offset = desktop->point() - sel_bbox->midpoint();
+            // Get offset from mouse pointer rounded to the pixel to bbox center, snap to grid if enabled
+            Geom::Point mouse_offset = (desktop->point() - sel_bbox->midpoint()).round();
             offset = m.multipleOfGridPitch(mouse_offset - offset, sel_bbox->midpoint() + offset) + offset;
-            // Integer align for mouse pasting
-            offset = offset.round();
             m.unSetup();
         } else if (on_page && from_page && to_page) {
             // Moving to the same location on a different page requires us to remove the original page translation
@@ -808,7 +806,6 @@ file_import(SPDocument *in_doc, const std::string &path, Inkscape::Extension::Ex
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     bool cancelled = false;
     auto prefs = Inkscape::Preferences::get();
-    bool onimport = prefs->getBool("/options/onimport", true);
 
     // Store mouse pointer location before opening any dialogs, so we can drop the item where initially intended.
     auto pointer_location = desktop->point();
@@ -816,16 +813,18 @@ file_import(SPDocument *in_doc, const std::string &path, Inkscape::Extension::Ex
     //DEBUG_MESSAGE( fileImport, "file_import( in_doc:%p uri:[%s], key:%p", in_doc, uri, key );
     std::unique_ptr<SPDocument> doc;
     try {
-        doc = Inkscape::Extension::open(key, path.c_str());
+        doc = Inkscape::Extension::open(key, path.c_str(), true);
     } catch (Inkscape::Extension::Input::no_extension_found const &) {
     } catch (Inkscape::Extension::Input::open_failed const &) {
     } catch (Inkscape::Extension::Input::open_cancelled const &) {
         cancelled = true;
     }
 
-    if (onimport && !prefs->getBool("/options/onimport", true)) {
-        // Opened instead of imported (onimport set to false in Svg::open)
-        prefs->setBool("/options/onimport", true);
+    if (prefs->getString("/dialogs/import/import_mode_svg") == "new") {
+        // Opened instead of imported, open and return nothing
+        auto *app = InkscapeApplication::instance();
+        auto doc_ptr = app->document_add(std::move(doc));
+        app->window_open(doc_ptr);
         return nullptr;
     } else if (doc) {
         // Always preserve any imported text kerning / formatting

@@ -35,6 +35,9 @@ class SPPage;
 namespace Inkscape {
 
 class Preferences;
+namespace Colors {
+class Color;
+}
 
 namespace Extension {
 class Output;
@@ -51,8 +54,8 @@ enum notebook_page
     BATCH_EXPORT
 };
 
-void set_export_bg_color(SPObject* object, guint32 color);
-guint32 get_export_bg_color(SPObject* object, guint32 default_color);
+void set_export_bg_color(SPObject* object, Inkscape::Colors::Color const &color);
+Inkscape::Colors::Color get_export_bg_color(SPObject* object, Inkscape::Colors::Color const &default_color);
 
 class Export final : public DialogBase
 {
@@ -96,6 +99,9 @@ public:
         unsigned (*callback)(float, void *), void *data,
         Inkscape::Extension::Output *extension, std::vector<SPItem const *> *items = nullptr);
   
+    static bool exportVector(
+        Inkscape::Extension::Output *extension, SPDocument *doc, Glib::ustring const &filename,
+        bool overwrite, Geom::Rect const &area);
     static bool exportVector(
         Inkscape::Extension::Output *extension, SPDocument *doc, Glib::ustring const &filename,
         bool overwrite, const std::vector<SPItem const *> &items, SPPage const *page);

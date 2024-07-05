@@ -46,6 +46,15 @@ See "inkscape.xml" for information about file structure.
   <bind gaction="win.view-focus-toggle" />
   <bind gaction="win.view-full-screen-focus" />
 
+<!-- TOOL SHORTCUTS -->
+  <bind gaction="tool.all.quick-preview" keys="f" />
+  <bind gaction="tool.all.quick-zoom" keys="q" />
+  <bind gaction="tool.all.quick-pan" keys="space" />
+
+  <bind gaction="tool.pen.to-line" keys="&lt;shift&gt;l" />
+  <bind gaction="tool.pen.to-curve" keys="&lt;shift&gt;u" />
+  <bind gaction="tool.pen.to-guides" keys="&lt;shift&gt;g" />
+
 <!-- ACTIONS -->
 
   <!-- Base -->
@@ -155,6 +164,7 @@ See "inkscape.xml" for information about file structure.
   <bind gaction="app.selection-make-bitmap-copy"         keys="&lt;alt&gt;b, &lt;alt&gt;B" />
   <bind gaction="app.delete"                             keys="Delete, KP_Delete, BackSpace" />
   <bind gaction="app.page-fit-to-selection"              keys="&lt;primary&gt;&lt;shift&gt;r, &lt;primary&gt;&lt;shift&gt;R" />
+  <bind gaction="app.swap-fill-and-stroke"               keys="&lt;Shift&gt;x" />
 
   <!-- Select -->
   <bind gaction="win.select-all"                         keys="&lt;primary&gt;a, &lt;primary&gt;A" />
@@ -338,5 +348,9 @@ See "inkscape.xml" for information about file structure.
 
   <!-- Help -->
   <bind gaction="app.about" />
+  <bind gaction="win.help-url-manual" />
+  <bind gaction="win.help-url-beginners-guide" />
+  <bind gaction="win.help-url-keys" />
+  <bind gaction="win.help-url-inkex" />
 
 </keys>
