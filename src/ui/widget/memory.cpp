@@ -11,44 +11,41 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include "memory.h"
+
 #include <sigc++/functors/mem_fun.h>
-#include <glibmm/i18n.h>
-#include <glibmm/main.h>
-#include <glibmm/refptr.h>
-#include <glibmm/ustring.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/treemodelcolumn.h>
-#include <gtkmm/treeview.h>
 
 #include "debug/heap.h"
+#include "gtkmm/columnviewcolumn.h"
+#include "gtkmm/selectionmodel.h"
 #include "inkgc/gc-core.h"
-#include "ui/dialog/memory.h"
 #include "ui/pack.h"
 #include "util/format_size.h"
 
 using Inkscape::Util::format_size;
 
-namespace Inkscape {
-namespace UI {
-namespace Dialog {
+namespace Inkscape::UI::Widget {
 
 struct Memory::Private {
-    class ModelColumns : public Gtk::TreeModel::ColumnRecord {
+    class ModelColumns : public Gtk::ColumnView {
     public:
-        Gtk::TreeModelColumn<Glib::ustring> name;
-        Gtk::TreeModelColumn<Glib::ustring> used;
-        Gtk::TreeModelColumn<Glib::ustring> slack;
-        Gtk::TreeModelColumn<Glib::ustring> total;
+        Glib::RefPtr<Gtk::ColumnViewColumn> name;
+        Glib::RefPtr<Gtk::ColumnViewColumn> used;
+        Glib::RefPtr<Gtk::ColumnViewColumn> slack;
+        Glib::RefPtr<Gtk::ColumnViewColumn> total;
 
-        ModelColumns() { add(name); add(used); add(slack); add(total); }
+        ModelColumns() {
+            append_column(name);
+            append_column(used);
+            append_column(slack);
+            append_column(total);
+        }
     };
 
     Private() {
-        model = Gtk::ListStore::create(columns);
+        model = Gtk::ListStore::create(GtkNoSelection::create());
         view.set_model(model);
-        view.append_column(_("Heap"), columns.name);
+        model.append_column(_("Heap"), columns.name);
         view.append_column(_("In Use"), columns.used);
         // TRANSLATORS: "Slack" refers to memory which is in the heap but currently unused.
         //  More typical usage is to call this memory "free" rather than "slack".
@@ -62,8 +59,8 @@ struct Memory::Private {
     void stop_update_task();
 
     ModelColumns columns;
-    Glib::RefPtr<Gtk::ListStore> model;
-    Gtk::TreeView view;
+    Gtk::SelectionModel model;
+    Gtk::ListView view;
 
     sigc::connection update_task;
 };
@@ -161,7 +158,7 @@ void Memory::Private::stop_update_task() {
 }
 
 Memory::Memory()
-    : DialogBase("/dialogs/memory", "Memory")
+    : Box()
     , _private(std::make_unique<Private>())
 {
     UI::pack_start(*this, _private->view);
@@ -195,9 +192,7 @@ void Memory::apply()
     _private->update();
 }
 
-} // namespace Dialog
-} // namespace UI
-} // namespace Inkscape
+} // namespace Inkscape::UI::Widget
 
 /*
   Local Variables:

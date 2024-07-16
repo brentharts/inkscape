@@ -16,7 +16,7 @@
 
 #include "ui/pack.h"
 
-namespace Inkscape::UI::Dialog {
+namespace Inkscape::UI::Widget {
 
 //#########################################################################
 //## E V E N T S
@@ -38,7 +38,7 @@ void Messages::clear()
  * Constructor
  */
 Messages::Messages()
-    : DialogBase("/dialogs/messages", "Messages")
+    : Box(Gtk::Orientation::VERTICAL)
     , buttonClear(_("_Clear"), _("Clear log messages"))
     , checkCapture(_("Capture log messages"), _("Capture log messages"))
     , buttonBox(Gtk::Orientation::HORIZONTAL)

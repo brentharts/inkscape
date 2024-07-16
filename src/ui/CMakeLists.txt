@@ -148,8 +148,6 @@ set(ui_SRC
 	dialog/livepatheffect-editor.cpp
 	dialog/lpe-fillet-chamfer-properties.cpp
 	dialog/lpe-powerstroke-properties.cpp
-	dialog/memory.cpp
-	dialog/messages.cpp
 	dialog/new-from-template.cpp
 	dialog/object-attributes.cpp
 	dialog/object-properties.cpp
@@ -237,6 +235,8 @@ set(ui_SRC
 	widget/layer-selector.cpp
 	widget/licensor.cpp
 	widget/marker-combo-box.cpp
+	widget/memory.cpp
+	widget/messages.cpp
 	widget/notebook-page.cpp
 	widget/object-composite-settings.cpp
 	widget/objects-dialog-cells.cpp
@@ -353,8 +353,6 @@ set(ui_SRC
 	dialog/livepatheffect-editor.h
 	dialog/lpe-fillet-chamfer-properties.h
 	dialog/lpe-powerstroke-properties.h
-	dialog/memory.h
-	dialog/messages.h
 	dialog/new-from-template.h
 	dialog/object-attributes.h
 	dialog/object-properties.h
@@ -534,6 +532,8 @@ set(ui_SRC
 	widget/layer-selector.h
 	widget/licensor.h
 	widget/marker-combo-box.h
+	widget/memory.h
+	widget/messages.h
 	widget/notebook-page.h
 	widget/object-composite-settings.h
 	widget/objects-dialog-cells.h
