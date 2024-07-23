@@ -15,7 +15,7 @@
 namespace Inkscape::UI::Dialog {
 
 Debug::Debug()
-    : DialogBase("/dialogs/debug", "Debug")
+    : DialogBase("/dialogs/debug", "DebugWindow")
     , notebook(new Gtk::Notebook())
     , memory(new Memory())
     , messages(new Messages())
