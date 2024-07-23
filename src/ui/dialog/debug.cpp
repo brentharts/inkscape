@@ -15,10 +15,10 @@
 namespace Inkscape::UI::Dialog {
 
 Debug::Debug()
-    : DialogBase("/dialogs/debug", "Debug"), 
-      notebook (new Gtk::Notebook()),
-      memory   (new Memory()),
-      messages (new Messages())
+    : DialogBase("/dialogs/debug", "Debug")
+    , notebook(new Gtk::Notebook())
+    , memory(new Memory())
+    , messages(new Messages())
 {
     notebook->append_page(*memory);
     notebook->append_page(*messages);
@@ -28,4 +28,4 @@ Debug::Debug()
 
 Debug::~Debug() {}
 
-} // namespace Inkscape::UI::Dialog::Debug
+} // namespace Inkscape::UI::Dialog

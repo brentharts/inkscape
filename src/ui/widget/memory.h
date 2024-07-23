@@ -9,18 +9,17 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include <memory>
 #include <glibmm/i18n.h>
 #include <glibmm/main.h>
 #include <glibmm/refptr.h>
 #include <glibmm/ustring.h>
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/liststore.h>
 #include <gtkmm/columnview.h>
+#include <gtkmm/liststore.h>
 #include <gtkmm/listview.h>
 #include <gtkmm/widget.h>
-#include <gtkmm/box.h>
+#include <memory>
 
 namespace Inkscape::UI::Widget {
 

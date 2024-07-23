@@ -26,15 +26,18 @@ using Inkscape::Util::format_size;
 
 namespace Inkscape::UI::Widget {
 
-struct Memory::Private {
-    class ModelColumns : public Gtk::ColumnView {
+struct Memory::Private
+{
+    class ModelColumns : public Gtk::ColumnView
+    {
     public:
         Glib::RefPtr<Gtk::ColumnViewColumn> name;
         Glib::RefPtr<Gtk::ColumnViewColumn> used;
         Glib::RefPtr<Gtk::ColumnViewColumn> slack;
         Glib::RefPtr<Gtk::ColumnViewColumn> total;
 
-        ModelColumns() {
+        ModelColumns()
+        {
             append_column(name);
             append_column(used);
             append_column(slack);
@@ -42,8 +45,9 @@ struct Memory::Private {
         }
     };
 
-    Private() {
-        model = Gtk::ListStore::create(GtkNoSelection::create());
+    Private()
+    {
+        model = Gtk::ListStore::create(Gtk::TreeModelColumnRecord());
         view.set_model(model);
         model.append_column(_("Heap"), columns.name);
         view.append_column(_("In Use"), columns.used);
@@ -59,25 +63,26 @@ struct Memory::Private {
     void stop_update_task();
 
     ModelColumns columns;
-    Gtk::SelectionModel model;
+    Glib::RefPtr<Gtk::SelectionModel> model;
     Gtk::ListView view;
 
     sigc::connection update_task;
 };
 
-void Memory::Private::update() {
-    Debug::Heap::Stats total = { 0, 0 };
+void Memory::Private::update()
+{
+    Debug::Heap::Stats total = {0, 0};
 
     int aggregate_features = Debug::Heap::SIZE_AVAILABLE | Debug::Heap::USED_AVAILABLE;
     Gtk::ListStore::iterator row;
 
-    row = model->children().begin();
+    // row = model->children().begin();
 
-    for ( unsigned i = 0 ; i < Debug::heap_count() ; i++ ) {
-        Debug::Heap *heap=Debug::get_heap(i);
+    for (unsigned i = 0; i < Debug::heap_count(); i++) {
+        Debug::Heap *heap = Debug::get_heap(i);
         if (heap) {
-            Debug::Heap::Stats stats=heap->stats();
-            int features=heap->features();
+            Debug::Heap::Stats stats = heap->stats();
+            int features = heap->features();
 
             aggregate_features &= features;
 
@@ -110,7 +115,7 @@ void Memory::Private::update() {
         }
     }
 
-    if ( row == model->children().end() ) {
+    /*if ( row == model->children().end() ) {
         row = model->append();
     }
 
@@ -142,18 +147,17 @@ void Memory::Private::update() {
 
     while ( row != model->children().end() ) {
         row = model->erase(row);
-    }
+    }*/
 }
 
-void Memory::Private::start_update_task() {
+void Memory::Private::start_update_task()
+{
     update_task.disconnect();
-    update_task = Glib::signal_timeout().connect(
-        sigc::bind_return(sigc::mem_fun(*this, &Private::update), true),
-        500
-    );
+    update_task = Glib::signal_timeout().connect(sigc::bind_return(sigc::mem_fun(*this, &Private::update), true), 500);
 }
 
-void Memory::Private::stop_update_task() {
+void Memory::Private::stop_update_task()
+{
     update_task.disconnect();
 }
 

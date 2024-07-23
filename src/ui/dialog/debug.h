@@ -14,7 +14,6 @@
 #define INKSCAPE_UI_DIALOG_WINDOW_H
 
 #include "gtkmm/notebook.h"
-
 #include "ui/dialog/dialog-base.h"
 #include "ui/dialog/dialog-container.h"
 #include "ui/widget/memory.h"
@@ -27,16 +26,16 @@ using Inkscape::UI::Widget::Messages;
 
 namespace Inkscape::UI::Dialog {
 
-class Debug : public DialogBase {
-    public:
-        Debug();
-        ~Debug() override;
-    
-    private:
-      Gtk::Notebook* notebook;
-      Memory* memory;
-      Messages* messages;
+class Debug : public DialogBase
+{
+public:
+    Debug();
+    ~Debug() override;
 
+private:
+    Gtk::Notebook *notebook;
+    Memory *memory;
+    Messages *messages;
 };
 
 } // namespace Inkscape::UI::Dialog

@@ -53,21 +53,21 @@ public:
 
 private:
     Gtk::ScrolledWindow textScroll;
-    Gtk::TextView       messageText;
-    Gtk::Box            buttonBox;
-    Gtk::Button         buttonClear;
-    Gtk::CheckButton    checkCapture;
+    Gtk::TextView messageText;
+    Gtk::Box buttonBox;
+    Gtk::Button buttonClear;
+    Gtk::CheckButton checkCapture;
 
-    //Handler ID's
+    // Handler ID's
     unsigned handlerDefault = 0;
-    unsigned handlerGlibmm  = 0;
-    unsigned handlerAtkmm   = 0;
+    unsigned handlerGlibmm = 0;
+    unsigned handlerAtkmm = 0;
     unsigned handlerPangomm = 0;
-    unsigned handlerGdkmm   = 0;
-    unsigned handlerGtkmm   = 0;
+    unsigned handlerGdkmm = 0;
+    unsigned handlerGtkmm = 0;
 };
 
-}
+} // namespace Inkscape::UI::Widget
 
 /*
   Local Variables:
