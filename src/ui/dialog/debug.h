@@ -26,16 +26,16 @@ using Inkscape::UI::Widget::Messages;
 
 namespace Inkscape::UI::Dialog {
 
-class Debug : public DialogBase
+class Debug final : public DialogBase
 {
 public:
     Debug();
-    ~Debug() override;
+    ~Debug() final;
 
 private:
-    Gtk::Notebook *notebook;
-    Memory *memory;
-    Messages *messages;
+    Gtk::Notebook &notebook;
+    Memory &memory;
+    Messages &messages;
 };
 
 } // namespace Inkscape::UI::Dialog
