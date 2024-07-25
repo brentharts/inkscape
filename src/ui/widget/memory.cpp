@@ -87,7 +87,7 @@ void Memory::Private::update()
 
             aggregate_features &= features;
 
-            if ( row == model->children().end() ) {
+            /*if ( row == model->children().end() ) {
                 row = model->append();
             }
 
@@ -112,7 +112,7 @@ void Memory::Private::update()
                 row->set_value(columns.slack, Glib::ustring(_("Unknown")));
             }
 
-            ++row;
+            ++row;*/
         }
     }
 
