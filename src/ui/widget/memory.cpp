@@ -13,11 +13,13 @@
 
 #include "memory.h"
 
+#include <gio/gio.h>
+#include <gtk/gtknoselection.h>
 #include <sigc++/functors/mem_fun.h>
 
 #include "debug/heap.h"
 #include "gtkmm/columnviewcolumn.h"
-#include "gtkmm/selectionmodel.h"
+#include "gtkmm/listitemfactory.h"
 #include "inkgc/gc-core.h"
 #include "ui/pack.h"
 #include "util/format_size.h"
@@ -47,14 +49,13 @@ struct Memory::Private
 
     Private()
     {
-        model = Gtk::ListStore::create(Gtk::TreeModelColumnRecord());
-        view.set_model(model);
-        model.append_column(_("Heap"), columns.name);
-        view.append_column(_("In Use"), columns.used);
+        view.set_factory(factory);
+        columns.name->set_title(_("Heap"));
+        columns.used->set_title(_("In Use"));
         // TRANSLATORS: "Slack" refers to memory which is in the heap but currently unused.
         //  More typical usage is to call this memory "free" rather than "slack".
-        view.append_column(_("Slack"), columns.slack);
-        view.append_column(_("Total"), columns.total);
+        columns.slack->set_title(_("Slack"));
+        columns.total->set_title(_("Total"));
     }
 
     void update();
@@ -63,7 +64,7 @@ struct Memory::Private
     void stop_update_task();
 
     ModelColumns columns;
-    Glib::RefPtr<Gtk::SelectionModel> model;
+    Glib::RefPtr<Gtk::ListItemFactory> factory;
     Gtk::ListView view;
 
     sigc::connection update_task;
