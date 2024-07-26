@@ -60,7 +60,7 @@ private:
             list_item->set_child(*box);
         });
 
-        _factory->signal_bind().connect([=](const Glib::RefPtr<Gtk::ListItem>& list_item) {
+        _factory->signal_bind().connect([this](const Glib::RefPtr<Gtk::ListItem>& list_item) {
             auto item = list_item->get_item();
 
             auto box = dynamic_cast<Gtk::CenterBox*>(list_item->get_child());
