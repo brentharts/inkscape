@@ -10,8 +10,8 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#ifndef INKSCAPE_UI_DIALOG_WINDOW_H
-#define INKSCAPE_UI_DIALOG_WINDOW_H
+#ifndef INKSCAPE_UI_DEBUG_H
+#define INKSCAPE_UI_DEBUG_H
 
 #include "gtkmm/notebook.h"
 #include "ui/dialog/dialog-base.h"
@@ -40,7 +40,7 @@ private:
 
 } // namespace Inkscape::UI::Dialog
 
-#endif // INKSCAPE_UI_DIALOG_WINDOW_H
+#endif // INKSCAPE_UI_DEBUG_H
 
 /*
   Local Variables:
