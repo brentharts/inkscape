@@ -13,7 +13,8 @@
 #ifndef INKSCAPE_UI_DEBUG_H
 #define INKSCAPE_UI_DEBUG_H
 
-#include "gtkmm/notebook.h"
+#include <gtkmm/notebook.h>
+
 #include "ui/dialog/dialog-base.h"
 #include "ui/dialog/dialog-container.h"
 #include "ui/widget/memory.h"
