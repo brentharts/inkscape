@@ -16,7 +16,6 @@
 #include <gtkmm/notebook.h>
 
 #include "ui/dialog/dialog-base.h"
-#include "ui/dialog/dialog-container.h"
 #include "ui/widget/memory.h"
 #include "ui/widget/messages.h"
 
