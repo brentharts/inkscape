@@ -16,9 +16,9 @@ namespace Inkscape::UI::Dialog {
 
 Debug::Debug()
     : DialogBase("/dialogs/debug", "DebugWindow")
-    , notebook(*new Gtk::Notebook())
-    , memory(*new Memory())
-    , messages(*new Messages())
+    , notebook(Gtk::Notebook())
+    , memory(Memory())
+    , messages(Messages())
 {
     notebook.append_page(memory);
     notebook.append_page(messages);

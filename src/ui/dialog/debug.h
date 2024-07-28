@@ -33,9 +33,9 @@ public:
     ~Debug() final;
 
 private:
-    Gtk::Notebook &notebook;
-    Memory &memory;
-    Messages &messages;
+    Gtk::Notebook notebook;
+    Memory memory;
+    Messages messages;
 };
 
 } // namespace Inkscape::UI::Dialog
