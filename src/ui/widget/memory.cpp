@@ -13,13 +13,23 @@
 
 #include "memory.h"
 
-#include <gio/gio.h>
-#include <gtk/gtknoselection.h>
 #include <sigc++/functors/mem_fun.h>
 
-#include "debug/heap.h"
+#include <gio/gio.h>
+#include <gtk/gtknoselection.h>
+#include <glibmm/i18n.h>
+#include <glibmm/main.h>
+#include <glibmm/refptr.h>
+#include <glibmm/ustring.h>
 #include "gtkmm/columnviewcolumn.h"
-#include "gtkmm/listitemfactory.h"
+#include <giomm/liststore.h>
+#include <gtkmm/button.h>
+#include <gtkmm/columnview.h>
+#include <gtkmm/listview.h>
+#include <gtkmm/widget.h>
+#include <memory>
+
+#include "debug/heap.h"
 #include "inkgc/gc-core.h"
 #include "ui/pack.h"
 #include "util/format_size.h"
