@@ -51180,11 +51180,11 @@ msgstr "Gon, Neugrad (360/400 deg/gon)"
 # File: ../share/ui/units.xml, line: 74
 #: ../share/ui/units.xml:74
 msgid "turn"
-msgstr "Drehung"
+msgstr "Turn"
 
 #: ../share/ui/units.xml:75
 msgid "turns"
-msgstr "Drehungen"
+msgstr "Turns"
 
 #
 # File: ../share/ui/units.xml, line: 78
