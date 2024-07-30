@@ -917,7 +917,7 @@ msgstr "Bild mit einem Lichthof versehen, ohne es zu verwischen"
 
 #: ../build/share/filters/filters.svg.h:302
 msgid "Stained Glass"
-msgstr "Bleiglas"
+msgstr "Satiniertes Glas"
 
 #: ../build/share/filters/filters.svg.h:304
 msgid "Illuminated stained glass effect"
