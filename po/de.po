@@ -51180,17 +51180,17 @@ msgstr "Gon, Neugrad (360/400 deg/gon)"
 # File: ../share/ui/units.xml, line: 74
 #: ../share/ui/units.xml:74
 msgid "turn"
-msgstr "Turn"
+msgstr "Vollwinkel"
 
 #: ../share/ui/units.xml:75
 msgid "turns"
-msgstr "Turns"
+msgstr "Vollwinkel"
 
 #
 # File: ../share/ui/units.xml, line: 78
 #: ../share/ui/units.xml:78
 msgid "Turns (360 deg/turn)"
-msgstr "Drehungen (360 deg/turn)"
+msgstr "Vollwinkel (360 Grad/Vollwinkel)"
 
 #: ../share/ui/units.xml:81
 msgid "font-height"
