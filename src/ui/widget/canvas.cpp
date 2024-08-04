@@ -241,6 +241,7 @@ public:
     // Redraw process management.
     bool redraw_active = false;
     bool redraw_requested = false;
+    uint32_t redraw_index = 0;
     sigc::connection schedule_redraw_conn;
     void schedule_redraw(int priority = Glib::PRIORITY_DEFAULT);
     void launch_redraw();
@@ -569,6 +570,14 @@ void CanvasPrivate::schedule_redraw(int priority)
 // Update state and launch redraw process in background. Requires a current OpenGL context.
 void CanvasPrivate::launch_redraw()
 {
+    // Skip the first draw since GTK doesn't have the canvas size set correctly until the second draw
+    // This is a fix for https://gitlab.com/inkscape/inkscape/-/issues/5122
+    if(redraw_index < 1) {
+        redraw_active = false;
+        redraw_index++;
+        return;
+    }
+    
     assert(redraw_active);
 
     if (q->_render_mode != render_mode) {
