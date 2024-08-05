@@ -241,7 +241,6 @@ public:
     // Redraw process management.
     bool redraw_active = false;
     bool redraw_requested = false;
-    uint32_t redraw_index = 0;
     sigc::connection schedule_redraw_conn;
     void schedule_redraw(int priority = Glib::PRIORITY_DEFAULT);
     void launch_redraw();
@@ -570,14 +569,16 @@ void CanvasPrivate::schedule_redraw(int priority)
 // Update state and launch redraw process in background. Requires a current OpenGL context.
 void CanvasPrivate::launch_redraw()
 {
-    // Skip the first draw since GTK doesn't have the canvas size set correctly until the second draw
     // This is a fix for https://gitlab.com/inkscape/inkscape/-/issues/5122
-    if(redraw_index < 1) {
+    // GTK has a problem where the size is not set correctly to start with.
+    auto const width = q->get_width();
+    auto const height = q->get_height();
+    if (width < 10 || height < 10) {
         redraw_active = false;
-        redraw_index++;
+        std::cout << "Canvas size is wrong, drawing later" << std::endl;
         return;
     }
-    
+
     assert(redraw_active);
 
     if (q->_render_mode != render_mode) {
@@ -1935,13 +1936,15 @@ void Canvas::paint_widget(Cairo::RefPtr<Cairo::Context> const &cr)
 
     _signal_pre_draw.emit();
 
-    if constexpr (false) d->canvasitem_ctx->root()->canvas_item_print_tree();
+    if constexpr (false)
+        d->canvasitem_ctx->root()->canvas_item_print_tree();
 
-    // On activation, launch_redraw() is scheduled at a priority much higher than draw, so it
-    // should have been called at least one before this point to perform vital initialisation
-    // (needed not to crash). However, we don't want to rely on that, hence the following check.
+    // On activation, launch_redraw() should have been scheduled at a priority much higher than draw,
+    // so it should have been called at least once before this point to perform vital initialisation
+    // (needed not to crash). However, since that might not be the case due to a problem with GTK,
+    // Check for that possibility and handle it.
     if (d->stores.mode() == Stores::Mode::None) {
-        std::cerr << "Canvas::paint_widget: Called while active but uninitialised!" << std::endl;
+        std::cout << "Canvas::paint_widget: Called while active but uninitialised!" << std::endl;
         return;
     }
 
