@@ -571,9 +571,7 @@ void CanvasPrivate::launch_redraw()
 {
     // This is a fix for https://gitlab.com/inkscape/inkscape/-/issues/5122
     // GTK has a problem where the size is not set correctly to start with.
-    auto const width = q->get_width();
-    auto const height = q->get_height();
-    if (width < 10 || height < 10) {
+    if (q->get_width() < 10 || q->get_height() < 10) {
         redraw_active = false;
         std::cout << "Canvas size is wrong, drawing later" << std::endl;
         return;
