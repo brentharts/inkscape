@@ -454,8 +454,7 @@ void CanvasPrivate::activate()
 
     active = true;
 
-    // Run the first redraw at high priority so it happens before the first call to paint_widget().
-    schedule_redraw(Glib::PRIORITY_HIGH);
+    // The canvas size is not set yet, so don't schedule the redraw.
 }
 
 void CanvasPrivate::deactivate()
@@ -1877,7 +1876,7 @@ void Canvas::size_allocate_vfunc(int const width, int const height, int const ba
     }
 
     // Trigger the size update to be applied to the stores before the next redraw of the window.
-    d->schedule_redraw();
+    d->schedule_redraw(Glib::PRIORITY_HIGH);
 
     // Keep canvas centered and optionally zoomed in.
     if (_desktop && new_dimensions != d->old_dimensions) {
