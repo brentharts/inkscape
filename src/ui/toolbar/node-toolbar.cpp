@@ -403,7 +403,8 @@ void NodeToolbar::edit_delete()
 {
     NodeTool *nt = get_node_tool();
     if (nt) {
-        nt->_multipath->deleteNodes(Preferences::get()->getBool("/tools/nodes/delete_preserves_shape", true));
+        // TODO: Decide how this toolbar button acts or if we need more
+        nt->_multipath->deleteNodes(NodeDeleteMode::automatic);
     }
 }
 
