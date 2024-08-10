@@ -403,8 +403,8 @@ void NodeToolbar::edit_delete()
 {
     NodeTool *nt = get_node_tool();
     if (nt) {
-        // TODO: Decide how this toolbar button acts or if we need more
-        nt->_multipath->deleteNodes(NodeDeleteMode::automatic);
+        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+        nt->_multipath->deleteNodes((NodeDeleteMode)prefs->getInt("/tools/node/delete-mode-default", (int)NodeDeleteMode::automatic));
     }
 }
 
