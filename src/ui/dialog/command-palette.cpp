@@ -482,9 +482,7 @@ bool CommandPalette::operate_recent_file(Glib::ustring const &uri, bool const im
     }
 
     if (import) {
-        prefs->setBool("/options/onimport", true);
         file_import(SP_ACTIVE_DOCUMENT, uri, nullptr);
-        prefs->setBool("/options/onimport", true);
 
         if (write_to_history) {
             _history_xml.add_import(uri);
@@ -1084,7 +1082,7 @@ void CommandPalette::set_mode(CPMode mode)
             set_sensitive(_CPFilter, true);
             _CPFilter.set_text("");
             // _CPFilter.set_icon_from_icon_name("edit-find-symbolic"); // Icon not modifiable in GTK4.
-            set_hint_texts(_CPFilter, _("Search operation..."));
+            set_hint_texts(_CPFilter, _("Enter search term to search for a command"));
 
             show_suggestions();
 

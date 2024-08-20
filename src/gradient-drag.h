@@ -44,6 +44,9 @@ class SPRadialGradient;
 class SPStop;
 
 namespace Inkscape {
+namespace Colors {
+class Color;
+}
 class Selection;
 class CanvasItemCurve;
 struct KeyPressEvent;
@@ -171,13 +174,15 @@ public: // FIXME: make more of this private!
     void selectByStop(SPStop *stop,  bool add_to_selection = true, bool override = true);
     void selectRect(Geom::Rect const &r);
 
+    void addColorToDragger(GrDragger &dragger, const char *color);
+    void dropColorOnCorrespondingRegion(const char *color, Geom::Point p);
     bool dropColor(SPItem *item, gchar const *c, Geom::Point p);
 
     SPStop *addStopNearPoint(SPItem *item, Geom::Point mouse_p, double tolerance);
 
     void deleteSelected(bool just_one = false);
 
-    guint32 getColor();
+    Inkscape::Colors::Color getColor();
 
     bool keep_selection;
 

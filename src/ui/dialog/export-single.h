@@ -22,6 +22,7 @@
 #include <gtkmm/entry.h>
 
 #include "helper/auto-connection.h"
+#include "ui/dialog/export-batch.h"
 
 namespace Gtk {
 class Builder;
@@ -113,6 +114,8 @@ private:
 
     Gtk::CheckButton *show_export_area = nullptr;
 
+    BatchItems current_items;
+
     // In order of intialization
     Gtk::FlowBox &pages_list;
     Gtk::ScrolledWindow &pages_list_box;
@@ -132,6 +135,7 @@ private:
     Gtk::ProgressBar &progress_bar;
     Gtk::Widget &progress_box;
     Gtk::Button &cancel_button;
+    UI::Widget::ColorPicker &_background_color;
 
     bool filename_modified = false;
     Glib::ustring original_name;
@@ -188,7 +192,6 @@ private:
     /**
      * Page functions
      */
-    void clearPagePreviews();
     void onPagesChanged();
     void onPagesModified(SPPage *page);
     void onPagesSelected(SPPage *page);
@@ -210,8 +213,6 @@ private:
     auto_connection _page_selected_connection;
     auto_connection _page_modified_connection;
     auto_connection _page_changed_connection;
-
-    std::unique_ptr<Inkscape::UI::Widget::ColorPicker> _bgnd_color_picker;
 };
 
 } // namespace Dialog

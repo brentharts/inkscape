@@ -103,6 +103,11 @@ ToolBase::ToolBase(SPDesktop *desktop, std::string &&prefs_path, std::string &&c
     , _cursor_default(std::move(cursor_filename))
     , _uses_snap(uses_snap)
     , _desktop(desktop)
+    , _acc_undo{"doc.undo"}
+    , _acc_redo{"doc.redo"}
+    , _acc_quick_preview{"tool.all.quick-preview"}
+    , _acc_quick_zoom{"tool.all.quick-zoom"}
+    , _acc_quick_pan{"tool.all.quick-pan"}
 {
     pref_observer = Inkscape::Preferences::PreferencesObserver::create(_prefs_path, [this] (auto &val) { set(val); });
     set_cursor(_cursor_default);
@@ -162,14 +167,16 @@ void ToolBase::set_cursor(std::string filename)
  */
 Glib::RefPtr<Gdk::Cursor> ToolBase::get_cursor(Gtk::Widget &widget, std::string const &filename) const
 {
-    bool fillHasColor   = false;
-    bool strokeHasColor = false;
-    guint32 fillColor = sp_desktop_get_color_tool(_desktop, getPrefsPath(), true, &fillHasColor);
-    guint32 strokeColor = sp_desktop_get_color_tool(_desktop, getPrefsPath(), false, &strokeHasColor);
-    double fillOpacity = fillHasColor ? sp_desktop_get_opacity_tool(_desktop, getPrefsPath(), true) : 1.0;
-    double strokeOpacity = strokeHasColor ? sp_desktop_get_opacity_tool(_desktop, getPrefsPath(), false) : 1.0;
-    return load_svg_cursor(widget, filename,
-                           fillColor, strokeColor, fillOpacity, strokeOpacity);
+    auto fillColor = sp_desktop_get_color_tool(_desktop, getPrefsPath(), true);
+    if (fillColor) {
+        fillColor->addOpacity(sp_desktop_get_opacity_tool(_desktop, getPrefsPath(), true));
+    }
+
+    auto strokeColor = sp_desktop_get_color_tool(_desktop, getPrefsPath(), false);
+    if (strokeColor) {
+        strokeColor->addOpacity(sp_desktop_get_opacity_tool(_desktop, getPrefsPath(), false));
+    }
+    return load_svg_cursor(widget, filename, fillColor, strokeColor);
 }
 
 /**
@@ -481,18 +488,18 @@ bool ToolBase::root_handler(CanvasEvent const &event)
                 return;
             }
 
-            if (Inkscape::Rubberband::get(_desktop)->is_started()) {
+            if (auto rubberband = Inkscape::Rubberband::get(_desktop); rubberband->isStarted()) {
                 auto const motion_w = event.pos;
                 auto const motion_dt = _desktop->w2d(motion_w);
 
-                Inkscape::Rubberband::get(_desktop)->move(motion_dt);
+                rubberband->move(motion_dt);
             } else {
                 // Start the box where the mouse was clicked, not where it is now
                 // because otherwise our box would be offset by the amount of tolerance.
                 auto const motion_w = xyp;
                 auto const motion_dt = _desktop->w2d(motion_w);
 
-                Inkscape::Rubberband::get(_desktop)->start(_desktop, motion_dt);
+                rubberband->start(_desktop, motion_dt);
             }
 
             if (zoom_rb == 2) {
@@ -585,6 +592,23 @@ bool ToolBase::root_handler(CanvasEvent const &event)
         double const acceleration = prefs->getDoubleLimited("/options/scrollingacceleration/value", 0, 0, 6);
         int const key_scroll = prefs->getIntLimited("/options/keyscroll/value", 10, 0, 1000);
 
+        if (_acc_quick_preview.isTriggeredBy(event)) {
+            _desktop->quick_preview(true);
+            ret = true;
+        }
+        if (_acc_quick_zoom.isTriggeredBy(event)) {
+            _desktop->zoom_quick(true);
+            ret = true;
+        }
+        if (_acc_quick_pan.isTriggeredBy(event) && allow_panning) {
+            xyp = {};
+            within_tolerance = true;
+            panning = PANNING_SPACE;
+            message_context->set(Inkscape::INFORMATION_MESSAGE, _("<b>Space+mouse move</b> to pan canvas"));
+            ret = true;
+        }
+
+
         switch (get_latin_keyval(event)) {
         // GDK insists on stealing these keys (F1 for no idea what, tab for cycling widgets
         // in the editing window). So we resteal them back and run our regular shortcut
@@ -600,26 +624,6 @@ bool ToolBase::root_handler(CanvasEvent const &event)
         case GDK_KEY_ISO_Left_Tab:
             sp_selection_item_prev(_desktop);
             ret = true;
-            break;
-
-        // TODO: make these keys customizable
-        case GDK_KEY_F:
-        case GDK_KEY_f:
-            if (!mod_shift(event) && !mod_ctrl(event) && !mod_alt(event)) {
-                _desktop->quick_preview(true);
-                ret = true;
-            }
-            break;
-
-        case GDK_KEY_Q:
-        case GDK_KEY_q:
-            if (_desktop->quick_zoomed()) {
-                ret = true;
-            }
-            if (!mod_shift(event) && !mod_ctrl(event) && !mod_alt(event)) {
-                _desktop->zoom_quick(true);
-                ret = true;
-            }
             break;
 
         case GDK_KEY_W:
@@ -702,16 +706,6 @@ bool ToolBase::root_handler(CanvasEvent const &event)
             }
             break;
 
-        case GDK_KEY_space:
-            within_tolerance = true;
-            xyp = {};
-            if (!allow_panning) break;
-            panning = PANNING_SPACE;
-            message_context->set(Inkscape::INFORMATION_MESSAGE, _("<b>Space+mouse move</b> to pan canvas"));
-
-            ret = true;
-            break;
-
         case GDK_KEY_r:
         case GDK_KEY_R:
             if (mod_alt_only(event)) {
@@ -751,6 +745,15 @@ bool ToolBase::root_handler(CanvasEvent const &event)
             dynamic_cast<Gtk::Window &>(*_desktop->getCanvas()->get_root()).set_cursor(_cursor);
         }
 
+        if (_acc_quick_preview.isTriggeredBy(event)) {
+            _desktop->quick_preview(false);
+            ret = true;
+        }
+        if (_acc_quick_zoom.isTriggeredBy(event) && _desktop->quick_zoomed()) {
+            _desktop->zoom_quick(false);
+            ret = true;
+        }
+
         switch (get_latin_keyval(event)) {
         case GDK_KEY_space:
             if (within_tolerance) {
@@ -761,21 +764,6 @@ bool ToolBase::root_handler(CanvasEvent const &event)
                 // Thus, make sure we return immediately.
                 ret = true;
                 return;
-            }
-            break;
-
-        // TODO: make these keys customizable
-        case GDK_KEY_F:
-        case GDK_KEY_f:
-            _desktop->quick_preview(false);
-            ret = true;
-            break;
-
-        case GDK_KEY_Q:
-        case GDK_KEY_q:
-            if (_desktop->quick_zoomed()) {
-                _desktop->zoom_quick(false);
-                ret = true;
             }
             break;
 
@@ -1241,7 +1229,10 @@ void ToolBase::menu_popup(CanvasEvent const &event, SPObject *obj)
     }
 
     auto const popup = [&] (std::optional<Geom::Point> const &pos) {
-        auto menu = Gtk::make_managed<ContextMenu>(_desktop, obj);
+        // Get a list of items under the cursor, used for unhiding and unlocking.
+        auto point_win = _desktop->point() * _desktop->d2w();
+        auto items_under_cursor = _desktop->getItemsAtPoints({point_win}, true, false, 0, false);
+        auto menu = Gtk::make_managed<ContextMenu>(_desktop, obj, items_under_cursor);
         _desktop->getDesktopWidget()->get_canvas_grid()->setPopover(menu);
         UI::popup_at(*menu, *_desktop->getCanvas(), pos);
     };

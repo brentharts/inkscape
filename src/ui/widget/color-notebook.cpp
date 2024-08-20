@@ -26,8 +26,8 @@
 #include "document.h"
 #include "inkscape.h"
 #include "preferences.h"
-#include "profile-manager.h"
-#include "color/cms-system.h"
+#include "colors/manager.h"
+#include "colors/spaces/base.h"
 #include "object/color-profile.h"
 #include "ui/dialog-events.h"
 #include "ui/icon-loader.h"
@@ -35,25 +35,22 @@
 #include "ui/tools/dropper-tool.h"
 #include "ui/util.h"
 #include "ui/widget/color-entry.h"
-#include "ui/widget/color-scales.h"
+#include "ui/widget/color-page.h"
 #include "ui/widget/icon-combobox.h"
-
-using Inkscape::CMSSystem;
 
 static constexpr int XPAD = 2;
 static constexpr int YPAD = 1;
 
 namespace Inkscape::UI::Widget {
 
-ColorNotebook::ColorNotebook(SelectedColor &color, bool no_alpha)
-    : _selected_color(color)
+ColorNotebook::ColorNotebook(std::shared_ptr<Colors::ColorSet> colors)
+    : _colors(std::move(colors))
 {
     set_name("ColorNotebook");
 
-    _initUI(no_alpha);
+    _initUI();
 
-    _selected_color.signal_changed.connect(sigc::mem_fun(*this, &ColorNotebook::_onSelectedColorChanged));
-    _selected_color.signal_dragged.connect(sigc::mem_fun(*this, &ColorNotebook::_onSelectedColorChanged));
+    //_colors->signal_changed.connect(sigc::mem_fun(*this, &ColorNotebook::_onSelectedColorChanged));
 
     auto desktop = SP_ACTIVE_DESKTOP;
     _doc_replaced_connection = desktop->connectDocumentReplaced(sigc::hide<0>(sigc::mem_fun(*this, &ColorNotebook::setDocument)));
@@ -68,33 +65,24 @@ ColorNotebook::~ColorNotebook()
     setDocument(nullptr);
 }
 
-ColorNotebook::Page::Page(std::unique_ptr<Inkscape::UI::ColorSelectorFactory> selector_factory, const char* icon)
-    : selector_factory(std::move(selector_factory)), icon_name(icon)
-{
-}
-
 void ColorNotebook::setDocument(SPDocument *document)
 {
     _document = document;
-    _icc_changed_connection.disconnect();
-    if (document) {
-        _icc_changed_connection = document->connectResourcesChanged("iccprofile", [this]() {
-            _selected_color.emitIccChanged();
-        });
-    }
+    // XXX Watch for new icc spaces here using the profile tracker
 }
 
 void ColorNotebook::set_label(const Glib::ustring& label) {
     _label->set_markup(label);
 }
 
-void ColorNotebook::_initUI(bool no_alpha)
+void ColorNotebook::_initUI()
 {
     guint row = 0;
 
     _book = Gtk::make_managed<Gtk::Stack>();
     _book->set_transition_type(Gtk::StackTransitionType::CROSSFADE);
     _book->set_transition_duration(130);
+    _book->set_vhomogeneous(false);
 
     // mode selection switcher widget shows all buttons for color mode selection, side by side
     _switcher = Gtk::make_managed<Gtk::StackSwitcher>();
@@ -113,14 +101,15 @@ void ColorNotebook::_initUI(bool no_alpha)
     _combo->set_visible();
     _combo->set_tooltip_text(_("Choose style of color selection"));
 
-    for (auto&& picker : get_color_pickers()) {
-        auto page = Page(std::move(picker.factory), picker.icon);
-        _addPage(page, no_alpha, picker.visibility_path);
+    // Add all universal (non-document icc profile) color spaces
+    for (auto &space : Colors::Manager::get().spaces(Space::Traits::Picker)) {
+        _addPageForSpace(space);
     }
 
     _label = Gtk::make_managed<Gtk::Label>();
     _label->set_visible();
     _label->set_xalign(0);
+    _label->set_margin_end(XPAD);
     UI::pack_start(*_buttonbox, *_label, true, true);
     UI::pack_end(*_buttonbox, *_combo, false, false);
     _combo->signal_changed().connect([this](int id){ _setCurrentPage(id, false); });
@@ -135,8 +124,6 @@ void ColorNotebook::_initUI(bool no_alpha)
 
     row++;
 
-    _book->set_margin_start(XPAD);
-    _book->set_margin_end(XPAD);
     _book->set_margin_top(YPAD);
     _book->set_margin_bottom(YPAD);
     _book->set_hexpand();
@@ -149,7 +136,7 @@ void ColorNotebook::_initUI(bool no_alpha)
     _setCurrentPage(getPageIndex(page_name), true);
     row++;
 
-    _observer = prefs->createObserver("/colorselector/switcher", [=](const Preferences::Entry& new_value) {
+    _observer = prefs->createObserver("/colorselector/switcher", [this](const Preferences::Entry& new_value) {
         _switcher->set_visible(!new_value.getBool());
         _buttonbox->set_visible(new_value.getBool());
     });
@@ -188,7 +175,8 @@ void ColorNotebook::_initUI(bool no_alpha)
     gtk_widget_set_hexpand(_rgbal, TRUE);
     gtk_box_append(rgbabox_box, _rgbal);
 
-    auto const rgba_entry = Gtk::make_managed<ColorEntry>(_selected_color);
+    auto const rgba_entry = Gtk::make_managed<ColorEntry>(_colors);
+    rgba_entry->set_max_width_chars(8);
     auto const rgba_entry_widget = rgba_entry->Gtk::Widget::gobj();
     sp_dialog_defocus_on_enter(rgba_entry);
     gtk_box_append(rgbabox_box, rgba_entry_widget);
@@ -204,7 +192,7 @@ void ColorNotebook::_initUI(bool no_alpha)
     attach(*Glib::wrap(rgbabox), 0, row, 2, 1);
 
     // remember the page we switched to
-    _book->property_visible_child_name().signal_changed().connect([=]() {
+    _book->property_visible_child_name().signal_changed().connect([this]() {
         // We don't want to remember auto cms selection
         Glib::ustring name = _book->get_visible_child_name();
         if (get_visible() && !name.empty() && name != "CMS") {
@@ -230,71 +218,38 @@ void ColorNotebook::_onPickerClicked(GtkWidget * /*widget*/, ColorNotebook *colo
         Inkscape::UI::Tools::sp_toggle_dropper(SP_ACTIVE_DESKTOP);
         auto tool = dynamic_cast<Inkscape::UI::Tools::DropperTool *>(SP_ACTIVE_DESKTOP->getTool());
         if (tool) {
-            colorbook->_onetimepick = tool->onetimepick_signal.connect(sigc::mem_fun(*colorbook, &ColorNotebook::_pickColor));
+            colorbook->_onetimepick = tool->onetimepick_signal.connect([colorbook](Colors::Color const &color) {
+                // Set color to color notebook here.
+                colorbook->_colors->setAll(color);
+            });
         }
     }
 }
 
-void ColorNotebook::_pickColor(ColorRGBA *color) {
-    // Set color to color notebook here.
-    _selected_color.setValue(color->getIntValue());
-    _onSelectedColorChanged();
-}
+/*void ColorNotebook::_onSelectedColorChanged() {
+    _updateICCButtons();
+}*/
 
-void ColorNotebook::_onSelectedColorChanged() { _updateICCButtons(); }
-
-void ColorNotebook::_updateICCButtons()
+/*void ColorNotebook::_updateICCButtons()
 {
-    if (!_document) {
+    if (!_document)
         return;
-    }
 
-    SPColor color = _selected_color.color();
-    gfloat alpha = _selected_color.alpha();
+    // update color management icon
+    // XXX auto space = _colors->getConstrainSpace();
+    //bool is_cms = space->getDocument();
+    //gtk_widget_set_sensitive(_colormanaged, is_cms);
+    //gtk_widget_set_sensitive(_toomuchink, _selected_color->isOutOfGamut());
+    //gtk_widget_set_sensitive(_outofgamut, _colors->average().isOverInked());
 
-    g_return_if_fail((0.0 <= alpha) && (alpha <= 1.0));
 
-    /* update color management icon*/
-    gtk_widget_set_sensitive(_colormanaged, color.hasColorProfile());
     gtk_widget_set_sensitive(_toomuchink, false);
     gtk_widget_set_sensitive(_outofgamut, false);
 
-    if (color.hasColors()) {
-        auto name = color.getColorProfile();
-
-        // Set notebook page to cms if icc profile being used.
-        _setCurrentPage(getPageIndex("CMS"), true);
-
-        /* update out-of-gamut icon */
-        Inkscape::ColorProfile *target_profile =
-            _document->getProfileManager().find(name.c_str());
-        if (target_profile)
-            gtk_widget_set_sensitive(_outofgamut, target_profile->GamutCheck(color));
-
-        /* update too-much-ink icon */
-        Inkscape::ColorProfile *prof = _document->getProfileManager().find(name.c_str());
-        if (prof && prof->isPrintColorSpace()) {
-            gtk_widget_set_visible(_toomuchink, true);
-            double ink_sum = 0;
-            for (double i : color.getColors()) {
-                ink_sum += i;
-            }
-
-            /* Some literature states that when the sum of paint values exceed 320%, it is considered to be a satured color,
-                which means the paper can get too wet due to an excessive amount of ink. This may lead to several issues
-                such as misalignment and poor quality of printing in general.*/
-            if (ink_sum > 3.2)
-                gtk_widget_set_sensitive(_toomuchink, true);
-        }
-        else {
-            gtk_widget_set_visible(_toomuchink, false);
-        }
-    } else {
-        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-        auto page = prefs->getString("/colorselector/page");
-        _setCurrentPage(getPageIndex(page), true);
-    }
-}
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    auto page = prefs->getString("/colorselector/page");
+    _setCurrentPage(getPageIndex(page), true);
+}*/
 
 int ColorNotebook::getPageIndex(const Glib::ustring &name)
 {
@@ -331,24 +286,23 @@ void ColorNotebook::_setCurrentPage(int i, bool sync_combo)
     }
 }
 
-void ColorNotebook::_addPage(Page &page, bool no_alpha, const Glib::ustring vpath)
+void ColorNotebook::_addPageForSpace(std::shared_ptr<Colors::Space::AnySpace> space)
 {
-    if (auto selector_widget = page.selector_factory->createWidget(_selected_color, no_alpha)) {
-        Glib::ustring mode_name = page.selector_factory->modeName();
-        _book->add(*selector_widget, mode_name, mode_name);
+    auto selector_widget = Gtk::make_managed<ColorPage>(space, _colors);
+    auto mode_name = space->getName();
+    _book->add(*selector_widget, mode_name, mode_name);
 
-        auto const n_pages = static_cast<int>(UI::get_children(*_book).size());
-        auto const page_num = n_pages - 1;
-        _combo->add_row(page.icon_name, mode_name, page_num);
+    auto const n_pages = static_cast<int>(UI::get_children(*_book).size());
+    auto const page_num = n_pages - 1;
+    _combo->add_row(space->getIcon(), mode_name, page_num);
 
-        auto prefs = Inkscape::Preferences::get();
-        auto obs = prefs->createObserver(vpath, [=](const Preferences::Entry& value) {
-            _combo->set_row_visible(page_num, value.getBool());
-            selector_widget->set_visible(value.getBool());
-        });
-        obs->call();
-        _visibility_observers.emplace_back(std::move(obs));
-    }
+    auto prefs = Inkscape::Preferences::get();
+    auto obs = prefs->createObserver(space->getPrefsPath() + "visible", [this,selector_widget,page_num](const Preferences::Entry& value) {
+        _combo->set_row_visible(page_num, value.getBool());
+        selector_widget->set_visible(value.getBool());
+    });
+    obs->call();
+    _visibility_observers.emplace_back(std::move(obs));
 }
 
 } // namespace Inkscape::UI::Widget

@@ -20,6 +20,9 @@
 
 #include <glibmm/i18n.h>
 
+#include "colors/utils.h"
+#include "colors/color-set.h"
+
 #include "desktop-style.h"
 #include "desktop.h"
 #include "document-undo.h"
@@ -125,12 +128,9 @@ static int gr_drag_style_query(SPStyle *style, int property, gpointer data)
         return QUERY_STYLE_NOTHING;
     } else {
         int ret = QUERY_STYLE_NOTHING;
-
-        float cf[4];
-        cf[0] = cf[1] = cf[2] = cf[3] = 0;
+        auto colors = Colors::ColorSet();
 
         SPStop* selected = nullptr;
-        int count = 0;
         for(auto d : drag->selected) { //for all selected draggers
             for(auto draggable : d->draggables) { //for all draggables of dragger
                 if (ret == QUERY_STYLE_NOTHING) {
@@ -140,39 +140,32 @@ static int gr_drag_style_query(SPStyle *style, int property, gpointer data)
                     ret = QUERY_STYLE_MULTIPLE_AVERAGED;
                 }
 
-                guint32 c = sp_item_gradient_stop_query_style (draggable->item, draggable->point_type, draggable->point_i, draggable->fill_or_stroke);
-                cf[0] += SP_RGBA32_R_F (c);
-                cf[1] += SP_RGBA32_G_F (c);
-                cf[2] += SP_RGBA32_B_F (c);
-                cf[3] += SP_RGBA32_A_F (c);
-
-                count ++;
+                colors.set(
+                    draggable->item->getId(),
+                    sp_item_gradient_stop_query_style (draggable->item, draggable->point_type, draggable->point_i, draggable->fill_or_stroke)
+                );
             }
         }
 
-        if (count) {
-            cf[0] /= count;
-            cf[1] /= count;
-            cf[2] /= count;
-            cf[3] /= count;
+        if (!colors.isEmpty()) {
+            auto avg = colors.getAverage();
+            auto opacity = avg.stealOpacity();
 
             // set both fill and stroke with our stop-color and stop-opacity
             style->fill.clear();
-            style->fill.setColor( cf[0], cf[1], cf[2] );
+            style->fill.setColor(avg);
             style->fill.set = TRUE;
             style->fill.setTag(selected);
             style->stroke.clear();
-            style->stroke.setColor( cf[0], cf[1], cf[2] );
+            style->stroke.setColor(avg);
             style->stroke.set = TRUE;
             style->stroke.setTag(selected);
 
-            style->fill_opacity.value = SP_SCALE24_FROM_FLOAT (cf[3]);
-            style->fill_opacity.set = TRUE;
-            style->stroke_opacity.value = SP_SCALE24_FROM_FLOAT (cf[3]);
-            style->stroke_opacity.set = TRUE;
+            style->fill_opacity.set_double(opacity);
+            style->stroke_opacity.set_double(opacity);
 
-            style->opacity.value = SP_SCALE24_FROM_FLOAT (cf[3]);
-            style->opacity.set = TRUE;
+            // This seems wrong, it duplicates the opacity
+            style->opacity.set_double(opacity);
         }
 
         return ret;
@@ -214,7 +207,10 @@ Glib::ustring GrDrag::makeStopSafeColor( gchar const *str, bool &isNull )
 bool GrDrag::styleSet( const SPCSSAttr *css, bool switch_style)
 {
     if (selected.empty()) {
-        return false;
+        if (draggers.empty()) {
+            return false;
+        }
+        setSelected(*draggers.begin(), true);
     }
 
     SPCSSAttr *stop = sp_repr_css_attr_new();
@@ -304,35 +300,20 @@ bool GrDrag::styleSet( const SPCSSAttr *css, bool switch_style)
     return local_change; // true if handled
 }
 
-guint32 GrDrag::getColor()
+Inkscape::Colors::Color GrDrag::getColor()
 {
-    if (selected.empty()) return 0;
+    if (selected.empty())
+        return Color(0x000000ff);
 
-    float cf[4];
-    cf[0] = cf[1] = cf[2] = cf[3] = 0;
-
-    int count = 0;
-
+    Inkscape::Colors::ColorSet colors;
     for(auto d : selected) { //for all selected draggers
         for(auto draggable : d->draggables) { //for all draggables of dragger
-            guint32 c = sp_item_gradient_stop_query_style (draggable->item, draggable->point_type, draggable->point_i, draggable->fill_or_stroke);
-            cf[0] += SP_RGBA32_R_F (c);
-            cf[1] += SP_RGBA32_G_F (c);
-            cf[2] += SP_RGBA32_B_F (c);
-            cf[3] += SP_RGBA32_A_F (c);
-
-            count ++;
+            colors.set(
+                draggable->item->getId(),
+                sp_item_gradient_stop_query_style (draggable->item, draggable->point_type, draggable->point_i, draggable->fill_or_stroke));
         }
     }
-
-    if (count) {
-        cf[0] /= count;
-        cf[1] /= count;
-        cf[2] /= count;
-        cf[3] /= count;
-    }
-
-    return SP_RGBA32_F_COMPOSE(cf[0], cf[1], cf[2], cf[3]);
+    return colors.getAverage();
 }
 
 // TODO refactor early returns
@@ -509,11 +490,23 @@ SPStop *GrDrag::addStopNearPoint(SPItem *item, Geom::Point mouse_p, double toler
                 next_stop = next_stop->getNextStop();
                 i++;
             }
-            if (!next_stop) {
+            if (vector->getStopCount() == 1) {
+                // Handle single stop vectors separately.
+                auto newstop = sp_gradient_add_stop_at(vector, new_stop_offset);
+                gradient->ensureVector();
+                updateDraggers();
+
+                // so that it does not automatically update draggers in idle loop, as this would deselect
+                local_change = true;
+
+                // select the newly created stop
+                selectByStop(newstop);
+
+                return newstop;
+            } else if (!next_stop) {
                 // logical error: the endstop should have offset 1 and should always be more than this offset here
                 return nullptr;
             }
-
 
             SPStop *newstop = sp_vector_add_stop (vector, prev_stop, next_stop, new_stop_offset);
             gradient->ensureVector();
@@ -550,42 +543,125 @@ SPStop *GrDrag::addStopNearPoint(SPItem *item, Geom::Point mouse_p, double toler
     return nullptr;
 }
 
-
-bool GrDrag::dropColor(SPItem */*item*/, gchar const *c, Geom::Point p)
+void GrDrag::addColorToDragger(GrDragger &dragger, const char *color)
 {
-    // Note: not sure if a null pointer can come in for the style, but handle that just in case
-    bool stopIsNull = false;
-    Glib::ustring toUse = makeStopSafeColor( c, stopIsNull );
+    auto stop = sp_repr_css_attr_new();
+    sp_repr_css_set_property(stop, "stop-color", color);
+    sp_repr_css_set_property(stop, "stop-opacity", "1");
+    for (auto draggable : dragger.draggables) {
+        local_change = true;
+        sp_item_gradient_stop_set_style(draggable->item, draggable->point_type, draggable->point_i,
+                                        draggable->fill_or_stroke, stop);
+    }
+    sp_repr_css_attr_unref(stop);
+}
 
-    // first, see if we can drop onto one of the existing draggers
-    for(auto d : draggers) { //for all draggers
-        if (Geom::L2(p - d->point)*desktop->current_zoom() < 5) {
-           SPCSSAttr *stop = sp_repr_css_attr_new ();
-           sp_repr_css_set_property( stop, "stop-color", stopIsNull ? nullptr : toUse.c_str() );
-           sp_repr_css_set_property( stop, "stop-opacity", "1" );
-           for(auto draggable : d->draggables) { //for all draggables of dragger
-               local_change = true;
-               sp_item_gradient_stop_set_style (draggable->item, draggable->point_type, draggable->point_i, draggable->fill_or_stroke, stop);
-           }
-           sp_repr_css_attr_unref(stop);
-           return true;
+void GrDrag::dropColorOnCorrespondingRegion(const char *color, Geom::Point p)
+{
+    if (draggers.empty()) {
+        return;
+    }
+
+    if (draggers.size() == 1) {
+        // In case of single dragger. No need to find out the region,
+        // just drop the color and return early.
+        addColorToDragger(*draggers[0], color);
+        return;
+    }
+
+    // The first stop will be the center of all the discs formed
+    // by the gradient.
+    auto const center = draggers[0]->point;
+    auto const dist_point = Geom::distance(center, p);
+    double outer_radius = Geom::distance(center, draggers[1]->point) / 2;
+
+    if (dist_point < outer_radius) {
+        // Innermost stop.
+        addColorToDragger(*draggers[0], color);
+    }
+
+    for (int i = 1; i < draggers.size() - 1; ++i) {
+        // Outer radius of the previous stop is equal to the inner radius of this stop.
+        double const inner_radius = outer_radius;
+        outer_radius =
+            Geom::distance(center, draggers[i]->point) + Geom::distance(draggers[i]->point, draggers[i + 1]->point) / 2;
+
+        // The point will be inside the annulus disc if
+        // the distance of the point from the center(first stop on the gradient line)
+        // of the stop is greater than the inner radius, and less than the outer radius
+        // of the disc.
+        if (dist_point >= inner_radius && dist_point < outer_radius) {
+            addColorToDragger(*draggers[i], color);
         }
     }
 
-    // now see if we're over line and create a new stop
+    if (dist_point >= outer_radius) {
+        // Outermost stop
+        addColorToDragger(*draggers[draggers.size() - 1], color);
+    }
+}
+
+bool GrDrag::dropColor(SPItem * /*item*/, gchar const *c, Geom::Point p)
+{
+    if (draggers.empty()) {
+        return false;
+    }
+
+    // Note: not sure if a null pointer can come in for the style, but handle that just in case
+    bool stopIsNull = false;
+    Glib::ustring toUse = makeStopSafeColor( c, stopIsNull );
+    const char *color = stopIsNull ? nullptr : toUse.c_str();
+
+    // Drop the color on the nearest dragger.
+    GrDragger *dragger = nullptr;
+
+    // Find out the dragger nearest to the mouse point.
+    double minDistance = Geom::infinity();
+    for (auto d : draggers) {
+        auto const dist = Geom::distance(p, d->point);
+        if (dist < minDistance) {
+            dragger = d;
+            minDistance = dist;
+        }
+    }
+
+    // Check if the mouse pointer is too close to a stop.
+    // In that case, do not create a new stop, instead,
+    // add the color to the nearest dragger stop.
+    double const tolerance = 5 / desktop->current_zoom();
+    bool const onDraggerStop = minDistance <= tolerance;
+
+    // Check if there's any selected draggers.
+    if (!selected.empty() && !onDraggerStop) {
+        for (auto selected_dragger : selected) {
+            addColorToDragger(*selected_dragger, color);
+        }
+        return true;
+    }
+
+    // Now see if we're over a line, we create a new stop
     for (auto &it : item_curves) {
-        if (it.curve->is_line() && it.item && it.curve->contains(p, 5)) {
-            if (auto stop = addStopNearPoint(it.item, p, 5 / desktop->current_zoom())) {
-                SPCSSAttr *css = sp_repr_css_attr_new();
-                sp_repr_css_set_property( css, "stop-color", stopIsNull ? nullptr : toUse.c_str() );
+        if (!onDraggerStop && it.curve->is_line() && it.item && it.curve->contains(desktop->d2w(p), 5)) {
+            if (auto stop = addStopNearPoint(it.item, p, tolerance)) {
+                auto css = sp_repr_css_attr_new();
+                sp_repr_css_set_property(css, "stop-color", color);
                 sp_repr_css_set_property( css, "stop-opacity", "1" );
                 sp_repr_css_change(stop->getRepr(), css, "style");
+                sp_repr_css_attr_unref(css);
                 return true;
             }
         }
     }
 
-    return false;
+    // Drop the color on the corresponding dragger.
+    auto const draggable = dragger->draggables[0];
+    if (is<SPLinearGradient>(getGradient(draggable->item, draggable->fill_or_stroke))) {
+        addColorToDragger(*dragger, color);
+    } else {
+        dropColorOnCorrespondingRegion(color, p);
+    }
+
+    return true;
 }
 
 GrDrag::GrDrag(SPDesktop *desktop) :
@@ -1158,8 +1234,33 @@ static void gr_knot_doubleclicked_handler(SPKnot */*knot*/, guint /*state*/, gpo
 
     dragger->point_original = dragger->point;
 
-    if (dragger->draggables.empty())
+    if (dragger->draggables.empty()) {
         return;
+    } else {
+        auto drag = dragger->parent;
+        auto draggable = dragger->draggables[0];
+        auto gradient = getGradient(draggable->item, draggable->fill_or_stroke);
+        auto vector = sp_gradient_get_forked_vector_if_necessary(gradient, false);
+
+        // Treat single stop gradients separately.
+        if (vector->getStopCount() == 1) {
+            auto first_stop = vector->getFirstStop();
+            bool is_offset_zero = first_stop->offset < 1e-4;
+            bool is_first_dragger = dragger == drag->draggers[0];
+
+            // Do not add new stop if the double clicked dragger already has a stop.
+            if ((is_offset_zero && is_first_dragger) || (!is_offset_zero && !is_first_dragger)) {
+                return;
+            }
+
+            auto newstop = sp_gradient_add_stop(vector, first_stop);
+            gradient->ensureVector();
+            drag->updateDraggers();
+            drag->local_change = true;
+            drag->selectByStop(newstop);
+            DocumentUndo::done(gradient->document, _("Add gradient stop"), INKSCAPE_ICON("color-gradient"));
+        }
+    }
 }
 
 /**
@@ -2118,9 +2219,6 @@ void GrDrag::addDraggersMesh(SPMeshGradient *mg, SPItem *item, Inkscape::PaintTa
     guint icorner = 0;
     guint ihandle = 0;
     guint itensor = 0;
-    mg->array.corners.clear();
-    mg->array.handles.clear();
-    mg->array.tensors.clear();
 
     if( (fill_or_stroke == Inkscape::FOR_FILL   && !edit_fill) ||
         (fill_or_stroke == Inkscape::FOR_STROKE && !edit_stroke) ) {
@@ -2135,7 +2233,6 @@ void GrDrag::addDraggersMesh(SPMeshGradient *mg, SPItem *item, Inkscape::PaintTa
 
                 case MG_NODE_TYPE_CORNER:
                 {
-                    mg->array.corners.push_back( j );
                     GrDraggable *corner = new GrDraggable (item, POINT_MG_CORNER, icorner, fill_or_stroke);
                     addDragger ( corner );
                     j->draggable = icorner;
@@ -2145,7 +2242,6 @@ void GrDrag::addDraggersMesh(SPMeshGradient *mg, SPItem *item, Inkscape::PaintTa
 
                 case MG_NODE_TYPE_HANDLE:
                 {
-                    mg->array.handles.push_back( j );
                     GrDraggable *handle = new GrDraggable (item, POINT_MG_HANDLE, ihandle, fill_or_stroke);
                     GrDragger* dragger = addDragger ( handle );
 
@@ -2159,7 +2255,6 @@ void GrDrag::addDraggersMesh(SPMeshGradient *mg, SPItem *item, Inkscape::PaintTa
 
                 case MG_NODE_TYPE_TENSOR:
                 {
-                    mg->array.tensors.push_back( j );
                     GrDraggable *tensor = new GrDraggable (item, POINT_MG_TENSOR, itensor, fill_or_stroke);
                     GrDragger* dragger = addDragger ( tensor );
                     if( !show_handles || !j->set ) {
@@ -2176,8 +2271,6 @@ void GrDrag::addDraggersMesh(SPMeshGradient *mg, SPItem *item, Inkscape::PaintTa
             }
         }
     }
-
-    mg->array.draggers_valid = true;
 }
 
 /**

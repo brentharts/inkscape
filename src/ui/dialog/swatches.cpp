@@ -57,7 +57,14 @@
 #include "ui/widget/color-palette-preview.h"
 #include "ui/widget/popover-menu-item.h"
 #include "util/variant-visitor.h"
-#include "widgets/paintdef.h"
+
+namespace Inkscape::Colors {
+    std::size_t hash_value(Color const& b)
+    {
+        boost::hash<int> hasher;
+        return hasher(b.toRGBA());
+    }
+}
 
 namespace Inkscape::UI::Dialog {
 
@@ -139,8 +146,8 @@ SwatchesPanel::SwatchesPanel(bool compact, char const *prefsPath)
     _palette->set_tile_size(prefs->getInt(_prefs_path + "/tile_size", 16));
     _palette->set_aspect(prefs->getDoubleLimited(_prefs_path + "/tile_aspect", 0.0, -2, 2));
     _palette->set_tile_border(prefs->getInt(_prefs_path + "/tile_border", 1));
-    _palette->set_rows(prefs->getInt(_prefs_path + "/rows", 1));
-    _palette->enable_stretch(prefs->getBool(_prefs_path + "/tile_stretch", false));
+    _palette->set_rows(prefs->getInt(_prefs_path + "/rows", 2));
+    _palette->enable_stretch(prefs->getBool(_prefs_path + "/tile_stretch", true));
     _palette->set_large_pinned_panel(embedded && prefs->getBool(_prefs_path + "/enlarge_pinned", true));
     _palette->enable_labels(!embedded && prefs->getBool(_prefs_path + "/show_labels", true));
 
@@ -228,7 +235,7 @@ void SwatchesPanel::set_palette(const Glib::ustring& id) {
     select_palette(id);
 }
 
-const PaletteFileData* SwatchesPanel::get_palette(const Glib::ustring& id) {
+const PaletteFileData *SwatchesPanel::get_palette(const Glib::ustring& id) {
     if (auto p = GlobalPalettes::get().find_palette(id)) return p;
 
     if (_loaded_palette.id == id) return &_loaded_palette;
@@ -375,19 +382,6 @@ bool SwatchesPanel::update_isswatch()
     return modified;
 }
 
-static auto spcolor_to_rgb(SPColor const &color)
-{
-    float rgbf[3];
-    color.get_rgb_floatv(rgbf);
-
-    std::array<unsigned, 3> rgb;
-    for (int i = 0; i < 3; i++) {
-        rgb[i] = SP_COLOR_F_TO_U(rgbf[i]);
-    };
-
-    return rgb;
-}
-
 void SwatchesPanel::update_fillstroke_indicators()
 {
     auto doc = getDocument();
@@ -413,7 +407,7 @@ void SwatchesPanel::update_fillstroke_indicators()
         if (attr->isNone()) {
             return std::monostate{};
         } else if (attr->isColor()) {
-            return spcolor_to_rgb(attr->value.color);
+            return attr->getColor();
         } else if (attr->isPaintserver()) {
             if (auto grad = cast<SPGradient>(fill ? style.getFillPaintServer() : style.getStrokePaintServer())) {
                 if (grad->isSwatch()) {
@@ -460,9 +454,9 @@ void SwatchesPanel::update_fillstroke_indicators()
     palette.id = p.id;
     for (auto const &c : p.colors) {
         std::visit(VariantVisitor {
-            [&](const PaletteFileData::Color& c) {
-                auto [r, g, b] = c.rgb;
-                palette.colors.push_back({r / 255.0, g / 255.0, b / 255.0});
+            [&](const Colors::Color& c) {
+                auto rgb = *c.converted(Colors::Space::Type::RGB);
+                palette.colors.push_back({rgb[0], rgb[1], rgb[2]});
             },
             [](const PaletteFileData::SpacerItem&) {},
             [](const PaletteFileData::GroupStart&) {}
@@ -480,6 +474,7 @@ void SwatchesPanel::update_palettes(bool compact) {
 
     // The first palette in the list is always the "Auto" palette. Although this
     // will contain colors when selected, the preview we show for it is empty.
+    // TRANSLATORS: A list of swatches in the document
     palettes.push_back({_("Document swatches"), auto_id, {}});
 
     // The remaining palettes in the list are the global palettes.
@@ -510,7 +505,7 @@ void SwatchesPanel::rebuild()
     current_stroke.clear();
 
     // Add the "remove-color" color.
-    auto const w = Gtk::make_managed<ColorItem>(PaintDef(), this);
+    auto const w = Gtk::make_managed<ColorItem>(this);
     w->set_pinned_pref(_prefs_path);
     palette.emplace_back(w);
     widgetmap.emplace(std::monostate{}, w);
@@ -527,10 +522,10 @@ void SwatchesPanel::rebuild()
                 [](const PaletteFileData::GroupStart& g) {
                     return Gtk::make_managed<ColorItem>(g.name);
                 },
-                [=, this](const PaletteFileData::Color& c) {
-                    auto w = Gtk::make_managed<ColorItem>(PaintDef(c.rgb, c.name, c.definition), dialog);
+                [=, this](const Colors::Color& c) {
+                    auto w = Gtk::make_managed<ColorItem>(c, dialog);
                     w->set_pinned_pref(_prefs_path);
-                    widgetmap.emplace(c.rgb, w);
+                    widgetmap.emplace(c, w);
                     return w;
                 },
             }, c);

@@ -27,7 +27,7 @@ namespace Inkscape {
 }
 
 #define Operator Operator_Gfx
-#include <Gfx.h>
+#include <poppler/Gfx.h>
 #undef Operator
 
 #include <2geom/affine.h>
@@ -36,7 +36,7 @@ namespace Inkscape {
 #include <glibmm/ustring.h>
 #include <lcms2.h>
 
-#include "CharTypes.h"
+#include <poppler/CharTypes.h>
 #include "enums.h"
 #include "poppler-utils.h"
 class Function;
@@ -70,10 +70,12 @@ namespace Internal {
 /**
  * Holds information about glyphs added by PdfParser which haven't been added
  * to the document yet.
+ * TODO Turn this into a class and store the actual GfxState.
  */
 struct SvgGlyph {
     Geom::Point position;      // Absolute glyph coords
     Geom::Point text_position; // Absolute glyph coords in text space
+    Geom::Point origin;        // Origin of glyph (used for fixing vertical text position)
     Geom::Point delta;         // X, Y advance values
     double rise;               // Text rise parameter
     Glib::ustring code;        // UTF-8 coded character
@@ -83,7 +85,7 @@ struct SvgGlyph {
     GfxState *state;           // A promise of the future text style
     double text_size;          // Text size
 
-    const char *font_specification;        // Pointer to current font specification
+    std::string font_specification;        // Current font specification
     SPCSSAttr *css_font;                   // The font style as a css style
     unsigned int cairo_index;              // The index into the selected cairo font
     std::shared_ptr<CairoFont> cairo_font; // A pointer to the selected cairo font
@@ -108,6 +110,7 @@ public:
         return _preferences;
     }
     void pushPage(const std::string &label, GfxState *state);
+    void setPageMode(bool as_pages) { _as_pages = as_pages; }
 
     // Path adding
     bool shouldMergePath(bool is_fill, const std::string &path);
@@ -201,7 +204,10 @@ private:
     void _setTextStyle(Inkscape::XML::Node *node, GfxState *state, SPCSSAttr *font_style, Geom::Affine text_affine);
     void _setBlendMode(Inkscape::XML::Node *node, GfxState *state);
     void _setTransform(Inkscape::XML::Node *node, GfxState *state, Geom::Affine extra = Geom::identity());
+
     // Write buffered text into doc
+    Inkscape::XML::Node* _flushTextText(GfxState *state, double text_scale, const Geom::Affine& text_transform);
+    Inkscape::XML::Node* _flushTextPath(GfxState *state, double text_scale, const Geom::Affine& text_transform);
     void _flushText(GfxState *state);
     std::string _aria_label;
     bool _aria_space = false;
@@ -236,7 +242,7 @@ private:
     FontStrategies _font_strategies;
     double _css_font_size = 1.0;
     SPCSSAttr *_css_font;
-    const char *_font_specification;
+    std::string _font_specification;
     double _text_size;
     Geom::Affine _text_matrix;
     Geom::Point _text_position;
@@ -261,6 +267,7 @@ private:
     double _width;       // Document size in px
     double _height;       // Document size in px
 
+    bool _as_pages = true; // If set to false, page objects are not created
     Inkscape::XML::Node *_page = nullptr; // XML Page definition
     int _page_num = 0; // Are we on a page
     double _page_left = 0 ; // Move to the left for more pages

@@ -52,10 +52,11 @@ class Registry;
 template <class W>
 class RegisteredWidget : public W {
 public:
-    void set_undo_parameters(Glib::ustring _event_description, Glib::ustring _icon_name)
+    void set_undo_parameters(Glib::ustring _event_description, Glib::ustring _icon_name, std::string undo_id = "")
     {
         icon_name = std::move(_icon_name);
         event_description = std::move(_event_description);
+        _undo_id = undo_id;
         write_undo = true;
     }
 
@@ -112,7 +113,10 @@ protected:
 
         if (write_undo) {
             local_repr->setAttribute(_key, svgstr);
-            DocumentUndo::done(local_doc, event_description, icon_name);
+            if (_undo_id.empty())
+                DocumentUndo::done(local_doc, event_description, icon_name);
+            else
+                DocumentUndo::maybeDone(local_doc, _undo_id.c_str(), event_description, icon_name);
         }
     }
 
@@ -123,6 +127,7 @@ protected:
     Glib::ustring event_description;
     Glib::ustring icon_name; // Used by History dialog.
     bool write_undo = false;
+    std::string _undo_id;
 };
 
 //#######################################################
@@ -287,15 +292,15 @@ public:
                           Inkscape::XML::Node *repr_in = nullptr,
                           SPDocument *doc_in = nullptr);
 
-    void setRgba32(std::uint32_t);
+    void setColor(Colors::Color const &);
     void closeWindow();
-    void setCustomSetter(std::function<void (Inkscape::XML::Node*, std::uint32_t)> setter) { _setter = std::move(setter); }
+    void setCustomSetter(std::function<void (Inkscape::XML::Node*, Colors::Color)> setter) { _setter = std::move(setter); }
 
 private:
     Glib::ustring _ckey, _akey;
     auto_connection _changed_connection;
-    std::function<void (Inkscape::XML::Node*, std::uint32_t)> _setter;
-    void on_changed(std::uint32_t);
+    std::function<void (Inkscape::XML::Node*, Colors::Color)> _setter;
+    void on_changed(Colors::Color const &);
 };
 
 class RegisteredInteger : public RegisteredWidget<Scalar> {

@@ -22,20 +22,17 @@
 namespace Inkscape::UI::Widget {
 
 /** @brief The color wheel used in the OKHSL picker. */
-class OKWheel : public ColorWheel
+class OKWheel : public ColorWheelBase
 {
 public:
     OKWheel();
 
     /** @brief Set the displayed color to the specified gamma-compressed sRGB color. */
     /// See base doc & N.B. that overrideHue is unused by this class
-    bool setRgb(double r, double g, double b,
+    bool setColor(Colors::Color const &color,
                 bool overrideHue = true, bool emit = true) override;
 
-    /** @brief Get the gamma-compressed sRGB color from the picker wheel. */
-    void getRgb(double *r, double *g, double *b) const override;
-    void getRgbV(double *rgb) const override { getRgb(rgb, rgb + 1, rgb + 2); }
-    guint32 getRgb() const override;
+    Colors::Color getColor() const override;
 
 private:
     void on_drawing_area_draw(Cairo::RefPtr<Cairo::Context> const &cr, int, int) override;
@@ -61,8 +58,7 @@ private:
     bool _onClick(Geom::Point const &unit_pos);
     Gtk::EventSequenceState on_click_pressed (Gtk::GestureClick const &click,
                                               int n_press, double x, double y) final;
-    Gtk::EventSequenceState on_click_released(Gtk::GestureClick const &click,
-                                              int n_press, double x, double y) final;
+    Gtk::EventSequenceState on_click_released(int n_press, double x, double y) final;
     void on_motion(GtkEventControllerMotion const *motion, double x, double y) final;
 
     double _disc_radius = 1.0;

@@ -30,7 +30,6 @@
 #include <sigc++/adaptors/bind.h>
 
 #include "desktop.h"
-#include "color.h"
 #include "desktop-events.h"
 #include "desktop-style.h"
 #include "document-undo.h"
@@ -111,7 +110,10 @@ SPDesktop::SPDesktop()
     _tips_message_context = std::make_unique<Inkscape::MessageContext>(_message_stack);
 
     _message_changed_connection = _message_stack->connectChanged([this](auto const type, auto const message) {
-        onStatusMessage(type, message);
+        _message_idle_connection = Glib::signal_idle().connect([=, this](){
+            onStatusMessage(type, message);
+            return false;
+        }, Glib::PRIORITY_HIGH);
     });
 
 }
@@ -241,8 +243,6 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
     // display rect and zoom are now handled in sp_desktop_widget_realize()
 
     // pinch zoom
-    Inkscape::UI::Controller::add_motion<&SPDesktop::on_motion, &SPDesktop::on_motion, &SPDesktop::on_leave>
-                                        (*canvas, *this);
     Inkscape::UI::Controller::add_zoom<&SPDesktop::on_zoom_begin, &SPDesktop::on_zoom_scale, &SPDesktop::on_zoom_end>
                                       (*canvas, *this, Gtk::PropagationPhase::CAPTURE);
 
@@ -431,6 +431,13 @@ SPItem *SPDesktop::getItemAtPoint(Geom::Point const &p, bool into_groups, SPItem
 {
     g_return_val_if_fail (doc() != nullptr, NULL);
     return doc()->getItemAtPoint( dkey, p, into_groups, upto);
+}
+
+std::vector<SPItem*> SPDesktop::getItemsAtPoints(std::vector<Geom::Point> points, bool all_layers, bool topmost_only, size_t limit, bool active_only) const
+{
+    if (!doc())
+        return {};
+    return doc()->getItemsAtPoints(dkey, points, all_layers, topmost_only, limit, active_only);
 }
 
 /**
@@ -1512,21 +1519,8 @@ void SPDesktop::emit_text_cursor_moved(void* sender, Inkscape::UI::Tools::TextTo
 }
 
 /*
-* * pinch zoom
+ * pinch zoom
  */
-
-void SPDesktop::on_motion(GtkEventControllerMotion const * /*motion*/,
-                          double const x, double const y)
-{
-    _motion_x = x;
-    _motion_y = y;
-}
-
-void SPDesktop::on_leave(GtkEventControllerMotion const * /*motion*/)
-{
-    _motion_x.reset();
-    _motion_y.reset();
-}
 
 void SPDesktop::on_zoom_begin(GtkGesture const * /*zoom*/, GdkEventSequence const * /*sequence*/)
 {
@@ -1535,9 +1529,13 @@ void SPDesktop::on_zoom_begin(GtkGesture const * /*zoom*/, GdkEventSequence cons
 
 void SPDesktop::on_zoom_scale(GtkGestureZoom const * /*zoom*/, double const scale)
 {
-    Geom::Point const widget_point{_motion_x.value(), _motion_y.value()};
-    auto const world_point = getCanvas()->canvas_to_world(widget_point);
-    zoom_absolute(w2d(world_point), _begin_zoom.value() * scale);
+    if (!_begin_zoom) {
+        std::cerr << "on_zoom_scale: Missed on_zoom_begin event" << std::endl;
+        return;
+    }
+    auto const widget_point = canvas->get_last_mouse().value_or(canvas->get_dimensions() / 2);
+    auto const world_point = canvas->canvas_to_world(widget_point);
+    zoom_absolute(w2d(world_point), *_begin_zoom * scale);
 }
 
 void SPDesktop::on_zoom_end(GtkGesture const * /*zoom*/, GdkEventSequence const * /*sequence*/)

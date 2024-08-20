@@ -306,8 +306,8 @@ static void find_references(SPObject *elem, refmap_type &refmap, bool from_clipb
     for (unsigned i = 0; i < NUM_SPIPAINT_PROPERTIES; ++i) {
         const SPIPaint SPStyle::*prop = SPIPaint_members[i];
         const SPIPaint *paint = &(style->*prop);
-        if (paint->isPaintserver() && paint->value.href) {
-            const SPObject *obj = paint->value.href->getObject();
+        if (paint->isPaintserver() && paint->href) {
+            const SPObject *obj = paint->href->getObject();
             if (obj) {
                 const gchar *id = obj->getId();
                 IdReference idref = { REF_STYLE, elem, SPIPaint_properties[i] };
@@ -421,9 +421,10 @@ static void change_clashing_ids(SPDocument *imported_doc, SPDocument *current_do
             // Change to the new ID
 
             elem->setAttribute("id", new_id);
-                // Make a note of this change, if we need to fix up refs to it
-            if (refmap.find(old_id) != refmap.end())
-                id_changes->push_back(id_changeitem_type(elem, old_id));
+            // Make a note of this change, if we need to fix up refs to it
+            if (refmap.find(old_id) != refmap.end()) {
+                id_changes->emplace_back(elem, old_id);
+            }
         }
     }
 
@@ -493,7 +494,26 @@ change_def_references(SPObject *from_obj, SPObject *to_obj)
     }
 }
 
+// Supposedly this is a list of valid XML 1.0 ID characters
+// TODO: find link to some reference page
 const char valid_id_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.:";
+
+Glib::ustring sanitize_id(const Glib::ustring& input_id) {
+    if (input_id.empty()) return input_id;
+
+    auto id = input_id;
+    for (auto pos = id.find_first_not_of(valid_id_chars);
+            pos != Glib::ustring::npos;
+            pos = id.find_first_not_of(valid_id_chars, pos)) {
+        id.replace(pos, 1, "_");
+    }
+    // ID cannot start with a digit, period, or minus (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/id)
+    auto c = id[0];
+    if (isdigit(c) || c == '.' || c == '-') {
+        id.insert(0, "x");
+    }
+    return id;
+}
 
 /**
  * Modify 'base_name' to create a new ID that is not used in the 'document'
@@ -505,14 +525,7 @@ Glib::ustring generate_similar_unique_id(SPDocument* document, const Glib::ustri
         id = "id-0";
     }
     else {
-        for (auto pos = id.find_first_not_of(valid_id_chars);
-                  pos != Glib::ustring::npos;
-                  pos = id.find_first_not_of(valid_id_chars, pos)) {
-            id.replace(pos, 1, "_");
-        }
-        if (!isalnum(id[0])) {
-            id.insert(0, "x");
-        }
+        id = sanitize_id(base_name);
     }
 
     if (!document) {

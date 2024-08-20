@@ -20,7 +20,6 @@
 #include <iostream> // Logging
 #include <mutex>
 #include <set> // Coarsener
-#include <stdexcept>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -42,8 +41,8 @@
 #include "canvas/stores.h"
 #include "canvas/synchronizer.h"
 #include "canvas/util.h"
-#include "color/cms-system.h"     // Color correction
-#include "color.h"          // Background color
+#include "colors/cms/transform.h"
+#include "colors/cms/system.h"
 #include "desktop.h"
 #include "display/control/canvas-item-drawing.h"
 #include "display/control/canvas-item-group.h"
@@ -155,8 +154,7 @@ struct RedrawData
     Fragment store;
     bool decoupled_mode;
     Cairo::RefPtr<Cairo::Region> snapshot_drawn;
-    Geom::OptIntRect grabbed;
-    std::shared_ptr<CMSTransform const> cms_transform;
+    std::shared_ptr<Colors::CMS::Transform> cms_transform;
 
     // Saved prefs
     int coarsener_min_size;
@@ -267,7 +265,6 @@ public:
     bool clip_to_page = false; // Whether to enable clip-to-page mode.
     PageInfo pi; // The list of page rectangles.
     std::optional<Geom::PathVector> calc_page_clip() const; // Union of the page rectangles if in clip-to-page mode, otherwise no clip.
-    bool is_point_on_page(const Geom::Point &point) const;
 
     int scale_factor = 1; // The device scale the stores are drawn at.
 
@@ -302,7 +299,7 @@ public:
     void queue_draw_area(Geom::IntRect const &rect);
 
     // For tracking the last known mouse position. (The function Gdk::Window::get_device_position cannot be used because of slow X11 round-trips. Remove this workaround when X11 dies.)
-    std::optional<Geom::IntPoint> last_mouse;
+    std::optional<Geom::Point> last_mouse;
 
     // For tracking the old size in size_allocate_vfunc(). As of GTK4, we only have access to the new size.
     Geom::IntPoint old_dimensions;
@@ -310,9 +307,9 @@ public:
     // Auto-scrolling.
     std::optional<guint> tick_callback;
     std::optional<gint64> last_time;
-    Geom::IntPoint strain;
+    Geom::Point strain;
     Geom::Point displacement, velocity;
-    void autoscroll_begin(Geom::IntPoint const &to);
+    void autoscroll_begin(Geom::Point const &to);
     void autoscroll_end();
 };
 
@@ -345,16 +342,16 @@ Canvas::Canvas()
     d->invalidated = Cairo::Region::create();
 
     // Preferences
-    d->prefs.grabsize.action = [=] { d->canvasitem_ctx->root()->update_canvas_item_ctrl_sizes(d->prefs.grabsize); };
-    d->prefs.debug_show_unclean.action = [=] { queue_draw(); };
-    d->prefs.debug_show_clean.action = [=] { queue_draw(); };
-    d->prefs.debug_disable_redraw.action = [=] { d->schedule_redraw(); };
-    d->prefs.debug_sticky_decoupled.action = [=] { d->schedule_redraw(); };
-    d->prefs.debug_animate.action = [=] { queue_draw(); };
-    d->prefs.outline_overlay_opacity.action = [=] { queue_draw(); };
-    d->prefs.softproof.action = [=] { set_cms_transform(); redraw_all(); };
-    d->prefs.displayprofile.action = [=] { set_cms_transform(); redraw_all(); };
-    d->prefs.request_opengl.action = [=] {
+    d->prefs.grabsize.action = [this] { d->canvasitem_ctx->root()->update_canvas_item_ctrl_sizes(d->prefs.grabsize); };
+    d->prefs.debug_show_unclean.action = [this] { queue_draw(); };
+    d->prefs.debug_show_clean.action = [this] { queue_draw(); };
+    d->prefs.debug_disable_redraw.action = [this] { d->schedule_redraw(); };
+    d->prefs.debug_sticky_decoupled.action = [this] { d->schedule_redraw(); };
+    d->prefs.debug_animate.action = [this] { queue_draw(); };
+    d->prefs.outline_overlay_opacity.action = [this] { queue_draw(); };
+    d->prefs.softproof.action = [this] { set_cms_transform(); redraw_all(); };
+    d->prefs.displayprofile.action = [this] { set_cms_transform(); redraw_all(); };
+    d->prefs.request_opengl.action = [this] {
         if (get_realized()) {
             d->deactivate();
             d->deactivate_graphics();
@@ -364,7 +361,7 @@ Canvas::Canvas()
             d->activate();
         }
     };
-    d->prefs.pixelstreamer_method.action = [=] {
+    d->prefs.pixelstreamer_method.action = [this] {
         if (get_realized() && get_opengl_enabled()) {
             d->deactivate();
             d->deactivate_graphics();
@@ -372,7 +369,7 @@ Canvas::Canvas()
             d->activate();
         }
     };
-    d->prefs.numthreads.action = [=] {
+    d->prefs.numthreads.action = [this] {
         if (!d->active) return;
         int const new_numthreads = d->get_numthreads();
         if (d->numthreads == new_numthreads) return;
@@ -656,7 +653,7 @@ void CanvasPrivate::launch_redraw()
     q->_drawing->snapshot();
 
     // Get the mouse position in screen space.
-    rd.mouse_loc = last_mouse.value_or((Geom::Point(q->get_dimensions()) / 2).round());
+    rd.mouse_loc = last_mouse.value_or(Geom::Point(q->get_dimensions()) / 2).round();
 
     // Map the mouse to canvas space.
     rd.mouse_loc += q->_pos;
@@ -689,7 +686,6 @@ void CanvasPrivate::launch_redraw()
     rd.debug_show_redraw = prefs.debug_show_redraw;
 
     rd.snapshot_drawn = stores.snapshot().drawn ? stores.snapshot().drawn->copy() : Cairo::RefPtr<Cairo::Region>();
-    rd.grabbed = q->_grabbed_canvas_item && prefs.block_updates ? (roundedOutwards(q->_grabbed_canvas_item->get_bounds()) & rd.visible & rd.store.rect).regularized() : Geom::OptIntRect();
     rd.cms_transform = q->_cms_active ? q->_cms_transform : nullptr;
 
     abort_flags.store((int)AbortFlags::None, std::memory_order_relaxed);
@@ -827,16 +823,16 @@ static Geom::Point apply_profile(Geom::Point const &pt)
     return pt * profile(r) / r;
 }
 
-void CanvasPrivate::autoscroll_begin(Geom::IntPoint const &to)
+void CanvasPrivate::autoscroll_begin(Geom::Point const &to)
 {
     if (!q->_desktop) {
         return;
     }
 
-    auto const rect = expandedBy(Geom::IntRect({}, q->get_dimensions()), -(int)prefs.autoscrolldistance);
+    auto const rect = expandedBy(Geom::Rect({}, q->get_dimensions()), -(int)prefs.autoscrolldistance);
     strain = to - rect.clamp(to);
 
-    if (strain == Geom::IntPoint(0, 0) || tick_callback) {
+    if (strain == Geom::Point(0, 0) || tick_callback) {
         return;
     }
 
@@ -852,7 +848,7 @@ void CanvasPrivate::autoscroll_begin(Geom::IntPoint const &to)
         last_time = t;
         dt *= 60.0 / 1e6 * prefs.autoscrollspeed;
 
-        bool const strain_zero = strain == Geom::IntPoint(0, 0);
+        bool const strain_zero = strain == Geom::Point(0, 0);
 
         if (strain.x() * velocity.x() < 0) velocity.x() = 0;
         if (strain.y() * velocity.y() < 0) velocity.y() = 0;
@@ -923,7 +919,7 @@ Gtk::EventSequenceState Canvas::on_button_pressed(Gtk::GestureClick const &contr
                                                   int const n_press, double const x, double const y)
 {
     _state = (int)controller.get_current_event_state();
-    d->last_mouse = Geom::IntPoint(x, y);
+    d->last_mouse = Geom::Point(x, y);
     d->unreleased_presses |= 1 << controller.get_current_button();
 
     grab_focus();
@@ -969,7 +965,7 @@ Gtk::EventSequenceState Canvas::on_button_released(Gtk::GestureClick const &cont
                                                    int /*n_press*/, double const x, double const y)
 {
     _state = (int)controller.get_current_event_state();
-    d->last_mouse = Geom::IntPoint(x, y);
+    d->last_mouse = Geom::Point(x, y);
     d->unreleased_presses &= ~(1 << controller.get_current_button());
 
     // Drag the split view controller.
@@ -1045,7 +1041,7 @@ void Canvas::on_enter(GtkEventControllerMotion const *controller_c, double x, do
 
     auto controller = const_wrap(controller_c, true);
     _state = (int)controller->get_current_event_state();
-    d->last_mouse = Geom::IntPoint(x, y);
+    d->last_mouse = Geom::Point(x, y);
 
     auto event = EnterEvent();
     event.modifiers = _state;
@@ -1120,15 +1116,20 @@ bool Canvas::on_key_released(GtkEventControllerKey const *controller_c,
 
 void Canvas::on_motion(GtkEventControllerMotion const *controller_c, double x, double y)
 {
+    auto const mouse = Geom::Point{x, y};
+    if (mouse == d->last_mouse) {
+        return; // Scrolling produces spurious motion events; discard them.
+    }
+    d->last_mouse = mouse;
+
     auto controller = const_wrap(controller_c, true);
     _state = (int)controller->get_current_event_state();
-    d->last_mouse = Geom::IntPoint(x, y);
 
     // Handle interactions with the split view controller.
     if (_split_mode == SplitMode::XRAY) {
         queue_draw();
     } else if (_split_mode == SplitMode::SPLIT) {
-        auto cursor_position = Geom::IntPoint(x, y);
+        auto cursor_position = mouse.floor();
 
         // Move controller.
         if (_split_dragging) {
@@ -1808,16 +1809,6 @@ std::optional<Geom::PathVector> CanvasPrivate::calc_page_clip() const
     return pv;
 }
 
-bool CanvasPrivate::is_point_on_page(const Geom::Point &point) const
-{
-    for (auto &rect : pi.pages) {
-        if (rect.contains(point)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 // Set the cms transform
 void Canvas::set_cms_transform()
 {
@@ -1830,8 +1821,7 @@ void Canvas::set_cms_transform()
     // auto surface = get_surface();
     // auto the_monitor = display->get_monitor_at_surface(surface);
 
-    auto cms_system = CMSSystem::get();
-    _cms_transform = cms_system->get_cms_transform( /* monitor */ );
+    _cms_transform = Colors::CMS::System::get().getDisplayTransform();
 }
 
 // Change cursor
@@ -1949,6 +1939,14 @@ void Canvas::paint_widget(Cairo::RefPtr<Cairo::Context> const &cr)
     if (d->stores.mode() == Stores::Mode::None) {
         std::cerr << "Canvas::paint_widget: Called while active but uninitialised!" << std::endl;
         return;
+    }
+
+    // If launch_redraw() has been scheduled but not yet called, call it now so there's no
+    // possibility of it getting blocked indefinitely by a busy idle loop.
+    if (d->schedule_redraw_conn.connected()) {
+        // Note: This also works around the bug https://gitlab.com/inkscape/inkscape/-/issues/4696.
+        d->launch_redraw();
+        d->schedule_redraw_conn.disconnect();
     }
 
     // Commit pending tiles in case GTK called on_draw even though after_redraw() is scheduled at higher priority.
@@ -2125,7 +2123,7 @@ void CanvasPrivate::init_tiler()
     rd.numactive = rd.numthreads;
 
     for (int i = 0; i < rd.numthreads - 1; i++) {
-        boost::asio::post(*pool, [=] { render_tile(i); });
+        boost::asio::post(*pool, [=, this] { render_tile(i); });
     }
 
     render_tile(rd.numthreads - 1);
@@ -2148,16 +2146,6 @@ bool CanvasPrivate::init_redraw()
             }
 
         case 1:
-            // Another high priority to redraw is the grabbed canvas item, if the user has requested block updates.
-            if (rd.grabbed) {
-                process_redraw(*rd.grabbed, updater->clean_region, false, false); // non-interruptible, non-preemptible
-                return true;
-            } else {
-                rd.phase++;
-                // fallthrough
-            }
-
-        case 2:
             if (rd.vis_store) {
                 // The main priority to redraw, and the bread and butter of Inkscape's painting, is the visible content that is not clean.
                 // This may be done over several cycles, at the direction of the Updater, each outwards from the mouse.
@@ -2168,7 +2156,7 @@ bool CanvasPrivate::init_redraw()
                 // fallthrough
             }
 
-        case 3: {
+        case 2: {
             // The lowest priority to redraw is the prerender margin around the visible rectangle.
             // (This is in addition to any opportunistic prerendering that may have already occurred in the above steps.)
             auto prerender = expandedBy(rd.visible, rd.margin);
@@ -2338,18 +2326,12 @@ bool CanvasPrivate::end_redraw()
             return init_redraw();
 
         case 1:
-            rd.phase++;
-            // Reset timeout to leave the normal amount of time for clearing up artifacts.
-            rd.start_time = g_get_monotonic_time();
-            return init_redraw();
-
-        case 2:
             if (!updater->report_finished()) {
                 rd.phase++;
             }
             return init_redraw();
 
-        case 3:
+        case 2:
             return false;
 
         default:
@@ -2431,16 +2413,11 @@ void CanvasPrivate::paint_single_buffer(Cairo::RefPtr<Cairo::ImageSurface> const
     auto buf = CanvasItemBuffer{ rect, scale_factor, cr, outline_pass };
     canvasitem_ctx->root()->render(buf);
 
-    // Apply CMS transform.
+    // Apply CMS transform for the screen. This rarely is used by modern desktops, but sometimes
+    // the user will apply an RGB transform to color correct their screen. This happens now, so the
+    // drawing plus all other canvas items (selection boxes, handles, etc) are also color corrected.
     if (rd.cms_transform) {
-        surface->flush();
-        auto px = surface->get_data();
-        int stride = surface->get_stride();
-        for (int i = 0; i < surface->get_height(); i++) {
-                auto row = px + i * stride;
-                Inkscape::CMSSystem::do_transform(rd.cms_transform->getHandle(), row, row, surface->get_width());
-        }
-        surface->mark_dirty();
+        rd.cms_transform->do_transform(surface->cobj(), surface->cobj());
     }
 
     // Paint over newly drawn content with a translucent random colour.

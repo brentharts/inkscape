@@ -54,8 +54,9 @@
 
 namespace Inkscape::UI::Dialog {
 
-BatchItem::BatchItem(SPItem *item, std::shared_ptr<PreviewDrawing> drawing)
+BatchItem::BatchItem(SPItem *item, bool isolate_item, std::shared_ptr<PreviewDrawing> drawing)
     : _item{item}
+    , _isolate_item{isolate_item}
 {
     init(std::move(drawing));
     _object_modified_conn = _item->connectModified([=, this](SPObject *obj, unsigned int flags) {
@@ -99,6 +100,14 @@ void BatchItem::update_label()
     set_tooltip_text(label);
 }
 
+void BatchItem::setIsolateItem(bool isolate)
+{
+    if (_isolate_item != isolate) {
+        _isolate_item = isolate;
+        _preview.setItem(_item, _isolate_item);
+    }
+}
+
 void BatchItem::init(std::shared_ptr<PreviewDrawing> drawing) {
     _grid.set_row_spacing(5);
     _grid.set_column_spacing(5);
@@ -117,7 +126,7 @@ void BatchItem::init(std::shared_ptr<PreviewDrawing> drawing) {
     _option.set_valign(Gtk::Align::END);
 
     _preview.set_name("export_preview_batch");
-    _preview.setItem(_item);
+    _preview.setItem(_item, _isolate_item);
     _preview.setDrawing(std::move(drawing));
     _preview.setSize(64);
     _preview.set_halign(Gtk::Align::CENTER);
@@ -228,12 +237,14 @@ void BatchItem::refresh(bool hide, guint32 bg_color)
         if (hide) {
             _selector.set_valign(Gtk::Align::BASELINE);
             _label.set_xalign(0.0);
+            _label.set_max_width_chars(-1);
             _grid.attach(_selector, 0, 1, 1, 1);
             _grid.attach(_option, 0, 1, 1, 1);
             _grid.attach(_label, 1, 1, 1, 1);
         } else {
             _selector.set_valign(Gtk::Align::END);
             _label.set_xalign(0.5);
+            _label.set_max_width_chars(18);
             _grid.attach(_selector, 0, 1, 1, 1);
             _grid.attach(_option, 0, 1, 1, 1);
             _grid.attach(_label, 0, 2, 2, 1);
@@ -252,6 +263,54 @@ void BatchItem::setDrawing(std::shared_ptr<PreviewDrawing> drawing)
     _preview.setDrawing(std::move(drawing));
 }
 
+/**
+ * Add and remove batch items and their previews carefully and insert new ones into the container FlowBox
+ */
+void BatchItem::syncItems(BatchItems &items, std::map<std::string, SPObject*> const &objects, Gtk::FlowBox &container, std::shared_ptr<PreviewDrawing> preview, bool isolate_items)
+{
+    // Remove any items not in objects
+    for (auto it = items.begin(); it != items.end();) {
+        if (!objects.contains(it->first)) {
+            container.remove(*it->second);
+            it = items.erase(it);
+        } else {
+            it->second->setIsolateItem(isolate_items);
+            ++it;
+        }
+    }
+
+    // A special container for pages allows them to be sorted correctly
+    std::set<SPPage *, SPPage::PageIndexOrder> pages;
+
+    // Add any objects not in items
+    for (auto &[id, obj] : objects) {
+        if (auto page = cast<SPPage>(obj)) {
+            if (!items[id] || items[id]->getPage() != page)
+                pages.insert(page);
+            continue;
+        }
+
+        auto item = cast<SPItem>(obj);
+
+        // If an Item or Page with same Id is already present, Skip
+        if (items[id] && items[id]->getItem() == item)
+            continue;
+
+        // Add new item to the end of list
+        items[id] = std::make_unique<BatchItem>(item, isolate_items, preview);
+        container.insert(*items[id], -1);
+        items[id]->set_selected(true);
+    }
+
+    for (auto &page : pages) {
+        if (auto id = page->getId()) {
+            items[id] = std::make_unique<BatchItem>(page, preview);
+            container.insert(*items[id], -1);
+            items[id]->set_selected(true);
+        }
+    }
+}
+
 BatchExport::BatchExport(BaseObjectType * const cobject, Glib::RefPtr<Gtk::Builder> const &builder)
     : Gtk::Box{cobject}
     , preview_container(get_widget<Gtk::FlowBox>      (builder, "b_preview_box"))
@@ -268,6 +327,7 @@ BatchExport::BatchExport(BaseObjectType * const cobject, Glib::RefPtr<Gtk::Build
     , _prog            (get_widget<Gtk::ProgressBar>  (builder, "b_progress"))
     , _prog_batch      (get_widget<Gtk::ProgressBar>  (builder, "b_progress_batch"))
     , export_list      (get_derived_widget<ExportList>(builder, "b_export_list"))
+    , _background_color(get_derived_widget<UI::Widget::ColorPicker>(builder, "b_backgnd", _("Background color"), true))
 {
     prefs = Inkscape::Preferences::get();
 
@@ -278,10 +338,6 @@ BatchExport::BatchExport(BaseObjectType * const cobject, Glib::RefPtr<Gtk::Build
     selection_buttons[SELECTION_SELECTION] = &get_widget<Gtk::ToggleButton>(builder, "b_s_selection");
     selection_buttons[SELECTION_LAYER]     = &get_widget<Gtk::ToggleButton>(builder, "b_s_layers");
     selection_buttons[SELECTION_PAGE]      = &get_widget<Gtk::ToggleButton>(builder, "b_s_pages");
-
-    auto &button = get_widget<Gtk::Button>(builder, "b_backgnd");
-    _bgnd_color_picker = std::make_unique<Inkscape::UI::Widget::ColorPicker>(
-        _("Background color"), _("Color used to fill the image background"), 0xffffff00, true, &button);
 
     path_chooser.signal_clicked().connect([this] { pickBatchPath(); });
 
@@ -362,8 +418,8 @@ void BatchExport::setup()
     show_preview.signal_toggled().connect(sigc::mem_fun(*this, &BatchExport::refreshPreview));
     export_conn = export_btn.signal_clicked().connect(sigc::mem_fun(*this, &BatchExport::onExport));
     cancel_conn = cancel_btn.signal_clicked().connect(sigc::mem_fun(*this, &BatchExport::onCancel));
-    hide_all.signal_toggled().connect(sigc::mem_fun(*this, &BatchExport::refreshPreview));
-    _bgnd_color_picker->connectChanged([=, this](guint32 color){
+    hide_all.signal_toggled().connect(sigc::mem_fun(*this, &BatchExport::refreshItems));
+    _background_color.connectChanged([=, this](Colors::Color const &color){
         if (_desktop) {
             Inkscape::UI::Dialog::set_export_bg_color(_desktop->getNamedView(), color);
         }
@@ -376,41 +432,40 @@ void BatchExport::refreshItems()
     if (!_desktop || !_document) return;
 
     // Create New List of Items
-    std::set<SPItem *> itemsList;
-    std::set<SPPage *, SPPage::PageIndexOrder> pageList;
-    std::set<SPPage *> pageUnsorted;
+    std::map<std::string, SPObject*> objects;
 
+    bool isolate = false;
     char *num_str = nullptr;
     switch (current_key) {
         case SELECTION_SELECTION: {
-            auto items = _desktop->getSelection()->items();
-            for (auto i = items.begin(); i != items.end(); ++i) {
-                if (SPItem *item = *i) {
-                    // Ignore empty items (empty groups, other bad items)
-                    if (item->visualBounds()) {
-                        itemsList.insert(item);
-                    }
+            isolate = hide_all.get_active();
+            for (auto item : _desktop->getSelection()->items()) {
+                // Ignore empty items (empty groups, other bad items)
+                if (item && item->visualBounds() && item->getId()) {
+                    objects[item->getId()] = item;
                 }
             }
-            num_str = g_strdup_printf(ngettext("%d Item", "%d Items", itemsList.size()), (int)itemsList.size());
+            num_str = g_strdup_printf(ngettext("%d Item", "%d Items", objects.size()), (int)objects.size());
             break;
         }
         case SELECTION_LAYER: {
+            isolate = true;
             for (auto layer : _desktop->layerManager().getAllLayers()) {
                 // Ignore empty layers, they have no size.
-                if (layer->geometricBounds()) {
-                    itemsList.insert(layer);
+                if (layer->geometricBounds() && layer->getId()) {
+                    objects[layer->getId()] = layer;
                 }
             }
-            num_str = g_strdup_printf(ngettext("%d Layer", "%d Layers", itemsList.size()), (int)itemsList.size());
+            num_str = g_strdup_printf(ngettext("%d Layer", "%d Layers", objects.size()), (int)objects.size());
             break;
         }
         case SELECTION_PAGE: {
             for (auto page : _desktop->getDocument()->getPageManager().getPages()) {
-                pageList.insert(page);
-                pageUnsorted.insert(page);
+                if (auto id = page->getId()) {
+                    objects[id] = page;
+                }
             }
-            num_str = g_strdup_printf(ngettext("%d Page", "%d Pages", pageList.size()), (int)pageList.size());
+            num_str = g_strdup_printf(ngettext("%d Page", "%d Pages", objects.size()), (int)objects.size());
             break;
         }
         default:
@@ -421,58 +476,11 @@ void BatchExport::refreshItems()
         g_free(num_str);
     }
 
-    // Create a list of items which are already present but will be removed as they are not present anymore
-    std::vector<std::string> toRemove;
-    for (auto &[key, val] : current_items) {
-        if (SPItem *item = val->getItem()) {
-            // if item is not present in itemList add it to remove list so that we can remove it
-            auto itemItr = itemsList.find(item);
-            if (itemItr == itemsList.end() || !(*itemItr)->getId() || (*itemItr)->getId() != key) {
-                toRemove.push_back(key);
-            }
-        }
-        if (SPPage *page = val->getPage()) {
-            auto pageItr = pageUnsorted.find(page);
-            if (pageItr == pageUnsorted.end() || !(*pageItr)->getId() || (*pageItr)->getId() != key) {
-                toRemove.push_back(key);
-            }
-        }
-    }
-
-    // now remove all the items
-    for (auto const &key : toRemove) {
-        if (current_items[key]) {
-            preview_container.remove(*current_items[key]);
-            current_items.erase(key);
-        }
-    }
-
-    // now add which were are new
-    for (auto &item : itemsList) {
-        if (auto id = item->getId()) {
-            // If an Item with same Id is already present, Skip
-            if (current_items[id] && current_items[id]->getItem() == item) {
-                continue;
-            }
-            // Add new item to the end of list
-            current_items[id] = std::make_unique<BatchItem>(item, _preview_drawing);
-            preview_container.insert(*current_items[id], -1);
-            current_items[id]->set_selected(true);
-        }
-    }
-    for (auto &page : pageList) {
-        if (auto id = page->getId()) {
-            if (current_items[id] && current_items[id]->getPage() == page) {
-                continue;
-            }
-            current_items[id] = std::make_unique<BatchItem>(page, _preview_drawing);
-            preview_container.insert(*current_items[id], -1);
-            current_items[id]->set_selected(true);
-        }
-    }
+    BatchItem::syncItems(current_items, objects, preview_container, _preview_drawing, isolate);
 
     refreshPreview();
 }
+
 
 void BatchExport::refreshPreview()
 {
@@ -481,28 +489,17 @@ void BatchExport::refreshPreview()
     // For Batch Export we are now hiding all object except current object
     bool hide = hide_all.get_active();
     bool preview = show_preview.get_active();
-    preview_container.set_orientation(preview ? Gtk::Orientation::HORIZONTAL : Gtk::Orientation::VERTICAL);
 
     if (preview) {
         std::vector<SPItem const *> selected;
-        for (auto &[key, val] : current_items) {
-            if (hide) {
-                // Assumption: This will never alternate between these branches in the same
-                // list of current_items. Either it's a selection, layers xor pages.
-                if (auto item = val->getItem()) {
-                    selected.push_back(item);
-                } else if (val->getPage()) {
-                    auto sels = _desktop->getSelection()->items();
-                    selected = {sels.begin(), sels.end()};
-                    break;
-                }
-            }
+        if (hide) {
+            auto sels = _desktop->getSelection()->items();
+            selected = {sels.begin(), sels.end()};
         }
         _preview_drawing->set_shown_items(std::move(selected));
-
-        for (auto &[key, val] : current_items) {
-            val->refresh(!preview, _bgnd_color_picker->get_current_color());
-        }
+    }
+    for (auto &[key, val] : current_items) {
+        val->refresh(!preview, _background_color.get_current_color().toRGBA());
     }
 }
 
@@ -668,7 +665,6 @@ void BatchExport::onExport()
     setBatchName(name);
     DocumentUndo::done(_document, _("Set Batch Export Options"), INKSCAPE_ICON("export"));
 
-
     // create vector of exports
     int num_rows = export_list.get_rows();
     std::vector<Glib::ustring> suffixs;
@@ -707,6 +703,7 @@ void BatchExport::onExport()
 
             SPItem *item = batchItem->getItem();
             SPPage *page = batchItem->getPage();
+            bool isolate_item = batchItem->isolateItem();
 
             std::vector<SPItem const *> show_only;
             Geom::Rect area;
@@ -716,10 +713,23 @@ void BatchExport::onExport()
                 } else {
                     continue;
                 }
-                show_only.emplace_back(item);
+                if (hide) {
+                    for (auto &sel_item : selected_items) {
+                        // Layers want their descendants, selections want themselves
+                        if (item->isAncestorOf(sel_item) || sel_item == item) {
+                            show_only.emplace_back(sel_item);
+                        }
+                    }
+                    if (show_only.empty())
+                        continue; // Nothing to export
+                } else if (isolate_item) {
+                    // Layers are isolated even when they aren't hiding other items
+                    show_only.emplace_back(item);
+                }
             } else if (page) {
-                area = page->getDesktopRect();
-                show_only = selected_items; // Maybe stuff here
+                area = page->getDocumentRect();
+                if (hide)
+                    show_only = selected_items;
             } else {
                 continue;
             }
@@ -729,17 +739,17 @@ void BatchExport::onExport()
                 continue;
             }
 
-            std::string item_filename = Glib::build_filename(path, name);
+            std::string item_name = name;
             if (!name.empty()) {
                 std::string::value_type last_char = name.at(name.length() - 1);
                 if (last_char != '/' && last_char != '\\') {
-                    item_filename += "_";
+                    item_name += "_";
                 }
             }
             if (id.at(0) == '#' && batchItem->getItem() && !batchItem->getItem()->label()) {
-                item_filename += id.substr(1);
+                item_name += id.substr(1);
             } else {
-                item_filename += id;
+                item_name += id;
             }
 
             if (!suffix.empty()) {
@@ -747,9 +757,16 @@ void BatchExport::onExport()
                     // Put the dpi in at the user's requested location.
                     suffix = std::regex_replace(suffix.c_str(), std::regex("\\{dpi\\}"), std::to_string((int)dpi));
                 }
-                item_filename = item_filename + "_" + suffix;
+                item_name += "_" + suffix;
             }
 
+            if (item_name.empty()) {
+                g_error("Empty item name in batch export, refusing to export.");
+                continue;
+            }
+
+            // Add the path last so item_name has a chance to be filled without path confusion
+            std::string item_filename = Glib::build_filename(path, item_name);
             if (!ow) {
                 if (!Export::unConflictFilename(_document, item_filename, ext->get_extension())) {
                     continue;
@@ -772,11 +789,14 @@ void BatchExport::onExport()
                 unsigned long int height = (int)(area.height() * dpi / DPI_BASE + 0.5);
 
                 Export::exportRaster(
-                    area, width, height, dpi, _bgnd_color_picker->get_current_color(),
-                    item_filename, true, onProgressCallback, this, ext, hide ? &show_only : nullptr);
-            } else {
+                    area, width, height, dpi, _background_color.get_current_color().toRGBA(),
+                    item_filename, true, onProgressCallback, this, ext, &show_only);
+            } else if (page || !show_only.empty()) {
                 auto copy_doc = _document->copy();
                 Export::exportVector(ext, copy_doc.get(), item_filename, true, show_only, page);
+            } else {
+                auto copy_doc = _document->copy();
+                Export::exportVector(ext, copy_doc.get(), item_filename, true, area);
             }
         }
     }
@@ -803,7 +823,8 @@ void BatchExport::setDefaultSelectionMode()
         if (auto _sel = _desktop->getSelection()) {
             selection_buttons[SELECTION_SELECTION]->set_sensitive(!_sel->isEmpty());
         }
-        selection_buttons[SELECTION_PAGE]->set_sensitive(_document->getPageManager().hasPages());
+        bool has_pages = _document->getPageManager().hasPages();
+        selection_buttons[SELECTION_PAGE]->set_sensitive(has_pages);
     }
     if (!selection_buttons[current_key]->get_sensitive()) {
         current_key = SELECTION_LAYER;
@@ -866,9 +887,9 @@ void BatchExport::setDocument(SPDocument *document)
     if (document) {
         // when the page selected is changed, update the export area
         _pages_changed_connection = document->getPageManager().connectPagesChanged([this]() { pagesChanged(); });
+        _background_color.setColor(get_export_bg_color(document->getNamedView(), Colors::Color(0xffffff00)));
+        pagesChanged();
 
-        auto bg_color = get_export_bg_color(document->getNamedView(), 0xffffff00);
-        _bgnd_color_picker->setRgba32(bg_color);
         _preview_drawing = std::make_shared<PreviewDrawing>(document);
     } else {
         _preview_drawing.reset();

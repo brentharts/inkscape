@@ -14,7 +14,6 @@ set(ui_SRC
 	monitor.cpp
 	pack.cpp
 	popup-menu.cpp
-	selected-color.cpp
 	shape-editor.cpp
 	shape-editor-knotholders.cpp
 	simple-pref-pusher.cpp
@@ -102,6 +101,7 @@ set(ui_SRC
 	tools/booleans-builder.cpp
 	tools/booleans-tool.cpp
 	tools/booleans-subitems.cpp
+	tools/shortcuts.cpp
 	tools/spiral-tool.cpp
 	tools/spray-tool.cpp
 	tools/star-tool.cpp
@@ -192,14 +192,15 @@ set(ui_SRC
 	widget/canvas-grid.cpp
 	widget/canvas-notice.cpp
 	widget/color-entry.cpp
-	widget/color-icc-selector.cpp
 	widget/color-notebook.cpp
+	widget/color-page.cpp
 	widget/color-palette.cpp
 	widget/color-palette-preview.cpp
 	widget/color-picker.cpp
+	widget/color-plate.cpp
 	widget/color-preview.cpp
-	widget/color-scales.cpp
 	widget/color-slider.cpp
+	widget/color-wheel-factory.cpp
 	widget/combo-box-entry-tool-item.cpp
 	widget/combo-tool-item.cpp
 	widget/css-name-class-init.cpp
@@ -214,6 +215,7 @@ set(ui_SRC
 	widget/fill-style.cpp
 	widget/font-button.cpp
 	widget/font-collection-selector.cpp
+	widget/font-list.cpp
 	widget/font-selector.cpp
 	widget/font-variants.cpp
 	widget/font-variations.cpp
@@ -230,6 +232,7 @@ set(ui_SRC
 	widget/ink-color-wheel.cpp
 	widget/ink-ruler.cpp
 	widget/ink-spinscale.cpp
+	widget/ink-spin-button.cpp
 	widget/labelled.cpp
 	widget/layer-selector.cpp
 	widget/licensor.cpp
@@ -296,7 +299,6 @@ set(ui_SRC
 	monitor.h
 	pack.h
 	popup-menu.h
-	selected-color.h
 	shape-editor.h
 	simple-pref-pusher.h
 	shortcuts.h
@@ -451,6 +453,7 @@ set(ui_SRC
 	tools/booleans-builder.h
 	tools/booleans-tool.h
 	tools/booleans-subitems.h
+	tools/shortcuts.h
 	tools/spiral-tool.h
 	tools/spray-tool.h
 	tools/star-tool.h
@@ -482,14 +485,16 @@ set(ui_SRC
 	widget/canvas-notice.h
 	widget/completion-popup.h
 	widget/color-entry.h
-	widget/color-icc-selector.h
 	widget/color-notebook.h
+	widget/color-page.h
 	widget/color-palette.h
 	widget/color-palette-preview.h
 	widget/color-picker.h
+	widget/color-plate.h
 	widget/color-preview.h
-	widget/color-scales.h
 	widget/color-slider.h
+	widget/color-wheel.h
+	widget/color-wheel-factory.h
 	widget/combo-enums.h
 	widget/combo-box-entry-tool-item.h
 	widget/combo-tool-item.h
@@ -524,6 +529,7 @@ set(ui_SRC
 	widget/ink-color-wheel.h
 	widget/ink-ruler.h
 	widget/ink-spinscale.h
+	widget/ink-spin-button.h
 	widget/labelled.h
 	widget/layer-selector.h
 	widget/licensor.h

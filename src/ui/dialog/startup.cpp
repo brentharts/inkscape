@@ -34,8 +34,6 @@
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/treeview.h>
 
-#include "color.h"
-#include "color-rgba.h"
 #include "inkscape-application.h"
 #include "inkscape.h"
 #include "inkscape-version.h"
@@ -136,19 +134,6 @@ class ThemeCols: public Gtk::TreeModel::ColumnRecord {
         Gtk::TreeModelColumn<bool> enabled;
 };
 
-/**
- * Color is store as a string in the form #RRGGBBAA, '0' means "unset"
- *
- * @param color - The string color from glade.
- */
-unsigned int get_color_value(const Glib::ustring color)
-{
-    Gdk::RGBA gdk_color = Gdk::RGBA(color);
-    ColorRGBA  sp_color(gdk_color.get_red(), gdk_color.get_green(),
-                        gdk_color.get_blue(), gdk_color.get_alpha());
-    return sp_color.getIntValue();
-}
-
 using Inkscape::UI::Widget::TemplateList;
 
 StartScreen::StartScreen()
@@ -189,7 +174,7 @@ StartScreen::StartScreen()
     auto prefs = Inkscape::Preferences::get();
 
     Controller::add_key<&StartScreen::on_key_pressed>(*this, *this);
-    tabs.signal_switch_page().connect(sigc::mem_fun(*this, &StartScreen::notebook_switch));
+    _tabs_switch_page_conn = tabs.signal_switch_page().connect(sigc::mem_fun(*this, &StartScreen::notebook_switch));
 
     // Setup the lists of items
     enlist_recent_files();
@@ -229,7 +214,7 @@ StartScreen::StartScreen()
     // "Time to Draw" tab
     recent_treeview.signal_row_activated().connect(sigc::hide(sigc::hide((sigc::mem_fun(*this, &StartScreen::load_document)))));
     recent_treeview.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &StartScreen::on_recent_changed));
-    templates.signal_switch_page().connect(sigc::mem_fun(*this, &StartScreen::on_kind_changed));
+    _templates_switch_page_conn = templates.signal_switch_page().connect(sigc::mem_fun(*this, &StartScreen::on_kind_changed));
     load_btn.set_sensitive(true);
 
     show_toggle->signal_toggled().connect(sigc::mem_fun(*this, &StartScreen::show_toggle));
@@ -366,14 +351,9 @@ StartScreen::on_recent_changed()
 /**
  * Called when the left side tabs are changed.
  */
-void
-StartScreen::on_kind_changed(Gtk::Widget *tab, unsigned page_num)
+void StartScreen::on_kind_changed(Gtk::Widget *tab, unsigned page_num)
 {
-    if (page_num == 0) {
-        load_btn.set_visible(true);
-    } else {
-        load_btn.set_visible(false);
-    }
+    load_btn.set_visible(page_num == 0);
 }
 
 /**
@@ -622,21 +602,18 @@ StartScreen::canvas_changed()
         prefs->setString("/options/boot/canvas", row[cols.id]);
 
         Gdk::RGBA gdk_color = Gdk::RGBA(row[cols.pagecolor]);
-        SPColor sp_color(gdk_color.get_red(), gdk_color.get_green(), gdk_color.get_blue());
-        prefs->setString("/template/base/pagecolor", sp_color.toString());
+        prefs->setString("/template/base/pagecolor", gdk_to_css_color(gdk_color));
         prefs->setDouble("/template/base/pageopacity", gdk_color.get_alpha());
 
         Gdk::RGBA gdk_border = Gdk::RGBA(row[cols.bordercolor]);
-        SPColor sp_border(gdk_border.get_red(), gdk_border.get_green(), gdk_border.get_blue());
-        prefs->setString("/template/base/bordercolor", sp_border.toString());
+        prefs->setString("/template/base/bordercolor", gdk_to_css_color(gdk_border));
         prefs->setDouble("/template/base/borderopacity", gdk_border.get_alpha());
 
         prefs->setBool("/template/base/pagecheckerboard", row[cols.checkered]);
         prefs->setInt("/template/base/pageshadow", row[cols.shadow] ? 2 : 0);
 
         Gdk::RGBA gdk_desk = Gdk::RGBA(row[cols.deskcolor]);
-        SPColor sp_desk(gdk_desk.get_red(), gdk_desk.get_green(), gdk_desk.get_blue());
-        prefs->setString("/template/base/deskcolor", sp_desk.toString());
+        prefs->setString("/template/base/deskcolor", gdk_to_css_color(gdk_desk));
     } catch(int e) {
         g_warning("Couldn't find canvas value.");
     }

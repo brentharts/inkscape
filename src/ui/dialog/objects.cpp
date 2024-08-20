@@ -353,7 +353,7 @@ void ObjectWatcher::updateRowHighlight() {
 
     if (auto item = cast<SPItem>(panel->getObject(node))) {
         auto row = *panel->_store->get_iter(row_ref.get_path());
-        auto new_color = item->highlight_color();
+        auto new_color = item->highlight_color().toRGBA();
         if (new_color != row[panel->_model->_colIconColor]) {
             row[panel->_model->_colIconColor] = new_color;
             updateRowBg(new_color);
@@ -695,7 +695,7 @@ ObjectsPanel::ObjectsPanel()
     , _layer(nullptr)
     , _is_editing(false)
     , _page(Gtk::Orientation::VERTICAL)
-    , _color_picker(_("Highlight color"), "", 0, true)
+    , _color_picker(_("Highlight color"), "", Colors::Color(0x000000ff), true)
     , _builder(create_builder("dialog-objects.glade"))
     , _settings_menu(get_widget<Gtk::Popover>(_builder, "settings-menu"))
     , _object_menu(get_widget<Gtk::Popover>(_builder, "object-menu"))
@@ -905,14 +905,14 @@ ObjectsPanel::ObjectsPanel()
         _clicked_item_row = *_store->get_iter(path);
         if (auto item = getItem(_clicked_item_row)) {
             // find object's color
-            _color_picker.setRgba32(item->highlight_color());
+            _color_picker.setColor(item->highlight_color());
             _color_picker.open();
         }
     });
 
-    _color_picker.connectChanged([this](guint rgba) {
+    _color_picker.connectChanged([this](Colors::Color const &color) {
         if (auto item = getItem(_clicked_item_row)) {
-            item->setHighlight(rgba);
+            item->setHighlight(color);
             DocumentUndo::maybeDone(getDocument(), "highlight-color", _("Set item highlight color"), INKSCAPE_ICON("dialog-object-properties"));
         }
     });
@@ -1414,6 +1414,15 @@ bool ObjectsPanel::on_tree_key_pressed(GtkEventControllerKey const * const contr
                 _activateAction("layer-lower", "selection-stack-down");
                 return true;
             }
+        case GDK_KEY_Return:
+            if (auto item = getSelection()->singleItem()) {
+                if (auto watcher = getWatcher(item->getRepr())) {
+                    auto item_path = watcher->getTreePath();
+                    _tree.set_cursor(item_path, *_tree.get_column(0), true /* start_editing */);
+                    _is_editing = true;
+                    return true;
+                }
+            }
     }
 
     return false;
@@ -1674,12 +1683,15 @@ Gtk::EventSequenceState ObjectsPanel::on_click(Gtk::GestureClick const &gesture,
             }
 
             // true == hide menu item for opening this dialog!
-            auto menu = Gtk::make_managed<ContextMenu>(getDesktop(), item, true);
+            std::vector<SPItem *> items = {item};
+            auto menu = Gtk::make_managed<ContextMenu>(getDesktop(), item, items, true);
             // popup context menu pointing to the clicked tree row:
             _popoverbin.setPopover(menu);
             UI::popup_at(*menu, _tree, ex, ey);
         } else if (should_set_current_layer()) {
             getDesktop()->layerManager().setCurrentLayer(item, true);
+            selection->set(item);
+            _initial_path = path;
         } else {
             selectCursorItem(state);
         }
@@ -1706,8 +1718,7 @@ void ObjectsPanel::_handleEdited(const Glib::ustring& path, const Glib::ustring&
             if (!new_text.empty() && (!item->label() || new_text != item->label())) {
                 auto obj = cast<SPGroup>(item);
                 if (obj && obj->layerMode() == SPGroup::LAYER && !obj->isHighlightSet()) {
-                    guint32 color = obj->highlight_color();
-                    obj->setHighlight(color);
+                    obj->setHighlight(obj->highlight_color());
                 }
                 item->setLabel(new_text.c_str());
                 DocumentUndo::done(getDocument(), _("Rename object"), "");
@@ -1978,6 +1989,43 @@ void ObjectsPanel::on_drag_end(Gtk::DragSource const &/*controller*/,
     drag_end_impl();
 }
 
+void ObjectsPanel::selectRange(Gtk::TreeModel::Path start, Gtk::TreeModel::Path end)
+{
+    if (!start || !end) {
+        return;
+    }
+
+    if (gtk_tree_path_compare(start.gobj(), end.gobj()) > 0) {
+        std::swap(start, end);
+    }
+
+    auto selection = getSelection();
+
+    if (!_start_new_range) {
+        // Deselect previous selection of this range first and then proceed.
+        for (auto obj : _prev_range) {
+            selection->remove(obj);
+        }
+    }
+
+    _prev_range.clear();
+
+    // Select everything between the initial selection and currently selected item.
+    _store->foreach ([&](Gtk::TreeModel::Path const &p, Gtk::TreeModel::const_iterator const &it) {
+        if ((gtk_tree_path_compare(start.gobj(), p.gobj()) <= 0) &&
+            (gtk_tree_path_compare(end.gobj(), p.gobj()) >= 0)) {
+            auto obj = getItem(*it);
+            if (obj) {
+                _prev_range.push_back(obj);
+                selection->add(obj, false, true);
+            }
+        }
+        return false;
+    });
+
+    _start_new_range = false;
+}
+
 /**
  * Select the object currently under the list-cursor (keyboard or mouse)
  */
@@ -2006,20 +2054,33 @@ bool ObjectsPanel::selectCursorItem(Gdk::ModifierType const state)
         auto item = getItem(row);
         auto group = cast<SPGroup>(item);
         _scroll_lock = true; // Clicking to select shouldn't scroll the treeview.
+
         if (Controller::has_flag(state, Gdk::ModifierType::SHIFT_MASK) && !selection->isEmpty()) {
-            // Select everything between this row and the last selected item
-            selection->setBetween(item);
+            // Shift + Click or Shift + Ctrl + Click
+            // TODO: Fix layers expand unexpectedly on range selection.
+            selectRange(_initial_path, path);
         } else if (Controller::has_flag(state, Gdk::ModifierType::CONTROL_MASK)) {
-            selection->toggle(item);
+            if (selection->includes(item)) {
+                selection->remove(item);
+            } else {
+                selection->add(item, false, true);
+                _initial_path = path;
+                _start_new_range = true;
+            }
         } else if (group && selection->includes(item) && !group->isLayer()) {
             // Clicking off a group (second click) will enter the group
             layers.setCurrentLayer(item, true);
         } else {
-            if (layers.currentLayer() == item) {
+            // Just Click
+            if (layers.currentLayer() == item || group) {
                 layers.setCurrentLayer(item->parent);
             }
+
             selection->set(item);
+            _initial_path = path;
+            _start_new_range = true;
         }
+
         return true;
     }
     return false;

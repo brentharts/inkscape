@@ -76,7 +76,7 @@ void InteractiveBooleansTool::hide_selected_objects(bool hide)
             if (hide && boolean_builder && boolean_builder->contains_image(item))
                 continue;
             if (auto ditem = item->get_arenaitem(_desktop->dkey)) {
-                ditem->setOpacity(hide ? 0.0 : item->style->opacity.value);
+                ditem->setOpacity(hide ? 0.0 : SP_SCALE24_TO_FLOAT(item->style->opacity.value));
             }
         }
     }
@@ -243,18 +243,16 @@ bool InteractiveBooleansTool::event_button_release_handler(ButtonReleaseEvent co
     return true;
 }
 
-bool InteractiveBooleansTool::catch_undo(bool redo)
-{
-    if (redo) {
-        boolean_builder->redo();
-    } else {
-        boolean_builder->undo();
-    }
-    return true;
-}
-
 bool InteractiveBooleansTool::event_key_press_handler(KeyPressEvent const &event)
 {
+    if (_acc_undo.isTriggeredBy(event)) {
+        boolean_builder->undo();
+        return true;
+    } else if (_acc_redo.isTriggeredBy(event)) {
+        boolean_builder->redo();
+        return true;
+    }
+
     switch (get_latin_keyval(event)) {
         case GDK_KEY_Escape:
             if (boolean_builder->has_task()) {
@@ -271,12 +269,6 @@ bool InteractiveBooleansTool::event_key_press_handler(KeyPressEvent const &event
                 shape_commit();
             }
             return true;
-        case GDK_KEY_z:
-        case GDK_KEY_Z:
-            if (event.modifiers & GDK_CONTROL_MASK) {
-                return catch_undo(event.modifiers & GDK_SHIFT_MASK);
-            }
-            break;
         default:
             break;
     }

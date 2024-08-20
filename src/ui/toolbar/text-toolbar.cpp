@@ -237,6 +237,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
     , _cusor_numbers(0)
     , _builder(create_builder("toolbar-text.ui"))
     , _font_collections_list(get_widget<Gtk::ListBox>(_builder, "_font_collections_list"))
+    , _reset_button(get_widget<Gtk::Button>(_builder, "reset_btn"))
     , _line_height_item(get_derived_widget<UI::Widget::SpinButton>(_builder, "_line_height_item"))
     , _superscript_btn(get_widget<Gtk::ToggleButton>(_builder, "_superscript_btn"))
     , _subscript_btn(get_widget<Gtk::ToggleButton>(_builder, "_subscript_btn"))
@@ -281,10 +282,17 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
     configure_mode_buttons(_direction_buttons, get_widget<Gtk::Box>(_builder, "direction_buttons_box"),
                            "direction_mode", &TextToolbar::direction_changed);
 
+    auto fontlister = Inkscape::FontLister::get_instance();
+    font_count_changed_connection = fontlister->connectUpdate([this, fontlister] {
+        bool all_fonts;
+        std::string label;
+        std::tie(all_fonts, label) = fontlister->get_font_count_label();
+        _reset_button.set_sensitive(!all_fonts);
+    });
+
     // Font family
     {
         // Font list
-        auto fontlister = Inkscape::FontLister::get_instance();
         fontlister->update_font_list(desktop->getDocument());
         auto store = fontlister->get_font_list();
 
@@ -318,7 +326,6 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
 
     // Font styles
     {
-        auto fontlister = Inkscape::FontLister::get_instance();
         auto store = fontlister->get_style_list();
 
         _font_style_item = Gtk::manage(new UI::Widget::ComboBoxEntryToolItem(
@@ -413,9 +420,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
         TextToolbar::on_fcm_button_pressed();
     });
 
-    get_widget<Gtk::Button>(_builder, "reset_btn").signal_clicked().connect([this]() {
-        TextToolbar::on_reset_button_pressed();
-    });
+    _reset_button.signal_clicked().connect([this]() { TextToolbar::on_reset_button_pressed(); });
 
     // We emit a selection change on tool switch to text.
     desktop->connectEventContextChanged(sigc::mem_fun(*this, &TextToolbar::watch_ec));
@@ -1568,12 +1573,10 @@ void TextToolbar::selection_changed(Inkscape::Selection *selection) // don't bot
             std::vector<SPItem *> qactive{ this->_sub_active_item };
             auto parent = cast<SPItem>(this->_sub_active_item->parent);
             std::vector<SPItem *> qparent{ parent };
-            result_numbers =
-                sp_desktop_query_style_from_list(qactive, &query, QUERY_STYLE_PROPERTY_FONTNUMBERS);
-            result_numbers_fallback =
-                sp_desktop_query_style_from_list(qparent, &query_fallback, QUERY_STYLE_PROPERTY_FONTNUMBERS);
+            result_numbers = objects_query_fontnumbers(qactive, &query);
+            result_numbers_fallback = objects_query_fontnumbers(qparent, &query_fallback);
         } else if (_outer) {
-            result_numbers = sp_desktop_query_style_from_list(to_work, &query, QUERY_STYLE_PROPERTY_FONTNUMBERS);
+            result_numbers = objects_query_fontnumbers(to_work, &query);
         } else {
             result_numbers = sp_desktop_query_style(desktop, &query, QUERY_STYLE_PROPERTY_FONTNUMBERS);
         }

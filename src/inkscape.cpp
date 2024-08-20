@@ -43,7 +43,6 @@
 #include "path-prefix.h"
 #include "selection.h"
 
-#include "color/cms-system.h"
 #include "debug/simple-event.h"
 #include "debug/event-tracker.h"
 #include "io/resource.h"
@@ -61,6 +60,8 @@
 #include "ui/themes.h"
 #include "ui/tools/tool-base.h"
 #include "ui/util.h"
+#include "util/font-discovery.h"
+#include "util/units.h"
 
 // Inkscape::Application static members
 Inkscape::Application * Inkscape::Application::_S_inst = nullptr;
@@ -178,6 +179,14 @@ Application::instance()
     return *Application::_S_inst;
 }
 
+// create font-related singletons in the order in which they will be destroyed
+void create_singletons() {
+    // font discovery first, because it depends on font factory, so it needs to be destroyed first
+    FontDiscovery::get();
+    // font factory next, so it is destroyed after font discovery is stopped
+    FontFactory::get();
+}
+
 /* \brief Constructor for the application.
  *  Creates a new Inkscape::Application.
  *
@@ -207,6 +216,8 @@ Application::Application(bool use_gui) :
 #ifndef _WIN32
     bus_handler  = signal (SIGBUS,  Application::crash_handler);
 #endif
+
+    create_singletons();
 
     // \TODO: this belongs to Application::init but if it isn't here
     // then the Filters and Extensions menus don't work.
@@ -296,7 +307,6 @@ Application::~Application()
     }
 
     Inkscape::Preferences::unload();
-    Inkscape::CMSSystem::unload();
 
     _S_inst = nullptr; // this will probably break things
 

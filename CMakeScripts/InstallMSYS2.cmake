@@ -77,7 +77,7 @@ if(WIN32)
     ${MINGW_BIN}/libmpdec-[0-9]*.dll
     ${MINGW_BIN}/libmpfr-[0-9]*.dll
     ${MINGW_BIN}/libncursesw6.dll
-    ${MINGW_BIN}/libnghttp2*.dll
+    ${MINGW_BIN}/libnghttp[0-9]*.dll
     ${MINGW_BIN}/libnspr[0-9]*.dll
     ${MINGW_BIN}/libopenblas.dll
     ${MINGW_BIN}/libopenjp2-[0-9]*.dll
@@ -163,6 +163,7 @@ if(WIN32)
     file(GLOB MAGICK_LIBS
       ${MINGW_BIN}/libGraphicsMagick[+-]*.dll
       ${MINGW_BIN}/libjxl.dll
+      ${MINGW_BIN}/libjxl_cms.dll
       ${MINGW_BIN}/libjxl_threads.dll
       ${MINGW_BIN}/libltdl-[0-9]*.dll
       ${MINGW_BIN}/libhwy.dll
@@ -203,8 +204,10 @@ if(WIN32)
   install(DIRECTORY ${MINGW_PATH}/share/glib-2.0/schemas
     DESTINATION share/glib-2.0)
 
-  install(DIRECTORY ${MINGW_PATH}/share/gtksourceview-5
-    DESTINATION share)
+  if(WITH_GSOURCEVIEW)
+    install(DIRECTORY ${MINGW_PATH}/share/gtksourceview-5
+      DESTINATION share)
+  endif()
 
   # fontconfig
   install(DIRECTORY ${MINGW_PATH}/etc/fonts

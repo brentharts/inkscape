@@ -74,7 +74,6 @@
 #include "object/filters/pointlight.h"
 #include "object/filters/spotlight.h"
 #include "selection-chemistry.h"
-#include "svg/svg-color.h"
 #include "ui/builder-utils.h"
 #include "ui/column-menu-builder.h"
 #include "ui/controller.h"
@@ -312,42 +311,29 @@ class ColorButton : public Widget::ColorPicker, public AttrWidget
 {
 public:
     ColorButton(unsigned int def, const SPAttr a, char* tip_text)
-        : ColorPicker(_("Select color"), tip_text ? tip_text : "", 0x000000ff, false),
+        : ColorPicker(_("Select color"), tip_text ? tip_text : "", Colors::Color(0x000000ff), false, false),
           AttrWidget(a, def)
     {
-        use_transparency(false);
-        connectChanged([this](unsigned const rgba){ signal_attr_changed().emit(); });
+        connectChanged([this](Colors::Color const &color){ signal_attr_changed().emit(); });
         if (tip_text) {
             set_tooltip_text(tip_text);
         }
-        setRgba32(0xffffffff);
+        setColor(Colors::Color(0xffffffff));
     }
 
-    // Returns the color in 'rgb(r,g,b)' form.
     Glib::ustring get_as_attribute() const override
     {
-        // no doubles here, so we can use the standard string stream.
-        std::ostringstream os;
-
-        const auto c = get_current_color();
-        int r = SP_RGBA32_R_U(c);
-        int g = SP_RGBA32_G_U(c);
-        int b = SP_RGBA32_B_U(c);
-        os << "rgb(" << r << "," << g << "," << b << ")";
-        return os.str();
+        return get_current_color().toString(false);
     }
-
 
     void set_from_attribute(SPObject* o) override
     {
         const gchar* val = attribute_value(o);
-        guint32 i = 0;
-        if(val) {
-            i = sp_svg_read_color(val, 0xFFFFFFFF);
+        if (auto color = Colors::Color::parse(val)) {
+            setColor(*color);
         } else {
-            i = (guint32) get_default()->as_uint();
+            setColor(Colors::Color(get_default()->as_uint()));
         }
-        setRgba32(i);
     }
 };
 
@@ -2121,11 +2107,18 @@ void FilterEffectsDialog::PrimitiveList::draw_connection(const Cairo::RefPtr<Cai
     cr->save();
 
     int src_id = 0;
-    Gtk::TreeModel::iterator res = find_result(input, attr, src_id, pos);
+    Gtk::TreeModel::iterator res = find_result(input, attr, src_id, pos); 
 
     const bool is_first = input == get_model()->children().begin();
+    const bool is_selected = input == get_selection()->get_selected();
     const bool is_merge = is<SPFeMerge>((SPFilterPrimitive*)(*input)[_columns.primitive]);
     const bool use_default = !res && !is_merge;
+    int arc_radius = 4;
+
+    if (is_selected) {
+        cr->set_line_width(2.5);
+        arc_radius = 6;
+    }
 
     if(res == input || (use_default && is_first)) {
         // Draw straight connection to a standard input
@@ -2144,7 +2137,7 @@ void FilterEffectsDialog::PrimitiveList::draw_connection(const Cairo::RefPtr<Cai
         cr->move_to(x1, y1);
         cr->line_to(end_x, y1);
         cr->stroke();
-        cr->arc(end_x, y1, 4, M_PI / 2, M_PI * 1.5);
+        cr->arc(end_x, y1, arc_radius, M_PI / 2, M_PI * 1.5);
         cr->fill();
     }
     else {
@@ -2778,8 +2771,10 @@ FilterEffectsDialog::FilterEffectsDialog()
         [this](int const id){ add_filter_primitive(static_cast<FilterPrimitiveType>(id)); });
     UI::pack_start(_search_box, _effects_popup);
 
-    UI::pack_end(_params_box, _settings_effect);
+    _settings_effect.set_valign(Gtk::Align::FILL);
+    _params_box.append(_settings_effect);
 
+    _settings_filter.set_margin(5);
     get_widget<Gtk::Popover>(_builder, "gen-settings").set_child(_settings_filter);
 
     get_widget<Gtk::Popover>(_builder, "info-popover").signal_show().connect([this]{

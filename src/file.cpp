@@ -33,54 +33,50 @@
 
 #include <gtkmm.h>
 
-#include "file.h"
-#include "inkscape-application.h"
-#include "inkscape-window.h"
-
 #include "desktop.h"
 #include "document-undo.h"
 #include "event-log.h"
-#include "id-clash.h"
-#include "inkscape-version.h"
-#include "inkscape.h"
-#include "layer-manager.h"
-#include "message-stack.h"
-#include "page-manager.h"
-#include "path-prefix.h"
-#include "print.h"
-#include "selection.h"
-#include "rdf.h"
-
 #include "extension/db.h"
 #include "extension/effect.h"
 #include "extension/input.h"
 #include "extension/output.h"
-
+#include "file.h"
+#include "id-clash.h"
+#include "inkscape-application.h"
+#include "inkscape-version.h"
+#include "inkscape-window.h"
+#include "inkscape.h"
 #include "io/file.h"
-#include "io/resource.h"
 #include "io/fix-broken-links.h"
+#include "io/resource.h"
 #include "io/sys.h"
-
+#include "layer-manager.h"
+#include "libnrtype/font-lister.h"
+#include "message-stack.h"
 #include "object/sp-defs.h"
 #include "object/sp-namedview.h"
 #include "object/sp-page.h"
 #include "object/sp-root.h"
 #include "object/sp-use.h"
 #include "page-manager.h"
+#include "path-prefix.h"
+#include "print.h"
+#include "rdf.h"
+#include "selection.h"
 #include "style.h"
-
+#include "svg/svg.h" // for sp_svg_transform_write, used in sp_import_document
 #include "ui/dialog/filedialog.h"
 #include "ui/icon-names.h"
 #include "ui/interface.h"
 #include "ui/tools/tool-base.h"
-
-#include "svg/svg.h" // for sp_svg_transform_write, used in sp_import_document
+#include "util/recently-used-fonts.h"
 #include "xml/rebase-hrefs.h"
 #include "xml/sp-css-attr.h"
 
 using Inkscape::DocumentUndo;
 using Inkscape::IO::Resource::TEMPLATES;
 using Inkscape::IO::Resource::USER;
+
 
 /*######################
 ## N E W
@@ -262,7 +258,7 @@ file_save(Gtk::Window &parentWindow,
     auto path = file->get_path();
     auto display_name = file->get_parse_name();
 
-    Inkscape::Version save = doc->getRoot()->version.inkscape;
+    Inkscape::Version const saved_version = doc->getRoot()->inkscape.getVersion();
     doc->getReprRoot()->setAttribute("inkscape:version", Inkscape::version_string);
     try {
         Inkscape::Extension::save(key, doc, file->get_path().c_str(),
@@ -274,32 +270,32 @@ file_save(Gtk::Window &parentWindow,
         sp_ui_error_dialog(text);
         g_free(text);
         // Restore Inkscape version
-        doc->getReprRoot()->setAttribute("inkscape:version", sp_version_to_string( save ));
+        doc->getReprRoot()->setAttribute("inkscape:version", saved_version.str());
         return false;
     } catch (Inkscape::Extension::Output::file_read_only &e) {
         gchar *text = g_strdup_printf(_("File %s is write protected. Please remove write protection and try again."), display_name.c_str());
         SP_ACTIVE_DESKTOP->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("Document not saved."));
         sp_ui_error_dialog(text);
         g_free(text);
-        doc->getReprRoot()->setAttribute("inkscape:version", sp_version_to_string( save ));
+        doc->getReprRoot()->setAttribute("inkscape:version", saved_version.str());
         return false;
     } catch (Inkscape::Extension::Output::save_failed &e) {
         gchar *text = g_strdup_printf(_("File %s could not be saved."), display_name.c_str());
         SP_ACTIVE_DESKTOP->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("Document not saved."));
         sp_ui_error_dialog(text);
         g_free(text);
-        doc->getReprRoot()->setAttribute("inkscape:version", sp_version_to_string( save ));
+        doc->getReprRoot()->setAttribute("inkscape:version", saved_version.str());
         return false;
     } catch (Inkscape::Extension::Output::save_cancelled &e) {
         SP_ACTIVE_DESKTOP->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("Document not saved."));
-        doc->getReprRoot()->setAttribute("inkscape:version", sp_version_to_string( save ));
+        doc->getReprRoot()->setAttribute("inkscape:version", saved_version.str());
         return false;
     } catch (Inkscape::Extension::Output::export_id_not_found &e) {
         gchar *text = g_strdup_printf(_("File could not be saved:\nNo object with ID '%s' found."), e.id);
         SP_ACTIVE_DESKTOP->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("Document not saved."));
         sp_ui_error_dialog(text);
         g_free(text);
-        doc->getReprRoot()->setAttribute("inkscape:version", sp_version_to_string( save ));
+        doc->getReprRoot()->setAttribute("inkscape:version", saved_version.str());
         return false;
     } catch (Inkscape::Extension::Output::no_overwrite &e) {
         return sp_file_save_dialog(parentWindow, doc, save_method);
@@ -310,7 +306,7 @@ file_save(Gtk::Window &parentWindow,
         SP_ACTIVE_DESKTOP->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("Document not saved."));
         sp_ui_error_dialog(text);
         g_free(text);
-        doc->getReprRoot()->setAttribute("inkscape:version", sp_version_to_string( save ));
+        doc->getReprRoot()->setAttribute("inkscape:version", saved_version.str());
         return false;
     } catch (...) {
         g_critical("Extension '%s' threw an unspecified exception.", key->get_id());
@@ -318,7 +314,7 @@ file_save(Gtk::Window &parentWindow,
         SP_ACTIVE_DESKTOP->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("Document not saved."));
         sp_ui_error_dialog(text);
         g_free(text);
-        doc->getReprRoot()->setAttribute("inkscape:version", sp_version_to_string( save ));
+        doc->getReprRoot()->setAttribute("inkscape:version", saved_version.str());
         return false;
     }
 
@@ -329,6 +325,11 @@ file_save(Gtk::Window &parentWindow,
     } else {
         g_message("file_save: SP_ACTIVE_DESKTOP == NULL. please report to bug #967416");
     }
+
+    auto font_lister = Inkscape::FontLister::get_instance();
+    auto recently_used = Inkscape::RecentlyUsedFonts::get();
+    recently_used->prepend_to_list(font_lister->get_font_family());
+    recently_used->set_continuous_streak(false);
 
     doc->get_event_log()->rememberFileSave();
     Glib::ustring msg;
@@ -774,11 +775,9 @@ void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place, 
             m.setup(desktop);
             desktop->getTool()->discard_delayed_snap_event();
 
-            // get offset from mouse pointer to bbox center, snap to grid if enabled
-            Geom::Point mouse_offset = desktop->point() - sel_bbox->midpoint();
+            // Get offset from mouse pointer rounded to the pixel to bbox center, snap to grid if enabled
+            Geom::Point mouse_offset = (desktop->point() - sel_bbox->midpoint()).round();
             offset = m.multipleOfGridPitch(mouse_offset - offset, sel_bbox->midpoint() + offset) + offset;
-            // Integer align for mouse pasting
-            offset = offset.round();
             m.unSetup();
         } else if (on_page && from_page && to_page) {
             // Moving to the same location on a different page requires us to remove the original page translation
@@ -807,7 +806,6 @@ file_import(SPDocument *in_doc, const std::string &path, Inkscape::Extension::Ex
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     bool cancelled = false;
     auto prefs = Inkscape::Preferences::get();
-    bool onimport = prefs->getBool("/options/onimport", true);
 
     // Store mouse pointer location before opening any dialogs, so we can drop the item where initially intended.
     auto pointer_location = desktop->point();
@@ -815,16 +813,18 @@ file_import(SPDocument *in_doc, const std::string &path, Inkscape::Extension::Ex
     //DEBUG_MESSAGE( fileImport, "file_import( in_doc:%p uri:[%s], key:%p", in_doc, uri, key );
     std::unique_ptr<SPDocument> doc;
     try {
-        doc = Inkscape::Extension::open(key, path.c_str());
+        doc = Inkscape::Extension::open(key, path.c_str(), true);
     } catch (Inkscape::Extension::Input::no_extension_found const &) {
     } catch (Inkscape::Extension::Input::open_failed const &) {
     } catch (Inkscape::Extension::Input::open_cancelled const &) {
         cancelled = true;
     }
 
-    if (onimport && !prefs->getBool("/options/onimport", true)) {
-        // Opened instead of imported (onimport set to false in Svg::open)
-        prefs->setBool("/options/onimport", true);
+    if (prefs->getString("/dialogs/import/import_mode_svg") == "new") {
+        // Opened instead of imported, open and return nothing
+        auto *app = InkscapeApplication::instance();
+        auto doc_ptr = app->document_add(std::move(doc));
+        app->window_open(doc_ptr);
         return nullptr;
     } else if (doc) {
         // Always preserve any imported text kerning / formatting

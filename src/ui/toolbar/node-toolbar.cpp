@@ -87,6 +87,8 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop)
     , _object_edit_clip_path_btn(&get_widget<Gtk::ToggleButton>(_builder, "_object_edit_clip_path_btn"))
     , _nodes_x_item(get_derived_widget<UI::Widget::SpinButton>(_builder, "_nodes_x_item"))
     , _nodes_y_item(get_derived_widget<UI::Widget::SpinButton>(_builder, "_nodes_y_item"))
+    , _nodes_d_item(get_derived_widget<UI::Widget::SpinButton>(_builder, "_nodes_d_item"))
+    , _nodes_d_box(get_widget<Gtk::Box>(_builder, "_nodes_d_box"))
 {
     Unit doc_units = *desktop->getNamedView()->display_units;
     _tracker->setActiveUnit(&doc_units);
@@ -94,8 +96,11 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop)
     _toolbar = &get_widget<Gtk::Box>(_builder, "node-toolbar");
 
     // Setup the derived spin buttons.
-    setup_derived_spin_button(_nodes_x_item, "Xcoord");
-    setup_derived_spin_button(_nodes_y_item, "Ycoord");
+    setup_derived_spin_button(_nodes_x_item, "x");
+    setup_derived_spin_button(_nodes_y_item, "y");
+    setup_derived_spin_button(_nodes_d_item, "d");
+    _nodes_x_item.set_sensitive(false);
+    _nodes_y_item.set_sensitive(false);
 
     auto unit_menu = _tracker->create_tool_item(_("Units"), (""));
     get_widget<Gtk::Box>(_builder, "unit_menu_box").append(*unit_menu);
@@ -181,18 +186,13 @@ NodeToolbar::~NodeToolbar() = default;
 
 void NodeToolbar::setup_derived_spin_button(Inkscape::UI::Widget::SpinButton &btn, Glib::ustring const &name)
 {
-    const Glib::ustring path = "/tools/nodes/" + name;
-    auto const val = Preferences::get()->getDouble(path, 0);
     auto adj = btn.get_adjustment();
-    adj->set_value(val);
-    adj->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NodeToolbar::value_changed), Geom::X));
+    adj->set_value(0);
+    adj->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &NodeToolbar::value_changed), name, adj));
 
     _tracker->addAdjustment(adj->gobj());
     btn.addUnitTracker(_tracker.get());
     btn.set_defocus_widget(_desktop->getCanvas());
-
-    // TODO: Handle this in the toolbar class.
-    btn.set_sensitive(false);
 }
 
 void NodeToolbar::setup_insert_node_menu()
@@ -206,10 +206,8 @@ void NodeToolbar::setup_insert_node_menu()
     insert_action_group("node-toolbar", actions);
 }
 
-void NodeToolbar::value_changed(Geom::Dim2 d)
+void NodeToolbar::value_changed(Glib::ustring const &name, Glib::RefPtr<Gtk::Adjustment> &adj)
 {
-    auto adj = (d == Geom::X) ? _nodes_x_item.get_adjustment() : _nodes_y_item.get_adjustment();
-
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
     if (!_tracker) {
@@ -217,11 +215,6 @@ void NodeToolbar::value_changed(Geom::Dim2 d)
     }
 
     Unit const *unit = _tracker->getActiveUnit();
-
-    if (DocumentUndo::getUndoSensitive(_desktop->getDocument())) {
-        prefs->setDouble(Glib::ustring("/tools/nodes/") + (d == Geom::X ? "x" : "y"),
-            Quantity::convert(adj->get_value(), unit, "px"));
-    }
 
     // quit if run by the attr_changed listener
     if (_freeze || _tracker->isUpdating()) {
@@ -232,9 +225,23 @@ void NodeToolbar::value_changed(Geom::Dim2 d)
     _freeze = true;
 
     NodeTool *nt = get_node_tool();
-    if (nt && !nt->_selected_nodes->empty()) {
-        double val = Quantity::convert(adj->get_value(), unit, "px");
-        double oldval = nt->_selected_nodes->pointwiseBounds()->midpoint()[d];
+    double val = Quantity::convert(adj->get_value(), unit, "px");
+    auto pwb = nt->_selected_nodes->pointwiseBounds();
+    auto fsp = nt->_selected_nodes->firstSelectedPoint();
+
+    if (name == "d") {
+        // Length has changed, not a coordinate...
+        double delta = val / pwb->diameter();
+
+        if (delta > 0) {
+            auto center = fsp ? *fsp : pwb->midpoint();
+            nt->_multipath->scale(center, {delta, delta});
+        }
+
+    } else if (nt && !nt->_selected_nodes->empty()) {
+        // Coordinate
+        auto d = name == "x" ? Geom::X : Geom::Y;
+        double oldval = pwb->midpoint()[d];
 
         // Adjust the coordinate to the current page, if needed
         auto &pm = _desktop->getDocument()->getPageManager();
@@ -333,6 +340,20 @@ void NodeToolbar::coord_changed(Inkscape::UI::ControlPointSelection *selected_no
         if (oldy != mid[Geom::Y]) {
             adj_y->set_value(Quantity::convert(mid[Geom::Y], "px", unit));
         }
+    }
+
+    if (selected_nodes->size() == 2) {
+        // Length is only visible when exactly two nodes are selected
+        _nodes_d_box.set_visible(true);
+        auto adj_l = _nodes_d_item.get_adjustment();
+        Geom::Coord oldl = Quantity::convert(adj_l->get_value(), unit, "px");
+
+        Geom::Coord length = selected_nodes->pointwiseBounds()->diameter();
+        if (oldl != length) {
+            adj_l->set_value(Quantity::convert(length, "px", unit));
+        }
+    } else {
+        _nodes_d_box.set_visible(false);
     }
 
     _freeze = false;

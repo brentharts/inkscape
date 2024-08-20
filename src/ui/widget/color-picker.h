@@ -15,67 +15,71 @@
 #define SEEN_INKSCAPE_COLOR_PICKER_H
 
 #include "labelled.h"
-
 #include <cstdint>
+#include <glibmm/ustring.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/popover.h>
+#include <gtkmm/widget.h>
 #include <utility>
 
-#include "ui/selected-color.h"
+#include "colors/color.h"
+#include "colors/color-set.h"
 #include "ui/widget/color-preview.h"
-#include <gtkmm/button.h>
+#include <gtkmm/menubutton.h>
 #include <gtkmm/dialog.h>
 #include <sigc++/signal.h>
 
-struct SPColorSelector;
+namespace Gtk {
+class Builder;
+}
 
 namespace Inkscape::UI::Widget {
 
 class ColorNotebook;
 
-class ColorPicker : public Gtk::Button {
+class ColorPicker : public Gtk::MenuButton {
 public:
-    [[nodiscard]] ColorPicker(Glib::ustring const &title,
+    [[nodiscard]] ColorPicker(Glib::ustring title,
                               Glib::ustring const &tip,
-                              std::uint32_t rgba,
+                              Colors::Color const &initial,
                               bool undo,
-                              Gtk::Button *external_button = nullptr);
+                              bool use_transparency = true);
+
+    ColorPicker(BaseObjectType *cobject, Glib::RefPtr<Gtk::Builder> const &,
+                Glib::ustring title, bool use_transparency = true);
 
     ~ColorPicker() override;
 
-    void setRgba32(std::uint32_t rgba);
-    void setSensitive(bool sensitive) { set_sensitive(sensitive); }
+    void setColor(Colors::Color const &);
     void open();
-    void closeWindow();
+    void close();
+    void setTitle(Glib::ustring title);
 
-    sigc::connection connectChanged(sigc::slot<void (std::uint32_t)> slot)
+    sigc::connection connectChanged(sigc::slot<void (Colors::Color const &)> slot)
     {
         return _changed_signal.connect(std::move(slot));
     }
 
-    void use_transparency(bool enable);
-    [[nodiscard]] std::uint32_t get_current_color() const;
-
-protected:
-    void _onSelectedColorChanged();
-    void on_clicked() override;
-    virtual void on_changed(std::uint32_t);
-
-    ColorPreview *_preview = nullptr;
-
-    Glib::ustring _title;
-    sigc::signal<void (std::uint32_t)> _changed_signal;
-    std::uint32_t _rgba     = 0    ;
-    bool          _undo     = false;
-    bool          _updating = false;
-
-    Gtk::Window _colorSelectorDialog;
-
-    SelectedColor _selected_color;
+    [[nodiscard]] Colors::Color get_current_color() const {
+        if (_colors->isEmpty())
+            return Colors::Color(0x0);
+        return _colors->getAverage();
+    }
 
 private:
+    void _onSelectedColorChanged();
+    virtual void on_changed(Colors::Color const &);
+    void _construct();
     void set_preview(std::uint32_t rgba);
 
-    ColorNotebook *_color_selector = nullptr;
-    bool _ignore_transparency = false;
+    ColorPreview* _preview = nullptr;
+    Glib::ustring _title;
+    sigc::signal<void (Colors::Color const &)> _changed_signal;
+    bool          _undo     = false;
+    bool          _updating = false;
+    std::shared_ptr<Colors::ColorSet> _colors;
+    Gtk::Popover _popup;
+    ColorNotebook* _color_selector = nullptr;
 };
 
 
@@ -84,26 +88,25 @@ public:
     [[nodiscard]] LabelledColorPicker(Glib::ustring const &label,
                                       Glib::ustring const &title,
                                       Glib::ustring const &tip,
-                                      std::uint32_t rgba,
+                                      Colors::Color const &initial,
                                       bool undo)
-        : Labelled(label, tip, new ColorPicker(title, tip, rgba, undo)) {
-
+        : Labelled(label, tip, new ColorPicker(title, tip, initial, undo)) {
         property_sensitive().signal_changed().connect([this](){
             getWidget()->set_sensitive(is_sensitive());
         });
     }
 
-    void setRgba32(std::uint32_t const rgba)
+    void setColor(Colors::Color const &color)
     {
-        static_cast<ColorPicker *>(getWidget())->setRgba32(rgba);
+        static_cast<ColorPicker *>(getWidget())->setColor(color);
     }
 
     void closeWindow()
     {
-        static_cast<ColorPicker *>(getWidget())->closeWindow();
+        static_cast<ColorPicker *>(getWidget())->close();
     }
 
-    sigc::connection connectChanged(sigc::slot<void (std::uint32_t)> slot)
+    sigc::connection connectChanged(sigc::slot<void (Colors::Color const &)> slot)
     {
         return static_cast<ColorPicker*>(getWidget())->connectChanged(std::move(slot));
     }

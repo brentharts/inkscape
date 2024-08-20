@@ -24,7 +24,6 @@
 
 #include <boost/range/adaptor/transformed.hpp>
 
-#include "helper/sp-marshal.h"
 #include "attributes.h"
 #include "attribute-rel-util.h"
 #include "color-profile.h"
@@ -734,8 +733,8 @@ void SPObject::release() {
     debug("id=%p, typename=%s", object, g_type_name_from_instance((GTypeInstance*)object));
 
     style->filter.clear();
-    style->fill.value.href.reset();
-    style->stroke.value.href.reset();
+    style->fill.href.reset();
+    style->stroke.href.reset();
     style->shape_inside.clear();
     style->shape_subtract.clear();
 
@@ -1638,12 +1637,10 @@ std::string SPObject::generate_unique_id(char const *default_id) const
 }
 
 void SPObject::_requireSVGVersion(Inkscape::Version version) {
-    for ( SPObject::ParentIterator iter=this ; iter ; ++iter ) {
-        SPObject *object = iter;
-        if (is<SPRoot>(object)) {
-            auto root = cast<SPRoot>(object);
-            if ( root->version.svg < version ) {
-                root->version.svg = version;
+    for (SPObject::ParentIterator iter = this; iter; ++iter) {
+        if (auto root = cast<SPRoot>(static_cast<SPObject *>(iter))) {
+            if (root->svg.getVersion() < version) {
+                root->svg.version = version;
             }
         }
     }

@@ -14,10 +14,10 @@
 
 #include <poppler/UTF.h>
 
-#include "2geom/affine.h"
-#include "GfxFont.h"
-#include "GfxState.h"
-#include "PDFDoc.h"
+#include <2geom/affine.h>
+#include <poppler/GfxFont.h>
+#include <poppler/GfxState.h>
+#include <poppler/PDFDoc.h>
 #include "libnrtype/font-factory.h"
 
 /**
@@ -453,9 +453,25 @@ std::string FontData::getSubstitute() const
     return "sans";
 }
 
+/*
+ * Used to determine if any font property has changed by comparing
+ * font specifications.
+ */
 std::string FontData::getSpecification() const
 {
-    return family + (style.empty() ? "" : "-" + style);
+    if (auto desc = FontFactory::get().parsePostscriptName(name, false)) {
+        char *copyAsString = pango_font_description_to_string(desc);
+        std::string pangoString = copyAsString;
+        g_free(copyAsString);
+        return pangoString;
+    } else {
+        return
+            family +
+            (weight  == "normal" ? "" : " " + weight) +
+            (style.empty()   ? "" : " " + style) +
+            (stretch.empty() ? "" : " " + stretch) +
+            (variation.empty() ? "" : " " + variation);
+    }
 }
 
 //------------------------------------------------------------------------
@@ -641,3 +657,13 @@ void pdf_debug_object(const Object *obj, int depth, XRef *xref)
     }
 }
 
+/*
+  Local Variables:
+  mode:c++
+  c-file-style:"stroustrup"
+  c-file-offsets:((innamespace . 0)(inline-open . 0)(case-label . +))
+  indent-tabs-mode:nil
+  fill-column:99
+  End:
+*/
+// vim:filetype=cpp:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:fileencoding=utf-8:textwidth=99:

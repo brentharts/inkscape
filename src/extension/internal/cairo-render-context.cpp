@@ -34,6 +34,7 @@
 #include <glib.h>
 #include <glibmm/i18n.h>
 
+#include "colors/color.h"
 #include "display/drawing.h"
 #include "display/cairo-utils.h"
 #include "display/drawing-paintserver.h"
@@ -524,15 +525,8 @@ void CairoRenderContext::popLayer(cairo_operator_t composite)
                 // If a mask won't be applied set opacity too. (The clip is represented by a solid Cairo mask.)
                 cairo_set_source_rgba(clip_ctx._cr, 1.0, 1.0, 1.0, mask ? 1.0 : opacity);
 
-                // copy over the correct CTM
-                // It must be stored in item_transform of current state after pushState.
-                auto state = getCurrentState();
-                Geom::Affine item_transform;
-                if (state->parent_has_userspace)
-                    item_transform = getParentState()->transform * state->item_transform;
-                else
-                    item_transform = state->item_transform;
-
+                // It must be copied before pushState and stored after.
+                auto item_transform = getItemTransform();
                 // apply the clip path
                 clip_ctx.pushState();
                 clip_ctx.setItemTransform(item_transform);
@@ -574,6 +568,7 @@ void CairoRenderContext::popLayer(cairo_operator_t composite)
             auto state = getCurrentState();
             mask_ctx.setTransform(state->parent_has_userspace ? state->item_transform * getParentState()->transform
                                                               : state->transform);
+
             // render mask contents to mask_ctx
             _renderer->applyMask(&mask_ctx, mask);
 
@@ -997,6 +992,15 @@ Geom::Affine CairoRenderContext::getTransform() const
     return ink_matrix_to_2geom(ctm);
 }
 
+Geom::Affine CairoRenderContext::getItemTransform() const
+{
+    auto state = getCurrentState();
+    if (state->parent_has_userspace) {
+        return getParentTransform() * state->item_transform;
+    }
+    return state->item_transform;
+}
+
 Geom::Affine CairoRenderContext::getParentTransform() const
 {
     g_assert(_is_valid);
@@ -1262,9 +1266,7 @@ CairoRenderContext::_createPatternForPaintServer(SPPaintServer const *const pain
 
             // add stops
             for (gint i = 0; unsigned(i) < lg->vector.stops.size(); i++) {
-                float rgb[3];
-                lg->vector.stops[i].color.get_rgb_floatv(rgb);
-                cairo_pattern_add_color_stop_rgba(pattern, lg->vector.stops[i].offset, rgb[0], rgb[1], rgb[2], lg->vector.stops[i].opacity * alpha);
+                ink_cairo_pattern_add_color_stop(pattern, lg->vector.stops[i].offset, *lg->vector.stops[i].color, alpha);
             }
     } else if (auto rg = cast<SPRadialGradient>(paintserver_mutable)) {
 
@@ -1282,9 +1284,7 @@ CairoRenderContext::_createPatternForPaintServer(SPPaintServer const *const pain
 
         // add stops
         for (gint i = 0; unsigned(i) < rg->vector.stops.size(); i++) {
-            float rgb[3];
-            rg->vector.stops[i].color.get_rgb_floatv(rgb);
-            cairo_pattern_add_color_stop_rgba(pattern, rg->vector.stops[i].offset, rgb[0], rgb[1], rgb[2], rg->vector.stops[i].opacity * alpha);
+            ink_cairo_pattern_add_color_stop(pattern, rg->vector.stops[i].offset, *rg->vector.stops[i].color, alpha);
         }
     } else if (auto mg = cast<SPMeshGradient>(paintserver_mutable)) {
         pattern = mg->create_drawing_paintserver()->create_pattern(_cr, pbox, 1.0);
@@ -1368,12 +1368,8 @@ void CairoRenderContext::_setFillStyle(SPStyle const *const style, Geom::OptRect
             cairo_set_source(_cr, pattern);
             cairo_pattern_destroy(pattern);
         }
-    } else if (style->fill.colorSet) {
-        float rgb[3];
-        style->fill.value.color.get_rgb_floatv(rgb);
-
-        cairo_set_source_rgba(_cr, rgb[0], rgb[1], rgb[2], alpha);
-
+    } else if (style->fill.isColor()) {
+        ink_cairo_set_source_color(_cr, style->fill.getColor(), alpha);
     } else { // unset fill is black
         g_assert(!style->fill.set
                 || (paint_server && !paint_server->isValid()));
@@ -1386,10 +1382,7 @@ void CairoRenderContext::_setStrokeStyle(SPStyle const *style, Geom::OptRect con
 {
     float const alpha = _mergedOpacity(SP_SCALE24_TO_FLOAT(style->stroke_opacity.value));
     if (style->stroke.isColor() || (style->stroke.isPaintserver() && !style->getStrokePaintServer()->isValid())) {
-        float rgb[3];
-        style->stroke.value.color.get_rgb_floatv(rgb);
-
-        cairo_set_source_rgba(_cr, rgb[0], rgb[1], rgb[2], alpha);
+        ink_cairo_set_source_color(_cr, style->stroke.getColor(), alpha);
     } else {
         g_assert( style->stroke.isPaintserver()
                   || is<SPGradient>(SP_STYLE_STROKE_SERVER(style))

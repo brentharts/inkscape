@@ -3,21 +3,24 @@
 set(util_SRC
 	action-accel.cpp
     document-fonts.cpp
+	drawing-utils.cpp
 	expression-evaluator.cpp
-	format_size.cpp
-	funclog.cpp
-	pool.cpp
     font-collections.cpp
+	format_size.cpp
+	font-discovery.cpp
+	font-tags.cpp
+	funclog.cpp
 	share.cpp
     object-renderer.cpp
 	paper.cpp
 	preview.cpp
 	source_date_epoch.cpp
 	statics.cpp
+	theme-utils.cpp
     recently-used-fonts.cpp
+	pool.cpp
 	units.cpp
 	ziptool.cpp
-
 
 	# -------
 	# Headers
@@ -27,10 +30,13 @@ set(util_SRC
 	const_char_ptr.h
 	delete-with.h
     document-fonts.h
+	drawing-utils.h
 	enums.h
 	expression-evaluator.h
     font-collections.h
 	fixed_point.h
+	font-discovery.h
+	font-tags.h
 	format.h
 	format_size.h
 	forward-pointer-iterator.h
@@ -52,6 +58,7 @@ set(util_SRC
 	source_date_epoch.h
 	statics.h
 	static-doc.h
+	theme-utils.h
 	trim.h
 	smart_ptr_keys.h
 	units.h
