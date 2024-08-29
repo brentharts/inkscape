@@ -25,11 +25,7 @@
 static const int OPENMP_THRESHOLD = 2048;
 #endif
 
-#include <cmath>
-#include <algorithm>
-#include <cairo.h>
-#include "display/nr-3dutils.h"
-#include "display/cairo-utils.h"
+
 
 /**
  * Blend two surfaces using the supplied functor.
