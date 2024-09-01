@@ -21,8 +21,8 @@
 
 class InkscapeWindow;
 
-using Inkscape::UI::Widget::Memory;
-using Inkscape::UI::Widget::Messages;
+class Memory;
+class Messages;
 
 namespace Inkscape::UI::Dialog {
 
