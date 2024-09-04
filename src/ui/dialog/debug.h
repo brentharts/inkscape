@@ -21,9 +21,6 @@
 
 class InkscapeWindow;
 
-class Memory;
-class Messages;
-
 namespace Inkscape::UI::Dialog {
 
 class Debug final : public DialogBase
@@ -34,8 +31,8 @@ public:
 
 private:
     Gtk::Notebook notebook;
-    Memory memory;
-    Messages messages;
+    Inkscape::UI::Widget::Memory memory;
+    Inkscape::UI::Widget::Messages messages;
 };
 
 } // namespace Inkscape::UI::Dialog

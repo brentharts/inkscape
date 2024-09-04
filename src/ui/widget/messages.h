@@ -14,6 +14,9 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#ifndef INKSCAPE_UI_WIDGET_MESSAGES_H
+#define INKSCAPE_UI_WIDGET_MESSAGES_H
+
 #include <glibmm/i18n.h>
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
@@ -68,6 +71,8 @@ private:
 };
 
 } // namespace Inkscape::UI::Widget
+
+#endif // INKSCAPE_UI_WIDGET_MESSAGES
 
 /*
   Local Variables:
