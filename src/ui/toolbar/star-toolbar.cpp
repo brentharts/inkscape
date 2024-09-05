@@ -84,7 +84,7 @@ StarToolbar::StarToolbar(SPDesktop *desktop)
 
     _spoke_item.set_custom_numeric_menu_data({
         {0.010, _("thin-ray star")},
-        {0.200, _("")},
+        {0.200, ""},
         {0.382, _("pentagram")},
         {0.577, _("hexagram")},
         {0.692, _("heptagram")},
