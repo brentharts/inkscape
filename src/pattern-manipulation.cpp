@@ -38,8 +38,10 @@ void sp_pattern_set_color(SPPattern* pattern, Inkscape::Colors::Color const &c)
 {
     if (!pattern) return;
 
-    SPCSSAttr* css = sp_repr_css_attr_new();
+    SPCSSAttr *css = sp_css_attr_from_object(pattern, SP_STYLE_FLAG_ALWAYS);
     sp_repr_css_set_property_string(css, "fill", c.toString());
+    if (sp_repr_css_property(css, "stroke", "none") != "none")
+        sp_repr_css_set_property_string(css, "stroke", c.toString());
     pattern->changeCSS(css, "style");
     sp_repr_css_attr_unref(css);
 }
