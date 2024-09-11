@@ -40,7 +40,7 @@
 #include <2geom/rect.h>                        // for Rect, OptRect
 #include <2geom/transforms.h>                  // for Scale
 
-#include "3rdparty/libcroco/src/cr-cascade.h"  // for CRCascade
+#include "3rdparty/inkscape_libcroco/src/cr-cascade.h"  // for CRCascade
 
 #include "inkgc/gc-managed.h"
 
