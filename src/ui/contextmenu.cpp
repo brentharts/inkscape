@@ -362,7 +362,7 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, std::vector<SPIte
     set_position(Gtk::PositionType::BOTTOM);
     set_has_arrow(false);
     show_all_images(*this);
-    set_flags(Gtk::PopoverMenu::Flags::NESTED);
+    //set_flags(Gtk::PopoverMenu::Flags::NESTED);
 
     // Do not install this CSS provider; it messes up menus with icons (like popup menu with all dialogs).
     // It doesn't work well with context menu either, introducing disturbing visual glitch 
