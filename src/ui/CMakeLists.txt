@@ -133,7 +133,7 @@ set(ui_SRC
 	dialog/filedialog.cpp
 	dialog/filedialogimpl-gtkmm.cpp
 	dialog/fill-and-stroke.cpp
-	dialog/filter-effects-dialog.cpp
+	#dialog/filter-effects-dialog.cpp
 	dialog/find.cpp
 	dialog/font-collections-manager.cpp
 	dialog/font-substitution.cpp
