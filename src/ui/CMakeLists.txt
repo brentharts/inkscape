@@ -129,7 +129,7 @@ set(ui_SRC
 	dialog/export.cpp
 	dialog/export-batch.cpp
 	dialog/export-single.cpp
-	dialog/extensions-gallery.cpp
+	#dialog/extensions-gallery.cpp
 	dialog/filedialog.cpp
 	dialog/filedialogimpl-gtkmm.cpp
 	dialog/fill-and-stroke.cpp
