@@ -36,7 +36,8 @@
 #include <gtkmm/recentmanager.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/searchbar.h>
-#include <gtkmm/searchentry2.h>
+//#include <gtkmm/searchentry2.h>
+#include <gtkmm/searchentry.h>
 #include <gtkmm/window.h>
 
 #include "desktop.h"
@@ -65,7 +66,7 @@ CommandPalette::CommandPalette()
     : _builder(create_builder("command-palette-main.glade"))
     , _CPBase              (get_widget<Gtk::Box>(_builder, "CPBase"))
     , _CPListBase          (get_widget<Gtk::Box>(_builder, "CPListBase"))
-    , _CPFilter            (get_widget<Gtk::SearchEntry2>(_builder, "CPFilter"))
+    , _CPFilter            (get_widget<Gtk::SearchEntry>(_builder, "CPFilter"))
     , _CPSuggestions       (get_widget<Gtk::ListBox>(_builder, "CPSuggestions"))
     , _CPHistory           (get_widget<Gtk::ListBox>(_builder, "CPHistory"))
     , _CPSuggestionsScroll (get_widget<Gtk::ScrolledWindow>(_builder, "CPSuggestionsScroll"))
@@ -504,7 +505,7 @@ bool CommandPalette::operate_recent_file(Glib::ustring const &uri, bool const im
     return true;
 }
 
-static void set_hint_texts(Gtk::SearchEntry2 &entry, Glib::ustring const &text)
+static void set_hint_texts(Gtk::SearchEntry &entry, Glib::ustring const &text)
 {
     entry.set_placeholder_text(text);
     entry.set_tooltip_text    (text);
@@ -1066,7 +1067,7 @@ int CommandPalette::on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2)
 }
 
 // Widget.set_sensitive() made the cursor vanish, so… TODO: GTK4: Check if fixed
-static void set_sensitive(Gtk::SearchEntry2 &entry, bool const sensitive)
+static void set_sensitive(Gtk::SearchEntry &entry, bool const sensitive)
 {
     entry.set_editable(sensitive);
 }
