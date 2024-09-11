@@ -115,7 +115,7 @@ set(ui_SRC
 	dialog/calligraphic-profile-rename.cpp
 	dialog/clonetiler.cpp
 	dialog/color-item.cpp
-	dialog/command-palette.cpp
+	#dialog/command-palette.cpp
 	dialog/attrdialog.cpp
 	dialog/dialog-base.cpp
 	dialog/dialog-container.cpp
