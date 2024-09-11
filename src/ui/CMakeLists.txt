@@ -135,7 +135,7 @@ set(ui_SRC
 	dialog/fill-and-stroke.cpp
 	#dialog/filter-effects-dialog.cpp
 	dialog/find.cpp
-	dialog/font-collections-manager.cpp
+	#dialog/font-collections-manager.cpp
 	dialog/font-substitution.cpp
 	dialog/global-palettes.cpp
     dialog/glyphs.cpp
