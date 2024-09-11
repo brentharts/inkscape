@@ -46,7 +46,7 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/noselection.h>
 #include <gtkmm/paned.h>
-#include <gtkmm/searchentry2.h>
+#include <gtkmm/searchentry.h>
 #include <gtkmm/signallistitemfactory.h>
 #include <gtkmm/sortlistmodel.h>
 #include <gtkmm/stack.h>
@@ -346,7 +346,7 @@ DocumentResources::DocumentResources()
     _select(get_widget<Gtk::Button>(_builder, "select")),
     _delete(get_widget<Gtk::Button>(_builder, "delete")),
     _extract(get_widget<Gtk::Button>(_builder, "extract")),
-    _search(get_widget<Gtk::SearchEntry2>(_builder, "search")) {
+    _search(get_widget<Gtk::SearchEntry>(_builder, "search")) {
 
     // _info_store = Gio::ListStore<InfoItem>::create();
     _info_store = Gio::ListStore<InfoItem>::create();
@@ -1234,6 +1234,11 @@ void DocumentResources::refresh_page(const Glib::ustring& id) {
     // _iconview.set_item_width(item_width);
     get_widget<Gtk::Stack>(_builder, "stack").set_visible_child(tab);
     update_buttons();
+}
+
+void DocumentResources::start_editing(Gtk::CellEditable* cell, const Glib::ustring& path) {
+    auto entry = dynamic_cast<Gtk::Entry*>(cell);
+    entry->set_has_frame();
 }
 
 //TODO
