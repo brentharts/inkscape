@@ -529,14 +529,16 @@ Glib::RefPtr<Gdk::Texture> to_texture(Cairo::RefPtr<Cairo::Surface> const &surfa
 
     return Glib::wrap(texture);
 }
-
+// note: this is only called by ui/widget/color-picker.cpp
 void restrict_minsize_to_square(Gtk::Widget& widget, int min_size_px) {
     auto name = widget.get_name();
     assert(!name.empty());
     auto css = Gtk::CssProvider::create();
     std::ostringstream ost;
     ost << "#" << name << " {min-width:" << min_size_px << "px; min-height:" << min_size_px << "px;}";
-    css->load_from_string(ost.str());
+    // not compatible with older GTKMM
+    //css->load_from_string(ost.str());
+
     auto style_context = widget.get_style_context();
     // load with a priority higher than that of the "style.css"
     style_context->add_provider(css, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 2);
