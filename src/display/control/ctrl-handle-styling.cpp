@@ -7,13 +7,13 @@
 #include <glibmm/i18n.h>
 #include <glibmm/regex.h>
 
-#include "3rdparty/libcroco/src/cr-selector.h"
-#include "3rdparty/libcroco/src/cr-doc-handler.h"
-#include "3rdparty/libcroco/src/cr-string.h"
-#include "3rdparty/libcroco/src/cr-term.h"
-#include "3rdparty/libcroco/src/cr-parser.h"
-#include "3rdparty/libcroco/src/cr-rgb.h"
-#include "3rdparty/libcroco/src/cr-utils.h"
+#include "3rdparty/inkscape_libcroco/src/cr-selector.h"
+#include "3rdparty/inkscape_libcroco/src/cr-doc-handler.h"
+#include "3rdparty/inkscape_libcroco/src/cr-string.h"
+#include "3rdparty/inkscape_libcroco/src/cr-term.h"
+#include "3rdparty/inkscape_libcroco/src/cr-parser.h"
+#include "3rdparty/inkscape_libcroco/src/cr-rgb.h"
+#include "3rdparty/inkscape_libcroco/src/cr-utils.h"
 
 #include "display/cairo-utils.h" // argb32_from_rgba()
 #include "display/control/canvas-item-enums.h"
