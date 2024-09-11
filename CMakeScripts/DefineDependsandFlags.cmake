@@ -281,8 +281,10 @@ link_directories(${G4_LIBRARY_DIRS})
 
 pkg_check_modules(
     GTKMM4
-    glibmm-2.68>=2.78.1
-    gtkmm-4.0>=4.13.3
+    #glibmm-2.68>=2.78.1
+    #gtkmm-4.0>=4.13.3
+    glibmm-2.68>=2.68.0
+    gtkmm-4.0>=4.10.0
     )
     list(APPEND INKSCAPE_CXX_FLAGS ${GTKMM4_CFLAGS_OTHER})
     list(APPEND INKSCAPE_INCS_SYS ${GTKMM4_INCLUDE_DIRS})
