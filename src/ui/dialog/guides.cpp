@@ -257,9 +257,9 @@ void GuidelinePropertiesDialog::_setup()
     _spin_angle.set_hexpand();
     _layout_table.attach(_spin_angle, 1, 6, 2, 1);
 
-    _spin_button_x.getSpinButton().set_activates_default();
-    _spin_button_y.getSpinButton().set_activates_default();
-    _spin_angle.getSpinButton().set_activates_default();
+    //_spin_button_x.getSpinButton().set_activates_default();
+    //_spin_button_y.getSpinButton().set_activates_default();
+    //_spin_angle.getSpinButton().set_activates_default();
 
     // mode radio button
     _relative_toggle.set_halign(Gtk::Align::FILL);
