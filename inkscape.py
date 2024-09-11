@@ -25,3 +25,5 @@ if not os.path.isdir(os.path.join(_3rdparty, 'inkscape_lib2geom')):
 cmd = ['cmake', os.path.abspath(_thisdir)]
 print(cmd)
 subprocess.check_call(cmd, cwd=_buildir)
+
+subprocess.check_call(['make'], cwd=_buildir)
