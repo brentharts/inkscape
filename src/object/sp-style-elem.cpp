@@ -12,7 +12,7 @@
 // For external style sheets
 #include <iostream>
 
-#include "3rdparty/libcroco/src/cr-parser.h"
+#include "3rdparty/inkscape_libcroco/src/cr-parser.h"
 
 #include "attributes.h"
 #include "document.h"
