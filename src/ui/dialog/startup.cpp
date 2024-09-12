@@ -522,11 +522,11 @@ StartScreen::refresh_theme(Glib::ustring theme_name)
     if (!prefs->getBool("/theme/symbolicDefaultHighColors", false)) {
         Gtk::CssProvider::create();
         Glib::ustring css_str = INKSCAPE.themecontext->get_symbolic_colors();
-        try {
-            INKSCAPE.themecontext->getColorizeProvider()->load_from_string(css_str);
-        } catch (Gtk::CssParserError const &ex) {
-            g_critical("CSSProviderError::load_from_data(): failed to load '%s'\n(%s)", css_str.c_str(), ex.what());
-        }
+        //try {
+        //    INKSCAPE.themecontext->getColorizeProvider()->load_from_string(css_str);
+        //} catch (Gtk::CssParserError const &ex) {
+        //    g_critical("CSSProviderError::load_from_data(): failed to load '%s'\n(%s)", css_str.c_str(), ex.what());
+        //}
         Gtk::StyleProvider::add_provider_for_display(display, INKSCAPE.themecontext->getColorizeProvider(),
                                                      GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
