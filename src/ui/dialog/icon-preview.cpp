@@ -16,7 +16,7 @@
  */
 
 #include "icon-preview.h"
-
+#include <iostream>
 #include <glibmm/i18n.h>
 #include <glibmm/timer.h>
 #include <glibmm/main.h>
@@ -575,6 +575,7 @@ void IconPreviewPanel::updateMagnify()
 
 void Magnifier::snapshot_vfunc(Glib::RefPtr<Gtk::Snapshot> const &snapshot)
 {
+#ifdef INKSCAPE_OLD
     if (!_texture) {
         snapshot->append_color(Gdk::RGBA{0, 0, 0}, Gdk::Rectangle{0, 0, get_width(), get_height()});
         return;
@@ -582,6 +583,9 @@ void Magnifier::snapshot_vfunc(Glib::RefPtr<Gtk::Snapshot> const &snapshot)
     auto node = gsk_texture_scale_node_new(_texture->gobj(), Gdk::Graphene::Rect{0, 0, 128, 128}.gobj(), GSK_SCALING_FILTER_NEAREST);
     gtk_snapshot_append_node(snapshot->gobj(), node);
     gsk_render_node_unref(node);
+#else
+    std::cout << "TODO remove Magnifier::snapshot_vfunc" << std::endl;
+#endif
 }
 
 } // namespace Inkscape::UI::Dialog
