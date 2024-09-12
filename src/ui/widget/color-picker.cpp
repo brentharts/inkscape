@@ -62,9 +62,9 @@ ColorPicker::ColorPicker(BaseObjectType *cobject, Glib::RefPtr<Gtk::Builder> con
 void ColorPicker::_construct() {
     // match min height with that of the current theme button and enforce square shape for our color picker
     Gtk::Button button;
-    auto height = button.measure(Gtk::Orientation::VERTICAL).sizes.minimum;
+    //auto height = button.measure(Gtk::Orientation::VERTICAL).sizes.minimum;
     set_name("ColorPicker");
-    restrict_minsize_to_square(*this, height);
+    //restrict_minsize_to_square(*this, height);
 
     _preview->setStyle(ColorPreview::Outlined);
     set_child(*_preview);
