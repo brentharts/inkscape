@@ -154,7 +154,8 @@ sigc::signal<bool ()>& CompletionPopup::on_focus() {
 
 /// Clear search box without triggering completion popup menu
 void CompletionPopup::clear() {
-    _search.set_text({});
+    //_search.set_text({});
+    _search.get_buffer()->set_text(Glib::ustring());
 }
 
 } // namespace Inkscape::UI::Widget
