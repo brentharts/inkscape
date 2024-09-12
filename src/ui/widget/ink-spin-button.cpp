@@ -222,11 +222,12 @@ void InkSpinButton::measure_vfunc(Gtk::Orientation orientation, int for_size, in
     if (orientation == Gtk::Orientation::HORIZONTAL) {
         minimum_baseline = natural_baseline = -1;
         // always measure, so gtk doesn't complain
+#ifdef INKSCAPE_OLD
         auto m = _minus.measure(orientation);
         auto p = _plus.measure(orientation);
         auto _ = _entry.measure(orientation);
         _ = _value.measure(orientation);
-
+#endif
         // always reserve space for inc/dec buttons:
         minimum = natural = text_width + 2 * _buttons_width;
     }
