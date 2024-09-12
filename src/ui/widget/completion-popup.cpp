@@ -3,7 +3,7 @@
 #include <cassert>
 #include <gtkmm/entrycompletion.h>
 #include <gtkmm/menubutton.h>
-#include <gtkmm/searchentry2.h>
+#include <gtkmm/searchentry.h>
 #include <gtkmm/liststore.h>
 
 #include "completion-popup.h"
@@ -23,7 +23,7 @@ enum Columns {
 
 CompletionPopup::CompletionPopup() :
     _builder(create_builder("completion-box.glade")),
-    _search(get_widget<Gtk::SearchEntry2>(_builder, "search")),
+    _search(get_widget<Gtk::SearchEntry>(_builder, "search")),
     _button(get_widget<Gtk::MenuButton>(_builder, "menu-btn")),
     _popover_menu{Gtk::PositionType::BOTTOM},
     _completion(get_object<Gtk::EntryCompletion>(_builder, "completion"))
@@ -136,7 +136,7 @@ PopoverMenu& CompletionPopup::get_menu() {
     return _popover_menu;
 }
 
-Gtk::SearchEntry2& CompletionPopup::get_entry() {
+Gtk::SearchEntry& CompletionPopup::get_entry() {
     return _search;
 }
 
