@@ -26,7 +26,7 @@
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/menubutton.h>
 #include <gtkmm/scrolledwindow.h>
-#include <gtkmm/searchentry2.h>
+#include <gtkmm/searchentry.h>
 #include <gtkmm/snapshot.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/togglebutton.h>
@@ -331,7 +331,7 @@ FontList::FontList(Glib::ustring preferences_path) :
         }
     });
 
-    auto search = &get_widget<Gtk::SearchEntry2>(_builder, "font-search");
+    auto search = &get_widget<Gtk::SearchEntry>(_builder, "font-search");
     search->signal_changed().connect([=](){ filter(); });
 
     auto set_row_height = [=](int font_size_percent) {
@@ -713,7 +713,7 @@ void FontList::filter() {
         selected = it->get_value(g_column_model.font);
     }
 
-    auto& search = get_widget<Gtk::SearchEntry2>(_builder, "font-search");
+    auto& search = get_widget<Gtk::SearchEntry>(_builder, "font-search");
     // Not used: extra search terms; use collections instead
     // auto& oblique = get_widget<Gtk::CheckButton>(_builder, "id-oblique");
     // auto& monospaced = get_widget<Gtk::CheckButton>(_builder, "id-monospaced");
