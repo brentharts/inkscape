@@ -58,7 +58,7 @@ class MenuButton;
 class Overlay;
 class Scale;
 class ScrolledWindow;
-class SearchEntry2;
+class SearchEntry;
 } // namespace Gtk
 
 class SPDesktop;
@@ -145,10 +145,10 @@ private:
     double previous_height;
     double previous_width;
     Gtk::MenuButton& _symbols_popup;
-    Gtk::SearchEntry2& _set_search;
+    Gtk::SearchEntry& _set_search;
     Gtk::IconView& _symbol_sets_view;
     Gtk::Label& _cur_set_name;
-    Gtk::SearchEntry2& _search;
+    Gtk::SearchEntry& _search;
     Gtk::Button* add_symbol;
     Gtk::Button* remove_symbol;
     Gtk::Button* _copy_symbol;
