@@ -153,13 +153,13 @@ void InkSpinButton::construct() {
 
     // Value (button) NOT USED, Click handled by zero length drag.
     // m_value->signal_clicked().connect(sigc::mem_fun(*this, &SpinButton::on_value_clicked));
-
+#ifdef INKSCAPE_OLD
     auto m = _minus.measure(Gtk::Orientation::HORIZONTAL);
     _buttons_width = m.sizes.natural;
     m = _entry.measure(Gtk::Orientation::VERTICAL);
     _entry_height = m.sizes.natural;
     _baseline = m.baselines.natural;
-
+#endif
     set_has_frame();
     show_arrows(false);
     _entry.hide();
