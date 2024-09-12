@@ -218,7 +218,7 @@ set(ui_SRC
 	#widget/font-list.cpp
 	widget/font-selector.cpp
 	widget/font-variants.cpp
-	widget/font-variations.cpp
+	#widget/font-variations.cpp
 	widget/frame.cpp
 	widget/gradient-image.cpp
 	widget/gradient-editor.cpp
