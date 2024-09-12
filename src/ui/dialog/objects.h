@@ -55,7 +55,7 @@ class DropTarget;
 class GestureClick;
 class Popover;
 class Scale;
-class SearchEntry2;
+class SearchEntry;
 class TreeStore;
 } // namespace Gtk
 
@@ -152,7 +152,7 @@ private:
     Gtk::Box _buttonsRow;
     Gtk::Box _buttonsPrimary;
     Gtk::Box _buttonsSecondary;
-    Gtk::SearchEntry2& _searchBox;
+    Gtk::SearchEntry& _searchBox;
     Gtk::ScrolledWindow _scroller;
     Gtk::Box _page;
     Inkscape::auto_connection _tree_style;
