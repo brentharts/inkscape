@@ -145,7 +145,7 @@ set(ui_SRC
 	dialog/inkscape-preferences.cpp
 	dialog/knot-properties.cpp
 	dialog/layer-properties.cpp
-	dialog/livepatheffect-editor.cpp
+	#dialog/livepatheffect-editor.cpp
 	dialog/lpe-fillet-chamfer-properties.cpp
 	dialog/lpe-powerstroke-properties.cpp
 	dialog/memory.cpp
