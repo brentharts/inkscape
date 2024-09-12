@@ -43,7 +43,7 @@ class Label;
 class ListBox;
 class MenuButton;
 class Popover;
-class SearchEntry2;
+class SearchEntry;
 class TextBuffer;
 class TextView;
 class Widget;
@@ -168,7 +168,7 @@ private:
     Gtk::Box &settings_and_filters_box;
     Gtk::MenuButton &filter_menu_button;
     Gtk::Button &reset_button;
-    Gtk::SearchEntry2 &search_entry;
+    Gtk::SearchEntry &search_entry;
     Gtk::Label &font_count_label;
     Gtk::Popover &filter_popover;
     Gtk::Box &popover_box;
