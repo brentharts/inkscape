@@ -33,7 +33,7 @@
 #include <gtkmm/cellrenderertext.h>
 #include <gtkmm/label.h>
 #include <gtkmm/menubutton.h>
-#include <gtkmm/searchentry2.h>
+#include <gtkmm/searchentry.h>
 #include <gtkmm/sizegroup.h>
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/window.h>
@@ -106,7 +106,7 @@ SwatchesPanel::SwatchesPanel(bool compact, char const *prefsPath)
         _palette->set_filter([this](Dialog::ColorItem const &color){
             return filter_callback(color);
         });
-        auto& search = get_widget<Gtk::SearchEntry2>(_builder, "search");
+        auto& search = get_widget<Gtk::SearchEntry>(_builder, "search");
         search.signal_search_changed().connect([this, &search]{
             if (search.get_text().length() == 0) {
                 clear_filter();
