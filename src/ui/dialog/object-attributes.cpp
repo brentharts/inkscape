@@ -158,9 +158,11 @@ void ObjectAttributes::widget_setup() {
         _style_swatch.set_visible(false);
     }
     else {
+#ifdef INKSCAPE_OLD
         if (_main_panel.get_children().empty()) {
             UI::pack_start(_main_panel, panel->widget(), true, true);
         }
+#endif
         bool show_style = false;
         if (panel->supports_fill_stroke()) {
             if (auto style = item ? item->style : nullptr) {
