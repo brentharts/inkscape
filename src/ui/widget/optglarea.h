@@ -1,26 +1,26 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-
 #ifndef INKSCAPE_UI_WIDGET_OPTGLAREA_H
 #define INKSCAPE_UI_WIDGET_OPTGLAREA_H
 
+#include <gtkmm.h>
 #include <epoxy/gl.h>
-#include <glibmm/refptr.h>
-#include <gtkmm/drawingarea.h>
 
-namespace Cairo { class Context; }
-namespace Gdk { class GLContext; }
+namespace Cairo {
+class Context;
+}
 
-namespace Inkscape::UI::Widget {
+namespace Inkscape {
+namespace UI {
+namespace Widget {
 
 /**
  * A widget that can dynamically switch between a Gtk::DrawingArea and a Gtk::GLArea.
- * Based on the source code for both widgets.
+ * Based on the GTK source code for both widgets.
  */
-class OptGLArea : public Gtk::Widget
+class OptGLArea : public Gtk::DrawingArea
 {
 public:
     OptGLArea();
-    ~OptGLArea() override;
 
     /**
      * Set whether OpenGL is enabled. Initially it is disabled. Upon enabling it,
@@ -32,7 +32,7 @@ public:
 
     /**
      * Call before doing any OpenGL operations to make the context current.
-     * Automatically done before calling paint_widget().
+     * Automatically done before calling opengl_render.
      */
     void make_current();
 
@@ -44,7 +44,8 @@ public:
 protected:
     void on_realize() override;
     void on_unrealize() override;
-    void snapshot_vfunc(Glib::RefPtr<Gtk::Snapshot> const &snapshot) override;
+    void on_size_allocate(Gtk::Allocation&) override;
+    bool on_draw(const Cairo::RefPtr<Cairo::Context>&) final;
 
     /**
      * Reimplement to create the desired OpenGL context. Return nullptr on error.
@@ -54,29 +55,26 @@ protected:
     /**
      * Reimplement to render the widget. The Cairo context is only for when OpenGL is disabled.
      */
-    virtual void paint_widget(Cairo::RefPtr<Cairo::Context> const &) {}
+    virtual void paint_widget(const Cairo::RefPtr<Cairo::Context>&) {}
 
 private:
-    bool opengl_enabled = false;
-
-    struct GLState;
-    std::shared_ptr<GLState> gl;
-
     void init_opengl();
-    void uninit_opengl();
+    void create_framebuffer();
+    void delete_framebuffer();
+    void resize_framebuffer() const;
+
+    Glib::RefPtr<Gdk::GLContext> context;
+
+    bool opengl_enabled;
+    bool need_resize;
+
+    GLuint framebuffer;
+    GLuint renderbuffer;
+    GLuint stencilbuffer;
 };
 
-} // namespace Inkscape::UI::Widget
+} // namespace Widget
+} // namespace UI
+} // namespace Inkscape
 
 #endif // INKSCAPE_UI_WIDGET_OPTGLAREA_H
-
-/*
-  Local Variables:
-  mode:c++
-  c-file-style:"stroustrup"
-  c-file-offsets:((innamespace . 0)(inline-open . 0)(case-label . +))
-  indent-tabs-mode:nil
-  fill-column:99
-  End:
-*/
-// vim:filetype=cpp:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:fileencoding=utf-8:textwidth=99:
