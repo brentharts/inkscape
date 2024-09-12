@@ -69,7 +69,7 @@ CanvasGrid::CanvasGrid(SPDesktopWidget *dtw)
     _canvas->set_focusable(true);
 
     // Command palette
-    _command_palette = std::make_unique<Inkscape::UI::Dialog::CommandPalette>();
+    //_command_palette = std::make_unique<Inkscape::UI::Dialog::CommandPalette>();
 
     // Notice overlay, note using unique_ptr will cause destruction race conditions
     _notice = CanvasNotice::create();
@@ -77,7 +77,7 @@ CanvasGrid::CanvasGrid(SPDesktopWidget *dtw)
     // Canvas overlay
     _popoverbin.setChild(_canvas.get());
     _canvas_overlay.set_child(_popoverbin);
-    _canvas_overlay.add_overlay(_command_palette->get_base_widget());
+    //_canvas_overlay.add_overlay(_command_palette->get_base_widget());
     _canvas_overlay.add_overlay(*_notice);
     _canvas_overlay.set_expand();
 
@@ -344,7 +344,7 @@ CanvasGrid::ToggleRulers()
 void
 CanvasGrid::ToggleCommandPalette()
 {
-    _command_palette->toggle();
+    //_command_palette->toggle();
 }
 
 void CanvasGrid::showNotice(Glib::ustring const &msg, int timeout)
@@ -356,9 +356,9 @@ void
 CanvasGrid::ShowCommandPalette(bool state)
 {
     if (state) {
-        _command_palette->open();
+        //_command_palette->open();
     } else {
-        _command_palette->close();
+        //_command_palette->close();
     }
 }
 
