@@ -44,7 +44,7 @@
 #include "object/sp-root.h"
 #include "ui/builder-utils.h"
 #include "ui/controller.h"
-#include "ui/dialog/command-palette.h"
+//#include "ui/dialog/command-palette.h"
 #include "ui/tools/tool-base.h"
 #include "ui/util.h"
 #include "ui/widget/canvas.h"
