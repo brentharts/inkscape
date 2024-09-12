@@ -46,7 +46,7 @@ class CanvasItemGuideLine;
 namespace UI {
 
 namespace Dialog {
-class CommandPalette;
+//class CommandPalette;
 } // namespace Dialog
 
 namespace Widget {
@@ -91,7 +91,7 @@ public:
     Gtk::ToggleButton *GetGuideLock()  { return &_guide_lock; }
     Gtk::ToggleButton *GetCmsAdjust()  { return &_cms_adjust; }
     Gtk::CheckButton  *GetStickyZoom();
-    Dialog::CommandPalette *getCommandPalette() { return _command_palette.get(); }
+    //Dialog::CommandPalette *getCommandPalette() { return _command_palette.get(); }
 
     // Motion event handler, and delayed snap event callback.
     void rulerMotion(MotionEvent const &event, bool horiz);
@@ -107,7 +107,7 @@ private:
     // The widgets
     Inkscape::UI::Widget::PopoverBin _popoverbin;
     std::unique_ptr<Inkscape::UI::Widget::Canvas> _canvas;
-    std::unique_ptr<Dialog::CommandPalette> _command_palette;
+    //std::unique_ptr<Dialog::CommandPalette> _command_palette;
     CanvasNotice *_notice;
     Gtk::Overlay _canvas_overlay;
     Gtk::Grid _subgrid;
