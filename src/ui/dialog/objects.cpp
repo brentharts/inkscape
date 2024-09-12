@@ -28,7 +28,7 @@
 #include <gtkmm/icontheme.h>
 #include <gtkmm/popover.h>
 #include <gtkmm/scale.h>
-#include <gtkmm/searchentry2.h>
+#include <gtkmm/searchentry.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/treestore.h>
@@ -699,7 +699,7 @@ ObjectsPanel::ObjectsPanel()
     , _builder(create_builder("dialog-objects.glade"))
     , _settings_menu(get_widget<Gtk::Popover>(_builder, "settings-menu"))
     , _object_menu(get_widget<Gtk::Popover>(_builder, "object-menu"))
-    , _searchBox(get_widget<Gtk::SearchEntry2>(_builder, "search"))
+    , _searchBox(get_widget<Gtk::SearchEntry>(_builder, "search"))
     , _opacity_slider(get_widget<Gtk::Scale>(_builder, "opacity-slider"))
     , _setting_layers(get_derived_widget<PrefCheckButton, Glib::ustring, bool>(_builder, "setting-layers", "/dialogs/objects/layers_only", false))
     , _setting_track(get_derived_widget<PrefCheckButton, Glib::ustring, bool>(_builder, "setting-track", "/dialogs/objects/expand_to_layer", true))
