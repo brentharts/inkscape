@@ -53,7 +53,7 @@ using namespace std::literals;
 #include <gtkmm/popover.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/scrolledwindow.h>
-#include <gtkmm/searchentry2.h>
+#include <gtkmm/searchentry.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treemodelfilter.h>
 #include <gtkmm/treemodelsort.h>
@@ -192,8 +192,8 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
     _builder(create_builder("dialog-symbols.glade")),
     _zoom(            get_widget<Gtk::Scale>      (_builder, "zoom")),
     _symbols_popup(   get_widget<Gtk::MenuButton> (_builder, "symbol-set-popup")),
-    _set_search(      get_widget<Gtk::SearchEntry2>(_builder, "set-search")),
-    _search(          get_widget<Gtk::SearchEntry2>(_builder, "search")),
+    _set_search(      get_widget<Gtk::SearchEntry>(_builder, "set-search")),
+    _search(          get_widget<Gtk::SearchEntry>(_builder, "search")),
     _symbol_sets_view(get_widget<Gtk::IconView>   (_builder, "symbol-sets")),
     _cur_set_name(   get_widget<Gtk::Label>       (_builder, "cur-set")),
     _image_cache(1000), // arbitrary limit for how many rendered symbols to keep around
@@ -207,7 +207,7 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
     _sets._store = _symbol_sets;
     _sets._filtered = Gtk::TreeModelFilter::create(_symbol_sets);
     _sets._filtered->set_visible_func([=, this](const Gtk::TreeModel::const_iterator& it){
-        if (_set_search.get_text().length() == 0) return true;
+        if (_set_search.get_text_length() == 0) return true;
 
         Glib::ustring id = (*it)[g_set_columns.set_id];
         if (id == CURRENT_DOC_ID || id == ALL_SETS_ID) return true;
@@ -313,7 +313,7 @@ SymbolsDialog::SymbolsDialog(const char* prefsPath)
     });
 
     _search.signal_search_changed().connect([this](){
-        int delay = _search.get_text().length() == 0 ? 0 : 300;
+        int delay = _search.get_text_length() == 0 ? 0 : 300;
         _idle_search = Glib::signal_timeout().connect([this](){
             auto scoped(_update.block());
             refilter();
@@ -658,7 +658,7 @@ void SymbolsDialog::rebuild_set(Gtk::TreeModel::iterator current) {
 }
 
 void SymbolsDialog::showOverlay() {
-    auto search = _search.get_text().length() > 0;
+    auto search = _search.get_text_length() > 0;
     auto visible = visible_symbols();
     auto current = get_current_set_id() == CURRENT_DOC_ID;
 
