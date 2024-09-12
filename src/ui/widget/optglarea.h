@@ -44,8 +44,10 @@ public:
 protected:
     void on_realize() override;
     void on_unrealize() override;
-    void on_size_allocate(Gtk::Allocation&) override;
-    bool on_draw(const Cairo::RefPtr<Cairo::Context>&) final;
+    //void on_size_allocate(Gtk::Allocation&) override;
+    //bool on_draw(const Cairo::RefPtr<Cairo::Context>&) final;
+    void on_size_allocate(Gtk::Allocation&);
+    bool on_draw(const Cairo::RefPtr<Cairo::Context>&);
 
     /**
      * Reimplement to create the desired OpenGL context. Return nullptr on error.
